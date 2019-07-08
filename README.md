@@ -9,6 +9,7 @@ Here is a minimal example:
 
 ```
 exolve-begin
+  exolve-id: tiny-42
   exolve-title: Tiny Demo Crossword
   exolve-setter: Exolve
   exolve-width: 5
@@ -58,10 +59,41 @@ and the exolve-end line:
 * exolve-question
 * exolve-submit
 
+Each section has the section title, followed by a colon. Other than the
+exolve-prelude, exolve-grid, exolve-across, and exolve-down sections, all other
+sections occupy a single line (some can be repeated though). For such
+single-line sections, the "value" of the section is the text following the colon
+on the same line.
+
 The italicized sections, namely exolve-width, exolve-height, exolve-grid,
 exolve-across, and exolve-down, are required. The other sections are optional,
 but exolve-id, exolve-title, exolve-setter should probably be present in most
 puzzles.
+
+# exolve-id
+Provide a unique id. Use only alphanumeric characters and dashes (-). This
+id is used as the key for saving/restoring state. You can create an unsolved
+version of a puzzle (to run a contest, for example) and, later, a version of
+the same puzzle that has the solutions, giving them both the same exolve-id.
+Then, when solvers visit the version with solutions, they can see their own
+entries and see which mistakes they made, if any. Example:
+```
+  exolve-id: tiny-42
+```
+
+# exolve-title, exolve-setter
+The title and the name/pseudonym of the setter. Example:
+```
+  exolve-title: My Lovely Crossword
+  exolve-setter: Narsi Sus
+```
+
+#exolve-copyright
+If your provide this, it will be displayed with the copyright symbol, to the
+bottom right of the rendered puzzle grid. Example:
+```
+  exolve-copyright: 2019 Viresh Ratnakar
+```
 
 Special characters:
 ```
