@@ -7,6 +7,7 @@ the part that contains the example grid with your own grid, strting at the
 
 Here is a minimal example:
 
+```
 exolve-begin
   exolve-title: Tiny Demo Crossword
   exolve-setter: Exolve
@@ -26,6 +27,7 @@ exolve-begin
     1 Emits cry (5)
     2 More ancient (5)
 exolve-end
+```
 
 The format is very simple and uses plain text (but the parsing code is
 simplistic and not very forgiving, so please go through the format
@@ -62,6 +64,7 @@ but exolve-id, exolve-title, exolve-setter should probably be present in most
 puzzles.
 
 Special characters:
+```
 | draw bar after
 _ draw bar under
 + draw bar after and under
@@ -74,4 +77,4 @@ $ bar after and circle
 & bar under and diagramless
 % bar after and under and diagramless
 ~ draw circle and diagramless
-
+```
