@@ -50,11 +50,11 @@ and the exolve-end line:
 * exolve-setter
 * exolve-copyright
 * exolve-prelude
-* *exolve-width*
-* *exolve-height*
-* *exolve-grid*
-* *exolve-across*
-* *exolve-down*
+* **exolve-width**
+* **exolve-height**
+* **exolve-grid**
+* **exolve-across**
+* **exolve-down**
 * exolve-nina
 * exolve-question
 * exolve-submit
@@ -65,7 +65,7 @@ sections occupy a single line (some can be repeated though). For such
 single-line sections, the "value" of the section is the text following the colon
 on the same line.
 
-The italicized sections, namely exolve-width, exolve-height, exolve-grid,
+The bolded sections, namely exolve-width, exolve-height, exolve-grid,
 exolve-across, and exolve-down, are required. The other sections are optional,
 but exolve-id, exolve-title, exolve-setter should probably be present in most
 puzzles.
@@ -82,19 +82,42 @@ entries and see which mistakes they made, if any. Example:
 ```
 
 # exolve-title, exolve-setter
-The title and the name/pseudonym of the setter. Example:
+The title of the puzzle and the name/pseudonym of the crossword setter. Example:
 ```
   exolve-title: My Lovely Crossword
   exolve-setter: Narsi Sus
 ```
 
-#exolve-copyright
+# exolve-copyright
 If your provide this, it will be displayed with the copyright symbol, to the
 bottom right of the rendered puzzle grid. Example:
 ```
   exolve-copyright: 2019 Viresh Ratnakar
 ```
 
+# exolve-width, exolve-height
+The width and height of the puzzle--i.e., how many squares across and how many
+squares down is the crossword grid. Example:
+```
+  exolve-width: 15
+  exolve-height: 15
+```
+
+# exolve-prelude
+Crossword puzzles often come with a prelude that contains special instructions
+and/or hints. The prelude section occupies multiple lines--starting from the
+line *after* the exolve-prelude: line, and going all they way down to the line
+preceding the next exolve-foo section. The prelude may include html tags. The
+prelude is rendered just above the grid, in the rendered puzzle. Example:
+```
+  exolve-prelude:
+    Words should be entered in the grid <i>after</i> deleting one letter. The
+    letter thus deleted, in clue order, form the name of a famous farm
+    animal.
+```
+
+# exolve-grid
+TODO
 Special characters:
 ```
 | draw bar after
@@ -110,3 +133,54 @@ $ bar after and circle
 % bar after and under and diagramless
 ~ draw circle and diagramless
 ```
+
+# exolve-across
+
+# exolve-down
+
+# exolve-nina
+
+# exolve-question
+
+# exolve-submit
+
+# Frequently Asked Questions
+
+**We are an established newspaper. Our readers have complained in various ways
+about out online interactive crossword. Can we use your code?**
+
+See below (same answer).
+
+**We are a small newsletter and we occasionally feature a crossword. Our
+readers have asked for an online interactive solver. Can we use your code?**
+
+Yes. The software is free, and is released under the rather permissive MIT
+License.
+
+**Why is everything wrapped in a single exolve.html file?**
+
+I really want to keep the released version in this state: a single,
+self-contained HTML file containing all the CSS and all the Javascript it needs.
+Vanilla Javascript: nothing to import, no scripts to run, absolutely zero
+dependencies.
+
+Of course, when you adopt it for your use, you might want to use all kinds of
+fancy frameworks and enhancements and refactorings. But my releases will
+continue to follow this simple structure.
+
+**How should I serve the exolve.html file?**
+
+TODO
+
+**What is the http.sh file?**
+
+Ignore it.
+
+**No, really, what is the http.sh file?**
+
+It's a silly and small bash script
+
+
+TODO
+
+
