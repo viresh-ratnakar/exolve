@@ -59,12 +59,12 @@ Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve
 supports *partially* diagramless puzzless, where only some squares or some
 partial areas of the grid do not show where the blocked squares are. While
-solving such a puzzle, the solver can press the space bar in a diagramless cell
-to posit that it is a blocked square (the dark square character, ⬛, will get
-placed in that square. It can be deleted just like any other regular entry).
-Further, when a user enters or clears a blocked square in a diagramless cell,
-the appropriate action will also be taken in the square that is the symmetric
-counterpart of the current square.
+solving such a puzzle, the solver can press the space bar in a diagramless
+square to posit that it is a blocked square (the dark square character, ⬛,
+will get placed in that square. It can be deleted just like any other regular
+entry). Further, when a user enters or clears a blocked square in a diagramless
+cell, the appropriate action will also be taken in the square that is the
+symmetric counterpart of the current square.
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
@@ -83,7 +83,7 @@ buttion.
 When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
 different clue, when there are clues that "cover" other clues). In a
-diagramless cell in a puzzle for which the solver has not provided all
+diagramless squarel in a puzzle for which the solver has not provided all
 solutions, there is no such automatic move after entereing a letter (as the
 software itself has no way of knowing where the next square is).
 
@@ -168,8 +168,8 @@ prelude is rendered just above the grid, in the rendered puzzle. Example:
 ## exolve-grid
 The grid specification starts from the line *after* the exolve-grid and goes all
 the way to the next exolve- section. There should be exactly as many lines
-in this section as the height of the grid. On each line, the cells in that row
-of the grid are specified.
+in this section as the height of the grid. On each line, the squares in that
+row of the grid are specified.
 
 There are two kinds of puzzles: with solutions provided and without solutions.
 Here are simple examples of both:
@@ -181,10 +181,10 @@ Grid with solutions:
     R.R
     EAR
 ```
-This is a 3x3 grid with one blocked cell in the center ('.' is used to indicate
-blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE, 3 Down = ERR, and
-3 Across = EAR. When solution letters are included like this, the control
-buttons for checking/revealing answers get shown. 
+This is a 3x3 grid with one blocked square in the center ('.' is used to
+indicate blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE,
+3 Down = ERR, and 3 Across = EAR. When solution letters are included like this,
+the control buttons for checking/revealing answers get shown. 
 
 Grid without solutions:
 ```
@@ -205,8 +205,8 @@ A bar to the right of a square is specified using the decorator |. A bar under a
 square is specified using the decorator \_. A square that has both a bar after
 and a bar under should use the decorator +. Arbitrary many spaces are allowed
 between grid square specifications, and spaces should be used to line up the
-cells in the presence of decorators. Here is an example 3x3 grid that uses both
-bars and blocked squares:
+squares in the presence of decorators. Here is an example 3x3 grid that uses
+both bars and blocked squares:
 ```
   exolve-grid:
     A M|B
@@ -214,8 +214,8 @@ bars and blocked squares:
     E|A T
 ```
 
-The decorator can also be used to inscribe circles inside some cells or to
-indicate that a cell is to be diagramless. There is a unique decorator letter
+The decorator can also be used to inscribe circles inside some squares or to
+indicate that a square is to be diagramless. There is a unique decorator letter
 for each of the 15 non-empty combinations in:
 ```
   {no bar, bar after, bar under, bar after and under} x
@@ -223,10 +223,7 @@ for each of the 15 non-empty combinations in:
   {not diagramless, diagramless}
 ```
 
-Here is the complete list of
-Each grid row is described on on
-TODO
-Special characters:
+Here is the complete list of the 15 possible decorators:
 ```
 | draw bar after
 _ draw bar under
@@ -245,9 +242,28 @@ $ bar after and circle
 ~ draw circle and diagramless
 ```
 
-## exolve-across
+## Some details about diagramless cells
+Note that "diagramlessness" only hides from the solver whether a square is
+a light or a blocked square--if the setter has used any bars, they do get
+displayed to the solver, even in diagramless cells.
 
-## exolve-down
+If a puzzle with diagramless squares has specified all solutions, then
+check/reveal controls get displayed. For example, revealing a blocked
+diagramless square will show the dark square character, ⬛, in that square. 
+
+If the solver wants to *not* provide solutions for a puzzle that has some
+diagramless squares, then the blocked square marker ('.') should not be used
+at all in the puzzle (otherwise the solver can peak into the HTML source
+and see where the blocked squares are). Each diagramless square should be
+specified with a '0' followed by one of the diagramless decorators, for example,
+'0\*'). But then, even the exolve software has no way of knowing which grid
+square any clue starts on. However, sometimes, even in a puzzle with diagramless
+squares, the setter does want to provide the clue start locations for *some*
+clues. Exolve provides a way to do this: the setter can optionally include the
+clue start location of any clue using the chessboard notation. Details are
+provided in the exolve-across/down section below.
+
+## exolve-across, exolve-down
 
 ## exolve-nina
 
