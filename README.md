@@ -31,7 +31,7 @@ exolve-end
 ```
 
 The format is very simple and uses plain text (but the parsing code is
-simplistic and not very forgiving, so please go through the format
+also simplistic and not very forgiving, so please go through the format
 documentation). The setter has the option to provide solutions (as in the
 example above), or just use 0 to indicate a square that needs to be filled
 (i.e., a "light," in crossword terms).
@@ -49,7 +49,7 @@ is a part of both an across clue and a down clue, then clicking on that square
 while it is the current square will toggle the active direction.
 
 The control buttons (*Clear this*, *Clear all*, *Check this*, *Check all*,
-*Reveal this*, and *Reveal all*) work as suggested by their name ("this" refers
+*Reveal this*, and *Reveal all*) work as suggested by their names ("this" refers
 to the currently selected clue(s)). You can click on a clue to jump to its
 squares. You can use the arrow keys. If the setter has not provided all
 solutions, then only the "Clear this/all" control buttons are shown, the
@@ -57,18 +57,18 @@ solutions, then only the "Clear this/all" control buttons are shown, the
 
 Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve
-supports partially diagramless puzzless, where only some squares or some
-partial area of the grid does not show where its blocked squares are. While
+supports *partially* diagramless puzzless, where only some squares or some
+partial areas of the grid do not show where the blocked squares are. While
 solving such a puzzle, the solver can press the space bar in a diagramless cell
-to posit that it is a blocked square (the dark square character—⬛—will get
-placed in that square. It can be deleted just like any other regular entry.
+to posit that it is a blocked square (the dark square character, ⬛, will get
+placed in that square. It can be deleted just like any other regular entry).
 Further, when a user enters or clears a blocked square in a diagramless cell,
 the appropriate action will also be taken in the square that is the symmetric
 counterpart of the current square.
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
-shown, for the solver to see where the ninas arore. The button can be clicked
+shown, for the solver to see where the ninas are. The button can be clicked
 again to hide the nina locations.
 
 If the setter has asked additional questions in the puzzle (through
@@ -76,18 +76,19 @@ exolve-question sections), then input fields for these get shown too.
 "Reveal/Clear all" controls buttons also include revealing/clearing
 answers to these questions.
 
-If the setter has set up a submit URL (with an exolve-submit section and with
-the URL typically set up using a Google form ), then there is a *Submit*
+If the setter has set up a submit URL (with an exolve-submit section—the URL
+can be set up using a Google form, for instance), then there is a *Submit*
 buttion.
 
 When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
 different clue, when there are clues that "cover" other clues). In a
-diagramless cell in a puzzle for which the solver has not provided the
-solutions, there is no such automatic move after entereing a letter.
+diagramless cell in a puzzle for which the solver has not provided all
+solutions, there is no such automatic move after entereing a letter (as the
+software itself has no way of knowing where the next square is).
 
-"Check/Reveal all" buttons, the "Show ninas" button , and the "submit" button
-solicit additional confirmation from the solver.
+"Clear/Check/Reveal all" buttons, the "Show ninas" button, and the "Submit"
+button solicit additional confirmation from the solver.
 
 ## Format
 The puzzle can contain the following "sections" between the exolve-begin line
@@ -165,8 +166,64 @@ prelude is rendered just above the grid, in the rendered puzzle. Example:
 ```
 
 ## exolve-grid
-The grid pecification starts from the line *after* the exolve-grid and goes all
-the way TODO
+The grid specification starts from the line *after* the exolve-grid and goes all
+the way to the next exolve- section. There should be exactly as many lines
+in this section as the height of the grid. On each line, the cells in that row
+of the grid are specified.
+
+There are two kinds of puzzles: with solutions provided and without solutions.
+Here are simple examples of both:
+
+Grid with solutions:
+```
+  exolve-grid:
+    ACE
+    R.R
+    EAR
+```
+This is a 3x3 grid with one blocked cell in the center ('.' is used to indicate
+blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE, 3 Down = ERR, and
+3 Across = EAR. When solution letters are included like this, the control
+buttons for checking/revealing answers get shown. 
+
+Grid without solutions:
+```
+  exolve-grid:
+    000
+    0.0
+    000
+```
+This is also a 3x3 grid, but no solutions have been provided (every light is
+shown using the letter '0'). In such a grid, the control buttins for checking/
+revealing answers do not get shown.
+
+It is also possible to specify barred grids, instead of blocked ones. In fact,
+it is possible to specify a a grid that uses both bars and blocks. Bars (and
+some other special treatments) are specified using a single letter, which we'll
+refer to as the *decorator*, to the right of the letter representing a square.
+A bar to the right of a square is specified using the decorator |. A bar under a
+square is specified using the decorator \_. A square that has both a bar after
+and a bar under should use the decorator +. Arbitrary many spaces are allowed
+between grid square specifications, and spaces should be used to line up the
+cells in the presence of decorators. Here is an example 3x3 grid that uses both
+bars and blocked squares:
+```
+  exolve-grid:
+    A M|B
+    X . E
+    E|A T
+```
+
+The decorator can also be used to inscribe circles inside some cells or to
+indicate that a cell is to be diagramless. There is a unique decorator letter
+for each of the 15 non-empty combinations in:
+```
+  {no bar, bar after, bar under, bar after and under} x
+  {no circle, circle} x
+  {not diagramless, diagramless}
+```
+
+Here is the complete list of
 Each grid row is described on on
 TODO
 Special characters:
@@ -182,6 +239,9 @@ $ bar after and circle
 ! bar after and diagramless
 & bar under and diagramless
 % bar after and under and diagramless
+) bar after and circle and diagramless
+( bar under and circle and diagramless
+^ bar after and under and circle and diagramless
 ~ draw circle and diagramless
 ```
 
