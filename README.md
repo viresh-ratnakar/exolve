@@ -145,7 +145,7 @@ bottom right of the rendered puzzle grid. Example:
 ```
 
 ## exolve-width, exolve-height
-The width and height of the puzzle--i.e., how many squares across and how many
+The width and height of the puzzle—i.e., how many squares across and how many
 squares down is the crossword grid. Example:
 ```
   exolve-width: 15
@@ -154,7 +154,7 @@ squares down is the crossword grid. Example:
 
 ## exolve-prelude
 Crossword puzzles often come with a prelude that contains special instructions
-and/or hints. The prelude text occupies multiple lines--starting from the
+and/or hints. The prelude text occupies multiple lines—starting from the
 line *after* the exolve-prelude: line, and going all they way down to the line
 preceding the next exolve-foo section. The prelude may include html tags. The
 prelude is rendered just above the grid, in the rendered puzzle. Example:
@@ -199,14 +199,14 @@ revealing answers do not get shown.
 
 It is also possible to specify barred grids, instead of blocked ones. In fact,
 it is possible to specify a a grid that uses both bars and blocks. Bars (and
-some other special treatments) are specified using a single letter, which we'll
-refer to as the *decorator*, to the right of the letter representing a square.
-A bar to the right of a square is specified using the decorator |. A bar under a
-square is specified using the decorator \_. A square that has both a bar after
-and a bar under should use the decorator +. Arbitrary many spaces are allowed
-between grid square specifications, and spaces should be used to line up the
-squares in the presence of decorators. Here is an example 3x3 grid that uses
-both bars and blocked squares:
+some other special treatments) are specified using letters that follow the main
+grid square specifier, which we'll refer to as *decorators*. A bar to the right
+of a square is specified using the decorator |. A bar under a square is
+specified using the decorator \_. A square that has both a bar after and a bar
+under can use '|\_' or the shortcut for that, '+'. Arbitrary many spaces are
+allowed between grid square specifications, and spaces can (should!) be used to
+line up the squares in the presence of decorators. Here is an example 3x3 grid
+that uses both bars and blocked squares:
 ```
   exolve-grid:
     A M|B
@@ -214,37 +214,29 @@ both bars and blocked squares:
     E|A T
 ```
 
-The decorator can also be used to inscribe circles inside some squares or to
-indicate that a square is to be diagramless. There is a unique decorator letter
-for each of the 15 non-empty combinations in:
+The decorator '@' can also be used to inscribe circles inside some squares, and
+the decorator '\*' can be used to indicate that a square is to be diagramless.
+Here's the last example again, this time with circles arounf some cells, and
+some cells being diagramless:
 ```
-  {no bar, bar after, bar under, bar after and under} x
-  {no circle, circle} x
-  {not diagramless, diagramless}
+  exolve-grid:
+    A  M|@B
+    X* .  E*
+    E| A  T
 ```
 
-Here is the complete list of the 15 possible decorators:
+Here again is the complete list of decorators:
 ```
 | draw bar after
 _ draw bar under
 + draw bar after and under
 @ draw circle
 * diagramless
-$ bar after and circle
-= bar under and circle
-# bar after and under and circle
-! bar after and diagramless
-& bar under and diagramless
-% bar after and under and diagramless
-) bar after and circle and diagramless
-( bar under and circle and diagramless
-^ bar after and under and circle and diagramless
-~ draw circle and diagramless
 ```
 
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
-a light or a blocked square--if the setter has used any bars, they do get
+a light or a blocked square—if the setter has used any bars, they do get
 displayed to the solver, even in diagramless cells.
 
 If a puzzle with diagramless squares has specified all solutions, then
@@ -253,17 +245,65 @@ diagramless square will show the dark square character, ⬛, in that square.
 
 If the solver wants to *not* provide solutions for a puzzle that has some
 diagramless squares, then the blocked square marker ('.') should not be used
-at all in the puzzle (otherwise the solver can peak into the HTML source
-and see where the blocked squares are). Each diagramless square should be
-specified with a '0' followed by one of the diagramless decorators, for example,
-'0\*'). But then, even the exolve software has no way of knowing which grid
-square any clue starts on. However, sometimes, even in a puzzle with diagramless
-squares, the setter does want to provide the clue start locations for *some*
-clues. Exolve provides a way to do this: the setter can optionally include the
-clue start location of any clue using the chessboard notation. Details are
-provided in the exolve-across/down section below.
+in the blocked squares that are also diagramless (otherwise the solver can peak
+into the HTML source and see where the blocked squares are). Each diagramless
+square should be specified with a '0' followed by one of the diagramless
+decorators, for example, '0\*'). But then, even the exolve software has no way
+of knowing which grid square any clue starts on. However, sometimes, even in a
+puzzle with diagramless squares, the setter does want to provide the clue start
+locations for *some* clues. Exolve provides a way to do this: the setter can
+optionally include the location of the square where a clue starts for any clue,
+using the chessboard notation. Details are provided in the exolve-across/down
+section below.
 
 ## exolve-across, exolve-down
+The exolve-across and exolve-down clues should be used to specify the across
+and down clues, respectively. There should be one clue per line, and there
+should not be any blank lines. The clues should start with the clue number, and
+end with the enum (the enum is not strictly required). Example:
+```
+  exolve-across:
+    1 Untouchable service (3)
+    3 Listener (3)
+  exolve-down:
+    1 Happen to be (3)
+    2 Make a mistake (3)
+```
+
+If the enum indicates multiple words (for example, *(4,3)*), or if the enum
+indicates hyphenated words (for example, *(4-2)*), then the word boundary or
+the hyphen gets displayed in the grid, to help solvers.
+
+If a clue "covers" other "children clues," this can be indicated by appending
+a comma-separated list of children clue numbers to the parent clue number.
+Example:
+```
+  exolve-across:
+    1, 5, 2D In spite of adverse circumstances (7, 3, 4)
+    5 See 1 Across
+    ...
+  exolve-down:
+    2 See 1 Across
+```
+As shown in the above example, if a child clue (2D in the example) has a
+different direction from the parent, the direction can be specified with a
+one-letter suffix ("A" or "D").
+
+As mentioned in the previous section, in a grid that has diagramless squares
+and that does not provide solutions, if the setter wants to display some clue
+numbers in squares, they can do so by prepending the clue (in the exolve-across
+or exolve-down section) with "#XN", there X is the column ("a" being the first
+column, "b" being the second column, etc.) and N is the row number (1 being the
+bottom row, 2 being the row above the bottom row, etc.). This is essentially
+an extension of the chessboard notation. I considered using programming
+notation, but went with this for hopefully wider understanding. This notation
+is also used for specifying ninas. Example:
+```
+  exolve-across:
+    #a9 15 Imprison and tie perhaps
+```
+In this example, the clue number (15) will get displayed in the square that is
+in the first column and the 9th row from the bottom.
 
 ## exolve-nina
 
