@@ -194,7 +194,7 @@ Grid without solutions:
     000
 ```
 This is also a 3x3 grid, but no solutions have been provided (every light is
-shown using the letter '0'). In such a grid, the control buttins for checking/
+shown using the letter '0'). In such a grid, the control buttons for checking/
 revealing answers do not get shown.
 
 It is also possible to specify barred grids, instead of blocked ones. In fact,
@@ -204,9 +204,9 @@ grid square specifier, which we'll refer to as *decorators*. A bar to the right
 of a square is specified using the decorator |. A bar under a square is
 specified using the decorator \_. A square that has both a bar after and a bar
 under can use '|\_' or the shortcut for that, '+'. Arbitrary many spaces are
-allowed between grid square specifications, and spaces can (should!) be used to
-line up the squares in the presence of decorators. Here is an example 3x3 grid
-that uses both bars and blocked squares:
+allowed between grid square specifications, and spaces can (*should!*) be used
+to line up the squares in the presence of decorators. Here is an example 3x3
+grid that uses both bars and blocked squares:
 ```
   exolve-grid:
     A M|B
@@ -216,7 +216,7 @@ that uses both bars and blocked squares:
 
 The decorator '@' can also be used to inscribe circles inside some squares, and
 the decorator '\*' can be used to indicate that a square is to be diagramless.
-Here's the last example again, this time with circles arounf some cells, and
+Here's the last example again, this time with circles around some cells, and
 some cells being diagramless:
 ```
   exolve-grid:
@@ -257,7 +257,7 @@ using the chessboard notation. Details are provided in the exolve-across/down
 section below.
 
 ## exolve-across, exolve-down
-The exolve-across and exolve-down clues should be used to specify the across
+The exolve-across and exolve-down sections should be used to specify the across
 and down clues, respectively. There should be one clue per line, and there
 should not be any blank lines. The clues should start with the clue number, and
 end with the enum (the enum is not strictly required). Example:
@@ -313,8 +313,12 @@ in the first column and the 9th row from the bottom.
 
 ## Frequently Asked Questions
 
+**How should solvers save their current state?**
+
+TODO
+
 **We are an established newspaper. Our readers have complained in various ways
-about out online interactive crossword. Can we use your code?**
+about our online interactive crossword. Can we use your code?**
 
 See below (same answer).
 
@@ -328,7 +332,7 @@ License.
 
 I really want to keep the released version in this state: a single,
 self-contained HTML file containing all the CSS and all the Javascript it needs.
-Vanilla Javascript: nothing to import, no scripts to run, absolutely zero
+Vanilla Javascript, nothing to import, no scripts to run, absolutely zero
 dependencies.
 
 Of course, when you adopt it for your use, you might want to use all kinds of
@@ -347,21 +351,6 @@ Ignore it.
 
 It's a silly and small bash script
 
-**How do I allow the solver to check their solutions?**
-
-TODO
-
-**How do I create a puzzle where the solver cannot see the solutions?**
-
-TODO
-
-**Can I create a puzzle that uses both blocked squares and bars?**
-
-Yes. See example-bars-and-blocks.exolve, for example.
-
-**Can I set up a puzzle to receive submissions?**
-
-Yes. See example-with-submit.exolve, for example.
 
 
 
