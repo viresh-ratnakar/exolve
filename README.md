@@ -1,5 +1,5 @@
 # exolve
-Online crossword solver
+An Easily Configurable Interactive Crossword Solver
 
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own grid, starting at the
@@ -181,7 +181,7 @@ Grid with solutions:
     R.R
     EAR
 ```
-This is a 3x3 grid with one blocked square in the center ('.' is used to
+This is a 3x3 grid with one blocked square in the center ("." is used to
 indicate blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE,
 3 Down = ERR, and 3 Across = EAR. When solution letters are included like this,
 the control buttons for checking/revealing answers get shown. 
@@ -194,7 +194,7 @@ Grid without solutions:
     000
 ```
 This is also a 3x3 grid, but no solutions have been provided (every light is
-shown using the letter '0'). In such a grid, the control buttons for checking/
+shown using the letter "0"). In such a grid, the control buttons for checking/
 revealing answers do not get shown.
 
 It is also possible to specify barred grids, instead of blocked ones. In fact,
@@ -203,7 +203,7 @@ some other special treatments) are specified using letters that follow the main
 grid square specifier, which we'll refer to as *decorators*. A bar to the right
 of a square is specified using the decorator |. A bar under a square is
 specified using the decorator \_. A square that has both a bar after and a bar
-under can use '|\_' or the shortcut for that, '+'. Arbitrary many spaces are
+under can use "|\_" or the shortcut for that, "+". Arbitrary many spaces are
 allowed between grid square specifications, and spaces can (*should!*) be used
 to line up the squares in the presence of decorators. Here is an example 3x3
 grid that uses both bars and blocked squares:
@@ -214,8 +214,8 @@ grid that uses both bars and blocked squares:
     E|A T
 ```
 
-The decorator '@' can also be used to inscribe circles inside some squares, and
-the decorator '\*' can be used to indicate that a square is to be diagramless.
+The decorator "@" can also be used to inscribe circles inside some squares, and
+the decorator "\*" can be used to indicate that a square is to be diagramless.
 Here's the last example again, this time with circles around some cells, and
 some cells being diagramless:
 ```
@@ -244,11 +244,11 @@ check/reveal controls get displayed. For example, revealing a blocked
 diagramless square will show the dark square character, ⬛, in that square. 
 
 If the solver wants to *not* provide solutions for a puzzle that has some
-diagramless squares, then the blocked square marker ('.') should not be used
+diagramless squares, then the blocked square marker (".") should not be used
 in the blocked squares that are also diagramless (otherwise the solver can peak
 into the HTML source and see where the blocked squares are). Each diagramless
-square should be specified with a '0' followed by one of the diagramless
-decorators, for example, '0\*'). But then, even the exolve software has no way
+square should be specified with a "0" followed by one of the diagramless
+decorators, for example, "0\*"). But then, even the exolve software has no way
 of knowing which grid square any clue starts on. However, sometimes, even in a
 puzzle with diagramless squares, the setter does want to provide the clue start
 locations for *some* clues. Exolve provides a way to do this: the setter can
@@ -332,9 +332,9 @@ do this. Example:
   exolve-question: Your name
 ```
 In this example, there are three questions. An answer has also been provided for
-the second question. The part following the last closing parenthesis (')') (if
+the second question. The part following the last closing parenthesis (")") (if
 there is one) is treated as the answer. the answer is not shown in the displayed
-question. When the solver clicks 'Reveal all', answers to all questions for
+question. When the solver clicks "Reveal all", answers to all questions for
 which answers have been provided do get revealed.
 
 If the setter has created an exolve-submit section (see below), then answers to

@@ -1,0 +1,21 @@
+exolve-begin
+  exolve-id: example-basic
+  exolve-title: Tiny Demo Crossword
+  exolve-setter: Exolve
+  exolve-width: 5
+  exolve-height: 5
+  exolve-grid:
+    HELLO
+    O...L
+    WORLD
+    L...E
+    STEER
+  exolve-across:
+    1 Greeting (5)
+    3 Earth (5)
+    4 Guide (5)
+  exolve-down:
+    1 Emits cry (5)
+    2 More ancient (5)
+exolve-end
+

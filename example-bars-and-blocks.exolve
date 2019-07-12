@@ -1,0 +1,25 @@
+exolve-begin
+  exolve-id: example-bb
+  exolve-title: Tiny Crossword With Bars And Blocks
+  exolve-setter: Exolve
+  exolve-width: 5
+  exolve-height: 5
+  exolve-grid:
+    H E|B O O
+    I_. . . L
+    W O R L D_
+    A . . . O
+    S U E|A N 
+  exolve-across:
+    1 The man (2)
+    2 Jeer (3)
+    4 Planet (5)
+    6 Take legal action against (3)
+    7 Article (2)
+  exolve-down:
+    1 Greeting (2)
+    3 Aged (3)
+    4 Used to be (3)
+    5 Working (2)
+exolve-end
+
