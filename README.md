@@ -306,16 +306,86 @@ In this example, the clue number (15) will get displayed in the square that is
 in the first column and the 9th row from the bottom.
 
 ## exolve-nina
+If a setter has included ninas in the grid, and if they are putting up a version
+that has solutions included, they can also specify where the ninas are, and in
+that case, a "Show ninas" control button will get displayed. Each nina should
+use its own "exolve-nina:" line, and the ninas will get displayed in different
+colours upon clicking "Show ninas."
+
+The squares involved in a nina are specified in the same chessboard notation
+described above. Example:
+```
+  exolve-nina: j5 j7 j9 j11 j13
+  exolve-nina: a7 b7 c7 d7 e7
+```
+This example is from a puzzle with two ninas. The first one is in the 10th
+column ("j"), and the second one is in the seventh row from the bottom.
 
 ## exolve-question
+Often, the setter might have hidden additional information for the solver to
+discover (such as ninas), or may simply want to survey solvers about something
+(such as their favourite clues). The exolve-question section can be used to
+do this. Example:
+```
+  exolve-question: What is the nina that begins with S?
+  exolve-question: What is the nina that requests people to find a famous TV series? (3, 4) GET LOST
+  exolve-question: Your name
+```
+In this example, there are three questions. An answer has also been provided for
+the second question. The part following the last closing parenthesis (')') (if
+there is one) is treated as the answer. the answer is not shown in the displayed
+question. When the solver clicks 'Reveal all', answers to all questions for
+which answers have been provided do get revealed.
+
+If the setter has created an exolve-submit section (see below), then answers to
+each exolve-question are also sent to the submit URL (see below for details).
 
 ## exolve-submit
+Setters/publishers can use the exolve-submit section to receive submissions
+from solvers. The format is easily seen from this example:
+```
+  exolve-submit: https://something k k1 k2
+```
+The first parameter is the URL. The second parameter k is the key for the
+letters entered in the grid. The letters are all strung together, row by row.
+Dots for blocked squares are also included. In a diagramless square, if the
+solver has proposed placing a block, then it is represented by "1" in the
+solution string. Consider this grid-fill:
+```
+  ACE
+  R.R
+  EAR
+```
+When submitting, the solution letters will be sent as the string "ACER.REAR" for
+this example.
+
+Subsqeuent parameters (k1, k2) are the keys for any questions posed using
+exolve-question sections. So, for this example, if the answers entered for the
+exolve-questions are ANSWER1, ANSWER2, respectively, then the full URL for
+submission will be:
+```
+  https://something&k=ACER.REAR&k1=ANSWER1&k2=ANSWER2
+``` 
+
+The submission is made using HTTP GET.
+
+One easy way to set up submissions is to create a Google Form with one Google
+Form question for the solution letters, and one Google Form question for each
+exolve-question (using "Short answer" as the question type in each case). Then
+the "Get prefilled link" option can be used to get a URL with all the needed
+keys.
+
+## Saving state
+The software automatically saves state. It does so in a cookie, using the id
+specified in the exolve-id section as the key.
+
+If an html file containing an exolve puzzle has been direcly loaded into
+Chrome from the local computer (i.e., using a file://... URL), then Chrome
+does not save cookies. Exolve also saves state in the URL itself, by appending
+the state after a "#". Exolve only does this if the URL is not an http://..
+URL.
 
 ## Frequently Asked Questions
-
-**How should solvers save their current state?**
-
-TODO
 
 **We are an established newspaper. Our readers have complained in various ways
 about our online interactive crossword. Can we use your code?**
@@ -339,17 +409,15 @@ Of course, when you adopt it for your use, you might want to use all kinds of
 fancy frameworks and enhancements and refactorings. But my releases will
 continue to follow this simple structure.
 
-**How should I serve the exolve.html file?**
-
-TODO
-
 **What is the http.sh file?**
 
 Ignore it.
 
 **No, really, what is the http.sh file?**
 
-It's a silly and small bash script
+It's a simple and small bash script for splicing a \*.exolve file in the right
+place into exolve.html and serving it with HTTP. It's based on
+https://github.com/benrady/shinatra.
 
 
 
