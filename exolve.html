@@ -35,7 +35,7 @@ https://github.com/viresh-ratnakar/exolve
 
 <script>
 
-const VERSION = 'exolve v0.0 July 9, 2019'
+const VERSION = 'exolve v0.01 July 12, 2019'
 
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
@@ -2098,29 +2098,35 @@ function displayButtons() {
   }
 }
 
+function createPuzzle() {
+  init();
+
+  parseOverallDisplayMost();
+  parseAndDisplayPrelude();
+  checkIdAndConsistency();
+  parseGrid();
+  markClueStartsUsingGrid();
+  checkClueLists();
+  parseClueLists();
+
+  setClueMemberships();
+  processClueChildren();
+  setGridWordEndsAndHyphens();
+  displayClues();
+  displayGridBackground();
+  createInputListeners();
+  displayGrid();
+  displayNinas();
+  displayButtons();
+
+  restoreState();
+}
+
 // ------ End functions.
 
 // ------ Begin execution.
 
-init();
-parseOverallDisplayMost();
-parseAndDisplayPrelude();
-checkIdAndConsistency();
-parseGrid();
-markClueStartsUsingGrid();
-checkClueLists();
-parseClueLists();
-setClueMemberships();
-processClueChildren();
-setGridWordEndsAndHyphens();
-displayClues();
-displayGridBackground();
-createInputListeners();
-displayGrid();
-displayNinas();
-displayButtons();
-
-restoreState();
+createPuzzle();
 
 // ------ End execution.
 </script>

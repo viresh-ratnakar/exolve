@@ -1,5 +1,6 @@
 # exolve
-An Easily Configurable Interactive Crossword Solver
+
+## An Easily Configurable Interactive Crossword Solver
 
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own grid, starting at the
@@ -77,7 +78,7 @@ exolve-question sections), then input fields for these get shown too.
 answers to these questions.
 
 If the setter has set up a submit URL (with an exolve-submit section—the URL
-can be set up using a Google form, for instance), then there is a *Submit*
+can be set up using a Google Form, for instance), then there is a *Submit*
 buttion.
 
 When the solver enters a letter in a square, the cursor automatically jumps to
@@ -333,7 +334,7 @@ do this. Example:
 ```
 In this example, there are three questions. An answer has also been provided for
 the second question. The part following the last closing parenthesis (")") (if
-there is one) is treated as the answer. the answer is not shown in the displayed
+there is one) is treated as the answer. The answer is not shown in the displayed
 question. When the solver clicks "Reveal all", answers to all questions for
 which answers have been provided do get revealed.
 
