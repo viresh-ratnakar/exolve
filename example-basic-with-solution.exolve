@@ -11,11 +11,14 @@ exolve-begin
     L...E
     STEER
   exolve-across:
-    1 Greeting (5)
+    1 Greeting (5) Example annotation shown for clue, upon "Reveal all"
     3 Earth (5)
     4 Guide (5)
   exolve-down:
     1 Emits cry (5)
     2 More ancient (5)
+  exolve-explanations:
+    This text gets shown on clicking "Reveal all" and may include
+    explanations, commentary, annotations, etc.
 exolve-end
 

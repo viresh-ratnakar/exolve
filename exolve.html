@@ -35,7 +35,7 @@ https://github.com/viresh-ratnakar/exolve
 
 <script>
 
-const VERSION = 'exolve v0.02 July 13, 2019'
+const VERSION = 'exolve v0.03 July 13, 2019'
 
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
@@ -887,7 +887,7 @@ function parseEnum(clueLine) {
     'hyphenAfter': [],
     'afterEnum': clueLine.length,
   };
-  let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\s]*\)/)
+  let enumLocation = clueLine.search(/\([1-9]+[0-9\-,'’\s]*\)/)
   if (enumLocation < 0) {
     // Look for the the string 'word' in parens.
     enumLocation = clueLine.search(/\([^)]*word[^)]*\)/i)
@@ -920,6 +920,11 @@ function parseEnum(clueLine) {
     } else if (nextSymbol == ',') {
       parse.wordEndAfter.push(parse.len - 1)
       enumLeft = enumLeft.substr(1)
+    } else if (nextSymbol == '\'') {
+      enumLeft = enumLeft.substr(1)
+    } else if (enumLeft.indexOf('’') == 0) {
+      // Fancy apostrophe
+      enumLeft = enumLeft.substr('’'.length)
     } else {
       break;
     }

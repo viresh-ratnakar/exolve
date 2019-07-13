@@ -278,7 +278,21 @@ end with the enum (the enum is not strictly required). Example:
 
 If the enum indicates multiple words (for example, *(4,3)*), or if the enum
 indicates hyphenated words (for example, *(4-2)*), then the word boundary or
-the hyphen gets displayed in the grid, to help solvers.
+the hyphen gets displayed in the grid, to help solvers. The software uses the
+following criteria to decide what constitites the enum part of a clue: a pair
+of opening and closing parentheses, containing only numbers, hyphens, commas,
+and apostrophes, starting with a number. The software also treats an pair of
+parentheses containing the text "word" with anything before are after it as an
+enum (to allow the setter to specify the enum as "(two words)", for example).
+
+In a grid with solutions provided, the setter may include annotations for
+explaining how a clue works. Any text located after the enum in a clue is
+treated as annotation. The annotation is displayed when the solver clicks on
+the "Reveal all" button. Example:
+```
+  exolve-across:
+    28	Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
+```
 
 If a clue "covers" other "children clues," this can be indicated by appending
 a comma-separated list of children clue numbers to the parent clue number.
@@ -351,10 +365,11 @@ do this. Example:
   exolve-question: Your name
 ```
 In this example, there are three questions. An answer has also been provided for
-the second question. The part following the last closing parenthesis (")") (if
-there is one) is treated as the answer. The answer is not shown in the displayed
-question. When the solver clicks "Reveal all", answers to all questions for
-which answers have been provided do get revealed.
+the second question. The part following the enum ("(3, 4)"), if there is an
+enum, is treated as the answer (see the exolve-across/across-down section for
+details on enums). The answer is not shown in the displayed question. When the
+solver clicks "Reveal all", answers to all questions for which answers have
+been provided do get revealed.
 
 If the setter has created an exolve-submit section (see below), then answers to
 each exolve-question are also sent to the submit URL (see below for details).
