@@ -67,15 +67,19 @@ entry). Further, when a user enters or clears a blocked square in a diagramless
 cell, the appropriate action will also be taken in the square that is the
 symmetric counterpart of the current square.
 
+If the setter has provided annotations by appending annotations at the end of
+some clues (or by writing them in the exolve-explanations section), then these
+annotations get shown when the solver clicks "Reveal all".
+
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
 shown, for the solver to see where the ninas are. The button can be clicked
-again to hide the nina locations.
+again to hide the nina locations. Ninas also get shown on clicking "Reveal all".
 
 If the setter has asked additional questions in the puzzle (through
 exolve-question sections), then input fields for these get shown too.
 "Reveal/Clear all" controls buttons also include revealing/clearing
-answers to these questions.
+answers to these questions apart from showing/hiding annos/explanations/ninas.
 
 If the setter has set up a submit URL (with an exolve-submit section—the URL
 can be set up using a Google Form, for instance), then there is a *Submit*
@@ -105,15 +109,16 @@ and the exolve-end line:
 * **exolve-grid**
 * **exolve-across**
 * **exolve-down**
+* exolve-explanations
 * exolve-nina
 * exolve-question
 * exolve-submit
 
 Each section has the section name (exolve-something), followed by a colon.
-Other than the exolve-prelude, exolve-grid, exolve-across, and exolve-down
-sections, all other sections occupy a single line (some can be repeated though).
-For such single-line sections, the "value" of the section is the text following
-the colon on the same line.
+Other than the exolve-prelude, exolve-grid, exolve-across, exolve-down,
+and exolve-explanations sections, all other sections occupy a single line
+(some can be repeated though). For such single-line sections, the "value" of
+the section is the text following the colon on the same line.
 
 The bolded sections, namely, exolve-width, exolve-height, exolve-grid,
 exolve-across, and exolve-down, are required. The other sections are optional,
@@ -306,12 +311,20 @@ is also used for specifying ninas. Example:
 In this example, the clue number (15) will get displayed in the square that is
 in the first column and the 9th row from the bottom.
 
+## exolve-explanations
+In a grid that includes solutions, the setter may provide additional notes,
+explanations, commentary, etc. (or even annotations, if they haven't given them
+with the clues), in an exolve-explanations section. Just like the
+exolve-prelude section, this section also has multiple lines, and these lines
+can include html tags. The contents get revealed when the solver clicks on
+"Reveal all".
+
 ## exolve-nina
 If a setter has included ninas in the grid, and if they are putting up a version
 that has solutions included, they can also specify where the ninas are, and in
 that case, a "Show ninas" control button will get displayed. Each nina should
 use its own "exolve-nina:" line, and the ninas will get displayed in different
-colours upon clicking "Show ninas."
+colours upon clicking "Show ninas" (as well as "Reveal all").
 
 The squares involved in a nina are specified in the same chessboard notation
 described above. Example:
