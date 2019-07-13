@@ -253,14 +253,14 @@ If the solver wants to *not* provide solutions for a puzzle that has some
 diagramless squares, then the blocked square marker (".") should not be used
 in the blocked squares that are also diagramless (otherwise the solver can peak
 into the HTML source and see where the blocked squares are). Each diagramless
-square should be specified with a "0" followed by one of the diagramless
-decorators, for example, "0\*"). But then, even the exolve software has no way
-of knowing which grid square any clue starts on. However, sometimes, even in a
-puzzle with diagramless squares, the setter does want to provide the clue start
-locations for *some* clues. Exolve provides a way to do this: the setter can
-optionally include the location of the square where a clue starts for any clue,
-using the chessboard notation. Details are provided in the exolve-across/down
-section below.
+square should be specified with a "0" followed by the diagramless decorator,
+i.e., "0\*". But then, even the exolve software has no way of knowing which
+grid square any clue starts on. However, sometimes, even in a puzzle with
+diagramless squares, the setter does want to provide the clue start locations
+for *some* clues. Exolve provides a way to do this: the setter can optionally
+include the location of the square where a clue starts for any clue, using the
+chessboard notation. Details are provided in the exolve-across/down section
+below.
 
 ## exolve-across, exolve-down
 The exolve-across and exolve-down sections should be used to specify the across
