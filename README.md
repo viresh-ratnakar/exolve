@@ -318,6 +318,11 @@ with the clues), in an exolve-explanations section. Just like the
 exolve-prelude section, this section also has multiple lines, and these lines
 can include html tags. The contents get revealed when the solver clicks on
 "Reveal all".
+```
+  exolve-explanations:
+    This puzzle's hidden message was driven by occasional hiccups in
+    some <i>noted</i> interactive solvers.
+```
 
 ## exolve-nina
 If a setter has included ninas in the grid, and if they are putting up a version
