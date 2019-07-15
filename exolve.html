@@ -35,7 +35,7 @@ https://github.com/viresh-ratnakar/exolve
 
 <script>
 
-const VERSION = 'exolve v0.03 July 13, 2019'
+const VERSION = 'exolve v0.04 July 15, 2019'
 
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
@@ -173,10 +173,9 @@ td:first-child {
 .flex-col {
   display: flex;
   flex-flow: column wrap;
-  align-items: center;
 }
 .wide-box {
-  width: 460px
+  width: 460px;
 }
 #title {
   text-align: center;
@@ -185,9 +184,11 @@ td:first-child {
 #setter {
   text-align: center;
   color: darkgreen;
+  margin: 0 0 8px 0;
 }
 #prelude {
-  margin: 8px;
+  margin: 8px 8px 0 8px;
+  padding: 0;
 }
 #small-print {
   font-size: small;
@@ -201,7 +202,10 @@ td:first-child {
   height: 40px;
   word-wrap: break-word;
   font-weight: bold;
-  margin: 8px;
+  margin: 0 0 8px 8px;
+}
+#grid-panel {
+  margin: 0 0 0 8px;
 }
 #grid-parent-centerer {
   text-align: center;
@@ -296,79 +300,77 @@ hr {
 
 <body>
 
-<div class="flex-row">
-  <div id="grid-panel">
-    <div class="wide-box flex-col">
-      <h3 id="title"></h3>
-      <div id="setter"></div>
-      <div id="prelude"></div>
-    </div>
-    <div id="current-clue" class="wide-box"></div>
-    <div id="grid-parent-centerer">
-      <div id="grid-parent">
-        <svg id="grid" zoomAndPan="disable"></svg>
-        <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"></div>
-        <div id="nina-group" style="display:none;left:0;top:0"></div>
-        <div id="small-print">
-          <a id="report-bug"
-             href="https://github.com/viresh-ratnakar/exolve/issues/new">Report
-              bug</a>
-          <a href="https://github.com/viresh-ratnakar/exolve">exolve on
-              GitHub</a>
-          <span id="copyright"></span>
-        </div> <!-- #small-print -->
-      </div> <!-- #grid-parent -->
-    </div> <!-- #grid-parent-centerer -->
-    <div id="controls-etc">
-      <div id="controls" class="wide-box">
-        <div id="button-row-1" class="controls-row">
-          <button id="clear" class="button"
-              onclick="clearCurrent()">Clear this</button>
-          <button id="clear-all" class="button"
-              onclick="clearAll()">Clear all!</button>
-          <button id="check" class="button" style="display:none"
-              onclick="checkCurrent()">Check this</button>
-          <button id="check-all" class="button" style="display:none"
-              onclick="checkAll()">Check all!</button>
-        </div> <!-- #button-row-1 -->
-        <div id="button-row-2" class="controls-row">
-          <button id="reveal" class="button" style="display:none"
-              onclick="revealCurrent()">Reveal this</button>
-          <button id="ninas" class="button" style="display:none"
-              onclick="toggleNinas()">Show ninas</button>
-          <button id="reveal-all" class="button" style="display:none"
-              onclick="revealAll()">Reveal all!</button>
-        </div> <!-- #button-row-2 -->
-      </div> <!-- #controls -->
-      <div id="errors"></div>
-      <div id="status">
-        Squares filled:
-        <span id="status-num-filled">0</span>/<span
-              id="status-num-total"></span>
-      </div> <!-- #status -->
-      <div id="questions" class="wide-box"></div> 
-      <div id="submit-parent">
-        <button id="submit" class="button" style="display:none"
-            onclick="submitSolution()">Submit!</button>
-      </div> <!-- submit-parent -->
-      <div id="explanations" class="wide-box" style="display:none"></div>
-    </div> <!-- #controls-etc -->
-    <br>
-    <br>
-  </div> <!-- #grid-panel -->
-  <div id="across-clues-panel" class="wide-box clues-box">
-    <hr/>
-    <b>Across</b>
-    <table id="across"></table>
-    <br>
-  </div> <!-- #across-clues-panel -->
-  <div id="down-clues-panel" class="wide-box clues-box">
-    <hr/>
-    <b>Down</b>
-    <table id="down"></table>
-    <br>
-  </div> <!-- #down-clues-panel -->
-</div>
+<div class="flex-col" id="outermost-stack">
+  <h2 id="title"></h2>
+  <div id="setter"></div>
+  <div id="prelude"></div>
+  <div id="current-clue"></div>
+  <div class="flex-row">
+    <div id="grid-panel">
+      <div id="grid-parent-centerer">
+        <div id="grid-parent">
+          <svg id="grid" zoomAndPan="disable"></svg>
+          <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"></div>
+          <div id="nina-group" style="display:none;left:0;top:0"></div>
+          <div id="small-print">
+            <a id="report-bug"
+               href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
+            <a href="https://github.com/viresh-ratnakar/exolve">exolve on GitHub</a>
+            <span id="copyright"></span>
+          </div> <!-- #small-print -->
+        </div> <!-- #grid-parent -->
+      </div> <!-- #grid-parent-centerer -->
+      <div id="controls-etc">
+        <div id="controls" class="wide-box">
+          <div id="button-row-1" class="controls-row">
+            <button id="clear" class="button"
+                onclick="clearCurrent()">Clear this</button>
+            <button id="clear-all" class="button"
+                onclick="clearAll()">Clear all!</button>
+            <button id="check" class="button" style="display:none"
+                onclick="checkCurrent()">Check this</button>
+            <button id="check-all" class="button" style="display:none"
+                onclick="checkAll()">Check all!</button>
+          </div> <!-- #button-row-1 -->
+          <div id="button-row-2" class="controls-row">
+            <button id="reveal" class="button" style="display:none"
+                onclick="revealCurrent()">Reveal this</button>
+            <button id="ninas" class="button" style="display:none"
+                onclick="toggleNinas()">Show ninas</button>
+            <button id="reveal-all" class="button" style="display:none"
+                onclick="revealAll()">Reveal all!</button>
+          </div> <!-- #button-row-2 -->
+        </div> <!-- #controls -->
+        <div id="errors"></div>
+        <div id="status">
+          Squares filled:
+          <span id="status-num-filled">0</span>/<span
+                id="status-num-total"></span>
+        </div> <!-- #status -->
+        <div id="questions" class="wide-box"></div> 
+        <div id="submit-parent">
+          <button id="submit" class="button" style="display:none"
+              onclick="submitSolution()">Submit!</button>
+        </div> <!-- submit-parent -->
+        <div id="explanations" class="wide-box" style="display:none"></div>
+      </div> <!-- #controls-etc -->
+      <br>
+      <br>
+    </div> <!-- #grid-panel -->
+    <div id="across-clues-panel" class="wide-box clues-box">
+      <hr/>
+      <b>Across</b>
+      <table id="across"></table>
+      <br>
+    </div> <!-- #across-clues-panel -->
+    <div id="down-clues-panel" class="wide-box clues-box">
+      <hr/>
+      <b>Down</b>
+      <table id="down"></table>
+      <br>
+    </div> <!-- #down-clues-panel -->
+  </div>
+</div> <!-- #outermost-stack -->
 
 <script>
 
@@ -889,8 +891,8 @@ function parseEnum(clueLine) {
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,'’\s]*\)/)
   if (enumLocation < 0) {
-    // Look for the the string 'word' in parens.
-    enumLocation = clueLine.search(/\([^)]*word[^)]*\)/i)
+    // Look for the the string 'word'/'letter' in parens.
+    enumLocation = clueLine.search(/\([^)]*(word|letter)[^)]*\)/i)
     if (enumLocation >= 0) {
       let enumEndLocation =
           enumLocation + clueLine.substr(enumLocation).indexOf(')')

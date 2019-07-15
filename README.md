@@ -2,6 +2,8 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
+### Version: exolve v0.04 July 15, 2019
+
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own grid, starting at the
 "exolve-begin" line and ending at the "exolve-end" line.
@@ -282,8 +284,9 @@ the hyphen gets displayed in the grid, to help solvers. The software uses the
 following criteria to decide what constitites the enum part of a clue: a pair
 of opening and closing parentheses, containing only numbers, hyphens, commas,
 and apostrophes, starting with a number. The software also treats an pair of
-parentheses containing the text "word" with anything before are after it as an
-enum (to allow the setter to specify the enum as "(two words)", for example).
+parentheses containing the text "word" or "letter" with anything before are
+after it as an enum (to allow the setter to specify the enum as
+"(two words)", for example).
 
 In a grid with solutions provided, the setter may include annotations for
 explaining how a clue works. Any text located after the enum in a clue is
