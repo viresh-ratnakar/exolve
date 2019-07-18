@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: exolve v0.04 July 15, 2019
+### Version: exolve v0.05 July 18, 2019
 
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own grid, starting at the
@@ -284,9 +284,9 @@ the hyphen gets displayed in the grid, to help solvers. The software uses the
 following criteria to decide what constitites the enum part of a clue: a pair
 of opening and closing parentheses, containing only numbers, hyphens, commas,
 and apostrophes, starting with a number. The software also treats an pair of
-parentheses containing the text "word" or "letter" with anything before are
-after it as an enum (to allow the setter to specify the enum as
-"(two words)", for example).
+parentheses containing the text "word" or "letter" or "?" with anything before
+are after it as an enum (to allow the setter to specify the enum as
+"(two words)" or "(?)", for example).
 
 In a grid with solutions provided, the setter may include annotations for
 explaining how a clue works. Any text located after the enum in a clue is
@@ -356,6 +356,26 @@ described above. Example:
 ```
 This example is from a puzzle with two ninas. The first one is in the 10th
 column ("j"), and the second one is in the seventh row from the bottom.
+
+You can also have ninas that involve arbitrary letters/words from within the
+text of the clues or the prelude. This takes involves a little bit of html.
+Just enclose the text that you want to highlight as a nina in a "span" tag,
+giving it a unique class name, and specify that class name in the exolve-nina
+(the name cannot be a letter followed by a number, so that it is not confused
+with the above chessboard notation).
+For example:
+```
+  exolve-nina: acrostic-1
+  exolve-across
+    1 <span class="acrostic-1">W</span>herefore? (3)
+    2 <span class="acrostic-1">O</span>pen borders working (2)
+    2 <span class="acrostic-1">W</span>indow (8)
+```
+Span-class-specified and square-location-specified ninas can be intermixed too,
+such as:
+```
+  exolve-nina: a4 c4 clue-nina
+```
 
 ## exolve-question
 Often, the setter might have hidden additional information for the solver to

@@ -35,7 +35,7 @@ https://github.com/viresh-ratnakar/exolve
 
 <script>
 
-const VERSION = 'exolve v0.04 July 15, 2019'
+const VERSION = 'exolve v0.05 July 18, 2019'
 
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
@@ -72,7 +72,7 @@ exolve-begin
   exolve-nina: a2 c2 g2 i2 m2 o2
   exolve-nina: h15 h11 h9 h7 h5 h1
 
-  exolve-question: What is the hidden message? (6, 6, 6, 6) BETTER ONLINE SOLVER PLEASE
+  exolve-question: What is the hidden message? (6,6,6,6) BETTER ONLINE SOLVER PLEASE
 
   exolve-explanations:
     The text in this section, along with annos and answers to questions and
@@ -394,7 +394,12 @@ let downLastLine = -1
 let explanationsFirstLine = -1
 let explanationsLastLine = -1
 
+// Each nina will be an array containing location [i,j] pairs and/or span
+// class names.
 let ninas = []
+// For span-class-specified ninas, ninaClassElements[] stores the elements
+// along with the colours to apply to them when showing the ninas.
+let ninaClassElements = []
 const puzzleTextLines = puzzleText.trim().split('\n');
 let numPuzzleTextLines = puzzleTextLines.length
 let nextPuzzleTextLine = 0
@@ -504,14 +509,15 @@ function parseToNextSection() {
 // to [row col] and push an array of these locations to the global ninas array.
 function parseNina(s) {
   let nina = []
-  let cells = s.split(' ')
-  for (let cell of cells) {
-    let cellLocation = parseCellLocation(cell)
+  let cellsOrClasses = s.split(' ')
+  for (let cellOrClass of cellsOrClasses) {
+    let cellLocation = parseCellLocation(cellOrClass)
     if (!cellLocation) {
-      addError('Could not parse cell location: ' + cell)
-      return
+      // Must be a class name, for a span-class-specified nina
+      nina.push(cellOrClass)
+    } else {
+      nina.push(cellLocation)
     }
-    nina.push(cellLocation)
   }
   if (nina.length > 0) {
     ninas.push(nina)
@@ -870,13 +876,14 @@ function parseCellLocation(s) {
   s = s.trim()
   let col = s.charCodeAt(0) - 'a'.charCodeAt(0)
   let row = gridHeight - parseInt(s.substr(1))
-  if (row < 0 || row >= gridHeight || col < 0 || col >= gridWidth) {
+  if (isNaN(row) || isNaN(col) ||
+      row < 0 || row >= gridHeight || col < 0 || col >= gridWidth) {
     return null
   }
   return [row, col];
 }
 
-// Parse an enum like (4) or (4, 5), or (5-2, 4).
+// Parse an enum like (4) or (4,5), or (5-2,4).
 // Return an object with the following properties:
 // len
 // hyphenAfter[] (0-based indices)
@@ -891,8 +898,8 @@ function parseEnum(clueLine) {
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,'’\s]*\)/)
   if (enumLocation < 0) {
-    // Look for the the string 'word'/'letter' in parens.
-    enumLocation = clueLine.search(/\([^)]*(word|letter)[^)]*\)/i)
+    // Look for the the string 'word'/'letter'/? in parens.
+    enumLocation = clueLine.search(/\([^)]*(word|letter|\?)[^)]*\)/i)
     if (enumLocation >= 0) {
       let enumEndLocation =
           enumLocation + clueLine.substr(enumLocation).indexOf(')')
@@ -1939,13 +1946,30 @@ function displayNinas() {
     'rgba(0,255,0,0.2)',
     'rgba(0,255,255,0.2)',
     'rgba(255,0,255,0.2)',
-    'rgba(255,255,0,0.2)'
+    'rgba(255,255,0,0.2)',
+    'rgba(255,50,50,0.2)',
+    'rgba(50,255,50,0.2)',
+    'rgba(50,50,255,0.2)',
+    'rgba(50,200,200,0.2)',
+    'rgba(200,50,200,0.2)',
+    'rgba(200,200,50,0.2)',
   ];
   let ninaColorIndex = 0;
   for (let nina of ninas) {
-    for (let cell of nina) {
-      const row = cell[0]
-      const col = cell[1]
+    for (let cellOrClass of nina) {
+      if (!Array.isArray(cellOrClass)) {
+        // span-class-specified nina
+        const elts = document.getElementsByClassName(cellOrClass)
+        for (const elt of elts) {
+          ninaClassElements.push({
+            'element': elt,
+            'colour':  NINA_COLORS[ninaColorIndex],
+          });
+        }
+        continue
+      }    
+      const row = cellOrClass[0]
+      const col = cellOrClass[1]
       const ninaRect = document.createElement('div');
       ninaRect.style.left =  '' +  grid[row][col].cellLeft + 'px';
       ninaRect.style.top = '' + grid[row][col].cellTop + 'px';
@@ -1960,18 +1984,32 @@ function displayNinas() {
   }
 }
 
+function showNinas() {
+  for (const ec of ninaClassElements) {
+    ec.element.style.backgroundColor = ec.colour;
+  }
+  ninaGroup.style.display = '';
+  ninasButton.innerHTML = 'Hide ninas'
+  showingNinas = true
+}
+
+function hideNinas() {
+  for (const ec of ninaClassElements) {
+    ec.element.style.backgroundColor = 'transparent';
+  }
+  ninaGroup.style.display = 'none';
+  ninasButton.innerHTML = 'Show ninas'
+  showingNinas = false
+}
+
 function toggleNinas() {
   if (showingNinas) {
-    ninaGroup.style.display = 'none';
-    ninasButton.innerHTML = 'Show ninas'
-    showingNinas = false
+    hideNinas()
   } else {
     if (!confirm('Are you sure you want to reveal the nina(s)!?')) {
       return
     }
-    ninaGroup.style.display = '';
-    ninasButton.innerHTML = 'Hide ninas'
-    showingNinas = true
+    showNinas()
   }
 }
 
@@ -2021,11 +2059,7 @@ function clearAll() {
   for (let a of revelationList) {
     a.style.display = 'none'
   }
-  if (showingNinas) {
-    ninaGroup.style.display = 'none';
-    ninasButton.innerHTML = 'Show ninas'
-    showingNinas = false
-  }
+  hideNinas()
   updateAndSaveState()
 }
 
@@ -2137,11 +2171,7 @@ function revealAll() {
   for (let a of revelationList) {
     a.style.display = ''
   }
-  if (!showingNinas) {
-    ninaGroup.style.display = '';
-    ninasButton.innerHTML = 'Hide ninas'
-    showingNinas = true
-  }
+  showNinas()
   updateAndSaveState()
 }
 
