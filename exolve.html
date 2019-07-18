@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'exolve v0.06 July 18, 2019'
+const VERSION = 'exolve v0.07 July 18, 2019'
 
 </script>
 
@@ -1293,7 +1293,7 @@ function displayClues() {
     }
     let table =
         (clues[clueIndex].clueDirection == 'A') ? acrossClues : downClues
-    let row = document.createElement('tr')
+    let tr = document.createElement('tr')
     let col1 = document.createElement('td')
     col1.innerHTML = clues[clueIndex].displayNumber
     let col2 = document.createElement('td')
@@ -1306,16 +1306,19 @@ function displayClues() {
       revelationList.push(anno)
       col2.appendChild(anno)
     }
-    row.appendChild(col1)
-    row.appendChild(col2)
+    tr.appendChild(col1)
+    tr.appendChild(col2)
     if (clues[clueIndex].cells.length > 0) {
       let i = clues[clueIndex].cells[0][0]
       let j = clues[clueIndex].cells[0][1]
-      row.addEventListener('click', getRowColDirActivator(
+      tr.addEventListener('click', getRowColDirActivator(
           i, j, clues[clueIndex].clueDirection));
+    } else {
+      // Fully diagramless. Just select clue.
+      tr.addEventListener('click', getClueSelector(clueIndex));
     }
-    clues[clueIndex].clueRow = row
-    table.appendChild(row)
+    clues[clueIndex].clueTR = tr
+    table.appendChild(tr)
   }
 }
 
@@ -1539,28 +1542,7 @@ function activateCell(row, col) {
     }
   }
   if (activeClueIndex != '') {
-    currentClue.innerHTML = clues[activeClueIndex].clueNumber +
-                            clues[activeClueIndex].clueDirection + '. ' +
-                            clues[activeClueIndex].clue
-    let clueIndices = [activeClueIndex]
-    if (clues[activeClueIndex].parentClueIndex) {
-      let parent = clues[activeClueIndex].parentClueIndex
-      currentClue.innerHTML = clues[parent].clueNumber +
-                              clues[parent].clueDirection + '. ' +
-                              clues[parent].clue
-      clueIndices = [parent].concat(clues[parent].childrenClueIndices)
-    } else {
-      clueIndices =
-          clueIndices.concat(clues[activeClueIndex].childrenClueIndices)
-    }
-    for (let clueIndex of clueIndices) {
-      for (let rowcol of clues[clueIndex].cells) {
-        grid[rowcol[0]][rowcol[1]].cellRect.style.fill = ACTIVE_COLOUR
-        activeCells.push(rowcol)
-      }
-      clues[clueIndex].clueRow.style.background = ACTIVE_COLOUR
-      activeClues.push(clues[clueIndex].clueRow)
-    }
+    selectClue(activeClueIndex)
   } else {
     // No active clue, activate just the cell.
     grid[row][col].cellRect.style.fill = ACTIVE_COLOUR
@@ -1597,6 +1579,39 @@ function getRowColDirActivator(row, col, dir) {
     } 
     activateCell(row, col);
   };
+}
+
+// For freezing clueIndex to deal with JS closure.
+function getClueSelector(clueIndex) {
+  return function() {
+    deactivateCurrentCell();
+    selectClue(clueIndex);
+  };
+}
+// Select a clicked clue.
+function selectClue(activeClueIndex) {
+  currentClue.innerHTML = clues[activeClueIndex].clueNumber +
+                          clues[activeClueIndex].clueDirection + '. ' +
+                          clues[activeClueIndex].clue
+  let clueIndices = [activeClueIndex]
+  if (clues[activeClueIndex].parentClueIndex) {
+    let parent = clues[activeClueIndex].parentClueIndex
+    currentClue.innerHTML = clues[parent].clueNumber +
+                            clues[parent].clueDirection + '. ' +
+                            clues[parent].clue
+    clueIndices = [parent].concat(clues[parent].childrenClueIndices)
+  } else {
+    clueIndices =
+        clueIndices.concat(clues[activeClueIndex].childrenClueIndices)
+  }
+  for (let clueIndex of clueIndices) {
+    for (let rowcol of clues[clueIndex].cells) {
+      grid[rowcol[0]][rowcol[1]].cellRect.style.fill = ACTIVE_COLOUR
+      activeCells.push(rowcol)
+    }
+    clues[clueIndex].clueTR.style.background = ACTIVE_COLOUR
+    activeClues.push(clues[clueIndex].clueTR)
+  }
 }
 
 function toggleCurrentDirection() {
