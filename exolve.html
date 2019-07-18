@@ -35,8 +35,6 @@ https://github.com/viresh-ratnakar/exolve
 
 <script>
 
-const VERSION = 'exolve v0.05 July 18, 2019'
-
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
 exolve-begin
@@ -117,17 +115,10 @@ exolve-begin
 exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
-</script>
 
-<!--
-Reference list of possible values of the optional decorator characters that can
-follow each grid square entry:
-| draw bar after
-_ draw bar under
-+ draw bar after and under
-@ draw circle
-* diagramless
--->
+const VERSION = 'exolve v0.06 July 18, 2019'
+
+</script>
 
 <style>
 .background {
@@ -1960,6 +1951,11 @@ function displayNinas() {
       if (!Array.isArray(cellOrClass)) {
         // span-class-specified nina
         const elts = document.getElementsByClassName(cellOrClass)
+        if (!elts || elts.length == 0) {
+          addError('Nina ' + cellOrClass +
+                   ' is not a cell location nor a class with html tags');
+          return
+        }
         for (const elt of elts) {
           ninaClassElements.push({
             'element': elt,
