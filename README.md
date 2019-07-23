@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: exolve v0.07 July 18, 2019
+### Version: exolve v0.08 July 23 2019
 
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own grid, starting at the
@@ -93,6 +93,9 @@ different clue, when there are clues that "cover" other clues). In a
 diagramless squarel in a puzzle for which the solver has not provided all
 solutions, there is no such automatic move after entereing a letter (as the
 software itself has no way of knowing where the next square is).
+
+The software tries to keep the current clue visible when scrolling, as long
+as the square with the cursor is visible.
 
 "Clear/Check/Reveal all" buttons, the "Show ninas" button, and the "Submit"
 button solicit additional confirmation from the solver.
