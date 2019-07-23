@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'exolve v0.09 July 23 2019'
+const VERSION = 'exolve v0.10 July 23 2019'
 
 // ------ Begin globals.
 
@@ -1285,6 +1285,7 @@ function deactivateCurrentCell() {
   activeCells = [];
   activeClues = [];
   currentClue.innerHTML = ''
+  currentClue.style.background = 'transparent'
   currentClue.style.top = '0'
   clearButton.disabled = true
   checkButton.disabled = true
@@ -1418,6 +1419,7 @@ function selectClue(activeClueIndex) {
     clueIndices =
         clueIndices.concat(clues[activeClueIndex].childrenClueIndices)
   }
+  currentClue.style.background = ACTIVE_COLOUR;
   for (let clueIndex of clueIndices) {
     for (let rowcol of clues[clueIndex].cells) {
       grid[rowcol[0]][rowcol[1]].cellRect.style.fill = ACTIVE_COLOUR
@@ -2142,11 +2144,11 @@ td:first-child {
 }
 #current-clue {
   position: absolute;
-  background: mistyrose;
   z-index: 2;
   word-wrap: break-word;
   font-weight: bold;
   margin: 0 0 0 8px;
+  padding: 4px 4px 4px 0;
 }
 #grid-panel {
   margin: 0 0 0 8px;
