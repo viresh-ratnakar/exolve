@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'exolve v0.08 July 23 2019'
+const VERSION = 'exolve v0.09 July 23 2019'
 
 // ------ Begin globals.
 
@@ -1312,8 +1312,9 @@ function makeCurrentClueVisible() {
   const parentTop = clueParentPos.top
   // Reposition
   let newTop = 0
-  // If parent is below viewport top, go back to standard position
-  if (parentTop >= 0) {
+  // If parent is below viewport top, or no cells are active (because
+  // of fully diagramless clue) go back to standard position.
+  if (parentTop >= 0 || activeCells.length == 0) {
     currentClue.style.top = '0'
     return
   }
