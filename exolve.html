@@ -77,7 +77,7 @@ exolve-begin
     ninas, gets shown upon clicking "Reveal all."
 
   exolve-across:
-    1 Just running leisurely on vacation (4) Def: Just. ON L(-eisurel)Y.
+    1,23 Just running leisurely on vacation (4) Def: Just. ON L(-eisurel)Y.
     3 Quietly a friend of the Catholic church (5) Def: of the Catholic church. P A PAL.
     6 Reverse course and make changes (4) Def: make changes. TIDE<<.
     9 Best alternative to open-air (7) Def: open-air. OUTDO OR.
@@ -86,7 +86,7 @@ exolve-begin
     14 About this matter of the star-eating alien (6) Def: About this matter. HERO around ET.
     16 Awkwardly issue bids for financial rewards (9) Def: financial rewards. ISSUEBIDS*.
     18 Cancel yearly leave, Ana (5) Def: Cancel. ANNUAL -A ("leave an a").
-    20 Chromosome in sperm determined whether male or female (5) Def: determined whether male or female. X in SEED.
+    20,2d Chromosome in sperm determined whether male or female (5) Def: determined whether male or female. X in SEED.
     21 Ally’s break-up carries pain forever (9) Def: forever. ALLY* around STING.
     23 Finally obtain Saudi seismic license; drill exploratory well (6) Def: well. Tail acrostic.
     25 Perhaps Santa is married to devil-worship? (8) Def: devil-worship. SANTA* IS M.
@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'exolve v0.11 July 25 2019'
+const VERSION = 'exolve v0.12 July 27 2019'
 
 // ------ Begin globals.
 
@@ -802,6 +802,7 @@ function parseClueLists() {
       clues[clueParse.clueIndex].clueNumber = clueParse.clueNumber
       clues[clueParse.clueIndex].displayNumber = '' + clueParse.clueNumber
       clues[clueParse.clueIndex].clueDirection = clueDirection
+      clues[clueParse.clueIndex].fullDisplayNumber = '' + clueParse.clueNumber + clueDirection
       clues[clueParse.clueIndex].children = clueParse.children
       clues[clueParse.clueIndex].childrenClueIndices = []
       clues[clueParse.clueIndex].len = clueParse.len
@@ -926,6 +927,7 @@ function processClueChildren() {
         return
       }
       clue.displayNumber = clue.displayNumber + ', ' + child
+      clue.fullDisplayNumber = clue.fullDisplayNumber + ', ' + childNumber + childIndex.charAt(0)
       clue.childrenClueIndices.push(childIndex)
       let childClue = clues[childIndex]
       childClue.parentClueIndex = clueIndex
@@ -1405,14 +1407,12 @@ function getClueSelector(clueIndex) {
 }
 // Select a clicked clue.
 function selectClue(activeClueIndex) {
-  currentClue.innerHTML = clues[activeClueIndex].clueNumber +
-                          clues[activeClueIndex].clueDirection + '. ' +
+  currentClue.innerHTML = clues[activeClueIndex].fullDisplayNumber + '. ' +
                           clues[activeClueIndex].clue
   let clueIndices = [activeClueIndex]
   if (clues[activeClueIndex].parentClueIndex) {
     let parent = clues[activeClueIndex].parentClueIndex
-    currentClue.innerHTML = clues[parent].clueNumber +
-                            clues[parent].clueDirection + '. ' +
+    currentClue.innerHTML = clues[parent].fullDisplayNumber + '. ' +
                             clues[parent].clue
     clueIndices = [parent].concat(clues[parent].childrenClueIndices)
   } else {
@@ -2097,7 +2097,7 @@ td {
   vertical-align: top;
 }
 td:first-child {
-  max-width: 40px;
+  max-width: 45px;
   font-weight: bold;
 }
 .anno-text {
