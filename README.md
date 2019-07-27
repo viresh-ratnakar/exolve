@@ -361,7 +361,7 @@ This example is from a puzzle with two ninas. The first one is in the 10th
 column ("j"), and the second one is in the seventh row from the bottom.
 
 You can also have ninas that involve arbitrary letters/words from within the
-text of the clues or the prelude. This takes involves a little bit of html.
+text of the clues or the prelude. This involves a little bit of html.
 Just enclose the text that you want to highlight as a nina in a "span" tag,
 giving it a unique class name, and specify that class name in the exolve-nina
 (the name cannot be a letter followed by a number, so that it is not confused
