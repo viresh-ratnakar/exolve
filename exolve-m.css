@@ -1,0 +1,195 @@
+/*
+MIT License
+
+Copyright (c) 2019 Viresh Ratnakar
+
+See the full license notice in exolve-m.js.
+
+Version: exolve v0.13 July 29 2019
+*/
+
+.background {
+  fill: black;
+}
+.cell {
+  fill: white;
+  cursor: pointer;
+}
+.cell-num {
+  font-size: 9px;
+  font-family: sans-serif;
+}
+.cell-text {
+  font-size: 16px;
+  font-family: sans-serif;
+  cursor: text;
+}
+.wordend {
+  fill: rgb(0,0,255);
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td {
+  padding: 4px 6px 0 0;
+  vertical-align: top;
+}
+td:first-child {
+  max-width: 45px;
+  font-weight: bold;
+}
+.anno-text {
+  font-style: italic;
+  color: darkgreen;
+}
+.flex-row {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+}
+.flex-col {
+  display: flex;
+  flex-flow: column wrap;
+}
+.wide-box {
+  width: 460px;
+}
+#title {
+  text-align: center;
+  font-weight: bold;
+}
+#setter {
+  text-align: center;
+  color: darkgreen;
+  margin: 0 0 8px 0;
+}
+#prelude {
+  margin: 8px 8px 0 8px;
+  padding: 0;
+}
+#small-print {
+  font-size: small;
+  text-align: right;
+}
+#errors {
+  font-weight: bold;
+  color: red;
+}
+#current-clue-parent {
+  height: 40px;
+  position:relative;
+  margin: 8px 8px 8px 0;
+}
+#current-clue {
+  position: absolute;
+  z-index: 2;
+  word-wrap: break-word;
+  font-weight: bold;
+  margin: 0 0 0 8px;
+  padding: 4px 4px 4px 0;
+}
+#grid-panel {
+  margin: 0 0 0 8px;
+}
+#grid-parent-centerer {
+  text-align: center;
+}
+#grid-parent {
+  position:relative;
+  margin: 0 20px 0 0;
+  display: inline-block;
+}
+#grid-input-wrapper {
+  position: absolute;
+  border: none;
+  border-width:0;
+}
+#grid-input {
+  text-align: center;
+  text-anchor: middle;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(255,255,255,0.0);
+}
+.controls-row {
+  margin: 6px 0 6px 0;
+}
+.clues-box {
+  margin: 0 10px 0 0;
+}
+#explanations {
+  margin: 10px 0 0 0;
+}
+hr {
+  margin: 0 0 4px 0;
+  background-color: darkgreen;
+}
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  outline: none;
+  color: white;
+  padding: 8px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 12px;
+  font-family: monospace;
+  font-size: 14px;
+}
+.button:hover {
+  background-color: darkgreen;
+  cursor: pointer;
+}
+.button:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+}
+#nina-group {
+  position: absolute;
+  border: none;
+  border-width:0;
+  outline: none;
+}
+.nina {
+  position: absolute;
+  border: none;
+  border-width:0;
+  outline: none;
+  cursor: pointer;
+}
+#status {
+  font-family: monospace;
+  font-size: 12px;
+  margin: 6px 0 6px 0;
+  color: darkgreen;
+}
+.question {
+  margin: 10px 0 10px 0;
+}
+.answer {
+  border: none;
+  border-bottom: 1px solid darkgreen;
+  padding: 0 0 6px 0;
+  outline: none;
+  font-family: monospace;
+  font-size: 12px;
+  color: darkgreen;
+}
+@media print {
+  .button {
+    display: none;
+  }
+  #report-bug {
+    display: none;
+  }
+  #exolve-link {
+    display: none;
+  }
+  @page {
+    margin: 0.2in;
+  }
+}

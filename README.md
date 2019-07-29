@@ -2,13 +2,17 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: exolve v0.12 July 27 2019
+### Version: exolve v0.13 July 29 2019
 
 exolve.html contains *all* the code you need: just make a copy and then replace
-the part that contains the example grid with your own grid, starting at the
-"exolve-begin" line and ending at the "exolve-end" line.
+the part that contains the example grid with your own puzzle specification,
+starting at the "exolve-begin" line and ending at the "exolve-end" line.
 
-Here is a minimal example:
+[exolve-m.html, exolve-m.css, exolve-m.js have the same  content as exolve.html,
+except that it is split into separate parts: html (including the puzzle
+specification), CSS, and JavaScript.]
+
+Here is a minimal example of the puzzle specification:
 
 ```
 exolve-begin
@@ -90,7 +94,7 @@ buttion.
 When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
 different clue, when there are clues that "cover" other clues). In a
-diagramless squarel in a puzzle for which the solver has not provided all
+diagramless square in a puzzle for which the solver has not provided all
 solutions, there is no such automatic move after entereing a letter (as the
 software itself has no way of knowing where the next square is).
 
@@ -286,7 +290,7 @@ indicates hyphenated words (for example, *(4-2)*), then the word boundary or
 the hyphen gets displayed in the grid, to help solvers. The software uses the
 following criteria to decide what constitites the enum part of a clue: a pair
 of opening and closing parentheses, containing only numbers, hyphens, commas,
-and apostrophes, starting with a number. The software also treats an pair of
+and apostrophes, starting with a number. The software also treats a pair of
 parentheses containing the text "word" or "letter" or "?" with anything before
 are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
@@ -437,7 +441,8 @@ keys.
 
 ## Saving state
 The software automatically saves state. It does so in a cookie, using the id
-specified in the exolve-id section as the key.
+specified in the exolve-id section as the key. The saved puzzle state is
+retained for 90 days after the last change.
 
 If an html file containing an exolve puzzle has been direcly loaded into
 Chrome from the local computer (i.e., using a file://... URL), then Chrome
@@ -458,27 +463,17 @@ readers have asked for an online interactive solver. Can we use your code?**
 Yes. The software is free, and is released under the rather permissive MIT
 License.
 
-**Why is everything wrapped in a single exolve.html file?**
+**Which files should I use? exolve.html or exolve-m.html, exolve-m.css, exolve-m.js?**
 
-I really want to keep the released version in this state: a single,
+I want to maintain a released version in the simple state of a single,
 self-contained HTML file containing all the CSS and all the Javascript it needs.
 Vanilla Javascript, nothing to import, no scripts to run, absolutely zero
-dependencies.
+dependencies. If you have just one or two puzzles that you want to render,
+and/or you do not have much experience with HTML, then use this file.
 
-Of course, when you adopt it for your use, you might want to use all kinds of
-fancy frameworks and enhancements and refactorings. But my releases will
-continue to follow this simple structure.
-
-**What is the http.sh file?**
-
-Ignore it.
-
-**No, really, what is the http.sh file?**
-
-It's a simple and small bash script for splicing a \*.exolve file in the right
-place into exolve.html and serving it with HTTP. It's based on
-https://github.com/benrady/shinatra.
-
+If you are serving multiple puzzles, use one copy each of exolve-m.css and
+exolve-m.js, and create one copy of exolve-m.html for each puzzle (renaming
+it suitably).
 
 
 
