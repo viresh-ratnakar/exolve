@@ -11,7 +11,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: exolve v0.13 July 29 2019
+Version: exolve v0.14 August 5 2019
 -->
 
 <link rel="stylesheet" type="text/css" href="exolve-m.css"/>
@@ -120,7 +120,7 @@ exolve-end
       <div id="grid-parent-centerer">
         <div id="grid-parent">
           <svg id="grid" zoomAndPan="disable"></svg>
-	  <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"/></div>
+          <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"/></div>
           <div id="nina-group" style="display:none;left:0;top:0"></div>
           <div id="small-print">
             <a id="report-bug"
@@ -167,18 +167,25 @@ exolve-end
       <br/>
       <br/>
     </div> <!-- #grid-panel -->
-    <div id="across-clues-panel" class="wide-box clues-box">
-      <hr/>
-      <b>Across</b>
-      <table id="across"></table>
-      <br/>
-    </div> <!-- #across-clues-panel -->
-    <div id="down-clues-panel" class="wide-box clues-box">
-      <hr/>
-      <b>Down</b>
-      <table id="down"></table>
-      <br/>
-    </div> <!-- #down-clues-panel -->
+    <div id="clues" class="flex-row">
+      <div id="across-panel" class="wide-box clues-box" style="display:none">
+        <hr/>
+        <b>Across</b>
+        <table id="across"></table>
+        <br/>
+      </div> <!-- #across-panel -->
+      <div id="down-panel" class="wide-box clues-box" style="display:none">
+        <hr/>
+        <b>Down</b>
+        <table id="down"></table>
+        <br/>
+      </div> <!-- #down-panel -->
+      <div id="nodir-panel" class="wide-box clues-box" style="display:none">
+        <hr/>
+        <table id="nodir"></table>
+        <br/>
+      </div> <!-- #nodir-panel -->
+    </div> <!-- #clues -->
   </div>
 </div> <!-- #outermost-stack -->
 

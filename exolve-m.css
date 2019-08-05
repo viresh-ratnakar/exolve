@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: exolve v0.13 July 29 2019
+Version: exolve v0.14 August 5 2019
 */
 
 .background {
@@ -119,6 +119,7 @@ td:first-child {
 }
 .clues-box {
   margin: 0 10px 0 0;
+  overflow-y: auto;
 }
 #explanations {
   margin: 10px 0 0 0;
@@ -147,6 +148,23 @@ hr {
 .button:disabled {
   background-color: gray;
   cursor: not-allowed;
+}
+.small-button {
+  background-color: mistyrose;
+  border: 1px solid lightpink;
+  outline: none;
+  padding: 4px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 14px;
+}
+.small-button:hover {
+  background-color: lightpink;
+  cursor: pointer;
 }
 #nina-group {
   position: absolute;
@@ -193,3 +211,4 @@ hr {
     margin: 0.2in;
   }
 }
+

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: exolve v0.13 July 29 2019
+### Version: exolve v0.14 August 5 2019
 
 exolve.html contains *all* the code you need: just make a copy and then replace
 the part that contains the example grid with your own puzzle specification,
@@ -116,22 +116,24 @@ and the exolve-end line:
 * **exolve-width**
 * **exolve-height**
 * **exolve-grid**
-* **exolve-across**
-* **exolve-down**
+* exolve-across
+* exolve-down
+* exolve-nodir
 * exolve-explanations
 * exolve-nina
 * exolve-question
 * exolve-submit
+* exolve-option
 
 Each section has the section name (exolve-something), followed by a colon.
 Other than the exolve-prelude, exolve-grid, exolve-across, exolve-down,
-and exolve-explanations sections, all other sections occupy a single line
-(some can be repeated though). For such single-line sections, the "value" of
-the section is the text following the colon on the same line.
+exolve-nodir, and exolve-explanations sections, all other sections occupy a
+single line (some can be repeated though). For such single-line sections, the
+"value" of the section is the text following the colon on the same line.
 
-The bolded sections, namely, exolve-width, exolve-height, exolve-grid,
-exolve-across, and exolve-down, are required. The other sections are optional,
-but exolve-id, exolve-title, exolve-setter should probably be present in most
+The bolded sections, namely, exolve-width, exolve-height, and exolve-grid
+are required. The other sections are optional, but exolve-across, exolve-down,
+exolve-id, exolve-title, exolve-setter should probably be present in most
 puzzles.
 
 ## exolve-id
@@ -249,6 +251,18 @@ _ draw bar under
 * diagramless
 ```
 
+## Some details about clue numbers
+Across and down clue numbers are automatically inferred from the grid, except
+in two cases. The first is the when there are diagramless cells and solutions
+have not been provided. The second is when the setter opts to deliberately
+not provide associations between grid squares and clues, by using non-numeric
+clue labels without providing their grid locations. When the solver is entering
+a value in a light for which the clue association is not known, the highlighted
+"current clue" is actually a browsable interface in which the solver can
+bring up any of all the clues that cover at least one square without a known
+clue association.
+
+
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
 a light or a blocked square—if the setter has used any bars, they do get
@@ -271,11 +285,13 @@ include the location of the square where a clue starts for any clue, using the
 chessboard notation. Details are provided in the exolve-across/down section
 below.
 
-## exolve-across, exolve-down
+## exolve-across, exolve-down, exolve-nodir
 The exolve-across and exolve-down sections should be used to specify the across
-and down clues, respectively. There should be one clue per line, and there
-should not be any blank lines. The clues should start with the clue number, and
-end with the enum (the enum is not strictly required). Example:
+and down clues, respectively (exolve-nodir is for the special/rare case of
+clues that do not have a specified direction; we will describe it at the end of
+this section). There should be one clue per line, and there should not be any
+blank lines. The clues should start with the clue number, and end with the
+enum (the enum is not strictly required). Example:
 ```
   exolve-across:
     1 Untouchable service (3)
@@ -334,6 +350,41 @@ is also used for specifying ninas. Example:
 ```
 In this example, the clue number (15) will get displayed in the square that is
 in the first column and the 9th row from the bottom.
+
+### Non-numeric clue labels
+If you want to use non-numeric clue labels (such as A, B, C, etc.), you can
+do that by enclosing the non-numeric clue label in square brackets, like this:
+Example:
+```
+  exolve-across:
+    2 Imprison and tie perhaps (6)
+    [F] Enjoyable (3)
+    5 Hitchhiker's accessory (5)
+    #a12 [G], 4, [H] Fitting reply (3,3,3)
+    ...
+```
+For non-numeric clue labels, the software does not know which cell the clue
+begins in, unless it is specified explicitly by the setter using a "#XN"
+prefix as described above and shown in the fourth clue example above.
+
+### Clues without a specified direction
+If you want to create a section of clues without a specified across/down
+direction, you can use an exolve-nodir section, which has the same structure
+as exolve-across and exolve-down, but the direction of each clue in this
+section is considered unspecified. Setters would probably want to use this
+section with non-numeric clue labels. Example:
+```
+  exolve-nodir:
+    [P] Direct (5)
+    [Q] Server spilling one's drink (5)
+    ...
+```
+The clue label can be numeric too, and the starting cell can also be specified
+using the "#XN" prefix as described above.
+
+If the setter is using  nun-numeric clue labels or clues without a specified
+direction, then they should probably also use the option "hide-inferred-numbers"
+in an exolve-option section.
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
@@ -431,13 +482,23 @@ submission will be:
   https://something&k=ACER.REAR&k1=ANSWER1&k2=ANSWER2
 ``` 
 
-The submission is made using HTTP GET.
+The submission is made using HTTP GET. All answers are converted to upper case
+for submission.
 
 One easy way to set up submissions is to create a Google Form with one Google
 Form question for the solution letters, and one Google Form question for each
 exolve-question (using "Short answer" as the question type in each case). Then
 the "Get prefilled link" option can be used to get a URL with all the needed
 keys.
+
+## exolve-option
+In this single-line, repeatable section, the setter can specify certain options.
+The list of currently supported options is as follows:
+- **hide-inferred-numbers** If this option is specified, then the software does
+  not display any clue numbers that were automatically inferred. Setters using
+  non-numeric clue labels may want to specify this option.
+- **clues-panel-lines:<N>** Limit the across/down/nodir clues boxes to about N
+  lines of text, adding scrollbars if needed.
 
 ## Saving state
 The software automatically saves state. It does so in a cookie, using the id
