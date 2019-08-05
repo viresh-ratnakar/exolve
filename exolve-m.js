@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'exolve v0.14 August 5 2019'
+const VERSION = 'exolve v0.15 August 5 2019'
 
 // ------ Begin globals.
 
@@ -159,9 +159,9 @@ function init() {
   background =
     document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-  acrossPanel = document.getElementById('across-panel')
-  downPanel = document.getElementById('down-panel')
-  nodirPanel = document.getElementById('nodir-panel')
+  acrossPanel = document.getElementById('across-clues-panel')
+  downPanel = document.getElementById('down-clues-panel')
+  nodirPanel = document.getElementById('nodir-clues-panel')
   acrossClues = document.getElementById('across')
   downClues = document.getElementById('down')
   nodirClues = document.getElementById('nodir')

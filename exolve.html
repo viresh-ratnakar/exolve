@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'exolve v0.14 August 05 2019'
+const VERSION = 'exolve v0.15 August 05 2019'
 
 // ------ Begin globals.
 
@@ -250,9 +250,9 @@ function init() {
   background =
     document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-  acrossPanel = document.getElementById('across-panel')
-  downPanel = document.getElementById('down-panel')
-  nodirPanel = document.getElementById('nodir-panel')
+  acrossPanel = document.getElementById('across-clues-panel')
+  downPanel = document.getElementById('down-clues-panel')
+  nodirPanel = document.getElementById('nodir-clues-panel')
   acrossClues = document.getElementById('across')
   downClues = document.getElementById('down')
   nodirClues = document.getElementById('nodir')
@@ -2711,23 +2711,23 @@ hr {
       <br/>
     </div> <!-- #grid-panel -->
     <div id="clues" class="flex-row">
-      <div id="across-panel" class="wide-box clues-box" style="display:none">
+      <div id="across-clues-panel" class="wide-box clues-box" style="display:none">
         <hr/>
         <b>Across</b>
         <table id="across"></table>
         <br/>
-      </div> <!-- #across-panel -->
-      <div id="down-panel" class="wide-box clues-box" style="display:none">
+      </div> <!-- #across-clues-panel -->
+      <div id="down-clues-panel" class="wide-box clues-box" style="display:none">
         <hr/>
         <b>Down</b>
         <table id="down"></table>
         <br/>
-      </div> <!-- #down-panel -->
-      <div id="nodir-panel" class="wide-box clues-box" style="display:none">
+      </div> <!-- #down-clues-panel -->
+      <div id="nodir-clues-panel" class="wide-box clues-box" style="display:none">
         <hr/>
         <table id="nodir"></table>
         <br/>
-      </div> <!-- #nodir-panel -->
+      </div> <!-- #nodir-clues-panel -->
     </div> <!-- #clues -->
   </div>
 </div> <!-- #outermost-stack -->
