@@ -1,12 +1,13 @@
-# exolve
+# Exolve
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: exolve v0.15 August 5 2019
+### Version: Exolve v0.16 August 17 2019
 
-exolve.html contains *all* the code you need: just make a copy and then replace
-the part that contains the example grid with your own puzzle specification,
-starting at the "exolve-begin" line and ending at the "exolve-end" line.
+The file *exolve.html* contains *all* the code you need: just make a copy and
+then replace the part that contains the example grid with your own puzzle
+specification, starting at the "exolve-begin" line and ending at the
+"exolve-end" line.
 
 [exolve-m.html, exolve-m.css, exolve-m.js have the same  content as exolve.html,
 except that it is split into separate parts: html (including the puzzle
@@ -41,7 +42,7 @@ The format is very simple and uses plain text (but the parsing code is
 also simplistic and not very forgiving, so please go through the format
 documentation). The setter has the option to provide solutions (as in the
 example above), or just use 0 to indicate a square that needs to be filled
-(i.e., a "light," in crossword terms).
+(i.e., part of a "light," in crossword terms).
 
 A few example puzzles are also included in this directory, each in a file with
 the ".exolve" extension. These showcase some of the available features, such as
@@ -265,7 +266,7 @@ clue association.
 
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
-a light or a blocked square—if the setter has used any bars, they do get
+in a light or is a blocked square—if the setter has used any bars, they do get
 displayed to the solver, even in diagramless cells.
 
 If a puzzle with diagramless squares has specified all solutions, then
@@ -442,15 +443,20 @@ discover (such as ninas), or may simply want to survey solvers about something
 do this. Example:
 ```
   exolve-question: What is the nina that begins with S?
-  exolve-question: What is the nina that requests people to find a famous TV series? (3, 4) GET LOST
-  exolve-question: Your name
+  exolve-question: What is the nina that requests people to find a famous TV series? (3,4) GET LOST
+  exolve-question: Your name (30)*
 ```
 In this example, there are three questions. An answer has also been provided for
-the second question. The part following the enum ("(3, 4)"), if there is an
+the second question. The part following the enum ("(3,4)"), if there is an
 enum, is treated as the answer (see the exolve-across/across-down section for
 details on enums). The answer is not shown in the displayed question. When the
 solver clicks "Reveal all", answers to all questions for which answers have
 been provided do get revealed.
+
+If an enum in an exolve-question is immediately followed by an asterisk (like
+"(30)*" above—note that there is no space before the asterisk), then the enum
+is not displayed to the solver; it is only used to determine the size of the
+answer box to show.
 
 If the setter has created an exolve-submit section (see below), then answers to
 each exolve-question are also sent to the submit URL (see below for details).
@@ -507,9 +513,12 @@ retained for 90 days after the last change.
 
 If an html file containing an exolve puzzle has been direcly loaded into
 Chrome from the local computer (i.e., using a file://... URL), then Chrome
-does not save cookies. Exolve also saves state in the URL itself, by appending
-the state after a "#". Exolve only does this if the URL is not an http://..
-URL.
+does not save cookies. Exolve then saves state in the URL itself, by appending
+the state after a "#".
+
+You can also copy a URL that includes the current state (appended after a "#")
+using the link provided under the puzzle (if you are worried about deleting the
+cookie-based state accidentally).
 
 ## Frequently Asked Questions
 
@@ -536,5 +545,14 @@ If you are serving multiple puzzles, use one copy each of exolve-m.css and
 exolve-m.js, and create one copy of exolve-m.html for each puzzle (renaming
 it suitably).
 
+## Release Notes
 
+### Version: Exolve v0.16 August 17 2019
+
+- Load state from url-hash first, so that even if cookie is lost, you can
+  recover state. Add explicit note about state getting saved automatically, and
+  also provide a URL that includes the current state in url-hash as a fallback.
+- In exolve-question, allow enums to be followed by the asterisk (like "Enter
+  your name: (40)\*") to indicate the size needed for the answer box without
+  actually displaying the enum.
 

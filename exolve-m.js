@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'exolve v0.15 August 5 2019'
+const VERSION = 'Exolve v0.16 August 17 2019'
 
 // ------ Begin globals.
 
@@ -133,6 +133,7 @@ let currentClueParent;
 let ninaGroup;
 let statusNumFilled;
 let statusNumTotal;
+let savingURL;
 let clearButton;
 let clearAllButton;
 let checkButton;
@@ -172,6 +173,7 @@ function init() {
 
   statusNumFilled = document.getElementById('status-num-filled')
   statusNumTotal = document.getElementById('status-num-total')
+  savingURL = document.getElementById('saving-url')
 
   clearButton = document.getElementById('clear')
   clearAllButton = document.getElementById('clear-all')
@@ -238,12 +240,29 @@ function parseQuestion(s) {
   let enumParse = parseEnum(s)
   let inputLen = enumParse.len + enumParse.hyphenAfter.length +
                  enumParse.wordEndAfter.length
-  let correctAnswer = s.substr(enumParse.afterEnum).trim()
 
+  let afterEnum = enumParse.afterEnum
+  let rawQ = s.substr(0, afterEnum)
+
+  let hideEnum = false
+  if (inputLen > 0) {
+    if (s.substr(afterEnum, 1) == '*') {
+      beforeEnum = s.lastIndexOf('(', afterEnum - 1)
+      if (beforeEnum < 0) {
+        addError('Could not find open-paren strangely')
+        return
+      }
+      rawQ = s.substr(0, beforeEnum)
+      afterEnum++
+      hideEnum = true
+    }
+  }
+
+  let correctAnswer = s.substr(afterEnum).trim()
   const question = document.createElement('div')
   question.setAttributeNS(null, 'class', 'question');
   const questionText = document.createElement('span')
-  questionText.innerHTML = s.substr(0, enumParse.afterEnum)
+  questionText.innerHTML = rawQ
   question.appendChild(questionText)
   question.appendChild(document.createElement('br'))
   const answer = document.createElement('input')
@@ -255,7 +274,7 @@ function parseQuestion(s) {
   });
   if (inputLen == 0) {
     inputLen = '30'
-  } else {
+  } else if (!hideEnum) {
     let answerValue = ''
     let wordEndIndex = 0
     let hyphenIndex = 0
@@ -1360,35 +1379,41 @@ function updateAndSaveState() {
     state = state + STATE_SEP + a.input.value
   }
 
-  let d = new Date();
-  // Keep cookie for some days
+  // Keep cookie for these many days
   const KEEP_FOR_DAYS = 90
+
+  let d = new Date();
   d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
   let expires = 'expires=' + d.toUTCString();
   document.cookie = puzzleId + '=' + state + ';' + expires + ';path=/';
-  if (location.protocol.substr(0, 4) != 'http') {
+  if (location.protocol.substr(0, 4) != 'http' || location.hash) {
     // Also save in location.hash as Chrome does not support cookies on file:
     location.hash = '#' + state
+  }
+  if (savingURL) {
+    savingURL.href = location.href
+    if (!location.hash) {
+      savingURL.href = location.href + '#' + state
+    }
   }
 }
 
 // Restore state from cookie (or location.hash).
 function restoreState() {
-  let state = ''
-  let name = puzzleId + '=';
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      state = c.substring(name.length, c.length);
-    }
-  }
+  let state = decodeURIComponent(location.hash.substr(1))
   if (!state) {
-    state = decodeURIComponent(location.hash.substr(1))
+    let name = puzzleId + '=';
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        state = c.substring(name.length, c.length);
+      }
+    }
   }
   state = state.trim()
   let error = false
@@ -1464,8 +1489,7 @@ function restoreState() {
       }
     }
   }
-  statusNumFilled.innerHTML = numFilled
-  submitButton.disabled = (numFilled != numCellsToFill)
+  updateAndSaveState()
 }
 
 function deactivateCurrentCell() {

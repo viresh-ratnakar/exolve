@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: exolve v0.15 August 5 2019
+Version: Exolve v0.16 August 17 2019
 */
 
 .background {
@@ -185,8 +185,14 @@ hr {
   margin: 6px 0 6px 0;
   color: darkgreen;
 }
+#saving {
+  font-size: x-small;
+  font-family: monospace;
+  color: gray;
+  margin: 0px 0 20px 0;
+}
 .question {
-  margin: 10px 0 10px 0;
+  margin: 20px 0 20px 0;
 }
 .answer {
   border: none;
@@ -209,6 +215,9 @@ hr {
   }
   @page {
     margin: 0.2in;
+  }
+  .clues-box {
+    overflow-y: visible;
   }
 }
 
