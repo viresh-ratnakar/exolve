@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.17 August 23 2019
+### Version: Exolve v0.18 August 23 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -564,5 +564,9 @@ it suitably).
 - Move the copyright div outside of grid-parent, so that when it gets too
   wide it does not move the grid. Also, make the text in the copyright div
   wrap around.
+
+### Version: Exolve v0.18 August 23 2019
+
+- Fix bug that did not let you click on circled squares.
 
 

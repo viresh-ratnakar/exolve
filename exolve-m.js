@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.17 August 23 2019'
+const VERSION = 'Exolve v0.18 August 23 2019'
 
 // ------ Begin globals.
 
@@ -1948,6 +1948,8 @@ function displayGrid() {
         cellCircle.setAttributeNS(null, 'stroke', 'gray');
         cellCircle.setAttributeNS(null, 'fill', TRANSPARENT_WHITE);
         cellGroup.appendChild(cellCircle)
+        cellCircle.addEventListener('click', getRowColActivator(i, j));
+
       }
       if (grid[i][j].startsClueLabel && !grid[i][j].isDiagramless &&
           (!hideInferredNumbers || grid[i][j].forcedClueLabel)) {
