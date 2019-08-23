@@ -11,11 +11,11 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.16 August 17 2019
+Version: Exolve v0.17 August 23 2019
 -->
 
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.16"/>
-<script src="exolve-m.js?v0.16"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.17"/>
+<script src="exolve-m.js?v0.17"></script>
 
 <title>Exolve: An Easily Configurable Interactive Crossword Solver</title>
 
@@ -122,14 +122,13 @@ exolve-end
           <svg id="grid" zoomAndPan="disable"></svg>
           <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"/></div>
           <div id="nina-group" style="display:none;left:0;top:0"></div>
-          <div id="small-print">
-            <a id="report-bug"
-               href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
-            <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
-            <span id="copyright"></span>
-          </div> <!-- #small-print -->
         </div> <!-- #grid-parent -->
       </div> <!-- #grid-parent-centerer -->
+      <div id="small-print" class="wide-box">
+        <a id="report-bug" href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
+        <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
+        <span id="copyright"></span>
+      </div> <!-- #small-print -->
       <div id="controls-etc">
         <div id="controls" class="wide-box">
           <div id="button-row-1" class="controls-row">
@@ -158,9 +157,9 @@ exolve-end
                 id="status-num-total"></span>
         </div> <!-- #status -->
         <div id="saving" class="wide-box">
-          The current state is saved automatically in a cookie for 90 days.
-          You can also copy <a id="saving-url" href="">this URL</a> as
-          a fallback option to bookmark/save the current state.
+          Your entries are saved automatically in a cookie, for the most
+          recent puzzle that you open from this site. Bookmark/save the
+          <a id="saving-url" href="">URL</a> for more reliable recovery.
         </div> <!-- #saving -->
         <div id="questions" class="wide-box"></div> 
         <div id="submit-parent">
@@ -173,19 +172,19 @@ exolve-end
       <br/>
     </div> <!-- #grid-panel -->
     <div id="clues" class="flex-row">
-      <div id="across-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="across-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <b>Across</b>
         <table id="across"></table>
         <br/>
       </div> <!-- #across-clues-panel -->
-      <div id="down-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="down-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <b>Down</b>
         <table id="down"></table>
         <br/>
       </div> <!-- #down-clues-panel -->
-      <div id="nodir-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="nodir-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <table id="nodir"></table>
         <br/>

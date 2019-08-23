@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.16 August 17 2019'
+const VERSION = 'Exolve v0.17 August 23 2019'
 
 // ------ Begin globals.
 
@@ -1372,7 +1372,7 @@ function updateDisplayAndGetState() {
   return state
 }
 
-// Call updateDisplayAndGetState() and save state in cookie/location.hash.
+// Call updateDisplayAndGetState() and save state in cookie and location.hash.
 function updateAndSaveState() {
   let state = updateDisplayAndGetState()
   for (let a of answersList) {
@@ -1386,15 +1386,11 @@ function updateAndSaveState() {
   d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
   let expires = 'expires=' + d.toUTCString();
   document.cookie = puzzleId + '=' + state + ';' + expires + ';path=/';
-  if (location.protocol.substr(0, 4) != 'http' || location.hash) {
-    // Also save in location.hash as Chrome does not support cookies on file:
-    location.hash = '#' + state
-  }
+
+  // Also save the state in location.hash.
+  location.hash = '#' + state
   if (savingURL) {
     savingURL.href = location.href
-    if (!location.hash) {
-      savingURL.href = location.href + '#' + state
-    }
   }
 }
 

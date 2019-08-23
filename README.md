@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.16 August 17 2019
+### Version: Exolve v0.17 August 23 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -555,4 +555,14 @@ it suitably).
 - In exolve-question, allow enums to be followed by the asterisk (like "Enter
   your name: (40)\*") to indicate the size needed for the answer box without
   actually displaying the enum.
+
+### Version: Exolve v0.17 August 23 2019
+
+- Always save the state in the URL. There are some reports of cookie-based
+  state getting lost, unfortunately, so relying more explicitly on URL-based
+  state seems like a good thing.
+- Move the copyright div outside of grid-parent, so that when it gets too
+  wide it does not move the grid. Also, make the text in the copyright div
+  wrap around.
+
 

@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.16 August 17 2019'
+const VERSION = 'Exolve v0.17 August 23 2019'
 
 // ------ Begin globals.
 
@@ -1463,7 +1463,7 @@ function updateDisplayAndGetState() {
   return state
 }
 
-// Call updateDisplayAndGetState() and save state in cookie/location.hash.
+// Call updateDisplayAndGetState() and save state in cookie and location.hash.
 function updateAndSaveState() {
   let state = updateDisplayAndGetState()
   for (let a of answersList) {
@@ -1477,15 +1477,11 @@ function updateAndSaveState() {
   d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
   let expires = 'expires=' + d.toUTCString();
   document.cookie = puzzleId + '=' + state + ';' + expires + ';path=/';
-  if (location.protocol.substr(0, 4) != 'http' || location.hash) {
-    // Also save in location.hash as Chrome does not support cookies on file:
-    location.hash = '#' + state
-  }
+
+  // Also save the state in location.hash.
+  location.hash = '#' + state
   if (savingURL) {
     savingURL.href = location.href
-    if (!location.hash) {
-      savingURL.href = location.href + '#' + state
-    }
   }
 }
 
@@ -2511,7 +2507,7 @@ td:first-child {
   flex-flow: column wrap;
 }
 .wide-box {
-  width: 460px;
+  width: 481px;
 }
 #title {
   text-align: center;
@@ -2554,7 +2550,7 @@ td:first-child {
   text-align: center;
 }
 #grid-parent {
-  position:relative;
+  position: relative;
   margin: 0 20px 0 0;
   display: inline-block;
 }
@@ -2576,6 +2572,7 @@ td:first-child {
   margin: 6px 0 6px 0;
 }
 .clues-box {
+  width: 460px;
   margin: 0 10px 0 0;
   overflow-y: auto;
 }
@@ -2698,14 +2695,13 @@ hr {
           <svg id="grid" zoomAndPan="disable"></svg>
           <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"/></div>
           <div id="nina-group" style="display:none;left:0;top:0"></div>
-          <div id="small-print">
-            <a id="report-bug"
-               href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
-            <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
-            <span id="copyright"></span>
-          </div> <!-- #small-print -->
         </div> <!-- #grid-parent -->
       </div> <!-- #grid-parent-centerer -->
+      <div id="small-print" class="wide-box">
+        <a id="report-bug" href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
+        <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
+        <span id="copyright"></span>
+      </div> <!-- #small-print -->
       <div id="controls-etc">
         <div id="controls" class="wide-box">
           <div id="button-row-1" class="controls-row">
@@ -2734,9 +2730,9 @@ hr {
                 id="status-num-total"></span>
         </div> <!-- #status -->
         <div id="saving" class="wide-box">
-          The current state is saved automatically in a cookie for 90 days.
-          You can also copy <a id="saving-url" href="">this URL</a> as
-          a fallback option to bookmark/save the current state.
+          Your entries are saved automatically in a cookie, for the most
+          recent puzzle that you open from this site. Bookmark/save the
+          <a id="saving-url" href="">URL</a> for more reliable recovery.
         </div> <!-- #saving -->
         <div id="questions" class="wide-box"></div> 
         <div id="submit-parent">
@@ -2749,19 +2745,19 @@ hr {
       <br/>
     </div> <!-- #grid-panel -->
     <div id="clues" class="flex-row">
-      <div id="across-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="across-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <b>Across</b>
         <table id="across"></table>
         <br/>
       </div> <!-- #across-clues-panel -->
-      <div id="down-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="down-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <b>Down</b>
         <table id="down"></table>
         <br/>
       </div> <!-- #down-clues-panel -->
-      <div id="nodir-clues-panel" class="wide-box clues-box" style="display:none">
+      <div id="nodir-clues-panel" class="clues-box" style="display:none">
         <hr/>
         <table id="nodir"></table>
         <br/>
