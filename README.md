@@ -507,18 +507,15 @@ The list of currently supported options is as follows:
   lines of text, adding scrollbars if needed.
 
 ## Saving state
-The software automatically saves state. It does so in a cookie, using the id
-specified in the exolve-id section as the key. The saved puzzle state is
-retained for 90 days after the last change.
+The software automatically saves state. It does so in the URL (after the #)
+and also in a cookie, using the id specified in the exolve-id section as the
+key. The cookie is retained for 90 days after the last change.
 
-If an html file containing an exolve puzzle has been direcly loaded into
-Chrome from the local computer (i.e., using a file://... URL), then Chrome
-does not save cookies. Exolve then saves state in the URL itself, by appending
-the state after a "#".
-
-You can also copy a URL that includes the current state (appended after a "#")
-using the link provided under the puzzle (if you are worried about deleting the
-cookie-based state accidentally).
+Because of limits on cookie size and number of cookies, the state for some
+ grid that was saved in a cookie may disappear if the solver opens lots of
+other grids from the same site, Such sites should encourage solvers to save
+o bookmark the URL (which also has the state) and/or implement server-side
+state saving.
 
 ## Frequently Asked Questions
 
