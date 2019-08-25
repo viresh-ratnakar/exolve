@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.18 August 23 2019
+### Version: Exolve v0.19 August 25 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -368,6 +368,17 @@ For non-numeric clue labels, the software does not know which cell the clue
 begins in, unless it is specified explicitly by the setter using a "#XN"
 prefix as described above and shown in the fourth clue example above.
 
+### Trailing period in clue labels
+A trailing period after a clue number or label is considered to be just a
+punctuation mark and is ignored. All the five periods in the following
+example get ignored:
+```
+    2. Clue (4)
+    3.Ignorance is _____ (5)
+    4 . Time for every one to end, finally (6)
+    [Q.]. Hop (4)
+```
+
 ### Clues without a specified direction
 If you want to create a section of clues without a specified across/down
 direction, you can use an exolve-nodir section, which has the same structure
@@ -566,4 +577,8 @@ it suitably).
 
 - Fix bug that did not let you click on circled squares.
 
+
+### Version: Exolve v0.19 August 25 2019
+
+- Ignore a trailing period after a clue number as just a punctuation mark.
 

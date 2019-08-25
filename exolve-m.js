@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.18 August 23 2019'
+const VERSION = 'Exolve v0.19 August 25 2019'
 
 // ------ Begin globals.
 
@@ -736,6 +736,10 @@ function parseClueLabel(clueLine) {
       parse.error = 'Numeric label not allowed in []: ' + clueLabel
       return
     }
+    if (parse.clueLabel.charAt(parse.clueLabel.length - 1) == '.') {
+       // strip trailing period
+       parse.clueLabel = parse.clueLabel.substr(0, parse.clueLabel.length - 1).trim()
+    }
     parse.isNonNum = true
     parse.skip = bracEnd + 1
   }
@@ -751,6 +755,13 @@ function parseClueLabel(clueLine) {
     parse.hasChildren = true
     parse.skip += commaParts[0].length
     clueLine = clueLine.substr(commaParts[0].length)
+  }
+  // Consume trailing period if it is there.
+  periodParts = clueLine.match(/^\s*\./)
+  if (periodParts && periodParts.length == 1) {
+    parse.hasChildren = false
+    parse.skip += periodParts[0].length
+    clueLine = clueLine.substr(periodParts[0].length)
   }
   return parse
 }
@@ -816,7 +827,7 @@ function parseClue(dir, clueLine) {
   parse.len = enumParse.len
   parse.hyphenAfter = enumParse.hyphenAfter
   parse.wordEndAfter = enumParse.wordEndAfter
-  parse.clue = clueLine.substr(0, enumParse.afterEnum)
+  parse.clue = clueLine.substr(0, enumParse.afterEnum).trim()
   parse.anno = clueLine.substr(enumParse.afterEnum).trim()
 
   return parse
@@ -1949,7 +1960,6 @@ function displayGrid() {
         cellCircle.setAttributeNS(null, 'fill', TRANSPARENT_WHITE);
         cellGroup.appendChild(cellCircle)
         cellCircle.addEventListener('click', getRowColActivator(i, j));
-
       }
       if (grid[i][j].startsClueLabel && !grid[i][j].isDiagramless &&
           (!hideInferredNumbers || grid[i][j].forcedClueLabel)) {
