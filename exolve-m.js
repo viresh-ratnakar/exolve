@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.19 August 25 2019'
+const VERSION = 'Exolve v0.20 September 2 2019'
 
 // ------ Begin globals.
 
@@ -82,8 +82,8 @@ const HYPHEN_WIDTH = 9
 const HYPHEN_WIDTH_BY2 = 5
 const CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
 
-const NUMBER_START_X = 3
-const NUMBER_START_Y = 11
+const NUMBER_START_X = 2
+const NUMBER_START_Y = 10
 const LIGHT_START_X = 16.5
 const LIGHT_START_Y = 21.925
 

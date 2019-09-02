@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.19 August 25 2019
+### Version: Exolve v0.20 September 2 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -581,4 +581,9 @@ it suitably).
 ### Version: Exolve v0.19 August 25 2019
 
 - Ignore a trailing period after a clue number as just a punctuation mark.
+
+### Version: Exolve v0.20 September 2 2019
+
+- Move clue numbers one pixel up and one pixel to the left, to clear them
+  away more from entered letters.
 
