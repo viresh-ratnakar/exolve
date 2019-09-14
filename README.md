@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.20 September 2 2019
+### Version: Exolve v0.21 September 14 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -105,6 +105,9 @@ as the square with the cursor is visible.
 "Clear/Check/Reveal all" buttons, the "Show ninas" button, and the "Submit"
 button solicit additional confirmation from the solver.
 
+You can click on the black background or on the puzzle title to unhighlight
+the current clue (for printing or screenshotting, for example).
+
 ## Format
 The puzzle can contain the following "sections" between the exolve-begin line
 and the exolve-end line:
@@ -122,6 +125,7 @@ and the exolve-end line:
 * exolve-nodir
 * exolve-explanations
 * exolve-nina
+* exolve-colour
 * exolve-question
 * exolve-submit
 * exolve-option
@@ -447,6 +451,15 @@ such as:
   exolve-nina: a4 c4 clue-nina
 ```
 
+## exolve-colour, exolve-color
+Specific cells in the grid may be coloured using this feature. The squares
+involved are again specified in the chessboard notation.
+```
+  exolve-colour: palegreen j5 j7 j9 j11 j13
+```
+The colour itself can be any valid
+[HTML colour name](https://www.w3schools.com/colors/colors_names.asp).
+
 ## exolve-question
 Often, the setter might have hidden additional information for the solver to
 discover (such as ninas), or may simply want to survey solvers about something
@@ -586,4 +599,16 @@ it suitably).
 
 - Move clue numbers one pixel up and one pixel to the left, to clear them
   away more from entered letters.
+
+### Version: Exolve v0.21 September 14 2019
+
+- Add feature (exolve-colour/exolve-color) that lets you colour specific
+  cells.
+- Reduce bar width slightly, in barred grids.
+- Bug fix in barred grids (light spans could be incorrect in certain cases).
+- Bug fix when using clues-panel-lines, scrolling the clue into view used
+  to scroll the current light out of view sometimes.
+- In a barred grid, there is no background visible to click on. You can
+  click on the grid title to unhighlight the current clue now (for
+  printing, for example).
 

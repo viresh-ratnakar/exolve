@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.20 September 2 2019'
+const VERSION = 'Exolve v0.21 September 14 2019'
 
 // ------ Begin globals.
 
@@ -59,6 +59,7 @@ let showingNinas = false
 
 let grid = []
 let clues = {}
+let cellColours = []
 let submitURL = null
 let submitKeys = []
 let hasDiagramlessCells = false
@@ -74,8 +75,8 @@ let nonNumClueIndices = {}
 const SQUARE_DIM = 31
 const SQUARE_DIM_BY2 = 16
 const GRIDLINE = 1
-const BAR_WIDTH = 4
-const BAR_WIDTH_BY2 = 2.5
+const BAR_WIDTH = 3
+const BAR_WIDTH_BY2 = 2
 const SEP_WIDTH = 2
 const SEP_WIDTH_BY2 = 1.5
 const HYPHEN_WIDTH = 9
@@ -233,6 +234,24 @@ function parseNina(s) {
   }
 }
 
+function parseColour(s) {
+  let colourAndCells = s.split(' ')
+  let colour = ''
+  for (let c of colourAndCells) {
+    if (!colour) {
+      colour = c
+      continue;
+    }
+    let cellLocation = parseCellLocation(c)
+    if (!cellLocation) {
+      addError('Could not parse cell location in: ' + c)
+      return
+    } else {
+      cellColours.push(cellLocation.concat(colour))
+    }
+  }
+}
+
 // Parse a question line and create the question element for it (which includes
 // an input box for the answer). The solution answer may be provided after the
 // last ')'.
@@ -380,6 +399,9 @@ function parseOverallDisplayMost() {
       gridLastLine = lastLine
     } else if (sectionAndValue.section == 'nina') {
       parseNina(sectionAndValue.value)
+    } else if (sectionAndValue.section == 'colour' ||
+               sectionAndValue.section == 'color') {
+      parseColour(sectionAndValue.value)
     } else if (sectionAndValue.section == 'question') {
       parseQuestion(sectionAndValue.value)
     } else if (sectionAndValue.section == 'submit') {
@@ -911,7 +933,7 @@ function parseClueLists() {
   }
 }
 
-// For each cell grid[i][j], set in{Across,Down}Clue using previously
+// For each cell grid[i][j], set {across,down}ClueLabels using previously
 // marked clue starts.
 function setClueMemberships() {
   // Set across clue memberships
@@ -925,6 +947,10 @@ function setClueMemberships() {
         continue
       }
       if (!grid[i][j].isLight || grid[i][j].isDiagramless) {
+        clueLabel = '';
+        continue
+      }
+      if (!grid[i][j].startsAcrossClue && j > 0 && grid[i][j - 1].hasBarAfter) {
         clueLabel = '';
         continue
       }
@@ -964,6 +990,10 @@ function setClueMemberships() {
         continue
       }
       if (!grid[i][j].isLight || grid[i][j].isDiagramless) {
+        clueLabel = '';
+        continue
+      }
+      if (!grid[i][j].startsDownClue && i > 0 && grid[i - 1][j].hasBarUnder) {
         clueLabel = '';
         continue
       }
@@ -1503,7 +1533,11 @@ function deactivateCurrentCell() {
   gridInputWrapper.style.display = 'none'
   for (let x of activeCells) {
     let cellRect = grid[x[0]][x[1]].cellRect
-    cellRect.style.fill = 'white'
+    if (grid[x[0]][x[1]].colour) {
+      cellRect.style.fill = grid[x[0]][x[1]].colour
+    } else {
+      cellRect.style.fill = 'white'
+    }
   }
   for (let x of activeClues) {
     x.style.background = 'white'
@@ -1696,6 +1730,7 @@ function selectClue(activeClueIndex) {
     if (cluesPanelLines > 0 &&
         isVisible(clues[clueIndex].clueTR.parentElement)) {
       clues[clueIndex].clueTR.scrollIntoView()
+      gridInput.scrollIntoView()  // Else we may move away from the cell!
     }
     activeClues.push(clues[clueIndex].clueTR)
   }
@@ -1901,6 +1936,9 @@ function createListeners() {
   gridInput.addEventListener('input', handleGridInput);
   gridInput.addEventListener('click', toggleCurrentDirection);
   background.addEventListener('click', getRowColActivator(-1, -1));
+  // Clicking on the title will also unselect current clue (useful
+  // for barred grids where background is not visible).
+  document.getElementById('title').addEventListener('click', getRowColActivator(-1, -1));
   window.addEventListener('scroll', makeCurrentClueVisible);
 }
 
@@ -1976,6 +2014,15 @@ function displayGrid() {
       }
       svg.appendChild(cellGroup);
     }
+  }
+
+  // Set colours specified through exolve-colour.
+  for (let cellColour of cellColours) {
+    let row = cellColour[0]
+    let col = cellColour[1]
+    let colour = cellColour[2]
+    grid[row][col].colour = colour
+    grid[row][col].cellRect.style.fill = colour
   }
 
   // Bars/word-ends to the right and under; hyphens.
