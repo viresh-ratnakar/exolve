@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.21 September 14 2019'
+const VERSION = 'Exolve v0.22 September 14 2019'
 
 // ------ Begin globals.
 
@@ -99,12 +99,13 @@ let activeClues = [];
 let numCellsToFill = 0
 
 let allClueIndices = []
-// For the all-clues widget.
-let posInAllClueIndices = 0
+let orphanClueIndices = []
+// For the orhpan-clues widget.
+let posInOrphanClueIndices = 0
 
 const BLOCK_CHAR = '⬛';
 const ACTIVE_COLOUR = 'mistyrose'
-const ALL_CLUES_COLOUR = 'white'
+const ORPHAN_CLUES_COLOUR = 'white'
 const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
 
 let nextPuzzleTextLine = 0
@@ -926,7 +927,7 @@ function parseClueLists() {
     }
     if (!clues[clueIndex].clue) {
       // A clue whose existence was inferred from the grid, but no actual
-      // clue was provided, hopefull deliberately.
+      // clue was provided, hopefully deliberately.
       continue
     }
     allClueIndices.push(clueIndex) 
@@ -934,7 +935,7 @@ function parseClueLists() {
 }
 
 // For each cell grid[i][j], set {across,down}ClueLabels using previously
-// marked clue starts.
+// marked clue starts. Adds clues to orphanClueIndices[] if warranted.
 function setClueMemberships() {
   // Set across clue memberships
   for (let i = 0; i < gridHeight; i++) {
@@ -1020,6 +1021,12 @@ function setClueMemberships() {
         }
       }
       clues[clueIndex].cells.push([i, j])
+    }
+  }
+  for (let clueIndex of allClueIndices) {
+    if (!clues[clueIndex].cells || !clues[clueIndex].len ||
+        !clues[clueIndex].cells.length) {
+      orphanClueIndices.push(clueIndex) 
     }
   }
 }
@@ -1654,7 +1661,7 @@ function activateCell(row, col) {
     selectClue(activeClueIndex)
   } else {
     // No active clue, activate just the cell and show all potential clues.
-    showAllCluesAsActive()
+    showOrphanCluesAsActive()
     grid[row][col].cellRect.style.fill = ACTIVE_COLOUR
     activeCells.push([row, col])
   }
@@ -1736,7 +1743,7 @@ function selectClue(activeClueIndex) {
   }
   curr = clues[indexForCurr]
   if (!curr || !curr.clue) {
-    showAllCluesAsActive()
+    showOrphanCluesAsActive()
     return
   }
   currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
@@ -1744,24 +1751,25 @@ function selectClue(activeClueIndex) {
   makeCurrentClueVisible();
 }
 
-function allCluesBrowse(incr) {
-  if (allClueIndices.length <= 0) {
+function orphanCluesBrowse(incr) {
+  if (orphanClueIndices.length <= 0) {
     return
   }
-  posInAllClueIndices = (posInAllClueIndices + incr) % allClueIndices.length
-  if (posInAllClueIndices < 0) {
-    posInAllClueIndices += allClueIndices.length
+  posInOrphanClueIndices =
+    (posInOrphanClueIndices + incr) % orphanClueIndices.length
+  if (posInOrphanClueIndices < 0) {
+    posInOrphanClueIndices += orphanClueIndices.length
   }
-  showAllCluesAsActive()
+  showOrphanCluesAsActive()
 }
 
 // From a click in a  diagramless cell or a cell without a known clue
 // association, show "current-clue" as a browsable widget with all clues.
-function showAllCluesAsActive() {
-  if (posInAllClueIndices >= allClueIndices.length) {
+function showOrphanCluesAsActive() {
+  if (posInOrphanClueIndices >= orphanClueIndices.length) {
     return
   }
-  let clueIndex = allClueIndices[posInAllClueIndices]
+  let clueIndex = orphanClueIndices[posInOrphanClueIndices]
   let displayedClue = clues[clueIndex].fullDisplayLabel + clues[clueIndex].clue
   if (clues[clueIndex].parentClueIndex) {
     let parent = clues[clueIndex].parentClueIndex
@@ -1769,12 +1777,12 @@ function showAllCluesAsActive() {
   }
   currentClue.innerHTML =
     '<span>' +
-    '<button class="small-button" onclick="allCluesBrowse(-1)">&lsaquo;</button>' +
+    '<button class="small-button" onclick="orphanCluesBrowse(-1)">&lsaquo;</button>' +
     '<span title="You have to figure out which clue to use"> CLUES </span>' +
-    '<button class="small-button" onclick="allCluesBrowse(1)">&rsaquo;</button>' +
+    '<button class="small-button" onclick="orphanCluesBrowse(1)">&rsaquo;</button>' +
     '</span> ' +
     displayedClue
-  currentClue.style.background = ALL_CLUES_COLOUR;
+  currentClue.style.background = ORPHAN_CLUES_COLOUR;
   makeCurrentClueVisible();
 }
 

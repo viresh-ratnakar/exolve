@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.21 September 14 2019
+### Version: Exolve v0.22 September 14 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -611,4 +611,10 @@ it suitably).
 - In a barred grid, there is no background visible to click on. You can
   click on the grid title to unhighlight the current clue now (for
   printing, for example).
+
+### Version: Exolve v0.22 September 14 2019
+
+- Only put "Orphan" clues in what was called the "all clues bowser."
+  Orphan clues are those covering diagramless cells, or whose grid
+  lication has not been specified.
 
