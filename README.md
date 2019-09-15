@@ -616,5 +616,5 @@ it suitably).
 
 - Only put "Orphan" clues in what was called the "all clues bowser."
   Orphan clues are those covering diagramless cells, or whose grid
-  lication has not been specified.
+  location has not been specified.
 
