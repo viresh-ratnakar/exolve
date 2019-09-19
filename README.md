@@ -630,3 +630,5 @@ it suitably).
     non-15x15-sized grids in particular. Now it fits nicely, and also
     makes it more likely that people will read the "saving" text
     that is now right above it.
+- Also fix buf where the initial rendering of the current clue was
+  sometimes too narrow.

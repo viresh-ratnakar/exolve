@@ -78,6 +78,7 @@ td:first-child {
 }
 #current-clue-parent {
   height: 40px;
+  width: 100%;
   position:relative;
   margin: 8px 8px 8px 0;
 }
