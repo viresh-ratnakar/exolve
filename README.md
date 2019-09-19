@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.22 September 14 2019
+### Version: Exolve v0.23 September 19 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -618,3 +618,15 @@ it suitably).
   Orphan clues are those covering diagramless cells, or whose grid
   location has not been specified.
 
+### Version: Exolve v0.23 September 19 2019
+
+- Move the copyright etc. line to go under the light "saving" text
+  and be left- instead of right-aligned for the following reasons:
+  - It was cluttered when this was right between the grid and the control
+    buttons, making accidental clicks more likely.
+  - The cluttered view also looked, well, cluttered.
+  - Right-aligning while not being a child of the grid made it hard
+    to right-justify flush under the grid, making it look odd for
+    non-15x15-sized grids in particular. Now it fits nicely, and also
+    makes it more likely that people will read the "saving" text
+    that is now right above it.

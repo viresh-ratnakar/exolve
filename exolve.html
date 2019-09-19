@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
 <!--
@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.22 September 14 2019'
+const VERSION = 'Exolve v0.23 September 19 2019'
 
 // ------ Begin globals.
 
@@ -2591,8 +2591,7 @@ td:first-child {
 }
 #small-print {
   font-size: small;
-  text-align: right;
-  padding: 0 16px 0 0;
+  margin: 0 0 4px 0;
 }
 #errors {
   font-weight: bold;
@@ -2636,6 +2635,9 @@ td:first-child {
   padding: 0;
   background: rgba(255,255,255,0.0);
 }
+#controls-etc {
+  padding: 8px 0 6px 0;
+}
 .controls-row {
   margin: 6px 0 6px 0;
 }
@@ -2649,7 +2651,7 @@ td:first-child {
 }
 hr {
   margin: 0 0 4px 0;
-  background-color: darkgreen;
+  background-color: lightgreen;
 }
 .button {
   background-color: #4CAF50; /* Green */
@@ -2712,7 +2714,7 @@ hr {
   font-size: x-small;
   font-family: monospace;
   color: gray;
-  margin: 0px 0 20px 0;
+  margin: 0px 0 6px 0;
 }
 .question {
   margin: 20px 0 20px 0;
@@ -2765,11 +2767,6 @@ hr {
           <div id="nina-group" style="display:none;left:0;top:0"></div>
         </div> <!-- #grid-parent -->
       </div> <!-- #grid-parent-centerer -->
-      <div id="small-print" class="wide-box">
-        <a id="report-bug" href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
-        <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
-        <span id="copyright"></span>
-      </div> <!-- #small-print -->
       <div id="controls-etc">
         <div id="controls" class="wide-box">
           <div id="button-row-1" class="controls-row">
@@ -2802,6 +2799,12 @@ hr {
           recent puzzle that you open from this site. Bookmark/save the
           <a id="saving-url" href="">URL</a> for more reliable recovery.
         </div> <!-- #saving -->
+        <div id="small-print" class="wide-box">
+          <a id="report-bug" href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
+          <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
+          <span id="copyright"></span>
+        </div> <!-- #small-print -->
+	<hr/>
         <div id="questions" class="wide-box"></div> 
         <div id="submit-parent">
           <button id="submit" class="button" style="display:none"
