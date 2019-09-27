@@ -11,11 +11,11 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.23 September 19 2019
+Version: Exolve v0.24 September 26 2019
 -->
 
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.23"/>
-<script src="exolve-m.js?v0.23"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.24"/>
+<script src="exolve-m.js?v0.24"></script>
 
 <title>Exolve: An Easily Configurable Interactive Crossword Solver</title>
 
@@ -157,11 +157,42 @@ exolve-end
           <a id="saving-url" href="">URL</a> for more reliable recovery.
         </div> <!-- #saving -->
         <div id="small-print" class="wide-box">
-          <a id="report-bug" href="https://github.com/viresh-ratnakar/exolve/issues/new">Report bug</a>
-          <a id="exolve-link" href="https://github.com/viresh-ratnakar/exolve">Exolve on GitHub</a>
+          <div id="control-keys-list" style="display:none">
+            <ul>
+              <li>
+                <b>Tab, ]:</b>
+                Jump to the next clue in the current direction
+              </li>
+              <li>
+                <b>Shift-Tab, [:</b>
+                Jump to the previous clue in the current direction
+              </li>
+              <li>
+                <b>Enter, Click/Tap:</b>
+                Toggle current direction
+              </li>
+              <li>
+                <b>Arrow keys:</b>
+                Move to the nearest light square in that direction
+              </li>
+              <li>
+                <b>Spacebar:</b>
+                Place/clear block in the current square if it's diagramless
+              </li>
+            </ul>
+          </div>
+          <a id="show-control-keys" href=""
+            title="Show/hide list of control keys"
+            onclick="toggleShowControls();return false">Controls</a>
+          <a id="report-bug"
+            href="https://github.com/viresh-ratnakar/exolve/issues/new">Report
+            bug</a>
+          <a id="exolve-link"
+            href="https://github.com/viresh-ratnakar/exolve">Exolve on
+            GitHub</a>
           <span id="copyright"></span>
         </div> <!-- #small-print -->
-	<hr/>
+        <hr/>
         <div id="questions" class="wide-box"></div> 
         <div id="submit-parent">
           <button id="submit" class="button" style="display:none"

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.23 September 19 2019
+### Version: Exolve v0.24 September 26 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -54,7 +54,8 @@ exolve-end.
 ## Controls
 The basic control is to click on a square and enter a letter in it. If a square
 is a part of both an across clue and a down clue, then clicking on that square
-while it is the current square will toggle the active direction.
+while it is the current square (or pressing the Enter key) will toggle the
+active direction.
 
 The control buttons (*Clear this*, *Clear all*, *Check this*, *Check all*,
 *Reveal this*, and *Reveal all*) work as suggested by their names ("this" refers
@@ -76,7 +77,9 @@ symmetric counterpart of the current square.
 
 If the setter has provided annotations by appending annotations at the end of
 some clues (or by writing them in the exolve-explanations section), then these
-annotations get shown when the solver clicks "Reveal all".
+annotations get shown when the solver clicks "Reveal all". Clue-specific
+annotations get revealed/hidden with "Reveal/Clear this" buttons (unless the
+clue only has diagramless cells).
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
@@ -94,10 +97,14 @@ buttion.
 
 When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
-different clue, when there are clues that "cover" other clues). In a
+different clue, when there are linked clues that "cover" multiple clues). In a
 diagramless square in a puzzle for which the solver has not provided all
 solutions, there is no such automatic move after entereing a letter (as the
 software itself has no way of knowing where the next square is).
+
+The solver can press Tab/Shift-Tab to navigate to the next/previous clue in the
+current direction. The solver can use the arrow keys to navigate to the
+next/previous light cells in the direction of the arrow.
 
 The software tries to keep the current clue visible when scrolling, as long
 as the square with the cursor is visible.
@@ -632,3 +639,13 @@ it suitably).
     that is now right above it.
 - Also fix buf where the initial rendering of the current clue was
   sometimes too narrow.
+
+### Version: Exolve v0.24 September 26 2019
+
+- Stop auto-jumping to the next light after finishing entry in one.
+- Provide tab and shift-tab to navigate to the next/prev.
+  clue in the current direction.
+- Provide a Controls link to toggle list of keyboard controls.
+- Hit Enter to toggle current direction.
+- Reveal/Clear This now also show/hide anno for the current clue.
+

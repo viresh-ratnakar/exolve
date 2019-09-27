@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.23 September 19 2019'
+const VERSION = 'Exolve v0.24 September 26 2019'
 
 // ------ Begin globals.
 
@@ -94,6 +94,7 @@ let revelationList = []
 let currentRow = -1
 let currentCol = -1
 let currentDirectionIsAcross = true
+let currentClueIndex = null
 let activeCells = [];
 let activeClues = [];
 let numCellsToFill = 0
@@ -875,6 +876,7 @@ function parseClueLists() {
     if (first < 0 || last < first) {
       continue
     }
+    let prev = null
     for (let l = first; l <= last; l++) {
       let clueLine = puzzleTextLines[l].trim();
       if (clueLine == '') {
@@ -919,6 +921,12 @@ function parseClueLists() {
           grid[row][col].startsDownClue = true
         }
       }
+      clues[clueParse.clueIndex].prev = prev
+      clues[clueParse.clueIndex].next = null
+      if (prev) {
+        clues[prev].next = clueParse.clueIndex
+      }
+      prev = clueParse.clueIndex
     }
   }
   for (let clueIndex in clues) {
@@ -1330,6 +1338,7 @@ function displayClues() {
       anno.style.display = 'none'
       revelationList.push(anno)
       col2.appendChild(anno)
+      clues[clueIndex].annoSpan = anno
     }
     tr.appendChild(col1)
     tr.appendChild(col2)
@@ -1551,6 +1560,7 @@ function deactivateCurrentCell() {
   }
   activeCells = [];
   activeClues = [];
+  currentClueIndex = null
   currentClue.innerHTML = ''
   currentClue.style.background = 'transparent'
   currentClue.style.top = '0'
@@ -1706,6 +1716,20 @@ function isVisible(elt) {
   return true
 }
 
+// Given a clue index, return a list containing all the linked clues.
+// The first entry in the list is the parent clue.
+function getAllLinkedClueIndices(clueIndex) {
+  let clueIndices = [clueIndex]
+  if (clues[clueIndex].parentClueIndex) {
+    let parent = clues[clueIndex].parentClueIndex
+    clueIndices = [parent].concat(clues[parent].childrenClueIndices)
+  } else if (clues[clueIndex].childrenClueIndices) {
+    clueIndices =
+        clueIndices.concat(clues[clueIndex].childrenClueIndices)
+  }
+  return clueIndices
+}
+
 // For freezing clueIndex to deal with JS closure.
 function getClueSelector(clueIndex) {
   return function() {
@@ -1715,16 +1739,8 @@ function getClueSelector(clueIndex) {
 }
 // Select a clicked clue.
 function selectClue(activeClueIndex) {
-  indexForCurr = activeClueIndex
-  let clueIndices = [activeClueIndex]
-  if (clues[activeClueIndex].parentClueIndex) {
-    let parent = clues[activeClueIndex].parentClueIndex
-    indexForCurr = parent
-    clueIndices = [parent].concat(clues[parent].childrenClueIndices)
-  } else if (clues[activeClueIndex].childrenClueIndices) {
-    clueIndices =
-        clueIndices.concat(clues[activeClueIndex].childrenClueIndices)
-  }
+  let clueIndices = getAllLinkedClueIndices(activeClueIndex)
+  let indexForCurr = clueIndices[0]
   for (let clueIndex of clueIndices) {
     for (let rowcol of clues[clueIndex].cells) {
       grid[rowcol[0]][rowcol[1]].cellRect.style.fill = ACTIVE_COLOUR
@@ -1746,6 +1762,7 @@ function selectClue(activeClueIndex) {
     showOrphanCluesAsActive()
     return
   }
+  currentClueIndex = activeClueIndex
   currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
   currentClue.style.background = ACTIVE_COLOUR;
   makeCurrentClueVisible();
@@ -1819,7 +1836,10 @@ function handleKeyUpInner(key) {
       key = 38  // up
     }
   }
-  if (key == 39) {
+  if (key == 13) {
+    // Enter
+    toggleCurrentDirection()
+  } else if (key == 39) {
     // right arrow
     let col = currentCol + 1
     while (col < gridWidth &&
@@ -1863,6 +1883,26 @@ function handleKeyUpInner(key) {
     if (row >= 0) {
       activateCell(row, currentCol);
     }
+  } else if (key == 221) {
+    // ] or tab
+    if (currentClueIndex && clues[currentClueIndex] &&
+        clues[currentClueIndex].next) {
+      let next = clues[currentClueIndex].next
+      let cells = clues[next].cells
+      if (cells && cells.length > 0) {
+        activateCell(cells[0][0], cells[0][1])
+      }
+    }
+  } else if (key == 219) {
+    // [ or shift-tab
+    if (currentClueIndex && clues[currentClueIndex] &&
+        clues[currentClueIndex].prev) {
+      let prev = clues[currentClueIndex].prev
+      let cells = clues[prev].cells
+      if (cells && cells.length > 0) {
+        activateCell(cells[0][0], cells[0][1])
+      }
+    }
   }
 }
 
@@ -1870,6 +1910,18 @@ function handleKeyUp(e) {
   let key = e.which || e.keyCode
   handleKeyUpInner(key)
 }
+
+// For tab/shift-tab in grid-input, we intercept KeyDown
+function handleTabKeyDown(e) {
+  let key = e.which || e.keyCode
+  if (key == 9) {
+    e.preventDefault()
+    // tab. replace with [ or ]
+    key = e.shiftKey ? 219 : 221
+    handleKeyUpInner(key)
+  }
+}
+
 
 function handleGridInput() {
   if (currentRow < 0 || currentRow >= gridHeight ||
@@ -1932,15 +1984,24 @@ function handleGridInput() {
       return
     }
     if (currentDirectionIsAcross) {
-      handleKeyUpInner(39);
+      if (currentCol + 1 < gridWidth &&
+          grid[currentRow][currentCol + 1].acrossClueLabel ==
+              grid[currentRow][currentCol].acrossClueLabel) {
+        handleKeyUpInner(39);
+      }
     } else {
-      handleKeyUpInner(40);
+      if (currentRow + 1 < gridHeight &&
+          grid[currentRow + 1][currentCol].downClueLabel ==
+              grid[currentRow][currentCol].downClueLabel) {
+        handleKeyUpInner(40);
+      }
     }
   }
 }
 
 function createListeners() {
   gridInput.addEventListener('keyup', function(e) {handleKeyUp(e);});
+  gridInput.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
   gridInput.addEventListener('input', handleGridInput);
   gridInput.addEventListener('click', toggleCurrentDirection);
   background.addEventListener('click', getRowColActivator(-1, -1));
@@ -2232,6 +2293,14 @@ function clearCurrent() {
       }
     }
   }
+  if (currentClueIndex) {
+    let clueIndices = getAllLinkedClueIndices(currentClueIndex)
+    for (let clueIndex of clueIndices) {
+      if (clues[clueIndex].annoSpan) {
+        clues[clueIndex].annoSpan.style.display = 'none'
+      }
+    }
+  }
   updateAndSaveState()
 }
 
@@ -2336,6 +2405,14 @@ function revealCurrent() {
       }
     }
   }
+  if (currentClueIndex) {
+    let clueIndices = getAllLinkedClueIndices(currentClueIndex)
+    for (let clueIndex of clueIndices) {
+      if (clues[clueIndex].annoSpan) {
+        clues[clueIndex].annoSpan.style.display = ''
+      }
+    }
+  }
   updateAndSaveState()
 }
 
@@ -2405,6 +2482,15 @@ function displayButtons() {
   }
   if (submitURL) {
     submitButton.style.display = ''
+  }
+}
+
+function toggleShowControls() {
+  let e = document.getElementById('control-keys-list')
+  if (e.style.display == 'none') {
+    e.style.display = ''
+  } else {
+    e.style.display = 'none'
   }
 }
 
