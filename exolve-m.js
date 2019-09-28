@@ -64,6 +64,7 @@ let submitURL = null
 let submitKeys = []
 let hasDiagramlessCells = false
 let hasUnsolvedCells = false
+let hasSomeAnnos = false
 let hasAcrossClues = false
 let hasDownClues = false
 let hasNodirClues = false
@@ -922,6 +923,9 @@ function parseClueLists() {
       clues[clueParse.clueIndex].hyphenAfter = clueParse.hyphenAfter
       clues[clueParse.clueIndex].wordEndAfter = clueParse.wordEndAfter
       clues[clueParse.clueIndex].anno = clueParse.anno
+      if (clueParse.anno) {
+        hasSomeAnnos = true
+      }
       if (clueParse.startCell) {
         let row = clueParse.startCell[0]
         let col = clueParse.startCell[1]
@@ -1495,6 +1499,7 @@ function restoreState() {
       letter = state.charAt(index++);
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
         if (grid[i][j].prefill) {
+          grid[i][j].currentLetter = grid[i][j].solution
           continue
         }
         if (letter == '0') {
@@ -1528,6 +1533,7 @@ function restoreState() {
       for (let j = 0; j < gridWidth; j++) {
         if (grid[i][j].isLight || grid[i][j].isDiagramless) {
           if (grid[i][j].prefill) {
+            grid[i][j].currentLetter = grid[i][j].solution
             continue
           }
           grid[i][j].currentLetter = ''
@@ -1641,9 +1647,6 @@ function activateCell(row, col) {
     let len = gridInput.value.length
     gridInput.setSelectionRange(len, len);
   }
-  clearButton.disabled = false
-  checkButton.disabled = false
-  revealButton.disabled = false
 
   let activeClueIndex = ''
   let activeClueLabel = ''
@@ -1685,6 +1688,9 @@ function activateCell(row, col) {
       }
     }
   }
+  clearButton.disabled = false
+  checkButton.disabled = false
+  revealButton.disabled = hasUnsolvedCells
   if (activeClueIndex && clues[activeClueIndex]) {
     selectClue(activeClueIndex)
   } else {
@@ -1760,6 +1766,10 @@ function selectClue(activeClueIndex) {
   let clueIndices = getAllLinkedClueIndices(activeClueIndex)
   let indexForCurr = clueIndices[0]
   for (let clueIndex of clueIndices) {
+    if (clues[clueIndex].anno) {
+      // Even in unsolved grids, annos may be present as hints
+      revealButton.disabled = false
+    }
     for (let rowcol of clues[clueIndex].cells) {
       grid[rowcol[0]][rowcol[1]].cellRect.style.fill = ACTIVE_COLOUR
       activeCells.push(rowcol)
@@ -2306,6 +2316,9 @@ function clearCurrent() {
   for (let x of activeCells) {
     let row = x[0]
     let col = x[1]
+    if (grid[row][col].prefill) {
+      continue
+    }
     let oldLetter = grid[row][col].currentLetter
     if (oldLetter != '') {
       grid[row][col].currentLetter = ''
@@ -2341,6 +2354,9 @@ function clearAll() {
   for (let row = 0; row < gridHeight; row++) {
     for (let col = 0; col < gridWidth; col++) {
       if (!grid[row][col].isLight && !grid[row][col].isDiagramless) {
+        continue
+      }
+      if (grid[row][col].prefill) {
         continue
       }
       grid[row][col].currentLetter = ''
@@ -2423,9 +2439,12 @@ function revealCurrent() {
   for (let x of activeCells) {
     let row = x[0]
     let col = x[1]
+    if (grid[row][col].prefill) {
+      continue
+    }
     let oldLetter = grid[row][col].currentLetter
     let letter = grid[row][col].solution
-    if (oldLetter != letter) {
+    if (letter && oldLetter != letter) {
       grid[row][col].currentLetter = letter
       let char = letter
       if (char == '1') {
@@ -2465,6 +2484,9 @@ function revealAll() {
   for (let row = 0; row < gridHeight; row++) {
     for (let col = 0; col < gridHeight; col++) {
       if (!grid[row][col].isLight && !grid[row][col].isDiagramless) {
+        continue
+      }
+      if (grid[row][col].prefill) {
         continue
       }
       if (grid[row][col].currentLetter != grid[row][col].solution) {
@@ -2512,12 +2534,14 @@ function displayButtons() {
   if (!hasUnsolvedCells) {
     checkButton.style.display = ''
     checkAllButton.style.display = ''
-    revealButton.style.display = ''
     revealAllButton.style.display = ''
 
     checkButton.disabled = true
-    revealButton.disabled = true
     submitButton.disabled = true
+  }
+  if (!hasUnsolvedCells || hasSomeAnnos) {
+    revealButton.style.display = ''
+    revealButton.disabled = true
   }
   if (ninas.length > 0) {
     ninasButton.style.display = ''
