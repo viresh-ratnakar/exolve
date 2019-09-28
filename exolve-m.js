@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.24 September 26 2019'
+const VERSION = 'Exolve v0.25 September 28 2019'
 
 // ------ Begin globals.
 
@@ -533,7 +533,6 @@ function parseGrid() {
             return
           }
           grid[i][j].solution = letter
-          hasSolvedCells = true
         }
       } else {
         grid[i][j].isLight = false
@@ -542,6 +541,7 @@ function parseGrid() {
       grid[i][j].hasBarUnder = false
       grid[i][j].hasCircle = false
       grid[i][j].isDiagramless = false
+      grid[i][j].prefill = false
       gridLineIndex++
       let thisChar = ''
       while (gridLineIndex < gridLine.length &&
@@ -551,6 +551,7 @@ function parseGrid() {
               thisChar == '+' ||
               thisChar == '@' ||
               thisChar == '*' ||
+              thisChar == '!' ||
               thisChar == ' ')) {
         if (thisChar == '|') {
           grid[i][j].hasBarAfter = true
@@ -563,6 +564,8 @@ function parseGrid() {
           grid[i][j].hasCircle = true
         } else if (thisChar == '*') {
           grid[i][j].isDiagramless = true
+        } else if (thisChar == '!') {
+          grid[i][j].prefill = true
         } else if (thisChar == ' ') {
         } else {
           addError('Should not happen! thisChar = ' + thisChar);
@@ -573,11 +576,20 @@ function parseGrid() {
       if (grid[i][j].isDiagramless && letter == '.') {
         grid[i][j].solution = '1'
       }
+      if (grid[i][j].prefill &&
+          (!grid[i][j].isLight || letter < 'A' || letter > 'Z')) {
+        addError('Bad pre-filled cell (' + i + ',' + j +
+                 ') with letter: ' + letter)
+        return
+      }
       if (grid[i][j].isDiagramless) {
         hasDiagramlessCells = true
       }
       if (letter == '0') {
         hasUnsolvedCells = true
+      }
+      if (letter >= 'A' && letter <= 'Z' && !grid[i][j].prefill) {
+        hasSolvedCells = true
       }
     }
   }
@@ -1482,6 +1494,9 @@ function restoreState() {
     for (let j = 0; j < gridWidth && !error; j++) {
       letter = state.charAt(index++);
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
+        if (grid[i][j].prefill) {
+          continue
+        }
         if (letter == '0') {
            grid[i][j].currentLetter = ''
         } else if (letter == '1') {
@@ -1512,6 +1527,9 @@ function restoreState() {
     for (let i = 0; i < gridHeight; i++) {
       for (let j = 0; j < gridWidth; j++) {
         if (grid[i][j].isLight || grid[i][j].isDiagramless) {
+          if (grid[i][j].prefill) {
+            continue
+          }
           grid[i][j].currentLetter = ''
         }
       }
@@ -1615,7 +1633,7 @@ function activateCell(row, col) {
   gridInputWrapper.style.height = '' + SQUARE_DIM + 'px'
   gridInputWrapper.style.left = '' + grid[row][col].cellLeft + 'px'
   gridInputWrapper.style.top = '' + grid[row][col].cellTop + 'px'
-  gridInput.value = grid[row][col].currentLetter
+  gridInput.value = grid[row][col].prefill ? '' : grid[row][col].currentLetter
   gridInputWrapper.style.display = ''
   gridInput.focus()
   // Try to place the cursor at the end
@@ -1826,10 +1844,11 @@ function handleKeyUpInner(key) {
     return
   }
   if (key == 8) {
-    if (grid[currentRow][currentCol].currentLetter != '') {
+    if (grid[currentRow][currentCol].currentLetter != '' &&
+        !grid[currentRow][currentCol].prefill) {
       return
     }
-    // backspace in an empty cell
+    // backspace in an empty or prefilled cell
     if (currentDirectionIsAcross) {
       key = 37  // left
     } else {
@@ -1931,6 +1950,11 @@ function handleGridInput() {
   if (!grid[currentRow][currentCol].isLight &&
       !grid[currentRow][currentCol].isDiagramless) {
     return;
+  }
+  if (grid[currentRow][currentCol].prefill) {
+    // Changes disallowed
+    gridInput.value = ''
+    return
   }
   let newInput = gridInput.value
   if (grid[currentRow][currentCol].currentLetter != '' &&
@@ -2040,12 +2064,18 @@ function displayGrid() {
             null, 'y', LIGHT_START_Y + i * (SQUARE_DIM + GRIDLINE));
         cellText.setAttributeNS(null, 'text-anchor', 'middle');
         cellText.setAttributeNS(null, 'editable', 'simple');
-        cellText.setAttributeNS(null, 'class', 'cell-text');
-        const text = document.createTextNode('');
+        let letter = ''
+        let cellClass = 'cell-text'
+        if (grid[i][j].prefill) {
+          letter = grid[i][j].solution
+          cellClass = 'cell-text prefill'
+        }
+        cellText.setAttributeNS(null, 'class', cellClass);
+        const text = document.createTextNode(letter);
         cellText.appendChild(text);
         cellGroup.appendChild(cellText)
 
-        grid[i][j].currentLetter = '';
+        grid[i][j].currentLetter = letter;
         grid[i][j].textNode = text;
         grid[i][j].cellText = cellText;
         grid[i][j].cellRect = cellRect;
@@ -2331,6 +2361,7 @@ function clearAll() {
 }
 
 function checkCurrent() {
+  let allCorrect = true
   for (let x of activeCells) {
     let row = x[0]
     let col = x[1]
@@ -2338,6 +2369,7 @@ function checkCurrent() {
     if (oldLetter == grid[row][col].solution) {
       continue
     }
+    allCorrect = false
     grid[row][col].currentLetter = ''
     grid[row][col].textNode.nodeValue = ''
     if (row == currentRow && col == currentCol) {
@@ -2352,13 +2384,18 @@ function checkCurrent() {
       }
     }
   }
-  updateAndSaveState()
+  if (allCorrect) {
+    revealCurrent()  // calls updateAndSaveState()
+  } else {
+    updateAndSaveState()
+  }
 }
 
 function checkAll() {
   if (!confirm('Are you sure you want to clear mistakes everywhere!?')) {
     return
   }
+  let allCorrect = true
   for (let row = 0; row < gridHeight; row++) {
     for (let col = 0; col < gridWidth; col++) {
       if (!grid[row][col].isLight && !grid[row][col].isDiagramless) {
@@ -2367,6 +2404,7 @@ function checkAll() {
       if (grid[row][col].currentLetter == grid[row][col].solution) {
         continue
       }
+      allCorrect = false
       grid[row][col].currentLetter = ''
       grid[row][col].textNode.nodeValue = ''
       if (row == currentRow && col == currentCol) {
@@ -2374,7 +2412,11 @@ function checkAll() {
       }
     }
   }
-  updateAndSaveState()
+  if (allCorrect) {
+    revealAll()  // calls updateAndSaveState()
+  } else {
+    updateAndSaveState()
+  }
 }
 
 function revealCurrent() {

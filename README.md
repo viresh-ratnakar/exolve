@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.24 September 26 2019
+### Version: Exolve v0.25 September 28 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -79,7 +79,9 @@ If the setter has provided annotations by appending annotations at the end of
 some clues (or by writing them in the exolve-explanations section), then these
 annotations get shown when the solver clicks "Reveal all". Clue-specific
 annotations get revealed/hidden with "Reveal/Clear this" buttons (unless the
-clue only has diagramless cells).
+clue only has diagramless cells). Additionally, "Check this" and "Check all"
+behave like "Reveal this" and "Reveal all" respectively, if they find no
+mistakes.
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
@@ -254,6 +256,10 @@ some cells being diagramless:
     E| A  T
 ```
 
+The decorator "!" can be used to mark a cell as pre-filled (its solution letter
+must be provided). The solution letter will be pre-filled and will not be
+editable.
+
 Here again is the complete list of decorators:
 ```
 | draw bar after
@@ -261,6 +267,7 @@ _ draw bar under
 + draw bar after and under
 @ draw circle
 * diagramless
+! prefilled
 ```
 
 ## Some details about clue numbers
@@ -649,3 +656,9 @@ it suitably).
 - Hit Enter to toggle current direction.
 - Reveal/Clear This now also show/hide anno for the current clue.
 
+### Version: Exolve v0.25 September 28 2019
+
+- "Check this" and "Check all" now behave (respectively) like "Reveal this"
+  and "Reveal all" if no errors are found.
+- Add "!" as a cell decorator, indicating that the cell should have its
+  solution letter pre-filled (and not editable).
