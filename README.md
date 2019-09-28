@@ -81,7 +81,9 @@ annotations get shown when the solver clicks "Reveal all". Clue-specific
 annotations get revealed/hidden with "Reveal/Clear this" buttons (unless the
 clue only has diagramless cells). Additionally, "Check this" and "Check all"
 behave like "Reveal this" and "Reveal all" respectively, if they find no
-mistakes.
+mistakes. In a puzzle in which solutions are not provided, the "Reveal this"
+button will still get shown if there are any clues for which annotations
+are present (these annotations may be full solutions or just hints, possibly).
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
