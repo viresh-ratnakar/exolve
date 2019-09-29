@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.25 September 28 2019
+### Version: Exolve v0.26 September 29 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -664,3 +664,11 @@ it suitably).
   and "Reveal all" if no errors are found.
 - Add "!" as a cell decorator, indicating that the cell should have its
   solution letter pre-filled (and not editable).
+
+### Version: Exolve v0.26 September 29 2019
+
+- For long answers, use textarea instead of text.
+- Change colour of prefilled entries to blue: easier to distinguish from
+  black, and also consistent with the colour of hyphens and word-breaks.
+- In a prefilled cell, any input now moves to the next square.
+

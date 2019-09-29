@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.25 September 28 2019'
+const VERSION = 'Exolve v0.26 September 29 2019'
 
 // ------ Begin globals.
 
@@ -287,16 +287,37 @@ function parseQuestion(s) {
   questionText.innerHTML = rawQ
   question.appendChild(questionText)
   question.appendChild(document.createElement('br'))
-  const answer = document.createElement('input')
+
+  if (inputLen == 0) {
+    hideEnum = true
+    inputLen = '30'
+  }
+  const TEXTAREA_COLS = 68
+  let rows = Math.floor(inputLen / TEXTAREA_COLS)
+  if (rows * TEXTAREA_COLS < inputLen) {
+    rows++
+  }
+  let cols = (rows > 1) ? TEXTAREA_COLS : inputLen
+
+  let aType = 'input'
+  if (rows > 1) {
+    aType = 'textarea'
+  }
+
+  const answer = document.createElement(aType)
+  if (rows > 1) {
+    answer.setAttributeNS(null, 'rows', '' + rows);
+    answer.setAttributeNS(null, 'cols', '' + cols);
+  } else {
+    answer.setAttributeNS(null, 'size', '' + cols);
+  }
   answer.setAttributeNS(null, 'class', 'answer');
   answersList.push({
     'ans': correctAnswer,
     'input': answer,
     'hasEnum': (inputLen > 0),
   });
-  if (inputLen == 0) {
-    inputLen = '30'
-  } else if (!hideEnum) {
+  if (!hideEnum) {
     let answerValue = ''
     let wordEndIndex = 0
     let hyphenIndex = 0
@@ -314,12 +335,12 @@ function parseQuestion(s) {
       }
     }
     answer.setAttributeNS(null, 'placeholder', '' + answerValue);
-    answer.setAttributeNS(null, 'minlength', '' + inputLen);
   }
   answer.setAttributeNS(null, 'class', 'answer');
-  answer.setAttributeNS(null, 'type', 'text');
+  if (rows == 1) {
+    answer.setAttributeNS(null, 'type', 'text');
+  }
   answer.setAttributeNS(null, 'maxlength', '' + inputLen);
-  answer.setAttributeNS(null, 'size', '' + inputLen);
   answer.setAttributeNS(null, 'autocomplete', 'off');
   answer.setAttributeNS(null, 'spellcheck', 'false');
   question.appendChild(answer)
@@ -1951,6 +1972,29 @@ function handleTabKeyDown(e) {
   }
 }
 
+function advanceCursor() {
+  // First check if there is successor
+  let successorProperty = 'successor' + (currentDirectionIsAcross ? 'A' : 'D')
+  if (grid[currentRow][currentCol][successorProperty]) {
+    let successor = grid[currentRow][currentCol][successorProperty]
+    currentDirectionIsAcross = (successor.direction == 'A')
+    activateCell(successor.cell[0], successor.cell[1]);
+    return
+   }
+  if (currentDirectionIsAcross) {
+    if (currentCol + 1 < gridWidth &&
+        grid[currentRow][currentCol + 1].acrossClueLabel ==
+            grid[currentRow][currentCol].acrossClueLabel) {
+      handleKeyUpInner(39);
+    }
+  } else {
+    if (currentRow + 1 < gridHeight &&
+        grid[currentRow + 1][currentCol].downClueLabel ==
+            grid[currentRow][currentCol].downClueLabel) {
+      handleKeyUpInner(40);
+    }
+  }
+}
 
 function handleGridInput() {
   if (currentRow < 0 || currentRow >= gridHeight ||
@@ -1964,6 +2008,7 @@ function handleGridInput() {
   if (grid[currentRow][currentCol].prefill) {
     // Changes disallowed
     gridInput.value = ''
+    advanceCursor()
     return
   }
   let newInput = gridInput.value
@@ -2008,28 +2053,7 @@ function handleGridInput() {
 
   if (((letter >= 'A' && letter <= 'Z') || letter == '1') &&
       !grid[currentRow][currentCol].isDiagramless) {
-    // auto-advance
-    // First check if there is successor
-    let successorProperty = 'successor' + (currentDirectionIsAcross ? 'A' : 'D')
-    if (grid[currentRow][currentCol][successorProperty]) {
-      let successor = grid[currentRow][currentCol][successorProperty]
-      currentDirectionIsAcross = (successor.direction == 'A')
-      activateCell(successor.cell[0], successor.cell[1]);
-      return
-    }
-    if (currentDirectionIsAcross) {
-      if (currentCol + 1 < gridWidth &&
-          grid[currentRow][currentCol + 1].acrossClueLabel ==
-              grid[currentRow][currentCol].acrossClueLabel) {
-        handleKeyUpInner(39);
-      }
-    } else {
-      if (currentRow + 1 < gridHeight &&
-          grid[currentRow + 1][currentCol].downClueLabel ==
-              grid[currentRow][currentCol].downClueLabel) {
-        handleKeyUpInner(40);
-      }
-    }
+    advanceCursor()
   }
 }
 

@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.25 September 28 2019
+Version: Exolve v0.26 September 29 2019
 */
 
 .background {
@@ -25,7 +25,7 @@ Version: Exolve v0.25 September 28 2019
   cursor: text;
 }
 .prefill {
-  fill: darkgreen;
+  fill: blue;
 }
 .wordend {
   fill: rgb(0,0,255);
@@ -207,12 +207,13 @@ hr {
 }
 .answer {
   border: none;
-  border-bottom: 1px solid darkgreen;
   padding: 0 0 6px 0;
   outline: none;
   font-family: monospace;
   font-size: 12px;
   color: darkgreen;
+  background-image:
+    repeating-linear-gradient(to bottom, white, white 13px, black 14px);
 }
 @media print {
   .button {
@@ -231,4 +232,3 @@ hr {
     overflow-y: visible;
   }
 }
-
