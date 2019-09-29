@@ -76,14 +76,14 @@ cell, the appropriate action will also be taken in the square that is the
 symmetric counterpart of the current square.
 
 If the setter has provided annotations by appending annotations at the end of
-some clues (or by writing them in the exolve-explanations section), then these
-annotations get shown when the solver clicks "Reveal all". Clue-specific
-annotations get revealed/hidden with "Reveal/Clear this" buttons (unless the
-clue only has diagramless cells). Additionally, "Check this" and "Check all"
-behave like "Reveal this" and "Reveal all" respectively, if they find no
-mistakes. In a puzzle in which solutions are not provided, the "Reveal this"
-button will still get shown if there are any clues for which annotations
-are present (these annotations may be full solutions or just hints, possibly).
+some clues, then these annotations get shown when the solver clicks
+"Reveal all". Clue-specific annotations get revealed/hidden with
+"Reveal/Clear this" buttons (unless the clue only has diagramless cells).
+Additionally, "Check this" and "Check all" behave like "Reveal this" and
+"Reveal all" respectively, if they find no mistakes. In a puzzle in which
+solutions are not provided, the "Reveal this" button will still get shown if
+there are any clues for which annotations are present (these annotations may be
+full solutions or just hints, possibly).
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
@@ -333,9 +333,10 @@ are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
 
 In a grid with solutions provided, the setter may include annotations for
-explaining how a clue works. Any text located after the enum in a clue is
-treated as annotation. The annotation is displayed when the solver clicks on
-the "Reveal all" button. Example:
+explaining how a clue works or for providing hints. Any text located after the
+enum in a clue is treated as annotation. The annotation is displayed when the
+solver clicks on the "Reveal all" button or on the "Reveal this" button when
+that clue is the current clue. Example:
 ```
   exolve-across:
     28	Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
@@ -420,8 +421,7 @@ in an exolve-option section.
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
-explanations, commentary, etc. (or even annotations, if they haven't given them
-with the clues), in an exolve-explanations section. Just like the
+explanations, commentary, etc., in an exolve-explanations section. Just like the
 exolve-prelude section, this section also has multiple lines, and these lines
 can include html tags. The contents get revealed when the solver clicks on
 "Reveal all".
