@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.27 October 7 2019'
+const VERSION = 'Exolve v0.28 October 7 2019'
 
 // ------ Begin globals.
 
@@ -1342,6 +1342,11 @@ function setGridWordEndsAndHyphens() {
   }
 }
 
+function stripLineBreaks(s) {
+  s = s.replace(/<br\s*\/?>/gi, "/")
+  return s.replace(/<\/br\s*>/gi, "")
+}
+
 function displayClues() {
   // Populate clues tables. Check that we have all clues
   for (let clueIndex of allClueIndices) {
@@ -1368,6 +1373,12 @@ function displayClues() {
     col1.innerHTML = clues[clueIndex].displayLabel
     let col2 = document.createElement('td')
     col2.innerHTML = clues[clueIndex].clue
+
+    // If clue contains <br> tags, replace them with "/" for future renderings
+    // in the "current clue" strip.
+    if (clues[clueIndex].clue.indexOf('<') >= 0) {
+      clues[clueIndex].clue = stripLineBreaks(clues[clueIndex].clue)
+    }
     if (clues[clueIndex].anno) {
       let anno = document.createElement('span')
       anno.setAttributeNS(null, 'class', 'anno-text');

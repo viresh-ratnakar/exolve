@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.27 October 7 2019
+### Version: Exolve v0.28 October 7 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -678,4 +678,9 @@ it suitably).
   the selected text in it, if something has been selected).
 - Rename the "Controls" toggle to "Tools." The scratchpad is also now
   toggled with this link.
+
+### Version: Exolve v0.28 October 7 2019
+
+- If the clue contains <br> tags, replace them with "/" for use in
+  the "current clues" strip (which has limited available vertical space).
 
