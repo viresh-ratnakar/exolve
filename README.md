@@ -681,6 +681,6 @@ it suitably).
 
 ### Version: Exolve v0.28 October 7 2019
 
-- If the clue contains <br> tags, replace them with "/" for use in
+- If the clue contains &lt;br&gt; tags, replace them with "/" for use in
   the "current clues" strip (which has limited available vertical space).
 
