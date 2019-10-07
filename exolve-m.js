@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.26 September 29 2019'
+const VERSION = 'Exolve v0.27 October 7 2019'
 
 // ------ Begin globals.
 
@@ -2536,6 +2536,46 @@ function revealAll() {
   }
   showNinas()
   updateAndSaveState()
+}
+
+function scratchPadInput() {
+  let scratchPad = document.getElementById('scratchpad')
+  scratchPad.value = scratchPad.value.toUpperCase()
+}
+
+function scratchPadShuffle() {
+  let scratchPad = document.getElementById('scratchpad')
+  let text = scratchPad.value
+  let start = scratchPad.selectionStart
+  let end = scratchPad.selectionEnd
+  if (end <= start) {
+    start = 0
+    end = text.length
+  }
+  let indices = []
+  let toShuffle = []
+  for (let i = start; i < end; i++) {
+    if (text[i] >= 'A' && text[i] <= 'Z') {
+      indices.push(i)
+      toShuffle.push(text[i])
+    }
+  }
+  if (indices.length <= 1) {
+    return
+  }
+  for (let i = toShuffle.length - 1; i >= 1; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    if (i != j) {
+      let temp = toShuffle[i]
+      toShuffle[i] = toShuffle[j]
+      toShuffle[j] = temp
+    }
+  }
+  let textArray = text.split('')
+  for (let i = 0; i < indices.length; i++) {
+    textArray[indices[i]] = toShuffle[i]
+  }
+  scratchPad.value = textArray.join('')
 }
 
 function submitSolution() {

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.26 September 29 2019
+### Version: Exolve v0.27 October 7 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -671,4 +671,11 @@ it suitably).
 - Change colour of prefilled entries to blue: easier to distinguish from
   black, and also consistent with the colour of hyphens and word-breaks.
 - In a prefilled cell, any input now moves to the next square.
+
+### Version: Exolve v0.27 October 7 2019
+
+- Add a scratchpad, along with an option to shuffle its contents (or
+  the selected text in it, if something has been selected).
+- Rename the "Controls" toggle to "Tools." The scratchpad is also now
+  toggled with this link.
 

@@ -11,11 +11,11 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.26 September 29 2019
+Version: Exolve v0.27 October 7 2019
 -->
 
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.26"/>
-<script src="exolve-m.js?v0.26"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.27"/>
+<script src="exolve-m.js?v0.27"></script>
 
 <title>Exolve: An Easily Configurable Interactive Crossword Solver</title>
 
@@ -176,10 +176,20 @@ exolve-end
                 Place/clear block in the current square if it's diagramless
               </li>
             </ul>
+            <div>
+              <span id="shuffle"
+                title="Shuffle selected text (or all text, if none selected)"
+                onclick="scratchPadShuffle()">
+                Scratchpad: (click to shuffle)
+              </span>
+              <textarea oninput="scratchPadInput()"
+                id="scratchpad" spellcheck="false"
+                rows="2" cols="60"></textarea>
+            </div>
           </div>
           <a id="show-control-keys" href=""
-            title="Show/hide list of control keys"
-            onclick="toggleShowControls();return false">Controls</a>
+            title="Show/hide tools: list of control keys and scratch pad"
+            onclick="toggleShowControls();return false">Tools</a>
           <a id="report-bug"
             href="https://github.com/viresh-ratnakar/exolve/issues/new">Report
             bug</a>
