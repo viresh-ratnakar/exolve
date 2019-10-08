@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.28 October 7 2019
+### Version: Exolve v0.29 October 8 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -683,4 +683,13 @@ it suitably).
 
 - If the clue contains &lt;br&gt; tags, replace them with "/" for use in
   the "current clues" strip (which has limited available vertical space).
+
+### Version: Exolve v0.29 October 8 2019
+
+- Do not render any conrols/buttons/questions when printing: try to get
+  the grid and all the clues fit on one page.
+- Use the "zoom" css attribute (non-standard, but works on Chrome and
+  Edge, I think), to slso try to fit on one page when printing.
+- Minor fix: add spaces around the slash introduced for replacing &lt;br&gt;
+  in v0.28.
 

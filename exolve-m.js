@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.28 October 7 2019'
+const VERSION = 'Exolve v0.29 October 8 2019'
 
 // ------ Begin globals.
 
@@ -1343,7 +1343,7 @@ function setGridWordEndsAndHyphens() {
 }
 
 function stripLineBreaks(s) {
-  s = s.replace(/<br\s*\/?>/gi, "/")
+  s = s.replace(/<br\s*\/?>/gi, " / ")
   return s.replace(/<\/br\s*>/gi, "")
 }
 

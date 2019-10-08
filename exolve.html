@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.28 October 7 2019'
+const VERSION = 'Exolve v0.29 October 8 2019'
 
 // ------ Begin globals.
 
@@ -1434,7 +1434,7 @@ function setGridWordEndsAndHyphens() {
 }
 
 function stripLineBreaks(s) {
-  s = s.replace(/<br\s*\/?>/gi, "/")
+  s = s.replace(/<br\s*\/?>/gi, " / ")
   return s.replace(/<\/br\s*>/gi, "")
 }
 
@@ -2977,17 +2977,14 @@ hr {
   cursor: pointer;
 }
 @media print {
-  .button {
-    display: none;
-  }
-  #report-bug {
-    display: none;
-  }
-  #exolve-link {
-    display: none;
-  }
   @page {
-    margin: 0.2in;
+    margin: 0.5in;
+  }
+  body {
+    zoom: 100%;
+  }
+  #controls-etc {
+    display: none;
   }
   .clues-box {
     overflow-y: visible;
