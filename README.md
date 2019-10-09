@@ -60,9 +60,9 @@ active direction.
 The control buttons (*Clear this*, *Clear all*, *Check this*, *Check all*,
 *Reveal this*, and *Reveal all*) work as suggested by their names ("this" refers
 to the currently selected clue(s)). You can click on a clue to jump to its
-squares. You can use the arrow keys. If the setter has not provided all
-solutions, then only the "Clear this/all" control buttons are shown, the
-"Check/Reveal" buttons do not get shown.
+squares. If the setter has not provided all solutions, then only the
+"Clear this/all" control buttons are shown, the "Check/Reveal" buttons do not
+get shown.
 
 Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve
@@ -171,8 +171,8 @@ The title of the puzzle and the name/pseudonym of the crossword setter. Example:
 ```
 
 ## exolve-copyright
-If your provide this, it will be displayed with the copyright symbol, to the
-bottom right of the rendered puzzle grid. Example:
+If your provide this, it will be displayed with the copyright symbol, under
+the rendered puzzle grid. Example:
 ```
   exolve-copyright: 2019 Viresh Ratnakar
 ```
@@ -274,7 +274,7 @@ _ draw bar under
 
 ## Some details about clue numbers
 Across and down clue numbers are automatically inferred from the grid, except
-in two cases. The first is the when there are diagramless cells and solutions
+in two cases. The first is when there are diagramless cells and solutions
 have not been provided. The second is when the setter opts to deliberately
 not provide associations between grid squares and clues, by using non-numeric
 clue labels without providing their grid locations. When the solver is entering
@@ -347,20 +347,20 @@ a comma-separated list of children clue numbers to the parent clue number.
 Example:
 ```
   exolve-across:
-    1, 5, 2D In spite of adverse circumstances (7, 3, 4)
+    1, 5, 2d In spite of adverse circumstances (7,3,4)
     5 See 1 Across
     ...
   exolve-down:
     2 See 1 Across
 ```
-As shown in the above example, if a child clue (2D in the example) has a
+As shown in the above example, if a child clue (2d in the example) has a
 different direction from the parent, the direction can be specified with a
-one-letter suffix ("A" or "D").
+one-letter suffix ("a" or "d").
 
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue
 numbers in squares, they can do so by prepending the clue (in the exolve-across
-or exolve-down section) with "#XN", there X is the column ("a" being the first
+or exolve-down section) with "#xN", there x is the column ("a" being the first
 column, "b" being the second column, etc.) and N is the row number (1 being the
 bottom row, 2 being the row above the bottom row, etc.). This is essentially
 an extension of the chessboard notation. I considered using programming
@@ -386,7 +386,7 @@ Example:
     ...
 ```
 For non-numeric clue labels, the software does not know which cell the clue
-begins in, unless it is specified explicitly by the setter using a "#XN"
+begins in, unless it is specified explicitly by the setter using a "#xN"
 prefix as described above and shown in the fourth clue example above.
 
 ### Trailing period in clue labels
@@ -413,7 +413,7 @@ section with non-numeric clue labels. Example:
     ...
 ```
 The clue label can be numeric too, and the starting cell can also be specified
-using the "#XN" prefix as described above.
+using the "#xN" prefix as described above.
 
 If the setter is using  nun-numeric clue labels or clues without a specified
 direction, then they should probably also use the option "hide-inferred-numbers"
