@@ -543,8 +543,8 @@ The list of currently supported options is as follows:
 - **hide-inferred-numbers** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
-- **clues-panel-lines:<N>** Limit the across/down/nodir clues boxes to about N
-  lines of text, adding scrollbars if needed.
+- **clues-panel-lines:&lt;N&gt;** Limit the across/down/nodir clues boxes to
+  about N lines of text, adding scrollbars if needed.
 
 ## Saving state
 The software automatically saves state. It does so in the URL (after the #)
@@ -552,9 +552,9 @@ and also in a cookie, using the id specified in the exolve-id section as the
 key. The cookie is retained for 90 days after the last change.
 
 Because of limits on cookie size and number of cookies, the state for some
- grid that was saved in a cookie may disappear if the solver opens lots of
+grid that was saved in a cookie may disappear if the solver opens lots of
 other grids from the same site, Such sites should encourage solvers to save
-o bookmark the URL (which also has the state) and/or implement server-side
+or bookmark the URL (which also has the state) and/or implement server-side
 state saving.
 
 ## Frequently Asked Questions
