@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.29 October 8 2019'
+const VERSION = 'Exolve v0.30 October 10 2019'
 
 // ------ Begin globals.
 
@@ -2658,6 +2658,10 @@ function createPuzzle() {
   displayButtons();
 
   restoreState();
+
+  if (typeof customizePuzzle === 'function') {
+    customizePuzzle()
+  }
 }
 
 // ------ End functions.

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.29 October 8 2019
+### Version: Exolve v0.30 October 10 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -557,6 +557,36 @@ other grids from the same site, Such sites should encourage solvers to save
 or bookmark the URL (which also has the state) and/or implement server-side
 state saving.
 
+## Customizations
+Setters can customize their grids by directly making changes to the Exolve
+files outside of the puzzle specs area. However, this may get hard to maintain
+over time, as Exolve goes through new versions. I do try to make sure that
+all Exolve changes are backwards compatible (so, for example, I do not change
+element IDs in the html, and for newly introduced IDs, the javascript code
+checks first that such an element exists).
+
+The recommended way to customize is to load separate, additional Javascript
+and/or CSS files. Exolve provides a Javascript hook to do any custom
+initialization and/or to modify the html using Javascript. If the setter has
+defined a function called `customizePuzzle()`, then it gets called after
+Exolve has finished with its own set-up. For example, the following code,
+if added within the &lt;script&gt; tag or loaded from a script file, will
+customize the html by insering the italicized red text *New!* after the
+Tools link:
+```
+  function customizePuzzle() {
+    let toolsElement = document.getElementById('show-control-keys')
+    if (!toolsElement) {
+      return
+    }
+    toolsElement.insertAdjacentHTML(
+        'afterend', '<span style="color:red;font-style:italic">New!</span>')
+  }
+```
+
+It will be easier to keep your files synced up to the latest Exolve version
+with these recommendations for customizations.
+
 ## Frequently Asked Questions
 
 **We are an established newspaper. Our readers have complained in various ways
@@ -693,3 +723,10 @@ it suitably).
 - Minor fix: add spaces around the slash introduced for replacing &lt;br&gt;
   in v0.28.
 
+### Version: Exolve v0.30 October 10 2019
+
+- Add code in createPuzzle() that calls the function customizePuzzle() if
+  such a function exists. This can be used by setters to add custom
+  functionality as well as custom look-and-feel (for example, insert some
+  html elements). Such customization will be easier to maintain in the face
+  of newer Exolve versions, as opposed to hard-coded changes to the html.
