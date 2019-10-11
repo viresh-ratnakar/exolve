@@ -560,10 +560,11 @@ state saving.
 ## Customizations
 Setters can customize their grids by directly making changes to the Exolve
 files outside of the puzzle specs area. However, this may get hard to maintain
-over time, as Exolve goes through new versions. I do try to make sure that
-all Exolve changes are backwards compatible (so, for example, I do not change
-element IDs in the html, and for newly introduced IDs, the javascript code
-checks first that such an element exists).
+over time, as Exolve goes through new versions. (A conservative option is to
+simply not update the HTML part of your puzzle: I do try to make sure that all
+Exolve Javascript/CSS changes are backwards compatible (so, for example, I do
+not change element IDs in the html, and for newly introduced IDs, the
+Javascript code checks first that such an element exists).
 
 The recommended way to customize is to load separate, additional Javascript
 and/or CSS files. Exolve provides a Javascript hook to do any custom
