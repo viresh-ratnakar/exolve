@@ -572,7 +572,7 @@ initialization and/or to modify the html using Javascript. If the setter has
 defined a function called `customizePuzzle()`, then it gets called after
 Exolve has finished with its own set-up. For example, the following code,
 if added within the &lt;script&gt; tag or loaded from a script file, will
-customize the html by insering the italicized red text *New!* after the
+customize the html by inserting the italicized red text *New!* after the
 Tools link:
 ```
   function customizePuzzle() {
