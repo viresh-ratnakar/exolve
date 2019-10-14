@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.30 October 10 2019'
+const VERSION = 'Exolve v0.31 October 13 2019'
 
 // ------ Begin globals.
 
@@ -153,7 +153,23 @@ let submitButton;
 
 // Set up globals, version number and user agent in bug link.
 function init() {
-  puzzleTextLines = puzzleText.trim().split('\n');
+  puzzleTextLines = []
+  let rawLines = puzzleText.trim().split('\n');
+  for (let rawLine of rawLines) {
+    let cIndex = rawLine.indexOf('#');
+    // A # followed by a non-space/non-eol character is not a comment marker.
+    while (cIndex >= 0 && cIndex + 1 < rawLine.length &&
+           rawLine.charAt(cIndex + 1) != ' ') {
+      cIndex = rawLine.indexOf('#', cIndex + 1);
+    }
+    if (cIndex >= 0) {
+      rawLine = rawLine.substr(0, cIndex).trim()
+    }
+    if (!rawLine) {
+      continue;
+    }
+    puzzleTextLines.push(rawLine)
+  }
   numPuzzleTextLines = puzzleTextLines.length
 
   svg = document.getElementById('grid');
