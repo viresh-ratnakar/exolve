@@ -2,7 +2,7 @@
 
 ### Version: Exolve v0.31 October 13 2019
 
-- Remove &lt;hr/> and one <&lt;br/> from under grid-panel.
+- Remove &lt;hr/> and one &lt;br/> from under grid-panel.
 - Allow comments in the puzzleText area (anything starting with "# ").
 - Ignore blank lines in puzzleText.
 - Switch to a CHANGELOG.md file instead of adding release notes to README.md.
