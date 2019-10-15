@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.32 October 14 2019
+
+- Bug fix for an edge case: if a clue contains html tags that close beyond the
+  enum part (eg, "5. &lt;b>Clue (4)&lt;/b>"), then the closing tag should be
+  a part of the clue text, and it should not be misconstrued as the beginning
+  of an anno.
+
 ### Version: Exolve v0.31 October 13 2019
 
 - Remove &lt;hr/> and one &lt;br/> from under grid-panel.

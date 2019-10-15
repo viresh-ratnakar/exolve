@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.31 October 13 2019'
+const VERSION = 'Exolve v0.32 October 14 2019'
 
 // ------ Begin globals.
 
@@ -702,6 +702,20 @@ function markClueStartsUsingGrid() {
   }
 }
 
+// If there are any html closing tags, move past them.
+function adjustAfterEnum(clueLine, afterEnum) {
+  let lineAfter = clueLine.substr(afterEnum)
+  while (lineAfter.trim().substr(0, 2) == '</') {
+    let closer = clueLine.indexOf('>', afterEnum);
+    if (closer < 0) {
+      return afterEnum
+    }
+    afterEnum = closer + 1
+    lineAfter = clueLine.substr(afterEnum)
+  }
+  return afterEnum
+}
+
 // Parse a cell location in "chess notation" (a1 = bottom-left, etc.) and
 // return a two-element array [row, col].
 function parseCellLocation(s) {
@@ -738,7 +752,7 @@ function parseEnum(clueLine) {
       if (enumEndLocation <= enumLocation) {
         return parse
       }
-      parse.afterEnum = enumEndLocation + 1
+      parse.afterEnum = adjustAfterEnum(clueLine, enumEndLocation + 1)
     }
     return parse
   }
@@ -747,7 +761,7 @@ function parseEnum(clueLine) {
   if (enumEndLocation <= enumLocation) {
     return parse
   }
-  parse.afterEnum = enumEndLocation + 1
+  parse.afterEnum = adjustAfterEnum(clueLine, enumEndLocation + 1)
   let enumLeft = clueLine.substring(enumLocation + 1, enumEndLocation)
   let nextPart
   while (enumLeft && (nextPart = parseInt(enumLeft)) && !isNaN(nextPart) &&
