@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.33 October 16 2019
+
+- Retain the order of clues provided within Across/Down/Nodir sections (even
+  if the order is weird: the setter probably intends it).
+- Allow non-clue filler lines in Across/Down/Nodir sections (any lines that
+  cannot be parsed as clues and that precede a clue). These lines are simply
+  displayed—they can be used as headings of subsections within clues, or extra
+  notes/instructions, for example.
+
 ### Version: Exolve v0.32 October 14 2019
 
 - Bug fix for an edge case: if a clue contains html tags that close beyond the

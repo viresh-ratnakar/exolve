@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.32 October 14 2019
+### Version: Exolve v0.33 October 16 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -380,6 +380,21 @@ is also used for specifying ninas. Example:
 ```
 In this example, the clue number (15) will get displayed in the square that is
 in the first column and the 9th row from the bottom.
+
+### Filler lines between clues
+Any line in a clues section (i.e., in exolve-across/exolve-down/exolve-nodir)
+that cannot be parsed as a clue is treated as a filler line. It is simply
+displayed in that position in the list of clues. It is an error to place
+a filler line after the last clue in a clues section. Filler lines can
+be used to demarcate sections within clues, if needed. Example:
+```
+  exolve-across:
+    1 Communication device (5)
+    7 Greeting (5)
+    <i>The following entries all begin with B.</i>
+    9 Unreachable sound in 1 (4,4)
+    15 Zaphod (10)
+```
 
 ### Non-numeric clue labels
 If you want to use non-numeric clue labels (such as A, B, C, etc.), you can
