@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.35 October 22 2019
+
+- Functionality fix: Now, the "Clear this" button at first only clears letters
+  that do not cross other fully filled lights, if there are any. If there are
+  none (i.e., if all remaining letters in the current light also cross other
+  fully filled lights), only then will these remaining letters get cleared.
+
 ### Version: Exolve v0.34 October 22 2019
 
 - Make "Clear this" behave incrementally, clearing non-crossing squares first,

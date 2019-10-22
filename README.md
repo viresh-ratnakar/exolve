@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.34 October 22 2019
+### Version: Exolve v0.35 October 22 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -64,9 +64,10 @@ squares. If the setter has not provided all solutions, then only the
 "Clear this/all" control buttons are shown, the "Check/Reveal" buttons do not
 get shown.
 
-The "Clear ths" buttons only clears letters that do not cross other lights,
-if the current light has such letters as well as letters that do cross other
-lights ("Clear this" can be clicked again to clear the crossers).
+The "Clear this" button at first only clears letters that do not cross other
+fully filled lights, if there are any. If there are none (i.e., if all remaining
+letters in the current light also cross other fully filled lights), only then
+will these remaining letters get cleared.
 
 Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve

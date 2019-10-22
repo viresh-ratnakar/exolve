@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.34 October 22 2019'
+const VERSION = 'Exolve v0.35 October 22 2019'
 
 // ------ Begin globals.
 
@@ -2422,9 +2422,36 @@ function clearCell(row, col) {
   }
 }
 
+function isFull(clueIndex) {
+  if (!clues[clueIndex] || !clues[clueIndex].cells ||
+      clues[clueIndex].cells.length < 1) {
+    return false;
+  }
+  for (let x of clues[clueIndex].cells) {
+    let row = x[0]
+    let col = x[1]
+    if (grid[row][col].prefill) {
+      continue
+    }
+    if (grid[row][col].currentLetter == '') {
+      return false;
+    }
+  }
+  return true;
+}
+
 function clearCurrent() {
-  let crossers = []
-  let nonCrossers = []
+  let clueIndices = []
+  if (currentClueIndex) {
+    clueIndices = getAllLinkedClueIndices(currentClueIndex)
+    for (let clueIndex of clueIndices) {
+      if (clues[clueIndex].annoSpan) {
+        clues[clueIndex].annoSpan.style.display = 'none'
+      }
+    }
+  }
+  let fullCrossers = []
+  let others = []
   for (let x of activeCells) {
     let row = x[0]
     let col = x[1]
@@ -2435,25 +2462,29 @@ function clearCurrent() {
       continue
     }
     if (grid[row][col].acrossClueLabel && grid[row][col].downClueLabel) {
-      crossers.push([row, col])
+      let across = 'A' + grid[row][col].acrossClueLabel
+      let down = 'D' + grid[row][col].downClueLabel
+      let crosser = ''
+      if (clueIndices.includes(across) && !clueIndices.includes(down)) {
+        crosser = down
+      } else if (!clueIndices.includes(across) && clueIndices.includes(down)) {
+        crosser = across
+      }
+      if (crosser && isFull(crosser)) {
+        fullCrossers.push([row, col])
+      } else {
+        others.push([row, col])
+      }
     } else {
-      nonCrossers.push([row, col])
+      others.push([row, col])
     }
   }
-  for (let rc of nonCrossers) {
+  for (let rc of others) {
     clearCell(rc[0], rc[1])
   }
-  if (nonCrossers.length == 0) {
-    for (let rc of crossers) {
+  if (others.length == 0) {
+    for (let rc of fullCrossers) {
       clearCell(rc[0], rc[1])
-    }
-  }
-  if (currentClueIndex) {
-    let clueIndices = getAllLinkedClueIndices(currentClueIndex)
-    for (let clueIndex of clueIndices) {
-      if (clues[clueIndex].annoSpan) {
-        clues[clueIndex].annoSpan.style.display = 'none'
-      }
     }
   }
   updateAndSaveState()
