@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.33 October 16 2019'
+const VERSION = 'Exolve v0.34 October 22 2019'
 
 // ------ Begin globals.
 
@@ -2403,28 +2403,49 @@ function toggleNinas() {
   }
 }
 
+function clearCell(row, col) {
+  let oldLetter = grid[row][col].currentLetter
+  if (oldLetter != '') {
+    grid[row][col].currentLetter = ''
+    grid[row][col].textNode.nodeValue = ''
+    if (row == currentRow && col == currentCol) {
+      gridInput.value = ''
+    }
+  }
+  if (oldLetter == '1') {
+    let symRow = gridHeight - 1 - row
+    let symCol = gridWidth - 1 - col
+    if (grid[symRow][symCol].isDiagramless) {
+      grid[symRow][symCol].currentLetter = ''
+      grid[symRow][symCol].textNode.nodeValue = ''
+    }
+  }
+}
+
 function clearCurrent() {
+  let crossers = []
+  let nonCrossers = []
   for (let x of activeCells) {
     let row = x[0]
     let col = x[1]
     if (grid[row][col].prefill) {
       continue
     }
-    let oldLetter = grid[row][col].currentLetter
-    if (oldLetter != '') {
-      grid[row][col].currentLetter = ''
-      grid[row][col].textNode.nodeValue = ''
-      if (row == currentRow && col == currentCol) {
-        gridInput.value = ''
-      }
+    if (grid[row][col].currentLetter == '') {
+      continue
     }
-    if (oldLetter == '1') {
-      let symRow = gridHeight - 1 - row
-      let symCol = gridWidth - 1 - col
-      if (grid[symRow][symCol].isDiagramless) {
-        grid[symRow][symCol].currentLetter = ''
-        grid[symRow][symCol].textNode.nodeValue = ''
-      }
+    if (grid[row][col].acrossClueLabel && grid[row][col].downClueLabel) {
+      crossers.push([row, col])
+    } else {
+      nonCrossers.push([row, col])
+    }
+  }
+  for (let rc of nonCrossers) {
+    clearCell(rc[0], rc[1])
+  }
+  if (nonCrossers.length == 0) {
+    for (let rc of crossers) {
+      clearCell(rc[0], rc[1])
     }
   }
   if (currentClueIndex) {

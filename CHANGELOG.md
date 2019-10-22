@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.34 October 22 2019
+
+- Make "Clear this" behave incrementally, clearing non-crossing squares first,
+  if there are any.
+- Set a css width for #clues. Only impacts the rare case (but one that I am
+  running into for a grid) when there is an across section, a down section,
+  *and* a no-dir section. In that case, the specified width will make the no-dir  section wrap over (otherwise the entire clues panel wraps over and goes
+  under the grid).
+
 ### Version: Exolve v0.33 October 16 2019
 
 - Retain the order of clues provided within Across/Down/Nodir sections (even
