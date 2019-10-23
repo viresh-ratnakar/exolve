@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.35 October 22 2019
+Version: Exolve v0.36 October 22 2019
 */
 
 .background {
@@ -128,7 +128,7 @@ td:first-child:not(.filler) {
   margin: 6px 0 6px 0;
 }
 #clues {
-  width: 940px;
+  max-width: 940px;
 }
 .clues-box {
   width: 460px;

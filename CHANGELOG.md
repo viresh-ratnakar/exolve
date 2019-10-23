@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.36 October 22 2019
+
+- Fixing a slight/silly issue from v0.34: need to set "max-width" (not "width")
+  for #clues, so that we do not force that size on mobile.
+
 ### Version: Exolve v0.35 October 22 2019
 
 - Functionality fix: Now, the "Clear this" button at first only clears letters
