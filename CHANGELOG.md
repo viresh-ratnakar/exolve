@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.37 November 10 2019
+
+- Adding a line between clues that starts with --- starts rendering a new table of clues
+- Support for 3d (and 4d!) puzzles:
+  - In a nodir clue, allow all cells that comprise the clue to be specified
+  - Generalize the notion of 'current direction': it can now be 'A' or 'D' or the clueIndex of a nodir clue
+
 ### Version: Exolve v0.36 October 22 2019
 
 - Fixing a slight/silly issue from v0.34: need to set "max-width" (not "width")

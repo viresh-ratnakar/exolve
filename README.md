@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.36 October 22 2019
+### Version: Exolve v0.37 November 10 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -401,6 +401,10 @@ be used to demarcate sections within clues, if needed. Example:
     15 Zaphod (10)
 ```
 
+### Splitting long clue lists
+Any line in a clues section that starts with --- initiates the rendering of
+a new table of clues.
+
 ### Non-numeric clue labels
 If you want to use non-numeric clue labels (such as A, B, C, etc.), you can
 do that by enclosing the non-numeric clue label in square brackets, like this:
@@ -446,6 +450,19 @@ using the "#xN" prefix as described above.
 If the setter is using  nun-numeric clue labels or clues without a specified
 direction, then they should probably also use the option "hide-inferred-numbers"
 in an exolve-option section.
+
+### Nodir clues with cells explicitly specified
+In a nodir clue, you can specify not just the starting cell, but _all the cells_
+using the chessboard notation. If you do that, then clicking on a cell in that
+clue will highlight and allow entry in all the cells for that clue (cells in
+a nodir clue can be scattered arbitrarily in the grid). Example:
+```
+  exolve-nodir:
+    #c3 #c5 #c8 #f6 One hundred years lived in prison (4)
+```
+Note that this technique can be used to create 3-d (or 4-d!) puzzles. Use a
+nodir section for the third dimension, explicitly specifying the cells for
+each clue along the third dimension.
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
