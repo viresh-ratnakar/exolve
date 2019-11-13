@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.38 November 13 2019
+
+- Bug fix: Don't use parses enum-len == 0 to test if we should set successors in linkd clues.
+- Set wordEndAfter/Under, hyphenAfterUnder even at grid edges, if the setter has done that
+- Render wordendAfter/Under bars only when there is a next light
+- Render only half hyphens at grid edges
+
 ### Version: Exolve v0.37 November 10 2019
 
 - Adding a line between clues that starts with --- starts rendering a new table of clues

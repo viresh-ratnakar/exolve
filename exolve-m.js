@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.37 November 10 2019'
+const VERSION = 'Exolve v0.38 November 13 2019'
 
 // ------ Begin globals.
 
@@ -276,7 +276,7 @@ function parseColour(s) {
 // last ')'.
 function parseQuestion(s) {
   let enumParse = parseEnum(s)
-  let inputLen = enumParse.len + enumParse.hyphenAfter.length +
+  let inputLen = enumParse.enumLen + enumParse.hyphenAfter.length +
                  enumParse.wordEndAfter.length
 
   let afterEnum = enumParse.afterEnum
@@ -337,7 +337,7 @@ function parseQuestion(s) {
     let answerValue = ''
     let wordEndIndex = 0
     let hyphenIndex = 0
-    for (let i = 0; i < enumParse.len; i++) {
+    for (let i = 0; i < enumParse.enumLen; i++) {
       answerValue = answerValue + '?'
       if (wordEndIndex < enumParse.wordEndAfter.length &&
               i == enumParse.wordEndAfter[wordEndIndex]) {
@@ -731,13 +731,13 @@ function parseCellLocation(s) {
 
 // Parse an enum like (4) or (4,5), or (5-2,4).
 // Return an object with the following properties:
-// len
+// enumLen
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
 // afterEnum index after enum
 function parseEnum(clueLine) {
   let parse = {
-    'len': 0,
+    'enumLen': 0,
     'wordEndAfter': [],
     'hyphenAfter': [],
     'afterEnum': clueLine.length,
@@ -766,14 +766,14 @@ function parseEnum(clueLine) {
   let nextPart
   while (enumLeft && (nextPart = parseInt(enumLeft)) && !isNaN(nextPart) &&
          nextPart > 0) {
-    parse.len = parse.len + nextPart
+    parse.enumLen = parse.enumLen + nextPart
     enumLeft = enumLeft.replace(/\s*\d+\s*/, '')
     let nextSymbol = enumLeft.substr(0, 1)
     if (nextSymbol == '-') {
-      parse.hyphenAfter.push(parse.len - 1)
+      parse.hyphenAfter.push(parse.enumLen - 1)
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == ',') {
-      parse.wordEndAfter.push(parse.len - 1)
+      parse.wordEndAfter.push(parse.enumLen - 1)
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == '\'') {
       enumLeft = enumLeft.substr(1)
@@ -857,7 +857,7 @@ function parseClueLabel(clueLine) {
 // isOffNum
 // children[]  (raw parseClueLabel() resutls, not yet clueIndices)
 // clue
-// len
+// enumLen
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
 // startCell optional, used in diagramless+unsolved and off-numeric labels
@@ -947,7 +947,7 @@ function parseClue(dir, clueLine) {
   }
 
   let enumParse = parseEnum(clueLine)
-  parse.len = enumParse.len
+  parse.enumLen = enumParse.enumLen
   parse.hyphenAfter = enumParse.hyphenAfter
   parse.wordEndAfter = enumParse.wordEndAfter
   parse.clue = clueLine.substr(0, enumParse.afterEnum).trim()
@@ -1020,7 +1020,7 @@ function parseClueLists() {
       }
       clues[clueParse.clueIndex].children = clueParse.children
       clues[clueParse.clueIndex].childrenClueIndices = []
-      clues[clueParse.clueIndex].len = clueParse.len
+      clues[clueParse.clueIndex].enumLen = clueParse.enumLen
       clues[clueParse.clueIndex].hyphenAfter = clueParse.hyphenAfter
       clues[clueParse.clueIndex].wordEndAfter = clueParse.wordEndAfter
       clues[clueParse.clueIndex].anno = clueParse.anno
@@ -1154,8 +1154,7 @@ function setClueMemberships() {
     }
   }
   for (let clueIndex of allClueIndices) {
-    if (!clues[clueIndex].cells || !clues[clueIndex].len ||
-        !clues[clueIndex].cells.length) {
+    if (!clues[clueIndex].cells || !clues[clueIndex].cells.length) {
       orphanClueIndices.push(clueIndex) 
     }
   }
@@ -1179,7 +1178,7 @@ function processClueChildren() {
       lastRowCol = clue.cells[clue.cells.length - 1]
       // If we do not know the enum of this clue (likely a diagramless puzzle),
       // do not set successors.
-      if (!clue.len || clue.len <= 0) {
+      if (!clue.enumLen || clue.enumLen <= 0) {
         lastRowCol = null
       }
     }
@@ -1261,9 +1260,6 @@ function processClueChildren() {
       lastRowCol = null
       if (childClue.cells.length > 0) {
         lastRowCol = childClue.cells[childClue.cells.length - 1]
-        if (!childClue.len || childClue.len <= 0) {
-          lastRowCol = null
-        }
       }
       lastRowColDir = childClue.clueDirection
     }
@@ -1359,13 +1355,13 @@ function setGridWordEndsAndHyphens() {
         }
       }
       for (let wordEndPos of clues[clueIndex].wordEndAfter) {
-        if (positionInClue == wordEndPos && j < gridWidth - 1) {
+        if (positionInClue == wordEndPos) {
           grid[i][j].wordEndToRight = true
           break
         }
       }
       for (let hyphenPos of clues[clueIndex].hyphenAfter) {
-        if (positionInClue == hyphenPos && j < gridWidth - 1) {
+        if (positionInClue == hyphenPos) {
           grid[i][j].hyphenToRight = true
           break
         }
@@ -1412,13 +1408,13 @@ function setGridWordEndsAndHyphens() {
         }
       }
       for (let wordEndPos of clues[clueIndex].wordEndAfter) {
-        if (positionInClue == wordEndPos && i < gridHeight - 1) {
+        if (positionInClue == wordEndPos) {
           grid[i][j].wordEndBelow = true
           break
         }
       }
       for (let hyphenPos of clues[clueIndex].hyphenAfter) {
-        if (positionInClue == hyphenPos && i < gridHeight - 1) {
+        if (positionInClue == hyphenPos) {
           grid[i][j].hyphenBelow = true
           break
         }
@@ -2316,7 +2312,8 @@ function displayGrid() {
       const cellGroup =
           document.createElementNS('http://www.w3.org/2000/svg', 'g');
       let emptyGroup = true
-      if (grid[i][j].wordEndToRight) {
+      if (grid[i][j].wordEndToRight && (j + 1) < gridWidth &&
+          grid[i][j + 1].isLight) {
         const wordEndRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         wordEndRect.setAttributeNS(
@@ -2330,7 +2327,8 @@ function displayGrid() {
         cellGroup.appendChild(wordEndRect)
         emptyGroup = false
       }
-      if (grid[i][j].wordEndBelow) {
+      if (grid[i][j].wordEndBelow && (i + 1) < gridHeight &&
+          grid[i + 1][j].isLight) {
         const wordEndRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         wordEndRect.setAttributeNS(
@@ -2353,7 +2351,8 @@ function displayGrid() {
         hyphenRect.setAttributeNS(
             null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE) +
             SQUARE_DIM_BY2 - SEP_WIDTH_BY2);
-        hyphenRect.setAttributeNS(null, 'width', HYPHEN_WIDTH);
+	let hw = (j + 1) < gridWidth ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
+        hyphenRect.setAttributeNS(null, 'width', hw);
         hyphenRect.setAttributeNS(null, 'height', SEP_WIDTH);
         hyphenRect.setAttributeNS(null, 'class', 'wordend');
         cellGroup.appendChild(hyphenRect)
@@ -2369,7 +2368,8 @@ function displayGrid() {
             null, 'y',
             GRIDLINE + (i + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
         hyphenRect.setAttributeNS(null, 'width', SEP_WIDTH);
-        hyphenRect.setAttributeNS(null, 'height', HYPHEN_WIDTH);
+	let hh = (i + 1) < gridHeight ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
+        hyphenRect.setAttributeNS(null, 'height', hh);
         hyphenRect.setAttributeNS(null, 'class', 'wordend');
         cellGroup.appendChild(hyphenRect)
         emptyGroup = false
