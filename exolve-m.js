@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.39 November 19 2019'
+const VERSION = 'Exolve v0.40 November 19 2019'
 
 // ------ Begin globals.
 
@@ -2159,10 +2159,7 @@ function updateClueState(clueIndex) {
   } else if (clue.enumLen) {
     let numFilled = 0
     for (let ci of cis) {
-      if (!clues[ci].clueTR) {
-        return
-      }
-      if (!isFull(ci)) {
+      if (!clues[ci].clueTR || !isFull(ci)) {
         numFilled = 0
         break
       }
@@ -2172,7 +2169,9 @@ function updateClueState(clueIndex) {
   }
   let cls = solved ? 'solved' : ''
   for (let ci of cis) {
-    clues[ci].clueTR.setAttributeNS(null, 'class', cls);
+    if (clues[ci].clueTR) {
+      clues[ci].clueTR.setAttributeNS(null, 'class', cls);
+    }
   }
 }
 

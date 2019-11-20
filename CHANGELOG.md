@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.40 November 19 2019
+
+- Bugfix: updateClueState() had a bug with orphan clues.
+
 ### Version: Exolve v0.39 November 19 2019
 
 - When a light is filled in fully, change the colour of its clue-number. The
