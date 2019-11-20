@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v0.39 November 19 2019
+
+- When a light is filled in fully, change the colour of its clue-number. The
+  colour is chosen to be a light shade of blue so that:
+  - unsolved clues show with darker numbers
+  - shade of blue not green as green may be construed as "correct"
+    and we're not checking correctness
+  - using a checkmark instead of changing the colour has tedious issues (either
+    shift the clue text to make room, or worry about clipping/eclipsing).
+- Minor tweak to the width of the current clue shown atop the grid,
+  done to make sure that it is not too narrow in smaller puzzles.
+  When too narrow, long clues for the top grid rows were obscuring
+  the top rows.
+
 ### Version: Exolve v0.38 November 13 2019
 
 - Bug fix: Don't use parses enum-len == 0 to test if we should set successors in linkd clues.

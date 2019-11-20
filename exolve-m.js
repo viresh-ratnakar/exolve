@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.38 November 13 2019'
+const VERSION = 'Exolve v0.39 November 19 2019'
 
 // ------ Begin globals.
 
@@ -1707,6 +1707,9 @@ function restoreState() {
       }
     }
   }
+  for (let ci of allClueIndices) {
+    updateClueState(ci)
+  }
   updateAndSaveState()
 }
 
@@ -2144,6 +2147,35 @@ function advanceCursor() {
   }
 }
 
+function updateClueState(clueIndex) {
+  let clue = clues[clueIndex]
+  if (!clue) {
+    return
+  }
+  let cis = getAllLinkedClueIndices(clueIndex)
+  let solved = false
+  if (clue.annoSpan && clue.annoSpan.style.display == '') {
+    solved = true
+  } else if (clue.enumLen) {
+    let numFilled = 0
+    for (let ci of cis) {
+      if (!clues[ci].clueTR) {
+        return
+      }
+      if (!isFull(ci)) {
+        numFilled = 0
+        break
+      }
+      numFilled += clues[ci].cells.length
+    }
+    solved = numFilled == clue.enumLen
+  }
+  let cls = solved ? 'solved' : ''
+  for (let ci of cis) {
+    clues[ci].clueTR.setAttributeNS(null, 'class', cls);
+  }
+}
+
 function handleGridInput() {
   if (currentRow < 0 || currentRow >= gridHeight ||
       currentCol < 0 || currentCol >= gridWidth) {
@@ -2197,6 +2229,24 @@ function handleGridInput() {
       grid[symRow][symCol].textNode.nodeValue = symChar
     }
   }
+
+  let cluesAffected = []
+  let label = grid[currentRow][currentCol].acrossClueLabel
+  if (label) {
+    cluesAffected.push('A' + label)
+  }
+  label = grid[currentRow][currentCol].downClueLabel
+  if (label) {
+    cluesAffected.push('D' + label)
+  }
+  let otherClues = grid[currentRow][currentCol].nodirClues
+  if (otherClues) {
+    cluesAffected = cluesAffected.concat(otherClues)
+  }
+  for (ci of cluesAffected) {
+    updateClueState(ci)
+  }
+
   updateAndSaveState()
 
   if (((letter >= 'A' && letter <= 'Z') || letter == '1') &&
@@ -2572,6 +2622,9 @@ function clearCurrent() {
       clearCell(rc[0], rc[1])
     }
   }
+  for (let ci of clueIndices) {
+    updateClueState(ci)
+  }
   updateAndSaveState()
 }
 
@@ -2601,6 +2654,10 @@ function clearAll() {
     a.style.display = 'none'
   }
   hideNinas()
+
+  for (let ci of allClueIndices) {
+    updateClueState(ci)
+  }
   updateAndSaveState()
 }
 
@@ -2631,6 +2688,9 @@ function checkCurrent() {
   if (allCorrect) {
     revealCurrent()  // calls updateAndSaveState()
   } else {
+    if (currentClueIndex) {
+      updateClueState(currentClueIndex)
+    }
     updateAndSaveState()
   }
 }
@@ -2659,6 +2719,9 @@ function checkAll() {
   if (allCorrect) {
     revealAll()  // calls updateAndSaveState()
   } else {
+    for (let ci of allClueIndices) {
+      updateClueState(ci)
+    }
     updateAndSaveState()
   }
 }
@@ -2701,6 +2764,7 @@ function revealCurrent() {
         clues[clueIndex].annoSpan.style.display = ''
       }
     }
+    updateClueState(currentClueIndex)
   }
   updateAndSaveState()
 }
@@ -2739,6 +2803,9 @@ function revealAll() {
     a.style.display = ''
   }
   showNinas()
+  for (let ci of allClueIndices) {
+    updateClueState(ci)
+  }
   updateAndSaveState()
 }
 

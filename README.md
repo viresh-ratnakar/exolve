@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.38 November 13 2019
+### Version: Exolve v0.39 November 19 2019
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -369,6 +369,12 @@ Example:
 As shown in the above example, if a child clue (2d in the example) has a
 different direction from the parent, the direction can be specified with a
 one-letter suffix ("a" or "d").
+
+While solving, when a light is fully filled in, its clue number changes
+colour (to a light shade of blue, making the unsolved clue numbers stand out).
+There are some minor exceptions when this does not happen (diagramless cells
+or other reasons that don't let us determine when a clue's light is fully
+filled).
 
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue
