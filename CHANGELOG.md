@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.41 November 20 2019
+
+- Bug fixes in clearCurrent(), checkCurrent(), revealCurrent(): corner cases
+  for when to show clues state as filled/not-filled.
+- Bug fix to enable reveal button when there is available anno, even for an
+  orphan clue.
+
 ### Version: Exolve v0.40 November 19 2019
 
 - Bugfix: updateClueState() had a bug with orphan clues.

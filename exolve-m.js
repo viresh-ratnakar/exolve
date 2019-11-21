@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.40 November 19 2019'
+const VERSION = 'Exolve v0.41 November 20 2019'
 
 // ------ Begin globals.
 
@@ -1581,7 +1581,10 @@ function updateDisplayAndGetState() {
   }
   clearButton.disabled = (activeCells.length == 0)
   checkButton.disabled = (activeCells.length == 0)
-  revealButton.disabled = (activeCells.length == 0)
+  revealButton.disabled = (activeCells.length == 0) &&
+		          (!currentClueIndex ||
+			   !clues[currentClueIndex] ||
+			   !clues[currentClueIndex].anno)
   submitButton.disabled = (numFilled != numCellsToFill)
   return state
 }
@@ -2147,6 +2150,7 @@ function advanceCursor() {
   }
 }
 
+// Mark the clue as solved by setting its number's colour, if filled.
 function updateClueState(clueIndex) {
   let clue = clues[clueIndex]
   if (!clue) {
@@ -2154,9 +2158,7 @@ function updateClueState(clueIndex) {
   }
   let cis = getAllLinkedClueIndices(clueIndex)
   let solved = false
-  if (clue.annoSpan && clue.annoSpan.style.display == '') {
-    solved = true
-  } else if (clue.enumLen) {
+  if (clue.enumLen) {
     let numFilled = 0
     for (let ci of cis) {
       if (!clues[ci].clueTR || !isFull(ci)) {
@@ -2166,12 +2168,45 @@ function updateClueState(clueIndex) {
       numFilled += clues[ci].cells.length
     }
     solved = numFilled == clue.enumLen
+  } else if (clue.annoSpan && clue.annoSpan.style.display == '') {
+    solved = true
   }
   let cls = solved ? 'solved' : ''
   for (let ci of cis) {
     if (clues[ci].clueTR) {
       clues[ci].clueTR.setAttributeNS(null, 'class', cls);
     }
+  }
+}
+
+// Call updateClueState() on all clues active or crossing active cells.
+function updateActiveCluesState() {
+  let clueIndices = {}
+  if (currentClueIndex) {
+    let lci = getAllLinkedClueIndices(currentClueIndex)
+    for (let ci of lci) {
+      clueIndices[ci] = true
+    }
+  }
+  for (let x of activeCells) {
+    let row = x[0]
+    let col = x[1]
+    if (grid[row][col].acrossClueLabel) {
+      let ci = 'A' + grid[row][col].acrossClueLabel
+      clueIndices[ci] = true
+    }
+    if (grid[row][col].downClueLabel) {
+      let ci = 'D' + grid[row][col].downClueLabel
+      clueIndices[ci] = true
+    }
+    if (grid[row][col].nodirClues) {
+      for (let ci of grid[row][col].nodirClues) {
+        clueIndices[ci] = true
+      }
+    }
+  }
+  for (let ci in clueIndices) {
+    updateClueState(ci)
   }
 }
 
@@ -2621,9 +2656,7 @@ function clearCurrent() {
       clearCell(rc[0], rc[1])
     }
   }
-  for (let ci of clueIndices) {
-    updateClueState(ci)
-  }
+  updateActiveCluesState()
   updateAndSaveState()
 }
 
@@ -2687,9 +2720,7 @@ function checkCurrent() {
   if (allCorrect) {
     revealCurrent()  // calls updateAndSaveState()
   } else {
-    if (currentClueIndex) {
-      updateClueState(currentClueIndex)
-    }
+    updateActiveCluesState()
     updateAndSaveState()
   }
 }
@@ -2763,8 +2794,8 @@ function revealCurrent() {
         clues[clueIndex].annoSpan.style.display = ''
       }
     }
-    updateClueState(currentClueIndex)
   }
+  updateActiveCluesState()
   updateAndSaveState()
 }
 
