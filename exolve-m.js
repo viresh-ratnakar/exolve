@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.42 December 1 2019'
+const VERSION = 'Exolve v0.43 December 1 2019'
 
 // ------ Begin globals.
 
@@ -2152,11 +2152,15 @@ function advanceCursor() {
 
 // Mark the clue as solved by setting its number's colour, if filled.
 function updateClueState(clueIndex) {
+  let cis = getAllLinkedClueIndices(clueIndex)
+  if (!cis || cis.length == 0) {
+    return
+  }
+  clueIndex = cis[0]  // Use parent for a linked child
   let clue = clues[clueIndex]
   if (!clue) {
     return
   }
-  let cis = getAllLinkedClueIndices(clueIndex)
   let solved = false
   if (clue.enumLen) {
     let numFilled = 0

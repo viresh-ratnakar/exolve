@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.43 December 1 2019
+
+- Bug fix: mark linked child clues as filled by looking at their parent.
+
 ### Version: Exolve v0.42 December 1 2019
 
 - Bug fix: when there is a linked clue but the linked child clue is not
