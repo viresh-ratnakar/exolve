@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.41 November 20 2019'
+const VERSION = 'Exolve v0.42 December 1 2019'
 
 // ------ Begin globals.
 
@@ -688,12 +688,12 @@ function markClueStartsUsingGrid() {
       if (startsAcrossClue(i, j)) {
         grid[i][j].startsAcrossClue = true
         grid[i][j].startsClueLabel = '' + nextClueNumber
-        clues['A' + nextClueNumber] =  {'cells': []}
+        clues['A' + nextClueNumber] =  {'cells': [], 'clueDirection': 'A'}
       }
       if (startsDownClue(i, j)) {
         grid[i][j].startsDownClue = true
         grid[i][j].startsClueLabel = '' + nextClueNumber
-        clues['D' + nextClueNumber] =  {'cells': []}
+        clues['D' + nextClueNumber] =  {'cells': [], 'clueDirection': 'D'}
       }
       if (grid[i][j].startsClueLabel) {
         nextClueNumber++

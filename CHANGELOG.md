@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.42 December 1 2019
+
+- Bug fix: when there is a linked clue but the linked child clue is not
+  explicitly provided (as "13 See 10" or something like that), there was a bug
+  that disallowed typing beyond the first letter of the child clue.
+
 ### Version: Exolve v0.41 November 20 2019
 
 - Bug fixes in clearCurrent(), checkCurrent(), revealCurrent(): corner cases
