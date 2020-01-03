@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.45 January 3 2020
+
+- Bugfix: number-of-cells-filled computation had become buggy with v0.44.
+
 ### Version: Exolve v0.44 January 2 2020
 
 - Allow crosswords with single-digit numeric entries. To do this, the

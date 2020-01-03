@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.44 january 2 2020'
+const VERSION = 'Exolve v0.45 January 3 2020'
 
 // ------ Begin globals.
 
@@ -1647,7 +1647,9 @@ function getGridStateAndNumFilled() {
     for (let j = 0; j < gridWidth; j++) {
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
         state = state + grid[i][j].currentLetter
-        numFilled++
+        if (grid[i][j].currentLetter != '0') {
+          numFilled++
+        }
       } else {
         state = state + '.'
       }
@@ -1782,15 +1784,11 @@ function restoreState() {
       }
     }
   }
-  let numFilled = 0
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
         grid[i][j].textNode.nodeValue =
             stateCharToDisplayChar(grid[i][j].currentLetter)
-        if (grid[i][j].currentLetter != '0') {
-          numFilled++
-        }
       }
     }
   }
