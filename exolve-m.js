@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.43 December 1 2019'
+const VERSION = 'Exolve v0.44 january 2 2020'
 
 // ------ Begin globals.
 
@@ -106,6 +106,11 @@ let orphanClueIndices = []
 let posInOrphanClueIndices = 0
 
 const BLOCK_CHAR = '⬛';
+// We have special meanings for 0 (unfilled) and 1 (block in diagramless cell)
+// in solution states. For crosswords with digits, we use these to stand for
+// 0 and 1 respectively, in solution states.
+const DIGIT0 = '-'
+const DIGIT1 = '~'
 const ACTIVE_COLOUR = 'mistyrose'
 const ORPHAN_CLUES_COLOUR = 'white'
 const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
@@ -117,6 +122,7 @@ const STATE_SEP = 'eexxoollvvee'
 // Variables set by exolve-option
 let hideInferredNumbers = false
 let cluesPanelLines = -1
+let allowDigits = false
 
 // Variables set in init().
 let puzzleTextLines;
@@ -385,6 +391,10 @@ function parseOption(s) {
       hideInferredNumbers = true
       continue
     }
+    if (spart == "allow-digits") {
+      allowDigits = true
+      continue
+    }
     let kv = spart.split(':')
     if (kv.length != 2) {
       addError('Expected exolve-option: key:value, got: ' + spart)
@@ -523,7 +533,7 @@ function checkIdAndConsistency() {
   }
   for (let i = 0; i < gridHeight; i++) {
     let lineW = puzzleTextLines[i + gridFirstLine].toUpperCase().
-                    replace(/[^A-Z.0]/g, '').length
+                    replace(/[^A-Z.0-9]/g, '').length
     if (gridWidth != lineW) {
       addError('Width in row ' + i + ' is ' + lineW + ', not ' + gridWidth);
       return
@@ -534,6 +544,73 @@ function checkIdAndConsistency() {
              (answersList.length + 1));
     return
   }
+}
+
+// display chars: A-Z, 0-9
+// state chars: A-Z, '-' (DIGIT0), '~' (DIGIT1), 2-9, '0' (blank), '1' (block
+// in diagramless cell), '.'
+// grid[i][j].solution and grid[i][j].currentLetter are in "state char" space.
+// grid specified originally, consumed by parseGrid() is in state char space,
+// except:
+//   0 can mean the digit 0 if allow-digits is true and there are entries
+//   other than 0.
+
+function isValidDisplayChar(c) {
+  if (c >= 'A' && c <= 'Z') {
+    return true
+  }
+  if (allowDigits && c >= '0' && c <= '9') {
+    return true
+  }
+  return false
+}
+
+function isValidStateChar(c) {
+  if (c >= 'A' && c <= 'Z') {
+    return true
+  }
+  if (allowDigits && ((c >= '2' && c <= '9') || c == DIGIT0 || c == DIGIT1)) {
+    return true
+  }
+  if (c == '0') {
+    return true
+  }
+  if (hasDiagramlessCells && c == '1') {
+    return true
+  }
+  return false
+}
+
+function stateCharToDisplayChar(c) {
+  if (c == '0') {
+    return ''
+  }
+  if (c == '1') {
+    return BLOCK_CHAR
+  }
+  if (c == DIGIT0) {
+    return '0'
+  }
+  if (c == DIGIT1) {
+    return '1'
+  }
+  return c
+}
+
+function displayCharToStateChar(c) {
+  if (c == BLOCK_CHAR) {
+    return '1'
+  }
+  if (c == '0') {
+    return DIGIT0
+  }
+  if (c == '1') {
+    return DIGIT1
+  }
+  if (!isValidDisplayChar(c)) {
+    return '0'
+  }
+  return c
 }
 
 // Parse grid lines into a gridWidth x gridHeight array of objects that have
@@ -553,6 +630,7 @@ function checkIdAndConsistency() {
 //   hasUnsolvedCells
 function parseGrid() {
   let hasSolvedCells = false
+  let allEntriesAre0s = true
   for (let i = 0; i < gridHeight; i++) {
     grid[i] = new Array(gridWidth)
     let gridLine = puzzleTextLines[i + gridFirstLine].
@@ -560,20 +638,17 @@ function parseGrid() {
     let gridLineIndex = 0
     for (let j = 0; j < gridWidth; j++) {
       grid[i][j] = {};
-      let letter = gridLine.charAt(gridLineIndex);
-      if (letter != '.') {
-        grid[i][j].isLight = true
-        if (letter != '0') {
-          letter = letter.toUpperCase()
-          if (letter < 'A' || letter > 'Z') {
-            addError('Bad grid entry: ' + letter);
-            gridWidth = 0
-            return
-          }
-          grid[i][j].solution = letter
+      grid[i][j].solution = gridLine.charAt(gridLineIndex).toUpperCase()
+      // Deal with . and 0 and 1 in second pass
+      grid[i][j].isLight = false
+      if (grid[i][j].solution != '.') {
+        if (grid[i][j].solution != '0' &&
+            !isValidDisplayChar(grid[i][j].solution)) {
+          addError('Bad grid entry: ' + grid[i][j].solution);
+          gridWidth = 0
+          return
         }
-      } else {
-        grid[i][j].isLight = false
+        grid[i][j].isLight = true
       }
       grid[i][j].hasBarAfter = false
       grid[i][j].hasBarUnder = false
@@ -611,22 +686,38 @@ function parseGrid() {
         }
         gridLineIndex++
       }
-      if (grid[i][j].isDiagramless && letter == '.') {
+      if (grid[i][j].isLight && grid[i][j].solution != '0' &&
+          !grid[i][j].prefill) {
+        allEntriesAre0s = false
+      }
+    }
+  }
+  // We use two passes to be able to detect if 0 means blank cell or digit 0.
+  for (let i = 0; i < gridHeight; i++) {
+    for (let j = 0; j < gridWidth; j++) {
+      if (grid[i][j].isLight) {
+        if (grid[i][j].solution == '0') {
+          if (allEntriesAre0s && !grid[i][j].prefill) {
+            hasUnsolvedCells = true
+          } else {
+            grid[i][j].solution = DIGIT0;
+          }
+        } else if (grid[i][j].solution == '1') {
+          grid[i][j].solution = DIGIT1;
+        }
+      }
+      if (grid[i][j].isDiagramless && grid[i][j].solution == '.') {
         grid[i][j].solution = '1'
       }
-      if (grid[i][j].prefill &&
-          (!grid[i][j].isLight || letter < 'A' || letter > 'Z')) {
-        addError('Bad pre-filled cell (' + i + ',' + j +
-                 ') with letter: ' + letter)
+      if (grid[i][j].prefill && !grid[i][j].isLight) {
+        addError('Pre-filled cell (' + i + ',' + j + ') not a light: ')
         return
       }
       if (grid[i][j].isDiagramless) {
         hasDiagramlessCells = true
       }
-      if (letter == '0') {
-        hasUnsolvedCells = true
-      }
-      if (letter >= 'A' && letter <= 'Z' && !grid[i][j].prefill) {
+      if (grid[i][j].isLight && !grid[i][j].prefill &&
+          grid[i][j].solution != '0') {
         hasSolvedCells = true
       }
     }
@@ -822,7 +913,8 @@ function parseClueLabel(clueLine) {
     parse.clueLabel = clueLine.substring(pastBracOpen, bracEnd).trim()
     if (parse.clueLabel.charAt(parse.clueLabel.length - 1) == '.') {
        // strip trailing period
-       parse.clueLabel = parse.clueLabel.substr(0, parse.clueLabel.length - 1).trim()
+       parse.clueLabel =
+           parse.clueLabel.substr(0, parse.clueLabel.length - 1).trim()
     }
     parse.isOffNum = true
     parse.skip = bracEnd + 1
@@ -1016,7 +1108,8 @@ function parseClueLists() {
       clues[clueParse.clueIndex].fullDisplayLabel = clueParse.clueLabel
       if (clueDirection != 'X' && clueParse.clueLabel) {
         clues[clueParse.clueIndex].fullDisplayLabel =
-           clues[clueParse.clueIndex].fullDisplayLabel + clueDirection.toLowerCase()
+            clues[clueParse.clueIndex].fullDisplayLabel +
+            clueDirection.toLowerCase()
       }
       clues[clueParse.clueIndex].children = clueParse.children
       clues[clueParse.clueIndex].childrenClueIndices = []
@@ -1237,7 +1330,8 @@ function processClueChildren() {
         }
         clue.fullDisplayLabel = clue.fullDisplayLabel + ', ' + child.clueLabel
         if (childIndex.charAt(0) != 'X') {
-          clue.fullDisplayLabel = clue.fullDisplayLabel + childIndex.charAt(0).toLowerCase()
+          clue.fullDisplayLabel =
+            clue.fullDisplayLabel + childIndex.charAt(0).toLowerCase()
         }
       }
       clue.childrenClueIndices.push(childIndex)
@@ -1552,13 +1646,8 @@ function getGridStateAndNumFilled() {
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
-        let letter = grid[i][j].currentLetter.trim()
-        if (letter == '') {
-           state = state + '0'
-        } else {
-           state = state + letter
-           numFilled++
-        }
+        state = state + grid[i][j].currentLetter
+        numFilled++
       } else {
         state = state + '.'
       }
@@ -1582,9 +1671,9 @@ function updateDisplayAndGetState() {
   clearButton.disabled = (activeCells.length == 0)
   checkButton.disabled = (activeCells.length == 0)
   revealButton.disabled = (activeCells.length == 0) &&
-		          (!currentClueIndex ||
-			   !clues[currentClueIndex] ||
-			   !clues[currentClueIndex].anno)
+                          (!currentClueIndex ||
+                           !clues[currentClueIndex] ||
+                           !clues[currentClueIndex].anno)
   submitButton.disabled = (numFilled != numCellsToFill)
   return state
 }
@@ -1646,9 +1735,7 @@ function restoreState() {
           grid[i][j].currentLetter = grid[i][j].solution
           continue
         }
-        if (letter == '0') {
-           grid[i][j].currentLetter = ''
-        } else if (letter == '1') {
+        if (letter == '1') {
            if (!grid[i][j].isDiagramless) {
              console.log('Unexpected ⬛ in non-diagramless location');
              error = true
@@ -1656,8 +1743,8 @@ function restoreState() {
            }
            grid[i][j].currentLetter = '1'
         } else {
-           if (letter < 'A' || letter > 'Z') {
-             console.log('Unexpected letter ' + letter + ' in state');
+           if (!isValidStateChar(letter)) {
+             console.log('Unexpected letter/digit ' + letter + ' in state');
              error = true
              break
            }
@@ -1678,9 +1765,9 @@ function restoreState() {
         if (grid[i][j].isLight || grid[i][j].isDiagramless) {
           if (grid[i][j].prefill) {
             grid[i][j].currentLetter = grid[i][j].solution
-            continue
+          } else {
+            grid[i][j].currentLetter = '0'
           }
-          grid[i][j].currentLetter = ''
         }
       }
     }
@@ -1699,12 +1786,9 @@ function restoreState() {
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
-        if (grid[i][j].currentLetter == '1') {
-          grid[i][j].textNode.nodeValue = BLOCK_CHAR
-        } else {
-          grid[i][j].textNode.nodeValue = grid[i][j].currentLetter
-        }
-        if (grid[i][j].currentLetter != '') {
+        grid[i][j].textNode.nodeValue =
+            stateCharToDisplayChar(grid[i][j].currentLetter)
+        if (grid[i][j].currentLetter != '0') {
           numFilled++
         }
       }
@@ -1786,7 +1870,8 @@ function activateCell(row, col) {
   gridInputWrapper.style.height = '' + SQUARE_DIM + 'px'
   gridInputWrapper.style.left = '' + grid[row][col].cellLeft + 'px'
   gridInputWrapper.style.top = '' + grid[row][col].cellTop + 'px'
-  gridInput.value = grid[row][col].prefill ? '' : grid[row][col].currentLetter
+  gridInput.value = grid[row][col].prefill ? '' :
+      stateCharToDisplayChar(grid[row][col].currentLetter)
   gridInputWrapper.style.display = ''
   gridInput.focus()
   // Try to place the cursor at the end
@@ -2021,7 +2106,7 @@ function handleKeyUpInner(key) {
     return
   }
   if (key == 8) {
-    if (grid[currentRow][currentCol].currentLetter != '' &&
+    if (grid[currentRow][currentCol].currentLetter != '0' &&
         !grid[currentRow][currentCol].prefill) {
       return
     }
@@ -2134,7 +2219,7 @@ function advanceCursor() {
     currentDir = successor.direction
     activateCell(successor.cell[0], successor.cell[1]);
     return
-   }
+  }
   if (currentDir == 'A') {
     if (currentCol + 1 < gridWidth &&
         grid[currentRow][currentCol + 1].acrossClueLabel ==
@@ -2230,39 +2315,37 @@ function handleGridInput() {
     return
   }
   let newInput = gridInput.value
-  if (grid[currentRow][currentCol].currentLetter != '' &&
-      newInput != grid[currentRow][currentCol].currentLetter) {
+  let currDisplayChar =
+      stateCharToDisplayChar(grid[currentRow][currentCol].currentLetter)
+  if (grid[currentRow][currentCol].currentLetter != '0' &&
+      newInput != currDisplayChar) {
     // The "new" input may be before or after the old input.
-    let index = newInput.indexOf(grid[currentRow][currentCol].currentLetter)
+    let index = newInput.indexOf(currDisplayChar)
     if (index == 0) {
       newInput = newInput.substr(1)
     }
   }
-  let keyChar = newInput.substr(0, 1)
-  if (keyChar == ' ' && grid[currentRow][currentCol].isDiagramless) {
+  let displayChar = newInput.substr(0, 1)
+  if (displayChar == ' ' && grid[currentRow][currentCol].isDiagramless) {
     // spacebar creates a blocked cell in a diagramless puzzle cell
-    keyChar = BLOCK_CHAR
+    displayChar = BLOCK_CHAR
   } else {
-    keyChar = keyChar.toUpperCase()
-    if (keyChar < 'A' || keyChar > 'Z') {
-      // Clear away any random input other than A-Z.
-      keyChar = ''
+    displayChar = displayChar.toUpperCase()
+    if (!isValidDisplayChar(displayChar)) {
+      displayChar = ''
     }
   }
-  let letter = keyChar
-  if (letter == BLOCK_CHAR) {
-    letter = '1'
-  }
+  let stateChar = displayCharToStateChar(displayChar)
   let oldLetter = grid[currentRow][currentCol].currentLetter
-  grid[currentRow][currentCol].currentLetter = letter
-  grid[currentRow][currentCol].textNode.nodeValue = keyChar
-  gridInput.value = keyChar
-  if (oldLetter == '1' || letter == '1') {
+  grid[currentRow][currentCol].currentLetter = stateChar
+  grid[currentRow][currentCol].textNode.nodeValue = displayChar
+  gridInput.value = displayChar
+  if (oldLetter == '1' || stateChar == '1') {
     let symRow = gridHeight - 1 - currentRow
     let symCol = gridWidth - 1 - currentCol
     if (grid[symRow][symCol].isDiagramless) {
-      let symLetter = (letter == '1') ? '1' : ''
-      let symChar = (letter == '1') ? BLOCK_CHAR : ''
+      let symLetter = (stateChar == '1') ? '1' : ''
+      let symChar = (stateChar == '1') ? BLOCK_CHAR : ''
       grid[symRow][symCol].currentLetter = symLetter
       grid[symRow][symCol].textNode.nodeValue = symChar
     }
@@ -2287,7 +2370,7 @@ function handleGridInput() {
 
   updateAndSaveState()
 
-  if (((letter >= 'A' && letter <= 'Z') || letter == '1') &&
+  if (isValidDisplayChar(displayChar) &&
       !grid[currentRow][currentCol].isDiagramless) {
     advanceCursor()
   }
@@ -2439,7 +2522,7 @@ function displayGrid() {
         hyphenRect.setAttributeNS(
             null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE) +
             SQUARE_DIM_BY2 - SEP_WIDTH_BY2);
-	let hw = (j + 1) < gridWidth ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
+        let hw = (j + 1) < gridWidth ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
         hyphenRect.setAttributeNS(null, 'width', hw);
         hyphenRect.setAttributeNS(null, 'height', SEP_WIDTH);
         hyphenRect.setAttributeNS(null, 'class', 'wordend');
@@ -2456,7 +2539,7 @@ function displayGrid() {
             null, 'y',
             GRIDLINE + (i + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
         hyphenRect.setAttributeNS(null, 'width', SEP_WIDTH);
-	let hh = (i + 1) < gridHeight ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
+        let hh = (i + 1) < gridHeight ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
         hyphenRect.setAttributeNS(null, 'height', hh);
         hyphenRect.setAttributeNS(null, 'class', 'wordend');
         cellGroup.appendChild(hyphenRect)
@@ -2578,8 +2661,8 @@ function toggleNinas() {
 
 function clearCell(row, col) {
   let oldLetter = grid[row][col].currentLetter
-  if (oldLetter != '') {
-    grid[row][col].currentLetter = ''
+  if (oldLetter != '0') {
+    grid[row][col].currentLetter = '0'
     grid[row][col].textNode.nodeValue = ''
     if (row == currentRow && col == currentCol) {
       gridInput.value = ''
@@ -2589,7 +2672,7 @@ function clearCell(row, col) {
     let symRow = gridHeight - 1 - row
     let symCol = gridWidth - 1 - col
     if (grid[symRow][symCol].isDiagramless) {
-      grid[symRow][symCol].currentLetter = ''
+      grid[symRow][symCol].currentLetter = '0'
       grid[symRow][symCol].textNode.nodeValue = ''
     }
   }
@@ -2606,7 +2689,7 @@ function isFull(clueIndex) {
     if (grid[row][col].prefill) {
       continue
     }
-    if (grid[row][col].currentLetter == '') {
+    if (grid[row][col].currentLetter == '0') {
       return false;
     }
   }
@@ -2631,7 +2714,7 @@ function clearCurrent() {
     if (grid[row][col].prefill) {
       continue
     }
-    if (grid[row][col].currentLetter == '') {
+    if (grid[row][col].currentLetter == '0') {
       continue
     }
     if (grid[row][col].acrossClueLabel && grid[row][col].downClueLabel) {
@@ -2676,7 +2759,7 @@ function clearAll() {
       if (grid[row][col].prefill) {
         continue
       }
-      grid[row][col].currentLetter = ''
+      grid[row][col].currentLetter = '0'
       grid[row][col].textNode.nodeValue = ''
       if (row == currentRow && col == currentCol) {
         gridInput.value = ''
@@ -2707,7 +2790,7 @@ function checkCurrent() {
       continue
     }
     allCorrect = false
-    grid[row][col].currentLetter = ''
+    grid[row][col].currentLetter = '0'
     grid[row][col].textNode.nodeValue = ''
     if (row == currentRow && col == currentCol) {
       gridInput.value = ''
@@ -2716,7 +2799,7 @@ function checkCurrent() {
       let symRow = gridHeight - 1 - row
       let symCol = gridWidth - 1 - col
       if (grid[symRow][symCol].isDiagramless) {
-        grid[symRow][symCol].currentLetter = ''
+        grid[symRow][symCol].currentLetter = '0'
         grid[symRow][symCol].textNode.nodeValue = ''
       }
     }
@@ -2743,7 +2826,7 @@ function checkAll() {
         continue
       }
       allCorrect = false
-      grid[row][col].currentLetter = ''
+      grid[row][col].currentLetter = '0'
       grid[row][col].textNode.nodeValue = ''
       if (row == currentRow && col == currentCol) {
         gridInput.value = ''
@@ -2771,13 +2854,10 @@ function revealCurrent() {
     let letter = grid[row][col].solution
     if (letter && oldLetter != letter) {
       grid[row][col].currentLetter = letter
-      let char = letter
-      if (char == '1') {
-        char = BLOCK_CHAR
-      }  
-      grid[row][col].textNode.nodeValue = char
+      let revealedChar = stateCharToDisplayChar(letter)
+      grid[row][col].textNode.nodeValue = revealedChar
       if (row == currentRow && col == currentCol) {
-        gridInput.value = char
+        gridInput.value = revealedChar
       }
     }
     if (oldLetter == '1' || letter == '1') {
@@ -2817,11 +2897,8 @@ function revealAll() {
       }
       if (grid[row][col].currentLetter != grid[row][col].solution) {
         grid[row][col].currentLetter = grid[row][col].solution
-        let char = grid[row][col].solution
-        if (char == '1') {
-          char = BLOCK_CHAR
-        }  
-        grid[row][col].textNode.nodeValue = char
+        let revealedChar = stateCharToDisplayChar(grid[row][col].solution)
+        grid[row][col].textNode.nodeValue = revealedChar
         if (row == currentRow && col == currentCol) {
           gridInput.value = char
         }

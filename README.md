@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.43 December 1 2019
+### Version: Exolve v0.44 January 2 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -596,6 +596,8 @@ The list of currently supported options is as follows:
   non-numeric clue labels may want to specify this option.
 - **clues-panel-lines:&lt;N&gt;** Limit the across/down/nodir clues boxes to
   about N lines of text, adding scrollbars if needed.
+- **allow-digits** If this option is specified, then we allow solvers to enter
+  digits in cells.
 
 ## Saving state
 The software automatically saves state. It does so in the URL (after the #)

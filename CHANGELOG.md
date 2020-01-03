@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.44 January 2 2020
+
+- Allow crosswords with single-digit numeric entries. To do this, the
+  exolve-option, "allow-digits" must be specified.
+- For a crossword with solutions, it cannot be the case that all solutions
+  are 0s (even if allow-digits is specified). Such a grid is correctly
+  given the better interpretation: that it is a grid without solutions provided.
+
 ### Version: Exolve v0.43 December 1 2019
 
 - Bug fix: mark linked child clues as filled by looking at their parent.
