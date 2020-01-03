@@ -2342,7 +2342,7 @@ function handleGridInput() {
     let symRow = gridHeight - 1 - currentRow
     let symCol = gridWidth - 1 - currentCol
     if (grid[symRow][symCol].isDiagramless) {
-      let symLetter = (stateChar == '1') ? '1' : ''
+      let symLetter = (stateChar == '1') ? '1' : '0'
       let symChar = (stateChar == '1') ? BLOCK_CHAR : ''
       grid[symRow][symCol].currentLetter = symLetter
       grid[symRow][symCol].textNode.nodeValue = symChar
@@ -2415,7 +2415,7 @@ function displayGrid() {
             null, 'y', LIGHT_START_Y + i * (SQUARE_DIM + GRIDLINE));
         cellText.setAttributeNS(null, 'text-anchor', 'middle');
         cellText.setAttributeNS(null, 'editable', 'simple');
-        let letter = ''
+        let letter = '0'
         let cellClass = 'cell-text'
         if (grid[i][j].prefill) {
           letter = grid[i][j].solution
@@ -2862,7 +2862,7 @@ function revealCurrent() {
       let symRow = gridHeight - 1 - row
       let symCol = gridWidth - 1 - col
       if (grid[symRow][symCol].isDiagramless) {
-        let symLetter = (letter == '1') ? '1' : ''
+        let symLetter = (letter == '1') ? '1' : '0'
         let symChar = (letter == '1') ? BLOCK_CHAR : ''
         grid[symRow][symCol].currentLetter = symLetter
         grid[symRow][symCol].textNode.nodeValue = symChar
