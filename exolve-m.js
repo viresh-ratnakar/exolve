@@ -2898,7 +2898,7 @@ function revealAll() {
         let revealedChar = stateCharToDisplayChar(grid[row][col].solution)
         grid[row][col].textNode.nodeValue = revealedChar
         if (row == currentRow && col == currentCol) {
-          gridInput.value = char
+          gridInput.value = revealedChar
         }
       }
     }
