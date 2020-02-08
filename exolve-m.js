@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.45 January 3 2020'
+const VERSION = 'Exolve v0.46 February 8 2020'
 
 // ------ Begin globals.
 
@@ -1793,7 +1793,8 @@ function restoreState() {
     }
   }
   for (let ci of allClueIndices) {
-    updateClueState(ci)
+    // When restoring state, we reveal annos for fully prefilled entries.
+    updateClueState(ci, true)
   }
   updateAndSaveState()
 }
@@ -2234,7 +2235,8 @@ function advanceCursor() {
 }
 
 // Mark the clue as solved by setting its number's colour, if filled.
-function updateClueState(clueIndex) {
+// if annoPrefilled is true and the clue is fully prefilled, reveal its anno.
+function updateClueState(clueIndex, annoPrefilled) {
   let cis = getAllLinkedClueIndices(clueIndex)
   if (!cis || cis.length == 0) {
     return
@@ -2247,14 +2249,26 @@ function updateClueState(clueIndex) {
   let solved = false
   if (clue.enumLen) {
     let numFilled = 0
+    let numPrefilled = 0
     for (let ci of cis) {
-      if (!clues[ci].clueTR || !isFull(ci)) {
+      if (!clues[ci].clueTR) {
+        numFilled = 0
+        break
+      }
+      let isFullRet = isFull(ci)
+      if (!isFullRet) {
         numFilled = 0
         break
       }
       numFilled += clues[ci].cells.length
+      if (isFullRet == 2) {
+        numPrefilled += clues[ci].cells.length
+      }
     }
     solved = numFilled == clue.enumLen
+    if (solved && numFilled == numPrefilled && annoPrefilled && clue.annoSpan) {
+      clue.annoSpan.style.display = ''
+    }
   } else if (clue.annoSpan && clue.annoSpan.style.display == '') {
     solved = true
   }
@@ -2293,7 +2307,7 @@ function updateActiveCluesState() {
     }
   }
   for (let ci in clueIndices) {
-    updateClueState(ci)
+    updateClueState(ci, false)
   }
 }
 
@@ -2363,7 +2377,7 @@ function handleGridInput() {
     cluesAffected = cluesAffected.concat(otherClues)
   }
   for (ci of cluesAffected) {
-    updateClueState(ci)
+    updateClueState(ci, false)
   }
 
   updateAndSaveState()
@@ -2676,22 +2690,25 @@ function clearCell(row, col) {
   }
 }
 
+// Returns 0 if not full. 1 if full, 2 if full entirely with prefills.
 function isFull(clueIndex) {
   if (!clues[clueIndex] || !clues[clueIndex].cells ||
       clues[clueIndex].cells.length < 1) {
-    return false;
+    return 0;
   }
+  let numPrefills = 0;
   for (let x of clues[clueIndex].cells) {
     let row = x[0]
     let col = x[1]
     if (grid[row][col].prefill) {
+      numPrefills++;
       continue
     }
     if (grid[row][col].currentLetter == '0') {
-      return false;
+      return 0;
     }
   }
-  return true;
+  return (numPrefills == clues[clueIndex].cells.length) ? 2 : 1;
 }
 
 function clearCurrent() {
@@ -2773,7 +2790,7 @@ function clearAll() {
   hideNinas()
 
   for (let ci of allClueIndices) {
-    updateClueState(ci)
+    updateClueState(ci, false)
   }
   updateAndSaveState()
 }
@@ -2835,7 +2852,7 @@ function checkAll() {
     revealAll()  // calls updateAndSaveState()
   } else {
     for (let ci of allClueIndices) {
-      updateClueState(ci)
+      updateClueState(ci, false)
     }
     updateAndSaveState()
   }
@@ -2913,7 +2930,7 @@ function revealAll() {
   }
   showNinas()
   for (let ci of allClueIndices) {
-    updateClueState(ci)
+    updateClueState(ci, false)
   }
   updateAndSaveState()
 }

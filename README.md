@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.45 January 3 2020
+### Version: Exolve v0.46 February 8 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -273,7 +273,8 @@ some cells being diagramless:
 
 The decorator "!" can be used to mark a cell as pre-filled (its solution letter
 must be provided). The solution letter will be pre-filled and will not be
-editable.
+editable. If all entries in a light are prefilled, and an anno is provided
+for that clue, the anno will be shown automatically at start-up.
 
 Here again is the complete list of decorators:
 ```
