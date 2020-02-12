@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.46 February 8 2020
+### Version: Exolve v0.47 February 12 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle

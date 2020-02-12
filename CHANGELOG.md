@@ -1,8 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.47 February 12 2020
+
+- Minor bugfix: activateCell() could make one unnecessary call to itself through
+  toggleCurrentDirection() (making the activeCells array sometimes go bad).
+
 ### Version: Exolve v0.46 February 8 2020
 
-- If an entry is fully prefilled, reveal its anno upon first rendering the puzzle.
+- If an entry is fully prefilled, reveal its anno upon first rendering the
+  puzzle.
 
 ### Version: Exolve v0.45 January 3 2020
 

@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.46 February 8 2020'
+const VERSION = 'Exolve v0.47 February 12 2020'
 
 // ------ Begin globals.
 
@@ -1884,14 +1884,14 @@ function activateCell(row, col) {
   // If the current direction does not have an active clue, toggle direction
   if (currentDir == 'A' && !grid[row][col].isDiagramless &&
       !grid[row][col].acrossClueLabel) {
-    toggleCurrentDirection()
+    toggleCurrentDir()
   } else if (currentDir == 'D' && !grid[row][col].isDiagramless &&
              !grid[row][col].downClueLabel) {
-    toggleCurrentDirection()
+    toggleCurrentDir()
   } else if (currentDir.charAt(0) == 'X' &&
              (!grid[row][col].nodirClues ||
               !grid[row][col].nodirClues.includes(currentDir))) {
-    toggleCurrentDirection()
+    toggleCurrentDir()
   }
   if (currentDir == 'A') {
     if (grid[row][col].acrossClueLabel) {
@@ -2063,7 +2063,7 @@ function showOrphanCluesAsActive() {
   makeCurrentClueVisible();
 }
 
-function toggleCurrentDirection() {
+function toggleCurrentDir() {
   // toggle direction
   if (currentRow < 0 || currentRow >= gridHeight ||
       currentCol < 0 || currentCol >= gridWidth) {
@@ -2094,6 +2094,10 @@ function toggleCurrentDirection() {
     return
   }
   currentDir = newDir
+}
+
+function toggleCurrentDirAndActivate() {
+  toggleCurrentDir()
   activateCell(currentRow, currentCol)
 }
 
@@ -2120,7 +2124,7 @@ function handleKeyUpInner(key) {
   }
   if (key == 13) {
     // Enter
-    toggleCurrentDirection()
+    toggleCurrentDirAndActivate()
   } else if (key == 39) {
     // right arrow
     let col = currentCol + 1
@@ -2392,7 +2396,7 @@ function createListeners() {
   gridInput.addEventListener('keyup', function(e) {handleKeyUp(e);});
   gridInput.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
   gridInput.addEventListener('input', handleGridInput);
-  gridInput.addEventListener('click', toggleCurrentDirection);
+  gridInput.addEventListener('click', toggleCurrentDirAndActivate);
   background.addEventListener('click', getRowColActivator(-1, -1));
   // Clicking on the title will also unselect current clue (useful
   // for barred grids where background is not visible).
