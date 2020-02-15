@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.47 February 12 2020'
+const VERSION = 'Exolve v0.48 February 14 2020'
 
 // ------ Begin globals.
 
@@ -1340,15 +1340,18 @@ function processClueChildren() {
 
       if (lastRowCol && childClue.cells.length > 0) {
         let cell = childClue.cells[0]
+        let childDir = childClue.clueDirection
         if (lastRowCol[0] == cell[0] && lastRowCol[1] == cell[1]) {
-          addError('loop in successor for ' + lastRowCol)
-          return
-        } else {
-          grid[lastRowCol[0]][lastRowCol[1]]['successor' + lastRowColDir] = {
-            'cell': cell,
-            'direction': childClue.clueDirection
-          };
+          if (childDir == lastRowColDir || childClue.cells.length == 1) {
+            addError('loop in successor for ' + lastRowCol)
+            return
+          }
+          cell = childClue.cells[1]  // Advance to the next cell.
         }
+        grid[lastRowCol[0]][lastRowCol[1]]['successor' + lastRowColDir] = {
+          'cell': cell,
+          'direction': childDir
+        };
       }
 
       lastRowCol = null

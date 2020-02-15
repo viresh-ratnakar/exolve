@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.48 February 14 2020
+
+- Bugfix: Handle the case of a linked clue ending and ressuming on the same
+  cell.
+
 ### Version: Exolve v0.47 February 12 2020
 
 - Minor bugfix: activateCell() could make one unnecessary call to itself through
