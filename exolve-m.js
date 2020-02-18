@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.48 February 14 2020'
+const VERSION = 'Exolve v0.49 February 17 2020'
 
 // ------ Begin globals.
 
@@ -1017,8 +1017,12 @@ function parseClue(dir, clueLine) {
       }
       grid[c[0]][c[1]].nodirClues.push(clueIndex)
       if (prev.length > 0) {
-        grid[prev[0]][prev[1]]['successor' + clueIndex] = {
+        grid[prev[0]][prev[1]]['succ' + clueIndex] = {
           'cell': c,
+          'direction': clueIndex
+        }
+        grid[c[0]][c[1]]['pred' + clueIndex] = {
+          'cell': prev,
           'direction': clueIndex
         }
       }
@@ -1052,6 +1056,9 @@ function parseClue(dir, clueLine) {
 // identified by parseOverallDisplayMost().
 function parseClueLists() {
   // Parse across, down, nodir clues
+  let prev = null
+  let firstClue = null
+  let lastClue = null
   for (let clueDirection of ['A', 'D', 'X']) {
     let first, last
     if (clueDirection == 'A') {
@@ -1067,7 +1074,6 @@ function parseClueLists() {
     if (first < 0 || last < first) {
       continue
     }
-    let prev = null
     let filler = ''
     let startNewTable = false
     for (let l = first; l <= last; l++) {
@@ -1096,6 +1102,10 @@ function parseClueLists() {
         addError('Clue entry already exists for clue: ' + clueLine);
         return
       }
+      if (!firstClue) {
+        firstClue = clueParse.clueIndex
+      }
+      lastClue = clueParse.clueIndex
       if (!clues[clueParse.clueIndex]) {
         clues[clueParse.clueIndex] =  {}
       }
@@ -1154,6 +1164,10 @@ function parseClueLists() {
       addError('Filler line should not be at the end: ' + filler)
       return
     }
+  }
+  if (firstClue && lastClue) {
+    clues[firstClue].prev = lastClue
+    clues[lastClue].next = firstClue
   }
 }
 
@@ -1348,9 +1362,13 @@ function processClueChildren() {
           }
           cell = childClue.cells[1]  // Advance to the next cell.
         }
-        grid[lastRowCol[0]][lastRowCol[1]]['successor' + lastRowColDir] = {
+        grid[lastRowCol[0]][lastRowCol[1]]['succ' + lastRowColDir] = {
           'cell': cell,
           'direction': childDir
+        };
+        grid[cell[0]][cell[1]]['pred' + childDir] = {
+          'cell': lastRowCol,
+          'direction': lastRowColDir
         };
       }
 
@@ -2107,6 +2125,41 @@ function toggleCurrentDirAndActivate() {
 // Handle navigation keys. Used by a listener, and also used to auto-advance
 // after a cell is filled.
 function handleKeyUpInner(key) {
+  if (key == 221) {
+    // ] or tab
+    if (currentClueIndex && clues[currentClueIndex] &&
+        clues[currentClueIndex].next) {
+      let next = clues[currentClueIndex].next
+      if (clues[next].cells.length > 0) {
+        currentDir = clues[next].clueDirection
+        if (currentDir == 'X') {
+          currentDir = next
+        }
+        activateCell(clues[next].cells[0][0], clues[next].cells[0][1])
+      } else {
+        deactivateCurrentCell()
+        selectClue(next)
+      }
+    }
+    return
+  } else if (key == 219) {
+    // [ or shift-tab
+    if (currentClueIndex && clues[currentClueIndex] &&
+        clues[currentClueIndex].prev) {
+      let prev = clues[currentClueIndex].prev
+      if (clues[prev].cells.length > 0) {
+        currentDir = clues[prev].clueDirection
+        if (currentDir == 'X') {
+          currentDir = prev
+        }
+        activateCell(clues[prev].cells[0][0], clues[prev].cells[0][1])
+      } else {
+        deactivateCurrentCell()
+        selectClue(prev)
+      }
+    }
+    return
+  }
   if (currentRow < 0 || currentRow >= gridHeight ||
       currentCol < 0 || currentCol >= gridWidth) {
     return
@@ -2117,6 +2170,10 @@ function handleKeyUpInner(key) {
       return
     }
     // backspace in an empty or prefilled cell
+    if (retreatCursorIfPred()) {
+      // retreated across linked clue!
+      return
+    }
     if (currentDir == 'A') {
       key = 37  // left
     } else if (currentDir == 'D') {
@@ -2172,32 +2229,6 @@ function handleKeyUpInner(key) {
     if (row >= 0) {
       activateCell(row, currentCol);
     }
-  } else if (key == 221) {
-    // ] or tab
-    if (currentClueIndex && clues[currentClueIndex] &&
-        clues[currentClueIndex].next) {
-      let next = clues[currentClueIndex].next
-      let cells = clues[next].cells
-      if (cells && cells.length > 0) {
-        if (next.charAt(0) == 'X') {
-          currentDir = next
-        }
-        activateCell(cells[0][0], cells[0][1])
-      }
-    }
-  } else if (key == 219) {
-    // [ or shift-tab
-    if (currentClueIndex && clues[currentClueIndex] &&
-        clues[currentClueIndex].prev) {
-      let prev = clues[currentClueIndex].prev
-      let cells = clues[prev].cells
-      if (cells && cells.length > 0) {
-        if (prev.charAt(0) == 'X') {
-          currentDir = prev
-        }
-        activateCell(cells[0][0], cells[0][1])
-      }
-    }
   }
 }
 
@@ -2206,7 +2237,7 @@ function handleKeyUp(e) {
   handleKeyUpInner(key)
 }
 
-// For tab/shift-tab in grid-input, we intercept KeyDown
+// For tab/shift-tab, we intercept KeyDown
 function handleTabKeyDown(e) {
   let key = e.which || e.keyCode
   if (key == 9) {
@@ -2219,7 +2250,7 @@ function handleTabKeyDown(e) {
 
 function advanceCursor() {
   // First check if there is successor
-  let successorProperty = 'successor' + currentDir
+  let successorProperty = 'succ' + currentDir
   if (grid[currentRow][currentCol][successorProperty]) {
     let successor = grid[currentRow][currentCol][successorProperty]
     currentDir = successor.direction
@@ -2239,6 +2270,17 @@ function advanceCursor() {
       handleKeyUpInner(40);
     }
   }
+}
+
+function retreatCursorIfPred() {
+  let predProperty = 'pred' + currentDir
+  if (!grid[currentRow][currentCol][predProperty]) {
+    return false
+  }
+  let pred = grid[currentRow][currentCol][predProperty]
+  currentDir = pred.direction
+  activateCell(pred.cell[0], pred.cell[1]);
+  return true
 }
 
 // Mark the clue as solved by setting its number's colour, if filled.
@@ -2397,7 +2439,9 @@ function handleGridInput() {
 
 function createListeners() {
   gridInput.addEventListener('keyup', function(e) {handleKeyUp(e);});
-  gridInput.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
+  // Listen for tab/shift tab everywhere in the puzzle area.
+  const outer = document.getElementById('outermost-stack')
+  outer.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
   gridInput.addEventListener('input', handleGridInput);
   gridInput.addEventListener('click', toggleCurrentDirAndActivate);
   background.addEventListener('click', getRowColActivator(-1, -1));

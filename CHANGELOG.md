@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.49 February 17 2020
+
+- Handle tab and shift-tab across clue directions (including nodir).
+- Allow backspacing across linked clues.
+
 ### Version: Exolve v0.48 February 14 2020
 
 - Bugfix: Handle the case of a linked clue ending and ressuming on the same

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.48 February 14 2020
+### Version: Exolve v0.49 February 17 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -465,7 +465,7 @@ clue will highlight and allow entry in all the cells for that clue (cells in
 a nodir clue can be scattered arbitrarily in the grid). Example:
 ```
   exolve-nodir:
-    #c3 #c5 #c8 #f6 One hundred years lived in prison (4)
+    #c3 #c5 #c8 #f6 [A] One hundred years lived in prison (4)
 ```
 Note that this technique can be used to create 3-d (or 4-d!) puzzles. Use a
 nodir section for the third dimension, explicitly specifying the cells for
