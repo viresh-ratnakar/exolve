@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.50 February 24 2020
+
+- Bug fix: revealAll() did not work properly for non-square grids.
+
 ### Version: Exolve v0.49 February 17 2020
 
 - Handle tab and shift-tab across clue directions (including nodir).

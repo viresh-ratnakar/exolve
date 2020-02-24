@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.49 February 17 2020'
+const VERSION = 'Exolve v0.50 February 24 2020'
 
 // ------ Begin globals.
 
@@ -2954,7 +2954,7 @@ function revealAll() {
     return
   }
   for (let row = 0; row < gridHeight; row++) {
-    for (let col = 0; col < gridHeight; col++) {
+    for (let col = 0; col < gridWidth; col++) {
       if (!grid[row][col].isLight && !grid[row][col].isDiagramless) {
         continue
       }
