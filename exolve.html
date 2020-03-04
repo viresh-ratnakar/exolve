@@ -116,7 +116,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.50 February 24 2020'
+const VERSION = 'Exolve v0.51 March 3 2020'
 
 // ------ Begin globals.
 
@@ -195,6 +195,8 @@ let allClueIndices = []
 let orphanClueIndices = []
 // For the orhpan-clues widget.
 let posInOrphanClueIndices = 0
+const CURR_ORPHAN_ID = 'curr-orphan'
+const DEFAULT_ORPHAN_LEN = 10
 
 const BLOCK_CHAR = '⬛';
 // We have special meanings for 0 (unfilled) and 1 (block in diagramless cell)
@@ -208,7 +210,8 @@ const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
 
 let nextPuzzleTextLine = 0
 
-const STATE_SEP = 'eexxoollvvee'
+const OLD_STATE_SEP = 'eexxoollvvee'
+const STATE_SEP = 'xlv'
 
 // Variables set by exolve-option
 let hideInferredNumbers = false
@@ -373,8 +376,7 @@ function parseColour(s) {
 // last ')'.
 function parseQuestion(s) {
   let enumParse = parseEnum(s)
-  let inputLen = enumParse.enumLen + enumParse.hyphenAfter.length +
-                 enumParse.wordEndAfter.length
+  let inputLen = enumParse.placeholder.length
 
   let afterEnum = enumParse.afterEnum
   let rawQ = s.substr(0, afterEnum)
@@ -428,26 +430,10 @@ function parseQuestion(s) {
   answersList.push({
     'ans': correctAnswer,
     'input': answer,
-    'hasEnum': (inputLen > 0),
+    'isq': true,
   });
   if (!hideEnum) {
-    let answerValue = ''
-    let wordEndIndex = 0
-    let hyphenIndex = 0
-    for (let i = 0; i < enumParse.enumLen; i++) {
-      answerValue = answerValue + '?'
-      if (wordEndIndex < enumParse.wordEndAfter.length &&
-              i == enumParse.wordEndAfter[wordEndIndex]) {
-        answerValue = answerValue + ' '
-        wordEndIndex++
-      }
-      if (hyphenIndex < enumParse.hyphenAfter.length &&
-              i == enumParse.hyphenAfter[hyphenIndex]) {
-        answerValue = answerValue + '-'
-        hyphenIndex++
-      }
-    }
-    answer.setAttributeNS(null, 'placeholder', '' + answerValue);
+    answer.setAttributeNS(null, 'placeholder', enumParse.placeholder);
   }
   answer.setAttributeNS(null, 'class', 'answer');
   if (rows == 1) {
@@ -630,10 +616,20 @@ function checkIdAndConsistency() {
       return
     }
   }
-  if (submitURL && submitKeys.length != answersList.length + 1) {
-    addError('Have ' + submitKeys.length + ' submit paramater keys, need ' +
-             (answersList.length + 1));
-    return
+  if (submitURL) {
+    let numKeys = 1
+    for (let a of answersList) {
+      if (a.isq) {
+        numKeys++
+      } else {
+        break
+      }
+    }
+    if (submitKeys.length != numKeys) {
+      addError('Have ' + submitKeys.length + ' submit paramater keys, need ' +
+               numKeys);
+      return
+    }
   }
 }
 
@@ -917,12 +913,14 @@ function parseCellLocation(s) {
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
 // afterEnum index after enum
+// placeholder (something like ???? ???-?'?)
 function parseEnum(clueLine) {
   let parse = {
     'enumLen': 0,
     'wordEndAfter': [],
     'hyphenAfter': [],
     'afterEnum': clueLine.length,
+    'placeholder': '',
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,'’\s]*\)/)
   if (enumLocation < 0) {
@@ -948,6 +946,9 @@ function parseEnum(clueLine) {
   let nextPart
   while (enumLeft && (nextPart = parseInt(enumLeft)) && !isNaN(nextPart) &&
          nextPart > 0) {
+    for (let i = 0; i < nextPart; i++) {
+      parse.placeholder = parse.placeholder + '?'
+    }
     parse.enumLen = parse.enumLen + nextPart
     enumLeft = enumLeft.replace(/\s*\d+\s*/, '')
     let nextSymbol = enumLeft.substr(0, 1)
@@ -955,16 +956,19 @@ function parseEnum(clueLine) {
       parse.hyphenAfter.push(parse.enumLen - 1)
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == ',') {
+      nextSymbol = ' '
       parse.wordEndAfter.push(parse.enumLen - 1)
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == '\'') {
       enumLeft = enumLeft.substr(1)
     } else if (enumLeft.indexOf('’') == 0) {
       // Fancy apostrophe
+      nextSymbol = '\''
       enumLeft = enumLeft.substr('’'.length)
     } else {
       break;
     }
+    parse.placeholder = parse.placeholder + nextSymbol
   }
   return parse
 }
@@ -1043,6 +1047,7 @@ function parseClueLabel(clueLine) {
 // enumLen
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
+// placeholder
 // startCell optional, used in diagramless+unsolved and off-numeric labels
 // cells[] optionally filled, if all clue cells are specified in the clue
 // anno (the part after the enum, if present)
@@ -1137,6 +1142,7 @@ function parseClue(dir, clueLine) {
   parse.enumLen = enumParse.enumLen
   parse.hyphenAfter = enumParse.hyphenAfter
   parse.wordEndAfter = enumParse.wordEndAfter
+  parse.placeholder = enumParse.placeholder
   parse.clue = clueLine.substr(0, enumParse.afterEnum).trim()
   parse.anno = clueLine.substr(enumParse.afterEnum).trim()
 
@@ -1217,6 +1223,7 @@ function parseClueLists() {
       clues[clueParse.clueIndex].enumLen = clueParse.enumLen
       clues[clueParse.clueIndex].hyphenAfter = clueParse.hyphenAfter
       clues[clueParse.clueIndex].wordEndAfter = clueParse.wordEndAfter
+      clues[clueParse.clueIndex].placeholder = clueParse.placeholder
       clues[clueParse.clueIndex].anno = clueParse.anno
       if (clueParse.anno) {
         hasSomeAnnos = true
@@ -1260,6 +1267,12 @@ function parseClueLists() {
     clues[firstClue].prev = lastClue
     clues[lastClue].next = firstClue
   }
+  // If there ae any clues not provided, link up their lights using prev/next.
+}
+
+function isOrphan(clueIndex) {
+  return clues[clueIndex] &&
+         (!clues[clueIndex].cells || !clues[clueIndex].cells.length);
 }
 
 // For each cell grid[i][j], set {across,down}ClueLabels using previously
@@ -1352,7 +1365,7 @@ function setClueMemberships() {
     }
   }
   for (let clueIndex of allClueIndices) {
-    if (!clues[clueIndex].cells || !clues[clueIndex].cells.length) {
+    if (isOrphan(clueIndex)) {
       orphanClueIndices.push(clueIndex) 
     }
   }
@@ -1629,6 +1642,60 @@ function setGridWordEndsAndHyphens() {
   }
 }
 
+function cmpClues(c1, c2) {
+  let d1 = c1.substr(0, 1)
+  let d2 = c2.substr(0, 1)
+  if (d1 < d2) {
+    return -1
+  } else if (d1 > d2) {
+    return 1
+  }
+  let n1 = parseInt(c1.substr(1))
+  let n2 = parseInt(c2.substr(1))
+  if (n1 < n2) {
+    return -1;
+  } else if (d1 > d2) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+function finishClueProcessing() {
+  // Find clue indices that do not have clues, set up tab-navigation for them.
+  let cluelesses = []
+  for (let ci in clues) {
+    if (!clues.hasOwnProperty(ci)) {           
+      continue;
+    }
+    if (!clues[ci].clue) {
+      if (clues[ci].prev || clues[ci].next ||
+          (clues[ci].clueDirection != 'A' && clues[ci].clueDirection != 'D')) {
+        addError('Unexpected properties in clueless clue: ' + ci);
+        return;
+      }
+      cluelesses.push(ci)
+    }
+  }
+  cluelesses.sort(cmpClues)
+  let prev = null
+  let first = null
+  for (let ci of cluelesses) {
+    clues[ci].prev = prev
+    if (prev) {
+      clues[prev].next = ci
+    }
+    prev = ci
+    if (!first) {
+      first = ci
+    }
+  }
+  if (first) {
+    clues[first].prev = prev
+    clues[prev].next = first
+  }
+}
+
 function stripLineBreaks(s) {
   s = s.replace(/<br\s*\/?>/gi, " / ")
   return s.replace(/<\/br\s*>/gi, "")
@@ -1686,6 +1753,24 @@ function displayClues() {
     let col2 = document.createElement('td')
     col2.innerHTML = clues[clueIndex].clue
 
+    if (!hasDiagramlessCells && isOrphan(clueIndex) &&
+        !clues[clueIndex].parentClueIndex) {
+      let placeholder = ''
+      let len = DEFAULT_ORPHAN_LEN
+      if (clues[clueIndex].placeholder) {
+        placeholder = clues[clueIndex].placeholder
+        len = placeholder.length
+      }
+      addOrphanEntryUI(col2, false, len, placeholder, clueIndex)
+      col2.lastElementChild.lastElementChild.addEventListener(
+        'click', function(e) {
+        copyOrphanEntry(clueIndex);
+        e.stopPropagation();});
+      answersList.push({
+        'input': col2.lastElementChild.firstElementChild,
+        'isq': false,
+      });
+    }
     // If clue contains <br> tags, replace them with "/" for future renderings
     // in the "current clue" strip.
     if (clues[clueIndex].clue.indexOf('<') >= 0) {
@@ -1778,8 +1863,12 @@ function updateDisplayAndGetState() {
   let numFilled = stateAndFilled[1]
   statusNumFilled.innerHTML = numFilled
   for (let a of answersList) {
-    if (a.hasEnum) {
-      a.input.value = a.input.value.toUpperCase()
+    if (a.isq) {
+      let cursor = a.input.selectionStart
+      a.input.value = a.input.value.toUpperCase().trimLeft()
+      a.input.selectionEnd = cursor 
+    } else {
+      break
     }
   }
   clearButton.disabled = (activeCells.length == 0)
@@ -1821,7 +1910,7 @@ function restoreState() {
     let name = puzzleId + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
     let ca = decodedCookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
       let c = ca[i];
       while (c.charAt(0) == ' ') {
         c = c.substring(1);
@@ -1886,7 +1975,8 @@ function restoreState() {
       }
     }
   } else {
-    // Also try to recover answers to questions
+    state = state.replace(new RegExp(OLD_STATE_SEP, 'g'), STATE_SEP);
+    // Also try to recover answers to questions and orphan-fills.
     if (state.substr(index, STATE_SEP.length) == STATE_SEP) {
       let parts = state.substr(index + STATE_SEP.length).split(STATE_SEP)
       if (parts.length == answersList.length) {
@@ -2130,11 +2220,11 @@ function selectClue(activeClueIndex) {
     activeClues.push(clues[clueIndex].clueTR)
   }
   curr = clues[indexForCurr]
+  currentClueIndex = activeClueIndex
   if (!curr || !curr.clue) {
     showOrphanCluesAsActive()
     return
   }
-  currentClueIndex = activeClueIndex
   currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
   currentClue.style.background = ACTIVE_COLOUR;
   makeCurrentClueVisible();
@@ -2152,6 +2242,126 @@ function orphanCluesBrowse(incr) {
   showOrphanCluesAsActive()
 }
 
+function copyOrphanEntry(clueIndex) {
+  if (hasDiagramlessCells || activeCells.length < 1 ||
+      !clueIndex || !clues[clueIndex] || !clues[clueIndex].clueTR) {
+    return
+  }
+  let ips = clues[clueIndex].clueTR.getElementsByTagName('input')
+  if (ips.length != 1) {
+    return
+  }
+  let entry = ips[0].value
+  let letters = ''
+  for (let i = 0; i < entry.length; i++) {
+    let letter = entry[i]
+    if (letter < 'A' || letter > 'Z') {
+      if (!allowDigits || letter < '0' || letter > '9') {
+        continue;
+      }
+    }
+    letters = letters + letter
+  }
+  if (letters.length < 1) {
+    return
+  }
+  if (letters.length != activeCells.length) {
+    if (!confirm('Are you sure you want to partially copy from ' +
+                  letters.length + ' letters into ' + activeCells.length +
+                  ' squares?')) {
+      return
+    }
+  }
+  let index = 0
+  let row = -1
+  let col = -1
+  for (let i = 0; i < letters.length; i++) {
+    if (index >= activeCells.length) {
+      break;
+    }
+    let x = activeCells[index++]
+    row = x[0]
+    col = x[1]
+    if (grid[row][col].prefill) {
+      continue
+    }
+    let letter = letters[i]
+    let oldLetter = grid[row][col].currentLetter
+    if (oldLetter != letter) {
+      grid[row][col].currentLetter = letter
+      let revealedChar = stateCharToDisplayChar(letter)
+      grid[row][col].textNode.nodeValue = revealedChar
+      if (row == currentRow && col == currentCol) {
+        gridInput.value = revealedChar
+      }
+    }
+  }
+  if (index < activeCells.length) {
+    // Advance to the next square.
+    let x = activeCells[index]
+    row = x[0]
+    col = x[1]
+  }
+  if (row >= 0 && col >= 0) {
+    activateCell(row, col)
+  }
+  updateActiveCluesState()
+  updateAndSaveState()
+}
+
+// inCurr is set to true when this is called oninput in the currentClue strip.
+function updateOrphanEntry(clueIndex, inCurr) {
+  if (!clueIndex || !clues[clueIndex] || !clues[clueIndex].clueTR ||
+      !isOrphan(clueIndex) || clues[clueIndex].parentClueIndex) {
+    return
+  }
+  let clueInputs = clues[clueIndex].clueTR.getElementsByTagName('input')
+  if (clueInputs.length != 1) {
+    addError('Missing placeholder input for clue ' + clueIndex)
+    return
+  }
+  if (!inCurr) {
+    let cursor = clueInputs[0].selectionStart
+    clueInputs[0].value = clueInputs[0].value.toUpperCase().trimLeft()
+    clueInputs[0].selectionEnd = cursor
+    updateAndSaveState()
+  }
+  let curr = document.getElementById(CURR_ORPHAN_ID)
+  if (!curr) {
+    return
+  }
+  let currInputs = curr.getElementsByTagName('input')
+  if (clueInputs.length != 1) {
+    return
+  }
+  if (inCurr) {
+    let cursor = currInputs[0].selectionStart
+    currInputs[0].value = currInputs[0].value.toUpperCase().trimLeft()
+    currInputs[0].selectionEnd = cursor
+    clueInputs[0].value = currInputs[0].value
+    updateAndSaveState()
+  } else {
+    currInputs[0].value = clueInputs[0].value
+  }
+}
+
+function addOrphanEntryUI(elt, inCurr, len, placeholder, clueIndex) {
+  let span = '<span'
+  if (inCurr) {
+    span = span + ' id="' + CURR_ORPHAN_ID + '"'
+  }
+  elt.insertAdjacentHTML(
+    'beforeend',
+    span + ' class="nobr">' +
+    '<input size="' + len + '" class="incluefill" placeholder="' +
+    placeholder + '" type="text" ' +
+    'oninput="updateOrphanEntry(\'' + clueIndex + '\', ' + inCurr + ')" ' +
+    'title="You can record your solution here before copying to squares" ' +
+    'autocomplete="off" spellcheck="off"></input>' +
+    '<button title="Copy into currently highlighted squares" ' +
+    'class="small-button">&#8690;</button></span>')
+}
+
 // From a click in a  diagramless cell or a cell without a known clue
 // association, show "current-clue" as a browsable widget with all clues.
 function showOrphanCluesAsActive() {
@@ -2159,18 +2369,30 @@ function showOrphanCluesAsActive() {
     return
   }
   let clueIndex = orphanClueIndices[posInOrphanClueIndices]
-  let displayedClue = clues[clueIndex].fullDisplayLabel + clues[clueIndex].clue
   if (clues[clueIndex].parentClueIndex) {
-    let parent = clues[clueIndex].parentClueIndex
-    displayedClue = clues[parent].fullDisplayLabel + clues[parent].clue
+    clueIndex = clues[clueIndex].parentClueIndex
   }
+  let displayedClue = clues[clueIndex].fullDisplayLabel + clues[clueIndex].clue
   currentClue.innerHTML =
     '<span>' +
-    '<button class="small-button" onclick="orphanCluesBrowse(-1)">&lsaquo;</button>' +
+    '<button class="small-button" onclick="orphanCluesBrowse(-1)">' +
+    '&lsaquo;</button>' +
     '<span title="You have to figure out which clue to use"> CLUES </span>' +
-    '<button class="small-button" onclick="orphanCluesBrowse(1)">&rsaquo;</button>' +
-    '</span> ' +
-    displayedClue
+    '<button class="small-button" onclick="orphanCluesBrowse(1)">' +
+    '&rsaquo;</button></span> ' + displayedClue
+  if (!hasDiagramlessCells) {
+    let placeholder = ''
+    let len = DEFAULT_ORPHAN_LEN
+    if (clues[clueIndex].placeholder) {
+      placeholder = clues[clueIndex].placeholder
+      len = placeholder.length
+    }
+    addOrphanEntryUI(currentClue, true, len, placeholder, clueIndex)
+    updateOrphanEntry(clueIndex, false /* need to copy to curr */)
+    currentClue.lastElementChild.lastElementChild.addEventListener(
+      'click', function(e) {
+      copyOrphanEntry(clueIndex);});
+  }
   currentClue.style.background = ORPHAN_CLUES_COLOUR;
   makeCurrentClueVisible();
 }
@@ -2214,7 +2436,7 @@ function toggleCurrentDirAndActivate() {
 }
 
 // Handle navigation keys. Used by a listener, and also used to auto-advance
-// after a cell is filled.
+// after a cell is filled. Returns false only if a tab input was actually used.
 function handleKeyUpInner(key) {
   if (key == 221) {
     // ] or tab
@@ -2231,8 +2453,9 @@ function handleKeyUpInner(key) {
         deactivateCurrentCell()
         selectClue(next)
       }
+      return false
     }
-    return
+    return true
   } else if (key == 219) {
     // [ or shift-tab
     if (currentClueIndex && clues[currentClueIndex] &&
@@ -2248,29 +2471,30 @@ function handleKeyUpInner(key) {
         deactivateCurrentCell()
         selectClue(prev)
       }
+      return false
     }
-    return
+    return true
   }
   if (currentRow < 0 || currentRow >= gridHeight ||
       currentCol < 0 || currentCol >= gridWidth) {
-    return
+    return true
   }
   if (key == 8) {
     if (grid[currentRow][currentCol].currentLetter != '0' &&
         !grid[currentRow][currentCol].prefill) {
-      return
+      return true
     }
     // backspace in an empty or prefilled cell
     if (retreatCursorIfPred()) {
       // retreated across linked clue!
-      return
+      return true
     }
     if (currentDir == 'A') {
       key = 37  // left
     } else if (currentDir == 'D') {
       key = 38  // up
     } else {
-      return
+      return true
     }
   }
   if (key == 13) {
@@ -2321,6 +2545,7 @@ function handleKeyUpInner(key) {
       activateCell(row, currentCol);
     }
   }
+  return true
 }
 
 function handleKeyUp(e) {
@@ -2332,10 +2557,12 @@ function handleKeyUp(e) {
 function handleTabKeyDown(e) {
   let key = e.which || e.keyCode
   if (key == 9) {
-    e.preventDefault()
     // tab. replace with [ or ]
     key = e.shiftKey ? 219 : 221
-    handleKeyUpInner(key)
+    if (!handleKeyUpInner(key)) {
+      // Tab input got used already.
+      e.preventDefault()
+    }
   }
 }
 
@@ -2924,7 +3151,11 @@ function clearAll() {
     }
   }
   for (let a of answersList) {
-    a.input.value = ''
+    if (a.isq) {
+      a.input.value = ''
+    } else {
+      break
+    }
   }
   for (let a of revelationList) {
     a.style.display = 'none'
@@ -3125,8 +3356,11 @@ function submitSolution() {
   let fullSubmitURL = submitURL + '&' + submitKeys[0] + '=' +
                       encodeURIComponent(state)
   for (let i = 0; i < answersList.length; i++) {
-     fullSubmitURL = fullSubmitURL + '&' + submitKeys[i + 1] + '=' +
-                   encodeURIComponent(answersList[i].input.value.toUpperCase())
+    if (!answersList[i].isq) {
+      break
+    }
+    fullSubmitURL = fullSubmitURL + '&' + submitKeys[i + 1] + '=' +
+      encodeURIComponent(answersList[i].input.value.toUpperCase())
   }
   document.body.style.cursor = 'wait'
   window.location.replace(fullSubmitURL)
@@ -3178,6 +3412,8 @@ function createPuzzle() {
   processClueChildren();
   fixFullDisplayLabels()
   setGridWordEndsAndHyphens();
+  finishClueProcessing();
+
   displayClues();
   displayGridBackground();
   createListeners();
@@ -3283,10 +3519,13 @@ td:first-child:not(.filler) {
   word-wrap: break-word;
   font-weight: bold;
   margin: 0 0 0 8px;
-  padding: 4px 4px 4px 0;
+  padding: 0 4px 4px 0;
 }
 #grid-panel {
   margin: 0 8px 0 8px;
+}
+.nobr {
+  white-space: nowrap;
 }
 #grid-parent-centerer {
   text-align: center;
@@ -3353,17 +3592,16 @@ hr {
   cursor: not-allowed;
 }
 .small-button {
-  background-color: mistyrose;
-  border: 1px solid lightpink;
+  background-color: inherit;
+  border: 1px solid gray;
   outline: none;
-  padding: 4px 8px;
+  padding: 0 4px 2px 4px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  border-radius: 4px;
   font-family: monospace;
   font-weight: bold;
-  font-size: 14px;
+  color: darkgreen;
 }
 .small-button:hover {
   background-color: lightpink;
@@ -3406,6 +3644,17 @@ hr {
   color: darkgreen;
   background-image:
     repeating-linear-gradient(to bottom, white, white 13px, black 14px);
+}
+.incluefill {
+  border: none;
+  padding: 0 0 2px 0px;
+  margin: 0 0 0 4px;
+  outline: none;
+  font-family: monospace;
+  font-size: 12px;
+  color: darkgreen;
+  border-bottom: solid 2px #c9c9c9;
+  background-color: inherit;
 }
 #scratchpad {
   border: 1px solid darkgreen;

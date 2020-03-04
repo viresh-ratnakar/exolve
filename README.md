@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.50 February 24 2020
+### Version: Exolve v0.51 March 3 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -297,7 +297,6 @@ a value in a light for which the clue association is not known, the highlighted
 bring up any of all the clues that cover at least one square without a known
 clue association.
 
-
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
 in a light or is a blocked square—if the setter has used any bars, they do get
@@ -470,6 +469,21 @@ a nodir clue can be scattered arbitrarily in the grid). Example:
 Note that this technique can be used to create 3-d (or 4-d!) puzzles. Use a
 nodir section for the third dimension, explicitly specifying the cells for
 each clue along the third dimension.
+
+### Jigsaw puzzle clues
+If there is any nodir clue without cells explicitly specified, then the
+clue is shown with a text entry area next to it. Solvers can record their
+solutions here, until they figure out where in the grid those letters should
+be entered. Solvers can transfer recorded letters from these placeholder areas
+by simply clicking the button (that looks like [⇲]) next to the area,
+whenever they have some squares highlighted for entry in the grid.
+
+The same placeholder text and the transfer button ([⇲]) are also shown
+in the highlighted scrollable 'orphan' clues widget, whenever the currently
+highlighed squares do not have a known clue association.
+
+The placeholder area and transfer button features do not get activated if there
+are any diagramless cells (as the logic gets too messy).
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,

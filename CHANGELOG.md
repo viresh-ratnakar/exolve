@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v0.51 March 3 2020
+
+- Allow tab/shift-tab for lights even when they do not have a known clue
+  associated.
+- Use a shorter separator string for saving state (but support the older one
+  too).
+- For nodir clues without cells specified, create placeholder text-entry areas.
+  Also add buttons to transfer into active cells.
+- Bugfix: only if a tab/shift-tab is usable for navigation do we now prevent
+  default browser behaviour.
+- Bugfix: When entering answers, do not make the cursor jump to the end.
+
 ### Version: Exolve v0.50 February 24 2020
 
 - Bug fix: revealAll() did not work properly for non-square grids.
