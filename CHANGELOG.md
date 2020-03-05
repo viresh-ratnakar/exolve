@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.53 March 5 2020
+
+- Turn on orphan-clue placeholder enrtry areas even if diagramless cells are
+  present--just turn off the copy-from-placeholder buttons (as only one cell
+  will be active if it is diagramless).
+
 ### Version: Exolve v0.52 March 4 2020
 
 - Bugfix: tab-navigation in the clues list also moves focus to the placeholder

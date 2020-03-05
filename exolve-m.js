@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.52 March 4 2020'
+const VERSION = 'Exolve v0.53 March 5 2020'
 
 // ------ Begin globals.
 
@@ -722,6 +722,9 @@ function parseGrid() {
         hasSolvedCells = true
       }
     }
+  }
+  if (hasDiagramlessCells) {
+    hideCopyPlaceholders = true
   }
   if (hasUnsolvedCells && hasSolvedCells) {
     addError('Either all or no solutions should be provided')
@@ -1635,7 +1638,8 @@ function displayClues() {
         table = nodirClues
         hasNodirClues = true
       } else {
-        addError('Unexpected clue direction ' + clues[clueIndex].clueDirection + ' in ' + clueIndex)
+        addError('Unexpected clue direction ' +
+                 clues[clueIndex].clueDirection + ' in ' + clueIndex)
         return
       }
       dir = clues[clueIndex].clueDirection
@@ -1667,8 +1671,7 @@ function displayClues() {
     let col2 = document.createElement('td')
     col2.innerHTML = clues[clueIndex].clue
 
-    if (!hasDiagramlessCells && isOrphan(clueIndex) &&
-        !clues[clueIndex].parentClueIndex) {
+    if (isOrphan(clueIndex) && !clues[clueIndex].parentClueIndex) {
       let placeholder = ''
       let len = DEFAULT_ORPHAN_LEN
       if (clues[clueIndex].placeholder) {
@@ -2157,7 +2160,7 @@ function orphanCluesBrowse(incr) {
 }
 
 function copyOrphanEntry(clueIndex) {
-  if (hasDiagramlessCells || activeCells.length < 1 ||
+  if (hideCopyPlaceholders || activeCells.length < 1 ||
       !clueIndex || !clues[clueIndex] || !clues[clueIndex].clueTR) {
     return
   }
@@ -2302,16 +2305,14 @@ function showOrphanCluesAsActive() {
     '<span title="You have to figure out which clue to use"> CLUES </span>' +
     '<button class="small-button" onclick="orphanCluesBrowse(1)">' +
     '&rsaquo;</button></span> ' + displayedClue
-  if (!hasDiagramlessCells) {
-    let placeholder = ''
-    let len = DEFAULT_ORPHAN_LEN
-    if (clues[clueIndex].placeholder) {
-      placeholder = clues[clueIndex].placeholder
-      len = placeholder.length
-    }
-    addOrphanEntryUI(currentClue, true, len, placeholder, clueIndex)
-    updateOrphanEntry(clueIndex, false /* need to copy to curr */)
+  let placeholder = ''
+  let len = DEFAULT_ORPHAN_LEN
+  if (clues[clueIndex].placeholder) {
+    placeholder = clues[clueIndex].placeholder
+    len = placeholder.length
   }
+  addOrphanEntryUI(currentClue, true, len, placeholder, clueIndex)
+  updateOrphanEntry(clueIndex, false /* need to copy to curr */)
   currentClue.style.background = ORPHAN_CLUES_COLOUR;
   makeCurrentClueVisible();
 }

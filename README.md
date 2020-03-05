@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.52 March 4 2020
+### Version: Exolve v0.53 March 5 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -475,20 +475,22 @@ If there is any nodir clue without cells explicitly specified, then the
 clue is shown with a text entry area next to it. Solvers can record their
 solutions here, until they figure out where in the grid those letters should
 be entered. Solvers can transfer recorded letters from these placeholder areas
-by simply clicking the button (that looks like [⇲]) next to the area,
-whenever they have some squares highlighted for entry in the grid.
+by simply clicking the "copy-placeholder" button (that looks like [⇲]) next to
+the placeholder area, whenever they have some squares highlighted for entry in
+the grid.
 
-The same placeholder text and the transfer button ([⇲]) are also shown
+The same placeholder text and the copy-placeholder button ([⇲]) are also shown
 in the highlighted scrollable 'orphan' clues widget, whenever the currently
 highlighed squares do not have a known clue association.
 
-The placeholder area and transfer button features do not get activated if there
-are any diagramless cells (as the logic gets too messy).
+The copy-placeholder button feature does not get activated if there are any
+diagramless cells (as only one diagramless is active generally).
 
-The transfer buttons can be disabled (i.e., not shown at all) by specifying
-the exolve-option, hide-copy-placeholder-buttons. This is useful if you find
-the buttons distracting in appearance, or if copying from the placeholder is
-not very useful for some other reason (for eg., lights are split into parts).
+The copy-placeholder buttons can be disabled (i.e., not shown at all) by
+specifying the exolve-option, hide-copy-placeholder-buttons. This is useful if
+you find the buttons distracting in appearance, or if copying from the
+placeholder is not very useful for some other reason (for eg., lights are split
+into parts).
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
