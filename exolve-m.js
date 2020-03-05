@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.51 March 3 2020'
+const VERSION = 'Exolve v0.52 March 4 2020'
 
 // ------ Begin globals.
 
@@ -126,6 +126,7 @@ const STATE_SEP = 'xlv'
 let hideInferredNumbers = false
 let cluesPanelLines = -1
 let allowDigits = false
+let hideCopyPlaceholders = false
 
 // Variables set in init().
 let puzzleTextLines;
@@ -379,6 +380,10 @@ function parseOption(s) {
     }
     if (spart == "allow-digits") {
       allowDigits = true
+      continue
+    }
+    if (spart == "hide-copy-placeholder-buttons") {
+      hideCopyPlaceholders = true
       continue
     }
     let kv = spart.split(':')
@@ -1671,10 +1676,6 @@ function displayClues() {
         len = placeholder.length
       }
       addOrphanEntryUI(col2, false, len, placeholder, clueIndex)
-      col2.lastElementChild.lastElementChild.addEventListener(
-        'click', function(e) {
-        copyOrphanEntry(clueIndex);
-        e.stopPropagation();});
       answersList.push({
         'input': col2.lastElementChild.firstElementChild,
         'isq': false,
@@ -2134,6 +2135,10 @@ function selectClue(activeClueIndex) {
     showOrphanCluesAsActive()
     return
   }
+  if (curr.clueTR) {
+    placeholders = curr.clueTR.getElementsByTagName('input')
+    placeholders[0].focus()
+  }
   currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
   currentClue.style.background = ACTIVE_COLOUR;
   makeCurrentClueVisible();
@@ -2255,20 +2260,28 @@ function updateOrphanEntry(clueIndex, inCurr) {
 }
 
 function addOrphanEntryUI(elt, inCurr, len, placeholder, clueIndex) {
-  let span = '<span'
+  let html = '<span'
   if (inCurr) {
-    span = span + ' id="' + CURR_ORPHAN_ID + '"'
+    html = html + ' id="' + CURR_ORPHAN_ID + '"'
   }
-  elt.insertAdjacentHTML(
-    'beforeend',
-    span + ' class="nobr">' +
+  html = html + ' class="nobr">' +
     '<input size="' + len + '" class="incluefill" placeholder="' +
     placeholder + '" type="text" ' +
     'oninput="updateOrphanEntry(\'' + clueIndex + '\', ' + inCurr + ')" ' +
     'title="You can record your solution here before copying to squares" ' +
-    'autocomplete="off" spellcheck="off"></input>' +
-    '<button title="Copy into currently highlighted squares" ' +
-    'class="small-button">&#8690;</button></span>')
+    'autocomplete="off" spellcheck="off"></input>'
+  if (!hideCopyPlaceholders) {
+    html = html + '<button title="Copy into currently highlighted squares" ' +
+      'class="small-button">&#8690;</button>'
+  }
+  html = html + '</span>'
+  elt.insertAdjacentHTML('beforeend', html)
+  if (!hideCopyPlaceholders) {
+    elt.lastElementChild.lastElementChild.addEventListener(
+      'click', function(e) {
+      copyOrphanEntry(clueIndex);
+      e.stopPropagation();});
+  }
 }
 
 // From a click in a  diagramless cell or a cell without a known clue
@@ -2298,9 +2311,6 @@ function showOrphanCluesAsActive() {
     }
     addOrphanEntryUI(currentClue, true, len, placeholder, clueIndex)
     updateOrphanEntry(clueIndex, false /* need to copy to curr */)
-    currentClue.lastElementChild.lastElementChild.addEventListener(
-      'click', function(e) {
-      copyOrphanEntry(clueIndex);});
   }
   currentClue.style.background = ORPHAN_CLUES_COLOUR;
   makeCurrentClueVisible();

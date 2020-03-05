@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.52 March 4 2020
+
+- Bugfix: tab-navigation in the clues list also moves focus to the placeholder
+  input area, if present.
+- Add hide-copy-placeholder-buttons option to not show copy placeholder buttons
+  if desired.
+
 ### Version: Exolve v0.51 March 3 2020
 
 - Allow tab/shift-tab for lights even when they do not have a known clue

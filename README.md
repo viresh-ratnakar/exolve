@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.51 March 3 2020
+### Version: Exolve v0.52 March 4 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -485,6 +485,11 @@ highlighed squares do not have a known clue association.
 The placeholder area and transfer button features do not get activated if there
 are any diagramless cells (as the logic gets too messy).
 
+The transfer buttons can be disabled (i.e., not shown at all) by specifying
+the exolve-option, hide-copy-placeholder-buttons. This is useful if you find
+the buttons distracting in appearance, or if copying from the placeholder is
+not very useful for some other reason (for eg., lights are split into parts).
+
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
 explanations, commentary, etc., in an exolve-explanations section. Just like the
@@ -613,6 +618,10 @@ The list of currently supported options is as follows:
   about N lines of text, adding scrollbars if needed.
 - **allow-digits** If this option is specified, then we allow solvers to enter
   digits in cells.
+- **hide-copy-placeholder-buttons** This is an option that is only applicable
+  when there are nodir clues without cells explicitly specified. It turns off
+  the display of buttons to copy placeholder texts in those cases (see the
+  subsection below on "Jigsaw puzzle clues".
 
 ## Saving state
 The software automatically saves state. It does so in the URL (after the #)
