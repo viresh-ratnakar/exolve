@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.54 March 5 2020
+
+- Bugfix: focus on placeholder in a clue only if it actually exists!
+
 ### Version: Exolve v0.53 March 5 2020
 
 - Turn on orphan-clue placeholder enrtry areas even if diagramless cells are

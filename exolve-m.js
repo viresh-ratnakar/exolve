@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.53 March 5 2020'
+const VERSION = 'Exolve v0.54 March 5 2020'
 
 // ------ Begin globals.
 
@@ -2140,7 +2140,9 @@ function selectClue(activeClueIndex) {
   }
   if (curr.clueTR) {
     placeholders = curr.clueTR.getElementsByTagName('input')
-    placeholders[0].focus()
+    if (placeholders && placeholders.length > 0) {
+      placeholders[0].focus()
+    }
   }
   currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
   currentClue.style.background = ACTIVE_COLOUR;
