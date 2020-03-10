@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.55 March 9 2020
+
+- Add prev/next clue buttons in the current clue strip, helping navigation
+  on mobile devices where tab/shift-tab is not doable.
+
 ### Version: Exolve v0.54 March 5 2020
 
 - Bugfix: focus on placeholder in a clue only if it actually exists!

@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.54 March 5 2020
+Version: Exolve v0.55 March 9 2020
 */
 
 .background {
@@ -94,7 +94,7 @@ td:first-child:not(.filler) {
   word-wrap: break-word;
   font-weight: bold;
   margin: 0 0 0 8px;
-  padding: 0 4px 4px 0;
+  padding: 2px 4px 2px 0;
 }
 #grid-panel {
   margin: 0 8px 0 8px;

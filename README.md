@@ -293,9 +293,8 @@ have not been provided. The second is when the setter opts to deliberately
 not provide associations between grid squares and clues, by using non-numeric
 clue labels without providing their grid locations. When the solver is entering
 a value in a light for which the clue association is not known, the highlighted
-"current clue" is actually a browsable interface in which the solver can
-bring up any of all the clues that cover at least one square without a known
-clue association.
+"current clue" browsable interface runs through all the clues for which no
+grid cells are known.
 
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is

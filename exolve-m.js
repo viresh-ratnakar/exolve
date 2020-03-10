@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.54 March 5 2020'
+const VERSION = 'Exolve v0.55 March 9 2020'
 
 // ------ Begin globals.
 
@@ -2101,6 +2101,27 @@ function getAllLinkedClueIndices(clueIndex) {
   return clueIndices
 }
 
+// get HTML for back/forth buttons in current-clue.
+function getCurrentClueButtons(forOrphans) {
+  let lfunc = "handleKeyUpInner(219)"
+  let lfuncTip = "Previous clue"
+  let rfunc = "handleKeyUpInner(221)"
+  let rfuncTip = "Next clue"
+  if (forOrphans) {
+    lfunc = "orphanCluesBrowse(-1)"
+    lfuncTip = "Previous clue lacking known grid position"
+    rfunc = "orphanCluesBrowse(1)"
+    rfuncTip = "Next clue lacking known grid position"
+  }
+  return '<span>' +
+    '<button class="small-button" ' +
+    'title="' + lfuncTip + '" onclick="' + lfunc + '">' +
+    '&lsaquo;</button>&nbsp;' +
+    '<button class="small-button" ' +
+    'title="' + rfuncTip + '" onclick="' + rfunc + '">' +
+    '&rsaquo;</button></span> ';
+}
+
 // For freezing clueIndex to deal with JS closure.
 function getClueSelector(clueIndex) {
   return function() {
@@ -2144,7 +2165,8 @@ function selectClue(activeClueIndex) {
       placeholders[0].focus()
     }
   }
-  currentClue.innerHTML = curr.fullDisplayLabel + curr.clue
+  currentClue.innerHTML = getCurrentClueButtons(false) +
+    curr.fullDisplayLabel + curr.clue
   currentClue.style.background = ACTIVE_COLOUR;
   makeCurrentClueVisible();
 }
@@ -2300,13 +2322,7 @@ function showOrphanCluesAsActive() {
     clueIndex = clues[clueIndex].parentClueIndex
   }
   let displayedClue = clues[clueIndex].fullDisplayLabel + clues[clueIndex].clue
-  currentClue.innerHTML =
-    '<span>' +
-    '<button class="small-button" onclick="orphanCluesBrowse(-1)">' +
-    '&lsaquo;</button>' +
-    '<span title="You have to figure out which clue to use"> CLUES </span>' +
-    '<button class="small-button" onclick="orphanCluesBrowse(1)">' +
-    '&rsaquo;</button></span> ' + displayedClue
+  currentClue.innerHTML = getCurrentClueButtons(true) + displayedClue
   let placeholder = ''
   let len = DEFAULT_ORPHAN_LEN
   if (clues[clueIndex].placeholder) {
