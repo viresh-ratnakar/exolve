@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.55 March 9 2020
+Version: Exolve v0.56 March 23 2020
 */
 
 .background {
@@ -41,6 +41,10 @@ td {
 td:first-child:not(.filler) {
   max-width: 45px;
   font-weight: bold;
+  text-align:right;
+}
+td:first-child:not(.filler):hover {
+  cursor: pointer;
 }
 .anno-text {
   font-style: italic;
@@ -115,6 +119,20 @@ td:first-child:not(.filler) {
   border: none;
   border-width:0;
 }
+#grid-input-rarr {
+  position: relative;
+  right: -12px;
+  top: -24px;
+  color: mistyrose;
+  font-size: small;
+}
+#grid-input-darr {
+  position: relative;
+  right: 0;
+  top: -12px;
+  color: mistyrose;
+  font-size: small;
+}
 #grid-input {
   text-align: center;
   text-anchor: middle;
@@ -122,7 +140,7 @@ td:first-child:not(.filler) {
   width: 100%;
   height: 100%;
   padding: 0;
-  background: rgba(255,255,255,0.0);
+  background: rgba(255,0,0,0.2);
 }
 #controls-etc {
   padding: 8px 0 6px 0;

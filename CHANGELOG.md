@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v0.56 March 23 2020
+
+- Mainly a revamp of tab navigation, to take into account various cases
+  involving diagramless cells, clues without cells specified, etc.
+- When on a diagramless cell or a cell without a known clue, the clues strip
+  will now cycle through only "orphan clues" with the < and > buttons in it.
+- Darken the current cell more than the rest of the active cells.
+- Add small triangles to indicate the current direction. Unobtrusive and
+  harmless (perhaps reassuring) normally, and quite useful on diagramless cells.
+- Allow clicking on clue numbers in the clues lists, to manually toggle "solved"
+  state (i.e., the light-blue colour). Useful for jigsaw puzzles.
+
 ### Version: Exolve v0.55 March 9 2020
 
 - Add prev/next clue buttons in the current clue strip, helping navigation
