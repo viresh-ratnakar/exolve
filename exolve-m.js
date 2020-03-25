@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.56 March 23 2020'
+const VERSION = 'Exolve v0.57 March 25 2020'
 
 // ------ Begin globals.
 
@@ -122,6 +122,8 @@ let nextPuzzleTextLine = 0
 
 const OLD_STATE_SEP = 'eexxoollvvee'
 const STATE_SEP = 'xlv'
+
+const MARK_CLUE_TOOLTIP = 'Click to forcibly mark/unmark as solved'
 
 // Variables set by exolve-option
 let hideInferredNumbers = false
@@ -1204,6 +1206,31 @@ function isOrphan(clueIndex) {
          (!clues[clueIndex].cells || !clues[clueIndex].cells.length);
 }
 
+function allCellsKnown(clueIndex) {
+  let cis = getAllLinkedClueIndices(clueIndex)
+  if (!cis || cis.length == 0) {
+    return false
+  }
+  clueIndex = cis[0]
+  let clue = clues[clueIndex]
+  if (!clue) {
+    return false
+  }
+  if (!clue.enumLen) {
+    return false
+  }
+  let allKnown = false
+  let numCells = 0
+  let numPrefilled = 0
+  for (let ci of cis) {
+    if (!clues[ci] || !clues[ci].cells || !clues[ci].cells.length) {
+      return false
+    }
+    numCells += clues[ci].cells.length
+  }
+  return numCells == clue.enumLen
+}
+
 // For each cell grid[i][j], set {across,down}ClueLabels using previously
 // marked clue starts. Sets lastOrphan, if any.
 function setClueMemberships() {
@@ -1448,12 +1475,32 @@ function processClueChildren() {
 }
 
 // Place a trailing period and space at the end of clue full display labels that
-// are not empty.
+// end in letter/digit. Wrap in a clickable span if all cells are not known.
 function fixFullDisplayLabels() {
   for (let clueIndex of allClueIndices) {
-    if (clues[clueIndex].fullDisplayLabel) {
-      clues[clueIndex].fullDisplayLabel =
-        clues[clueIndex].fullDisplayLabel + '. '
+    if (!clues[clueIndex].fullDisplayLabel) {
+      continue
+    }
+    let label = clues[clueIndex].fullDisplayLabel
+    let l = label.length
+    if (l < 1) {
+      continue
+    }
+    let last = label.charAt(l - 1).toLowerCase()
+    if ((last >= 'a' && last <= 'z') || (last >= '0' && last <= '9')) {
+      label = label + '. '
+    } else {
+      label = label + ' '
+    }
+    if (!allCellsKnown(clueIndex)) {
+      clues[clueIndex].fullDisplayLabel = '<span class="clickable">' +
+          '<span id="current-clue-label" ' +
+          ' title="' + MARK_CLUE_TOOLTIP +
+          '" onclick="toggleClueSolvedState(\'' + clueIndex + '\')">' +
+          label + '</span></span>';
+    } else {
+      clues[clueIndex].fullDisplayLabel = '<span id="current-clue-label">' +
+          label + '</span>';
     }
   }
 }
@@ -1752,10 +1799,12 @@ function displayClues() {
     }
     let tr = document.createElement('tr')
     let col1 = document.createElement('td')
-    col1.setAttributeNS(null, 'title',
-                        'Click to mark/unmark as "solved" forcibly');
     col1.innerHTML = clues[clueIndex].displayLabel
-    col1.addEventListener('click', getClueStateToggler(clueIndex));
+    if (!allCellsKnown(clueIndex)) {
+      col1.setAttributeNS(null, 'class', 'clickable')
+      col1.setAttributeNS(null, 'title', MARK_CLUE_TOOLTIP)
+      col1.addEventListener('click', getClueStateToggler(clueIndex));
+    }
     let col2 = document.createElement('td')
     col2.innerHTML = clues[clueIndex].clue
 
@@ -1986,9 +2035,14 @@ function restoreState() {
   }
   for (let ci of allClueIndices) {
     // When restoring state, we reveal annos for fully prefilled entries.
-    updateClueState(ci, true)
+    updateClueState(ci, true, null)
   }
   updateAndSaveState()
+}
+
+function deactivateCurrentCell() {
+  // for back-compat
+  deactivateGnav()
 }
 
 function deactivateGnav() {
@@ -2328,6 +2382,7 @@ function cnavToInner(activeClueIndex) {
     }
   }
   currClue.style.background = colour
+  updateClueState(parentIndex, false, null)
   makeCurrentClueVisible();
   return gnav
 }
@@ -2710,15 +2765,30 @@ function retreatCursorIfPred() {
 }
 
 function toggleClueSolvedState(clueIndex) {
+  if (allCellsKnown(clueIndex)) {
+    addError('toggleClueSolvedState() called on ' + clueIndex +
+             ' with all cells known')
+    return
+  }
   let clue = clues[clueIndex]
   if (!clue || !clue.clueTR) {
     return
   }
   let cls = clue.clueTR.className
+  let currLab = null
+  if (clueIndex == cnavClueIndex) {
+    currLab = document.getElementById('current-clue-label')
+  }
   if (cls == 'solved') {
     clue.clueTR.className = ''
+    if (currLab) {
+      currLab.className = ''
+    }
   } else {
     clue.clueTR.className = 'solved'
+    if (currLab) {
+      currLab.className = 'solved'
+    }
   }
 }
 function getClueStateToggler(ci) {
@@ -2730,7 +2800,8 @@ function getClueStateToggler(ci) {
 
 // Mark the clue as solved by setting its number's colour, if filled.
 // if annoPrefilled is true and the clue is fully prefilled, reveal its anno.
-function updateClueState(clueIndex, annoPrefilled) {
+// forceSolved can be passed as null or 'solved' or 'unsolved'.
+function updateClueState(clueIndex, annoPrefilled, forceSolved) {
   let cis = getAllLinkedClueIndices(clueIndex)
   if (!cis || cis.length == 0) {
     return
@@ -2741,35 +2812,54 @@ function updateClueState(clueIndex, annoPrefilled) {
     return
   }
   let solved = false
-  if (clue.enumLen) {
-    let numFilled = 0
-    let numPrefilled = 0
-    for (let ci of cis) {
-      if (!clues[ci].clueTR) {
-        numFilled = 0
-        break
-      }
-      let isFullRet = isFull(ci)
-      if (!isFullRet) {
-        numFilled = 0
-        break
-      }
-      numFilled += clues[ci].cells.length
-      if (isFullRet == 2) {
-        numPrefilled += clues[ci].cells.length
-      }
+  if (clue && clue.clueTR && clue.clueTR.className == 'solved') {
+    solved = true
+  }
+  let numFilled = 0
+  let numPrefilled = 0
+  for (let ci of cis) {
+    if (!clues[ci].clueTR) {
+      numFilled = 0
+      break
     }
-    solved = numFilled == clue.enumLen
-    if (solved && numFilled == numPrefilled && annoPrefilled && clue.annoSpan) {
-      clue.annoSpan.style.display = ''
+    let isFullRet = isFull(ci)
+    if (!isFullRet) {
+      numFilled = 0
+      break
+    }
+    numFilled += clues[ci].cells.length
+    if (isFullRet == 2) {
+      numPrefilled += clues[ci].cells.length
+    }
+  }
+  if (forceSolved) {
+    if (forceSolved == 'solved') {
+      solved = true
+    } else {
+      solved = false
+      // override for all-prefilled
+      if (allCellsKnown(clueIndex) && numPrefilled == clue.enumLen) {
+        solved = true
+      }
     }
   } else if (clue.annoSpan && clue.annoSpan.style.display == '') {
     solved = true
+  } else if (allCellsKnown(clueIndex)) {
+    solved = numFilled == clue.enumLen
+  }
+  if (solved && numFilled == numPrefilled && annoPrefilled && clue.annoSpan) {
+    clue.annoSpan.style.display = ''
   }
   let cls = solved ? 'solved' : ''
   for (let ci of cis) {
     if (clues[ci].clueTR) {
       clues[ci].clueTR.setAttributeNS(null, 'class', cls);
+    }
+    if (ci == cnavClueIndex) {
+      let currLab = document.getElementById('current-clue-label')
+      if (currLab) {
+        currLab.setAttributeNS(null, 'class', cls);
+      }
     }
   }
 }
@@ -2801,7 +2891,7 @@ function updateActiveCluesState() {
     }
   }
   for (let ci in clueIndices) {
-    updateClueState(ci, false)
+    updateClueState(ci, false, null)
   }
 }
 
@@ -2872,7 +2962,7 @@ function handleGridInput() {
     cluesAffected = cluesAffected.concat(otherClues)
   }
   for (ci of cluesAffected) {
-    updateClueState(ci, false)
+    updateClueState(ci, false, null)
   }
 
   updateAndSaveState()
@@ -2882,6 +2972,13 @@ function handleGridInput() {
   }
 }
 
+function getDeactivator() {
+  return function() {
+    deactivateGnav()
+    deactivateCnav()
+  };
+}
+
 function createListeners() {
   gridInput.addEventListener('keyup', function(e) {handleKeyUp(e);});
   // Listen for tab/shift tab everywhere in the puzzle area.
@@ -2889,11 +2986,11 @@ function createListeners() {
   outer.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
   gridInput.addEventListener('input', handleGridInput);
   gridInputWrapper.addEventListener('click', toggleCurrentDirAndActivate);
-  background.addEventListener('click', getRowColActivator(-1, -1));
+  background.addEventListener('click', getDeactivator());
   // Clicking on the title will also unselect current clue (useful
   // for barred grids where background is not visible).
   document.getElementById('title').addEventListener(
-    'click', getRowColActivator(-1, -1));
+    'click', getDeactivator());
   window.addEventListener('scroll', makeCurrentClueVisible);
 }
 
@@ -3297,7 +3394,7 @@ function clearAll() {
   hideNinas()
 
   for (let ci of allClueIndices) {
-    updateClueState(ci, false)
+    updateClueState(ci, false, 'unsolved')
   }
   updateAndSaveState()
   if (usingGnav) {
@@ -3368,7 +3465,7 @@ function checkAll() {
     revealAll()  // calls updateAndSaveState()
   } else {
     for (let ci of allClueIndices) {
-      updateClueState(ci, false)
+      updateClueState(ci, false, null)
     }
     updateAndSaveState()
   }
@@ -3455,7 +3552,7 @@ function revealAll() {
   }
   showNinas()
   for (let ci of allClueIndices) {
-    updateClueState(ci, false)
+    updateClueState(ci, false, 'solved')
   }
   updateAndSaveState()
   if (usingGnav) {

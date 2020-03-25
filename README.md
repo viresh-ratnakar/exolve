@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.56 March 23 2020
+### Version: Exolve v0.57 March 25 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -373,8 +373,8 @@ While solving, when a light is fully filled in, its clue number changes
 colour (to a light shade of blue, making the unsolved clue numbers stand out).
 There are some minor exceptions when this does not happen (diagramless cells
 or other reasons that don't let us determine when a clue's light is fully
-filled). The solver can always click on the clue number to set (or unset)
-its "has-been-solved" state manually.
+filled). For such clues, the solver can click on the clue number to set (or
+unset) its "has-been-solved" state manually.
 
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue

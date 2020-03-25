@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.57 March 25 2020
+
+- Only allow manually setting/unsetting a clue's "solved" state for clues
+  that do not have all cell locations known.
+- When clicking on a black cell or the title (to unhighlight active cells),
+  also unhighlight active clues.
+
 ### Version: Exolve v0.56 March 23 2020
 
 - Mainly a revamp of tab navigation, to take into account various cases
