@@ -197,7 +197,7 @@ multiple instance of this.
 Example:
 ```
   exolve-credits: Test solver: Zaphod Beelblebrox
-  exolve-credits: Custome code: H. A. C. Ker
+  exolve-credits: Custom code: H. A. C. Ker
 ```
 
 ## exolve-width, exolve-height
