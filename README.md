@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.57 March 25 2020
+### Version: Exolve v0.58 March 26 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -132,6 +132,7 @@ and the exolve-end line:
 * exolve-title
 * exolve-setter
 * exolve-copyright
+* exolve-credits
 * exolve-prelude
 * **exolve-width**
 * **exolve-height**
@@ -188,6 +189,15 @@ If your provide this, it will be displayed with the copyright symbol, under
 the rendered puzzle grid. Example:
 ```
   exolve-copyright: 2019 Viresh Ratnakar
+```
+
+## exolve-credits
+If your provide this, it will be displayed under the copyright. You can provide
+multiple instance of this.
+Example:
+```
+  exolve-credits: Test solver: Zaphod Beelblebrox
+  exolve-credits: Custome code: H. A. C. Ker
 ```
 
 ## exolve-width, exolve-height
@@ -618,6 +628,14 @@ The list of currently supported options is as follows:
   non-numeric clue labels may want to specify this option.
 - **clues-panel-lines:&lt;N&gt;** Limit the across/down/nodir clues boxes to
   about N lines of text, adding scrollbars if needed.
+- **offset-top:&lt;N&gt;** Draw the grid with this much space above and under
+  it (N pixels). Useful for drawing additional art around the grid using
+  customizePuzzle(), for example.
+- **offset-left:&lt;N&gt;** Draw the grid with this much space to the left and
+  to the right (N pixels). Useful for drawing additional art around the grid
+  using customizePuzzle(), for example.
+- **grid-background:&lt;C&gt;** Set the colour of the black cells to C, which
+  should be a valid HTML colour name/code.
 - **allow-digits** If this option is specified, then we allow solvers to enter
   digits in cells.
 - **hide-copy-placeholder-buttons** This is an option that is only applicable

@@ -1,5 +1,22 @@
 # Changelog
 
+### Version: Exolve v0.58 March 26 2020
+
+- Go back to using old var names such as currentRow, as some customizePuzzle()
+  scripts depend on them.
+- Add a test (test-customize-puzzle.html) to make sure we do not change these
+  names going forward.
+- Increase max allowed grid size to 100.
+- Add the following new exolve-options:
+  - grid-background:[html clolor]
+  - offset-left:[x]
+  - offset-top:[y]
+  The offset-left and offset-top options allow you to move the position of the
+  grid (for example, if you want to paint additional artwork around the grid,
+  using customizePuzzle().
+- Add an exolve-credits section (repeatable).
+- Expose numCelldFilled as a global (numCellsToFill is already there)
+
 ### Version: Exolve v0.57 March 25 2020
 
 - Only allow manually setting/unsetting a clue's "solved" state for clues

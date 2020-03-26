@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.57 March 25 2020'
+const VERSION = 'Exolve v0.58 March 26 2020'
 
 // ------ Begin globals.
 
@@ -73,6 +73,7 @@ let hasNodirClues = false
 let nextNonNumId = 1
 let offNumClueIndices = {}
 
+const MAX_GRID_SIZE = 100
 const SQUARE_DIM = 31
 const SQUARE_DIM_BY2 = 16
 const GRIDLINE = 1
@@ -93,16 +94,17 @@ let answersList = []
 let revelationList = []
 
 // State of navigation
-let gnavRow = -1
-let gnavCol = -1
-let gnavDir = 'A'
-let cnavClueIndex = null
+let currentRow = -1
+let currentCol = -1
+let currentDir = 'A'
+let currentClueIndex = null
 let usingGnav = true
 let lastOrphan = null
 let activeCells = [];
 let activeClues = [];
 
 let numCellsToFill = 0
+let numCellsFilled = 0
 
 let allClueIndices = []
 const CURR_ORPHAN_ID = 'curr-orphan'
@@ -117,6 +119,7 @@ const DIGIT1 = '~'
 const ACTIVE_COLOUR = 'mistyrose'
 const ORPHAN_COLOUR = 'linen'
 const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
+let gridBackground = 'black'
 
 let nextPuzzleTextLine = 0
 
@@ -130,6 +133,8 @@ let hideInferredNumbers = false
 let cluesPanelLines = -1
 let allowDigits = false
 let hideCopyPlaceholders = false
+let offsetLeft = 0
+let offsetTop = 0
 
 // Variables set in init().
 let puzzleTextLines;
@@ -405,8 +410,26 @@ function parseOption(s) {
     if (kv[0] == 'clues-panel-lines') {
       cluesPanelLines = parseInt(kv[1])
       if (isNaN(cluesPanelLines)) {
-        addError('Unexpected value in exolve-option: clue-panel-lines: ' + kv[1])
+        addError('Unexpected val in exolve-option: clue-panel-lines: ' + kv[1])
       }
+      continue
+    }
+    if (kv[0] == 'offset-left') {
+      offsetLeft = parseInt(kv[1])
+      if (isNaN(offsetLeft)) {
+        addError('Unexpected val in exolve-option: offset-left: ' + kv[1])
+      }
+      continue
+    }
+    if (kv[0] == 'offset-top') {
+      offsetTop = parseInt(kv[1])
+      if (isNaN(offsetTop)) {
+        addError('Unexpected val in exolve-option: offset-top: ' + kv[1])
+      }
+      continue
+    }
+    if (kv[0] == 'grid-background') {
+      gridBackground = kv[1]
       continue
     }
     addError('Unexpected exolve-option: ' + spart)
@@ -437,6 +460,10 @@ function parseOverallDisplayMost() {
     } else if (sectionAndValue.section == 'copyright') {
       document.getElementById('copyright').innerHTML =
           'Ⓒ ' + sectionAndValue.value
+    } else if (sectionAndValue.section == 'credits') {
+      let smallPrintBox = document.getElementById('small-print')
+      smallPrintBox.insertAdjacentHTML('beforeend',
+        '<div>' + sectionAndValue.value + '</div>')
     } else if (sectionAndValue.section == 'width') {
       gridWidth = parseInt(sectionAndValue.value)
       boxWidth = (SQUARE_DIM * gridWidth) + gridWidth + 1
@@ -525,7 +552,8 @@ function checkIdAndConsistency() {
              puzzleId)
     return
   }
-  if (gridWidth < 1 || gridWidth > 25 || gridHeight < 1 || gridHeight > 25) {
+  if (gridWidth < 1 || gridWidth > MAX_GRID_SIZE ||
+      gridHeight < 1 || gridHeight > MAX_GRID_SIZE) {
     addError('Bad/missing width/height');
     return
   } else if (gridFirstLine < 0 || gridLastLine < gridFirstLine ||
@@ -1862,20 +1890,22 @@ function displayClues() {
 }
 
 function displayGridBackground() {
-  svg.setAttributeNS(null, 'viewBox', '0 0 ' + boxWidth + ' ' + boxHeight)
-  svg.setAttributeNS(null, 'width', boxWidth);
-  svg.setAttributeNS(null, 'height', boxHeight);
+  let svgWidth = boxWidth + (2 * offsetLeft)
+  let svgHeight = boxHeight + (2 * offsetTop)
+  svg.setAttributeNS(null, 'viewBox', '0 0 ' + svgWidth + ' ' + svgHeight)
+  svg.setAttributeNS(null, 'width', svgWidth);
+  svg.setAttributeNS(null, 'height', svgHeight);
 
-  background.setAttributeNS(null, 'x', 0);
-  background.setAttributeNS(null, 'y', 0);
+  background.setAttributeNS(null, 'x', offsetLeft);
+  background.setAttributeNS(null, 'y', offsetTop);
   background.setAttributeNS(null, 'width', boxWidth);
   background.setAttributeNS(null, 'height', boxHeight);
-  background.setAttributeNS(null, 'class', 'background');
+  background.setAttributeNS(null, 'fill', gridBackground);
   svg.appendChild(background);
 }
 
 // Return a string encoding the current entries in the whole grid and
-// also the number of squares that have been filled.
+// also set the number of squares that have been filled.
 function getGridStateAndNumFilled() {
   let state = '';
   let numFilled = 0
@@ -1891,16 +1921,15 @@ function getGridStateAndNumFilled() {
       }
     }
   }
-  return [state, numFilled];
+  numCellsFilled = numFilled
+  return state;
 }
 
 // Update status, ensure answer fields are upper-case (when they have
 // an enum), disable buttons as needed, and return the state.
 function updateDisplayAndGetState() {
-  let stateAndFilled = getGridStateAndNumFilled();
-  let state = stateAndFilled[0]
-  let numFilled = stateAndFilled[1]
-  statusNumFilled.innerHTML = numFilled
+  let state = getGridStateAndNumFilled();
+  statusNumFilled.innerHTML = numCellsFilled
   for (let a of answersList) {
     if (a.isq) {
       let cursor = a.input.selectionStart
@@ -1913,10 +1942,10 @@ function updateDisplayAndGetState() {
   clearButton.disabled = (activeCells.length == 0)
   checkButton.disabled = (activeCells.length == 0)
   revealButton.disabled = (activeCells.length == 0) &&
-                          (!cnavClueIndex ||
-                           !clues[cnavClueIndex] ||
-                           !clues[cnavClueIndex].anno)
-  submitButton.disabled = (numFilled != numCellsToFill)
+                          (!currentClueIndex ||
+                           !clues[currentClueIndex] ||
+                           !clues[currentClueIndex].anno)
+  submitButton.disabled = (numCellsFilled != numCellsToFill)
   return state
 }
 
@@ -2041,11 +2070,6 @@ function restoreState() {
 }
 
 function deactivateCurrentCell() {
-  // for back-compat
-  deactivateGnav()
-}
-
-function deactivateGnav() {
   gridInputWrapper.style.display = 'none'
   for (let x of activeCells) {
     let cellRect = grid[x[0]][x[1]].cellRect
@@ -2058,12 +2082,12 @@ function deactivateGnav() {
   activeCells = [];
 }
 
-function deactivateCnav() {
+function deactivateCurrentClue() {
   for (let x of activeClues) {
     x.style.background = 'white'
   }
   activeClues = [];
-  cnavClueIndex = null
+  currentClueIndex = null
   currClue.innerHTML = ''
   currClue.style.background = 'transparent'
   currClue.style.top = '0'
@@ -2103,24 +2127,26 @@ function makeCurrentClueVisible() {
 }
 
 function gnavToInner(cell, dir) {
-  gnavRow = cell[0]
-  gnavCol = cell[1]
-  gnavDir = dir
-  if (gnavRow < 0 || gnavRow >= gridHeight ||
-      gnavCol < 0 || gnavCol >= gridWidth) {
+  currentRow = cell[0]
+  currentCol = cell[1]
+  currentDir = dir
+  if (currentRow < 0 || currentRow >= gridHeight ||
+      currentCol < 0 || currentCol >= gridWidth) {
     return null
   }
-  if (!grid[gnavRow][gnavCol].isLight &&
-      !grid[gnavRow][gnavCol].isDiagramless) {
+  if (!grid[currentRow][currentCol].isLight &&
+      !grid[currentRow][currentCol].isDiagramless) {
     return null
   }
 
   gridInputWrapper.style.width = '' + SQUARE_DIM + 'px'
   gridInputWrapper.style.height = '' + SQUARE_DIM + 'px'
-  gridInputWrapper.style.left = '' + grid[gnavRow][gnavCol].cellLeft + 'px'
-  gridInputWrapper.style.top = '' + grid[gnavRow][gnavCol].cellTop + 'px'
-  gridInput.value = grid[gnavRow][gnavCol].prefill ? '' :
-      stateCharToDisplayChar(grid[gnavRow][gnavCol].currentLetter)
+  gridInputWrapper.style.left =
+    '' + grid[currentRow][currentCol].cellLeft + 'px'
+  gridInputWrapper.style.top =
+    '' + grid[currentRow][currentCol].cellTop + 'px'
+  gridInput.value = grid[currentRow][currentCol].prefill ? '' :
+      stateCharToDisplayChar(grid[currentRow][currentCol].currentLetter)
   gridInputRarrow.style.display = 'none'
   gridInputDarrow.style.display = 'none'
   gridInputWrapper.style.display = ''
@@ -2134,35 +2160,35 @@ function gnavToInner(cell, dir) {
   let activeClueIndex = ''
   let activeClueLabel = ''
   // If the current direction does not have an active clue, toggle direction
-  if (gnavDir == 'A' && !grid[gnavRow][gnavCol].isDiagramless &&
-      !grid[gnavRow][gnavCol].acrossClueLabel &&
-      !extendsDiagramlessA(gnavRow, gnavCol)) {
+  if (currentDir == 'A' && !grid[currentRow][currentCol].isDiagramless &&
+      !grid[currentRow][currentCol].acrossClueLabel &&
+      !extendsDiagramlessA(currentRow, currentCol)) {
     toggleCurrentDir()
-  } else if (gnavDir == 'D' && !grid[gnavRow][gnavCol].isDiagramless &&
-             !grid[gnavRow][gnavCol].downClueLabel &&
-             !extendsDiagramlessD(gnavRow, gnavCol)) {
+  } else if (currentDir == 'D' && !grid[currentRow][currentCol].isDiagramless &&
+             !grid[currentRow][currentCol].downClueLabel &&
+             !extendsDiagramlessD(currentRow, currentCol)) {
     toggleCurrentDir()
-  } else if (gnavDir.charAt(0) == 'X' &&
-             (!grid[gnavRow][gnavCol].nodirClues ||
-              !grid[gnavRow][gnavCol].nodirClues.includes(gnavDir))) {
+  } else if (currentDir.charAt(0) == 'X' &&
+             (!grid[currentRow][currentCol].nodirClues ||
+              !grid[currentRow][currentCol].nodirClues.includes(currentDir))) {
     toggleCurrentDir()
   }
-  if (gnavDir == 'A') {
-    if (grid[gnavRow][gnavCol].acrossClueLabel) {
-      activeClueLabel = grid[gnavRow][gnavCol].acrossClueLabel
+  if (currentDir == 'A') {
+    if (grid[currentRow][currentCol].acrossClueLabel) {
+      activeClueLabel = grid[currentRow][currentCol].acrossClueLabel
       activeClueIndex = 'A' + activeClueLabel
     }
     gridInputRarrow.style.display = ''
-  } else if (gnavDir == 'D') {
-    if (grid[gnavRow][gnavCol].downClueLabel) {
-      activeClueLabel = grid[gnavRow][gnavCol].downClueLabel
+  } else if (currentDir == 'D') {
+    if (grid[currentRow][currentCol].downClueLabel) {
+      activeClueLabel = grid[currentRow][currentCol].downClueLabel
       activeClueIndex = 'D' + activeClueLabel
     }
     gridInputDarrow.style.display = ''
   } else {
-    // gnavDir is actually a clueindex (for an X clue)
-    activeClueIndex = gnavDir
-    activeClueLabel = gnavDir.substr(1)
+    // currentDir is actually a clueindex (for an X clue)
+    activeClueIndex = currentDir
+    activeClueLabel = currentDir.substr(1)
   }
   if (activeClueIndex != '') {
     if (!clues[activeClueIndex]) {
@@ -2196,17 +2222,17 @@ function gnavToInner(cell, dir) {
     return activeClueIndex
   } else {
     // No active clue, activate the last orphan clue.
-    grid[gnavRow][gnavCol].cellRect.style.fill = ACTIVE_COLOUR
-    activeCells.push([gnavRow, gnavCol])
+    grid[currentRow][currentCol].cellRect.style.fill = ACTIVE_COLOUR
+    activeCells.push([currentRow, currentCol])
     return lastOrphan
   }
 }
 
-function gnavTo(row, col) {
-  deactivateGnav();
-  let clue = gnavToInner([row, col], gnavDir)
+function activateCell(row, col) {
+  deactivateCurrentCell();
+  let clue = gnavToInner([row, col], currentDir)
   if (clue) {
-    deactivateCnav();
+    deactivateCurrentClue();
     cnavToInner(clue)
   }
   updateAndSaveState()
@@ -2216,7 +2242,7 @@ function gnavTo(row, col) {
 function getRowColActivator(row, col) {
   return function() {
     usingGnav = true
-    gnavTo(row, col);
+    activateCell(row, col);
   };
 }
 function getClueActivator(ci) {
@@ -2280,11 +2306,11 @@ function getCurrentClueButtons() {
 }
 
 function cnavNext() {
-  if (!cnavClueIndex || !clues[cnavClueIndex] ||
-      !clues[cnavClueIndex].next) {
+  if (!currentClueIndex || !clues[currentClueIndex] ||
+      !clues[currentClueIndex].next) {
     return
   }
-  let next = clues[cnavClueIndex].next
+  let next = clues[currentClueIndex].next
   if (gnavIsClueless()) {
     let jumps = 0
     while (jumps < allClueIndices.length && !isOrphan(next)) {
@@ -2298,11 +2324,11 @@ function cnavNext() {
   }
 }
 function cnavPrev() {
-  if (!cnavClueIndex || !clues[cnavClueIndex] ||
-      !clues[cnavClueIndex].prev) {
+  if (!currentClueIndex || !clues[currentClueIndex] ||
+      !clues[currentClueIndex].prev) {
     return
   }
-  let prev = clues[cnavClueIndex].prev
+  let prev = clues[currentClueIndex].prev
   if (gnavIsClueless()) {
     let jumps = 0
     while (jumps < allClueIndices.length && !isOrphan(prev)) {
@@ -2362,7 +2388,7 @@ function cnavToInner(activeClueIndex) {
     }
     activeClues.push(clues[clueIndex].clueTR)
   }
-  cnavClueIndex = activeClueIndex
+  currentClueIndex = activeClueIndex
   currClue.innerHTML = getCurrentClueButtons() +
     curr.fullDisplayLabel + curr.clue
   if (orphan) {
@@ -2390,29 +2416,29 @@ function cnavToInner(activeClueIndex) {
 // The current gnav position is diagramless or does not have a known
 // clue in the current direction.
 function gnavIsClueless() {
-  return gnavRow >= 0 && gnavCol >= 0 &&
-    (grid[gnavRow][gnavCol].isDiagramless ||
-     (gnavDir == 'A' &&
-      (!grid[gnavRow][gnavCol].acrossClueLabel ||
-       !clues['A' + grid[gnavRow][gnavCol].acrossClueLabel].clue)) ||
-     (gnavDir == 'D' &&
-      (!grid[gnavRow][gnavCol].downClueLabel ||
-       !clues['D' + grid[gnavRow][gnavCol].downClueLabel].clue)) ||
-     (gnavDir.charAt(0) == 'X' &&
-      (!grid[gnavRow][gnavCol].nodirClues ||
-       !grid[gnavRow][gnavCol].nodirClues.includes(gnavDir))));
+  return currentRow >= 0 && currentCol >= 0 &&
+    (grid[currentRow][currentCol].isDiagramless ||
+     (currentDir == 'A' &&
+      (!grid[currentRow][currentCol].acrossClueLabel ||
+       !clues['A' + grid[currentRow][currentCol].acrossClueLabel].clue)) ||
+     (currentDir == 'D' &&
+      (!grid[currentRow][currentCol].downClueLabel ||
+       !clues['D' + grid[currentRow][currentCol].downClueLabel].clue)) ||
+     (currentDir.charAt(0) == 'X' &&
+      (!grid[currentRow][currentCol].nodirClues ||
+       !grid[currentRow][currentCol].nodirClues.includes(currentDir))));
 }
 
 function cnavTo(activeClueIndex) {
-  deactivateCnav();
+  deactivateCurrentClue();
   let cellDir = cnavToInner(activeClueIndex)
   if (cellDir) {
-    deactivateGnav();
+    deactivateCurrentCell();
     gnavToInner([cellDir[0], cellDir[1]], cellDir[2])
   } else {
     // If the currently active cells had a known clue association, deactivate.
     if (!gnavIsClueless()) {
-      deactivateGnav();
+      deactivateCurrentCell();
     }
   }
   updateAndSaveState()
@@ -2467,7 +2493,7 @@ function copyOrphanEntry(clueIndex) {
       grid[row][col].currentLetter = letter
       let revealedChar = stateCharToDisplayChar(letter)
       grid[row][col].textNode.nodeValue = revealedChar
-      if (row == gnavRow && col == gnavCol) {
+      if (row == currentRow && col == currentCol) {
         gridInput.value = revealedChar
       }
     }
@@ -2479,7 +2505,7 @@ function copyOrphanEntry(clueIndex) {
     col = x[1]
   }
   if (row >= 0 && col >= 0) {
-    gnavTo(row, col)
+    activateCell(row, col)
   }
   updateActiveCluesState()
   updateAndSaveState()
@@ -2548,43 +2574,45 @@ function addOrphanEntryUI(elt, inCurr, len, placeholder, clueIndex) {
 
 function toggleCurrentDir() {
   // toggle direction
-  if (gnavRow < 0 || gnavRow >= gridHeight ||
-      gnavCol < 0 || gnavCol >= gridWidth) {
+  if (currentRow < 0 || currentRow >= gridHeight ||
+      currentCol < 0 || currentCol >= gridWidth) {
     return
   }
   let choices = []
-  if (grid[gnavRow][gnavCol].acrossClueLabel ||
-      grid[gnavRow][gnavCol].succA || grid[gnavRow][gnavCol].predA) {
+  if (grid[currentRow][currentCol].acrossClueLabel ||
+      grid[currentRow][currentCol].succA ||
+      grid[currentRow][currentCol].predA) {
     choices.push('A')
   }
-  if (grid[gnavRow][gnavCol].downClueLabel ||
-      grid[gnavRow][gnavCol].succD || grid[gnavRow][gnavCol].predD) {
+  if (grid[currentRow][currentCol].downClueLabel ||
+      grid[currentRow][currentCol].succD ||
+      grid[currentRow][currentCol].predD) {
     choices.push('D')
   }
-  if (grid[gnavRow][gnavCol].nodirClues) {
-    choices = choices.concat(grid[gnavRow][gnavCol].nodirClues)
+  if (grid[currentRow][currentCol].nodirClues) {
+    choices = choices.concat(grid[currentRow][currentCol].nodirClues)
   }
   if (choices.length < 1) {
     return
   }
   let i = 0
-  while (i < choices.length && gnavDir != choices[i]) {
+  while (i < choices.length && currentDir != choices[i]) {
     i++;
   }
   if (i >= choices.length) {
     i = -1
   }
   let newDir = choices[(i + 1) % choices.length]
-  if (gnavDir == newDir) {
+  if (currentDir == newDir) {
     return
   }
-  gnavDir = newDir
+  currentDir = newDir
 }
 
 function toggleCurrentDirAndActivate() {
   usingGnav = true
   toggleCurrentDir()
-  gnavTo(gnavRow, gnavCol)
+  activateCell(currentRow, currentCol)
 }
 
 // Handle navigation keys. Used by a listener, and also used to auto-advance
@@ -2596,52 +2624,52 @@ function handleKeyUpInner(key) {
   if (key == 221) {
     // ] or tab
     if (usingGnav) {
-      if (gnavRow < 0 || gnavCol < 0 || !gnavDir) {
+      if (currentRow < 0 || currentCol < 0 || !currentDir) {
         return false
       }
-      if (!grid[gnavRow][gnavCol]['next' + gnavDir]) {
+      if (!grid[currentRow][currentCol]['next' + currentDir]) {
         return false
       }
-      let gnav = grid[gnavRow][gnavCol]['next' + gnavDir]
-      gnavDir = gnav.dir
-      gnavTo(gnav.cell[0], gnav.cell[1])
+      let gnav = grid[currentRow][currentCol]['next' + currentDir]
+      currentDir = gnav.dir
+      activateCell(gnav.cell[0], gnav.cell[1])
     } else {
-      if (!cnavClueIndex || !clues[cnavClueIndex] ||
-          !clues[cnavClueIndex].next) {
+      if (!currentClueIndex || !clues[currentClueIndex] ||
+          !clues[currentClueIndex].next) {
         return false
       }
-      cnavTo(clues[cnavClueIndex].next)
+      cnavTo(clues[currentClueIndex].next)
     }
     return true
   } else if (key == 219) {
     // [ or shift-tab
     if (usingGnav) {
-      if (gnavRow < 0 || gnavCol < 0 || !gnavDir) {
+      if (currentRow < 0 || currentCol < 0 || !currentDir) {
         return false
       }
-      if (!grid[gnavRow][gnavCol]['prev' + gnavDir]) {
+      if (!grid[currentRow][currentCol]['prev' + currentDir]) {
         return false
       }
-      let gnav = grid[gnavRow][gnavCol]['prev' + gnavDir]
-      gnavDir = gnav.dir
-      gnavTo(gnav.cell[0], gnav.cell[1])
+      let gnav = grid[currentRow][currentCol]['prev' + currentDir]
+      currentDir = gnav.dir
+      activateCell(gnav.cell[0], gnav.cell[1])
     } else {
-      if (!cnavClueIndex || !clues[cnavClueIndex] ||
-          !clues[cnavClueIndex].prev) {
+      if (!currentClueIndex || !clues[currentClueIndex] ||
+          !clues[currentClueIndex].prev) {
         return false
       }
-      cnavTo(clues[cnavClueIndex].prev)
+      cnavTo(clues[currentClueIndex].prev)
     }
     return true
   }
-  if (gnavRow < 0 || gnavRow >= gridHeight ||
-      gnavCol < 0 || gnavCol >= gridWidth) {
+  if (currentRow < 0 || currentRow >= gridHeight ||
+      currentCol < 0 || currentCol >= gridWidth) {
     return false
   }
   usingGnav = true
   if (key == 8) {
-    if (grid[gnavRow][gnavCol].currentLetter != '0' &&
-        !grid[gnavRow][gnavCol].prefill) {
+    if (grid[currentRow][currentCol].currentLetter != '0' &&
+        !grid[currentRow][currentCol].prefill) {
       return true
     }
     // backspace in an empty or prefilled cell
@@ -2649,9 +2677,9 @@ function handleKeyUpInner(key) {
       // retreated across linked clue!
       return true
     }
-    if (gnavDir == 'A') {
+    if (currentDir == 'A') {
       key = 37  // left
-    } else if (gnavDir == 'D') {
+    } else if (currentDir == 'D') {
       key = 38  // up
     } else {
       return true
@@ -2662,47 +2690,47 @@ function handleKeyUpInner(key) {
     toggleCurrentDirAndActivate()
   } else if (key == 39) {
     // right arrow
-    let col = gnavCol + 1
+    let col = currentCol + 1
     while (col < gridWidth &&
-           !grid[gnavRow][col].isLight &&
-           !grid[gnavRow][col].isDiagramless) {
+           !grid[currentRow][col].isLight &&
+           !grid[currentRow][col].isDiagramless) {
       col++;
     }
     if (col < gridWidth) {
-      gnavTo(gnavRow, col);
+      activateCell(currentRow, col);
     }
   } else if (key == 37) {
     // left arrow
-    let col = gnavCol - 1
+    let col = currentCol - 1
     while (col >= 0 &&
-           !grid[gnavRow][col].isLight &&
-           !grid[gnavRow][col].isDiagramless) {
+           !grid[currentRow][col].isLight &&
+           !grid[currentRow][col].isDiagramless) {
       col--;
     }
     if (col >= 0) {
-      gnavTo(gnavRow, col);
+      activateCell(currentRow, col);
     }
   } else if (key == 40) {
     // down arrow
-    let row = gnavRow + 1
+    let row = currentRow + 1
     while (row < gridHeight &&
-           !grid[row][gnavCol].isLight &&
-           !grid[row][gnavCol].isDiagramless) {
+           !grid[row][currentCol].isLight &&
+           !grid[row][currentCol].isDiagramless) {
       row++;
     }
     if (row < gridHeight) {
-      gnavTo(row, gnavCol);
+      activateCell(row, currentCol);
     }
   } else if (key == 38) {
     // up arrow
-    let row = gnavRow - 1
+    let row = currentRow - 1
     while (row >= 0 &&
-           !grid[row][gnavCol].isLight &&
-           !grid[row][gnavCol].isDiagramless) {
+           !grid[row][currentCol].isLight &&
+           !grid[row][currentCol].isDiagramless) {
       row--;
     }
     if (row >= 0) {
-      gnavTo(row, gnavCol);
+      activateCell(row, currentCol);
     }
   }
   return true
@@ -2728,39 +2756,39 @@ function handleTabKeyDown(e) {
 
 function advanceCursor() {
   // First check if there is successor
-  let successorProperty = 'succ' + gnavDir
-  if (grid[gnavRow][gnavCol][successorProperty]) {
-    let successor = grid[gnavRow][gnavCol][successorProperty]
-    gnavDir = successor.dir
-    gnavTo(successor.cell[0], successor.cell[1]);
+  let successorProperty = 'succ' + currentDir
+  if (grid[currentRow][currentCol][successorProperty]) {
+    let successor = grid[currentRow][currentCol][successorProperty]
+    currentDir = successor.dir
+    activateCell(successor.cell[0], successor.cell[1]);
     return
   }
-  if (grid[gnavRow][gnavCol].isDiagramless) {
+  if (grid[currentRow][currentCol].isDiagramless) {
     return
   }
-  if (gnavDir == 'A') {
-    if (gnavCol + 1 < gridWidth &&
-        grid[gnavRow][gnavCol + 1].acrossClueLabel ==
-            grid[gnavRow][gnavCol].acrossClueLabel) {
+  if (currentDir == 'A') {
+    if (currentCol + 1 < gridWidth &&
+        grid[currentRow][currentCol + 1].acrossClueLabel ==
+            grid[currentRow][currentCol].acrossClueLabel) {
       handleKeyUpInner(39);
     }
-  } else if (gnavDir == 'D') {
-    if (gnavRow + 1 < gridHeight &&
-        grid[gnavRow + 1][gnavCol].downClueLabel ==
-            grid[gnavRow][gnavCol].downClueLabel) {
+  } else if (currentDir == 'D') {
+    if (currentRow + 1 < gridHeight &&
+        grid[currentRow + 1][currentCol].downClueLabel ==
+            grid[currentRow][currentCol].downClueLabel) {
       handleKeyUpInner(40);
     }
   }
 }
 
 function retreatCursorIfPred() {
-  let predProperty = 'pred' + gnavDir
-  if (!grid[gnavRow][gnavCol][predProperty]) {
+  let predProperty = 'pred' + currentDir
+  if (!grid[currentRow][currentCol][predProperty]) {
     return false
   }
-  let pred = grid[gnavRow][gnavCol][predProperty]
-  gnavDir = pred.dir
-  gnavTo(pred.cell[0], pred.cell[1]);
+  let pred = grid[currentRow][currentCol][predProperty]
+  currentDir = pred.dir
+  activateCell(pred.cell[0], pred.cell[1]);
   return true
 }
 
@@ -2776,7 +2804,7 @@ function toggleClueSolvedState(clueIndex) {
   }
   let cls = clue.clueTR.className
   let currLab = null
-  if (clueIndex == cnavClueIndex) {
+  if (clueIndex == currentClueIndex) {
     currLab = document.getElementById('current-clue-label')
   }
   if (cls == 'solved') {
@@ -2855,7 +2883,7 @@ function updateClueState(clueIndex, annoPrefilled, forceSolved) {
     if (clues[ci].clueTR) {
       clues[ci].clueTR.setAttributeNS(null, 'class', cls);
     }
-    if (ci == cnavClueIndex) {
+    if (ci == currentClueIndex) {
       let currLab = document.getElementById('current-clue-label')
       if (currLab) {
         currLab.setAttributeNS(null, 'class', cls);
@@ -2867,8 +2895,8 @@ function updateClueState(clueIndex, annoPrefilled, forceSolved) {
 // Call updateClueState() on all clues active or crossing active cells.
 function updateActiveCluesState() {
   let clueIndices = {}
-  if (cnavClueIndex) {
-    let lci = getAllLinkedClueIndices(cnavClueIndex)
+  if (currentClueIndex) {
+    let lci = getAllLinkedClueIndices(currentClueIndex)
     for (let ci of lci) {
       clueIndices[ci] = true
     }
@@ -2897,15 +2925,15 @@ function updateActiveCluesState() {
 
 function handleGridInput() {
   usingGnav = true
-  if (gnavRow < 0 || gnavRow >= gridHeight ||
-      gnavCol < 0 || gnavCol >= gridWidth) {
+  if (currentRow < 0 || currentRow >= gridHeight ||
+      currentCol < 0 || currentCol >= gridWidth) {
     return
   }
-  if (!grid[gnavRow][gnavCol].isLight &&
-      !grid[gnavRow][gnavCol].isDiagramless) {
+  if (!grid[currentRow][currentCol].isLight &&
+      !grid[currentRow][currentCol].isDiagramless) {
     return;
   }
-  if (grid[gnavRow][gnavCol].prefill) {
+  if (grid[currentRow][currentCol].prefill) {
     // Changes disallowed
     gridInput.value = ''
     advanceCursor()
@@ -2913,8 +2941,8 @@ function handleGridInput() {
   }
   let newInput = gridInput.value
   let currDisplayChar =
-      stateCharToDisplayChar(grid[gnavRow][gnavCol].currentLetter)
-  if (grid[gnavRow][gnavCol].currentLetter != '0' &&
+      stateCharToDisplayChar(grid[currentRow][currentCol].currentLetter)
+  if (grid[currentRow][currentCol].currentLetter != '0' &&
       newInput != currDisplayChar) {
     // The "new" input may be before or after the old input.
     let index = newInput.indexOf(currDisplayChar)
@@ -2923,7 +2951,7 @@ function handleGridInput() {
     }
   }
   let displayChar = newInput.substr(0, 1)
-  if (displayChar == ' ' && grid[gnavRow][gnavCol].isDiagramless) {
+  if (displayChar == ' ' && grid[currentRow][currentCol].isDiagramless) {
     // spacebar creates a blocked cell in a diagramless puzzle cell
     displayChar = BLOCK_CHAR
   } else {
@@ -2933,13 +2961,13 @@ function handleGridInput() {
     }
   }
   let stateChar = displayCharToStateChar(displayChar)
-  let oldLetter = grid[gnavRow][gnavCol].currentLetter
-  grid[gnavRow][gnavCol].currentLetter = stateChar
-  grid[gnavRow][gnavCol].textNode.nodeValue = displayChar
+  let oldLetter = grid[currentRow][currentCol].currentLetter
+  grid[currentRow][currentCol].currentLetter = stateChar
+  grid[currentRow][currentCol].textNode.nodeValue = displayChar
   gridInput.value = displayChar
   if (oldLetter == '1' || stateChar == '1') {
-    let symRow = gridHeight - 1 - gnavRow
-    let symCol = gridWidth - 1 - gnavCol
+    let symRow = gridHeight - 1 - currentRow
+    let symCol = gridWidth - 1 - currentCol
     if (grid[symRow][symCol].isDiagramless) {
       let symLetter = (stateChar == '1') ? '1' : '0'
       let symChar = (stateChar == '1') ? BLOCK_CHAR : ''
@@ -2949,15 +2977,15 @@ function handleGridInput() {
   }
 
   let cluesAffected = []
-  let label = grid[gnavRow][gnavCol].acrossClueLabel
+  let label = grid[currentRow][currentCol].acrossClueLabel
   if (label) {
     cluesAffected.push('A' + label)
   }
-  label = grid[gnavRow][gnavCol].downClueLabel
+  label = grid[currentRow][currentCol].downClueLabel
   if (label) {
     cluesAffected.push('D' + label)
   }
-  let otherClues = grid[gnavRow][gnavCol].nodirClues
+  let otherClues = grid[currentRow][currentCol].nodirClues
   if (otherClues) {
     cluesAffected = cluesAffected.concat(otherClues)
   }
@@ -2974,8 +3002,8 @@ function handleGridInput() {
 
 function getDeactivator() {
   return function() {
-    deactivateGnav()
-    deactivateCnav()
+    deactivateCurrentCell()
+    deactivateCurrentClue()
   };
 }
 
@@ -3004,12 +3032,10 @@ function displayGrid() {
         numCellsToFill++
         const cellRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        const cellLeft = GRIDLINE + j * (SQUARE_DIM + GRIDLINE);
-        const cellTop = GRIDLINE + i * (SQUARE_DIM + GRIDLINE);
-        cellRect.setAttributeNS(
-            null, 'x', GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
-        cellRect.setAttributeNS(
-            null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
+        const cellLeft = offsetLeft + GRIDLINE + j * (SQUARE_DIM + GRIDLINE);
+        const cellTop = offsetTop + GRIDLINE + i * (SQUARE_DIM + GRIDLINE);
+        cellRect.setAttributeNS(null, 'x', cellLeft);
+        cellRect.setAttributeNS(null, 'y', cellTop);
         cellRect.setAttributeNS(null, 'width', SQUARE_DIM);
         cellRect.setAttributeNS(null, 'height', SQUARE_DIM);
         cellRect.setAttributeNS(null, 'class', 'cell');
@@ -3018,9 +3044,10 @@ function displayGrid() {
         const cellText =
             document.createElementNS('http://www.w3.org/2000/svg', 'text');
         cellText.setAttributeNS(
-            null, 'x', LIGHT_START_X + j * (SQUARE_DIM + GRIDLINE));
+            null, 'x',
+            offsetLeft + LIGHT_START_X + j * (SQUARE_DIM + GRIDLINE));
         cellText.setAttributeNS(
-            null, 'y', LIGHT_START_Y + i * (SQUARE_DIM + GRIDLINE));
+            null, 'y', offsetTop + LIGHT_START_Y + i * (SQUARE_DIM + GRIDLINE));
         cellText.setAttributeNS(null, 'text-anchor', 'middle');
         cellText.setAttributeNS(null, 'editable', 'simple');
         let letter = '0'
@@ -3048,9 +3075,11 @@ function displayGrid() {
         const cellCircle =
             document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         cellCircle.setAttributeNS(
-            null, 'cx', CIRCLE_RADIUS + GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
+            null, 'cx',
+            offsetLeft + CIRCLE_RADIUS + GRIDLINE + j *(SQUARE_DIM + GRIDLINE));
         cellCircle.setAttributeNS(
-            null, 'cy', CIRCLE_RADIUS + GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
+            null, 'cy', 
+            offsetTop + CIRCLE_RADIUS + GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
         cellCircle.setAttributeNS(null, 'r', CIRCLE_RADIUS);
         cellCircle.setAttributeNS(null, 'stroke', 'gray');
         cellCircle.setAttributeNS(null, 'fill', TRANSPARENT_WHITE);
@@ -3062,9 +3091,9 @@ function displayGrid() {
         const cellNum =
             document.createElementNS('http://www.w3.org/2000/svg', 'text');
         cellNum.setAttributeNS(
-            null, 'x', NUMBER_START_X + j * (SQUARE_DIM + GRIDLINE));
+            null, 'x', offsetLeft + NUMBER_START_X + j*(SQUARE_DIM + GRIDLINE));
         cellNum.setAttributeNS(
-            null, 'y', NUMBER_START_Y + i * (SQUARE_DIM + GRIDLINE));
+            null, 'y', offsetTop + NUMBER_START_Y + i *(SQUARE_DIM + GRIDLINE));
         cellNum.setAttributeNS(null, 'class', 'cell-num');
         const num = document.createTextNode(grid[i][j].startsClueLabel)
         cellNum.appendChild(num);
@@ -3095,9 +3124,10 @@ function displayGrid() {
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         wordEndRect.setAttributeNS(
             null, 'x',
-            GRIDLINE + (j + 1) * (SQUARE_DIM + GRIDLINE) - SEP_WIDTH_BY2);
+            offsetLeft + GRIDLINE +
+            (j + 1) * (SQUARE_DIM + GRIDLINE) - SEP_WIDTH_BY2);
         wordEndRect.setAttributeNS(
-            null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
+            null, 'y', offsetTop + GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
         wordEndRect.setAttributeNS(null, 'width', SEP_WIDTH);
         wordEndRect.setAttributeNS(null, 'height', SQUARE_DIM);
         wordEndRect.setAttributeNS(null, 'class', 'wordend');
@@ -3109,10 +3139,11 @@ function displayGrid() {
         const wordEndRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         wordEndRect.setAttributeNS(
-            null, 'x', GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
+            null, 'x', offsetLeft + GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
         wordEndRect.setAttributeNS(
             null, 'y',
-            GRIDLINE + (i + 1) * (SQUARE_DIM + GRIDLINE) - SEP_WIDTH_BY2);
+            offsetTop + GRIDLINE +
+            (i + 1) * (SQUARE_DIM + GRIDLINE) - SEP_WIDTH_BY2);
         wordEndRect.setAttributeNS(null, 'width', SQUARE_DIM);
         wordEndRect.setAttributeNS(null, 'height', SEP_WIDTH);
         wordEndRect.setAttributeNS(null, 'class', 'wordend');
@@ -3124,9 +3155,10 @@ function displayGrid() {
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         hyphenRect.setAttributeNS(
             null, 'x',
-            GRIDLINE + (j + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
+            offsetLeft + GRIDLINE +
+            (j + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
         hyphenRect.setAttributeNS(
-            null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE) +
+            null, 'y', offsetTop + GRIDLINE + i * (SQUARE_DIM + GRIDLINE) +
             SQUARE_DIM_BY2 - SEP_WIDTH_BY2);
         let hw = (j + 1) < gridWidth ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
         hyphenRect.setAttributeNS(null, 'width', hw);
@@ -3139,11 +3171,12 @@ function displayGrid() {
         const hyphenRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         hyphenRect.setAttributeNS(
-            null, 'x', GRIDLINE + j * (SQUARE_DIM + GRIDLINE) +
+            null, 'x', offsetLeft + GRIDLINE + j * (SQUARE_DIM + GRIDLINE) +
             SQUARE_DIM_BY2 - SEP_WIDTH_BY2);
         hyphenRect.setAttributeNS(
             null, 'y',
-            GRIDLINE + (i + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
+            offsetTop + GRIDLINE +
+            (i + 1) * (SQUARE_DIM + GRIDLINE) - HYPHEN_WIDTH_BY2);
         hyphenRect.setAttributeNS(null, 'width', SEP_WIDTH);
         let hh = (i + 1) < gridHeight ? HYPHEN_WIDTH : HYPHEN_WIDTH_BY2
         hyphenRect.setAttributeNS(null, 'height', hh);
@@ -3156,12 +3189,13 @@ function displayGrid() {
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         barRect.setAttributeNS(
             null, 'x',
-            GRIDLINE + (j + 1) * (SQUARE_DIM + GRIDLINE) - BAR_WIDTH_BY2);
+            offsetLeft + GRIDLINE +
+            (j + 1) * (SQUARE_DIM + GRIDLINE) - BAR_WIDTH_BY2);
         barRect.setAttributeNS(
-            null, 'y', GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
+            null, 'y', offsetTop + GRIDLINE + i * (SQUARE_DIM + GRIDLINE));
         barRect.setAttributeNS(null, 'width', BAR_WIDTH);
         barRect.setAttributeNS(null, 'height', SQUARE_DIM);
-        barRect.setAttributeNS(null, 'class', 'background');
+        barRect.setAttributeNS(null, 'fill', gridBackground);
         cellGroup.appendChild(barRect)
         emptyGroup = false
       }
@@ -3169,13 +3203,14 @@ function displayGrid() {
         const barRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         barRect.setAttributeNS(
-            null, 'x', GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
+            null, 'x', offsetLeft + GRIDLINE + j * (SQUARE_DIM + GRIDLINE));
         barRect.setAttributeNS(
             null, 'y',
-            GRIDLINE + (i + 1) * (SQUARE_DIM + GRIDLINE) - BAR_WIDTH_BY2);
+            GRIDLINE + offsetTop +
+            (i + 1) * (SQUARE_DIM + GRIDLINE) - BAR_WIDTH_BY2);
         barRect.setAttributeNS(null, 'width', SQUARE_DIM);
         barRect.setAttributeNS(null, 'height', BAR_WIDTH);
-        barRect.setAttributeNS(null, 'class', 'background');
+        barRect.setAttributeNS(null, 'fill', gridBackground);
         cellGroup.appendChild(barRect)
         emptyGroup = false
       }
@@ -3270,7 +3305,7 @@ function clearCell(row, col) {
   if (oldLetter != '0') {
     grid[row][col].currentLetter = '0'
     grid[row][col].textNode.nodeValue = ''
-    if (row == gnavRow && col == gnavCol) {
+    if (row == currentRow && col == currentCol) {
       gridInput.value = ''
     }
   }
@@ -3307,8 +3342,8 @@ function isFull(clueIndex) {
 
 function clearCurrent() {
   let clueIndices = []
-  if (cnavClueIndex) {
-    clueIndices = getAllLinkedClueIndices(cnavClueIndex)
+  if (currentClueIndex) {
+    clueIndices = getAllLinkedClueIndices(currentClueIndex)
     for (let clueIndex of clueIndices) {
       if (clues[clueIndex].annoSpan) {
         clues[clueIndex].annoSpan.style.display = 'none'
@@ -3376,7 +3411,7 @@ function clearAll() {
       }
       grid[row][col].currentLetter = '0'
       grid[row][col].textNode.nodeValue = ''
-      if (row == gnavRow && col == gnavCol) {
+      if (row == currentRow && col == currentCol) {
         gridInput.value = ''
       }
     }
@@ -3414,7 +3449,7 @@ function checkCurrent() {
     allCorrect = false
     grid[row][col].currentLetter = '0'
     grid[row][col].textNode.nodeValue = ''
-    if (row == gnavRow && col == gnavCol) {
+    if (row == currentRow && col == currentCol) {
       gridInput.value = ''
     }
     if (oldLetter == '1') {
@@ -3456,7 +3491,7 @@ function checkAll() {
       allCorrect = false
       grid[row][col].currentLetter = '0'
       grid[row][col].textNode.nodeValue = ''
-      if (row == gnavRow && col == gnavCol) {
+      if (row == currentRow && col == currentCol) {
         gridInput.value = ''
       }
     }
@@ -3487,7 +3522,7 @@ function revealCurrent() {
       grid[row][col].currentLetter = letter
       let revealedChar = stateCharToDisplayChar(letter)
       grid[row][col].textNode.nodeValue = revealedChar
-      if (row == gnavRow && col == gnavCol) {
+      if (row == currentRow && col == currentCol) {
         gridInput.value = revealedChar
       }
     }
@@ -3502,8 +3537,8 @@ function revealCurrent() {
       }
     }
   }
-  if (cnavClueIndex) {
-    let clueIndices = getAllLinkedClueIndices(cnavClueIndex)
+  if (currentClueIndex) {
+    let clueIndices = getAllLinkedClueIndices(currentClueIndex)
     for (let clueIndex of clueIndices) {
       if (clues[clueIndex].annoSpan) {
         clues[clueIndex].annoSpan.style.display = ''
@@ -3536,7 +3571,7 @@ function revealAll() {
         grid[row][col].currentLetter = grid[row][col].solution
         let revealedChar = stateCharToDisplayChar(grid[row][col].solution)
         grid[row][col].textNode.nodeValue = revealedChar
-        if (row == gnavRow && col == gnavCol) {
+        if (row == currentRow && col == currentCol) {
           gridInput.value = revealedChar
         }
       }
