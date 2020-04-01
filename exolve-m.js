@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.58 March 26 2020'
+const VERSION = 'Exolve v0.59 April 1 2020'
 
 // ------ Begin globals.
 
@@ -1828,6 +1828,14 @@ function displayClues() {
     let tr = document.createElement('tr')
     let col1 = document.createElement('td')
     col1.innerHTML = clues[clueIndex].displayLabel
+
+    let col1Chars = clues[clueIndex].displayLabel.replace(/&.*;/g, 'X')
+    let col1NumChars = [...col1Chars].length
+    if (col1Chars.substr(1,1) == ',') {
+      // Linked clue that begins with a single-digit clue number. Indent!
+      col1.style.textIndent = '1ch'
+      col1NumChars++
+    }
     if (!allCellsKnown(clueIndex)) {
       col1.setAttributeNS(null, 'class', 'clickable')
       col1.setAttributeNS(null, 'title', MARK_CLUE_TOOLTIP)
@@ -1835,6 +1843,16 @@ function displayClues() {
     }
     let col2 = document.createElement('td')
     col2.innerHTML = clues[clueIndex].clue
+    if (col1NumChars > 2) {
+      // More than two unicode chars in col1. Need to indent col2.
+      let col1Spaces = col1Chars.split(' ').length - 1
+      let indent = (col1NumChars - 2 - (2 * col1Spaces)) * 8
+      indent = indent + (2 * col1Spaces * 4)
+      if (indent < 4) {
+        indent = 4
+      }
+      col2.style.textIndent = '' + indent + 'px'
+    }
 
     if (isOrphan(clueIndex) && !clues[clueIndex].parentClueIndex) {
       let placeholder = ''
@@ -1939,12 +1957,12 @@ function updateDisplayAndGetState() {
       break
     }
   }
-  clearButton.disabled = (activeCells.length == 0)
   checkButton.disabled = (activeCells.length == 0)
   revealButton.disabled = (activeCells.length == 0) &&
                           (!currentClueIndex ||
                            !clues[currentClueIndex] ||
                            !clues[currentClueIndex].anno)
+  clearButton.disabled = revealButton.disabled
   submitButton.disabled = (numCellsFilled != numCellsToFill)
   return state
 }
@@ -3388,6 +3406,9 @@ function clearCurrent() {
     }
   }
   updateActiveCluesState()
+  if (currentClueIndex) {
+    updateClueState(currentClueIndex, false, 'unsolved')
+  }
   updateAndSaveState()
   if (usingGnav) {
     gridInput.focus()
@@ -3546,6 +3567,9 @@ function revealCurrent() {
     }
   }
   updateActiveCluesState()
+  if (currentClueIndex) {
+    updateClueState(currentClueIndex, false, 'solved')
+  }
   updateAndSaveState()
   if (usingGnav) {
     gridInput.focus()

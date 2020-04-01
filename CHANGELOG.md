@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.59 April 1 2020
+
+- Do proper styling of clue numbers for linked clues: let them spill into
+  the clue column, and indent the clue column.
+- Enable 'clear this' button if there is an anno (just like 'reveal this')
+- In 'reveal/clear this' set/reset clue solved state and colour even for
+  orphan clues.
+
 ### Version: Exolve v0.58 March 26 2020
 
 - Go back to using old var names such as currentRow, as some customizePuzzle()

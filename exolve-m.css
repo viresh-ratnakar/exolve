@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.58 March 26 2020
+Version: Exolve v0.59 April 1 2020
 */
 
 .background {
@@ -39,7 +39,9 @@ td {
   vertical-align: top;
 }
 td:first-child:not(.filler) {
-  max-width: 45px;
+  max-width: 16px;
+  white-space: nowrap;
+  overflow: visible;
   font-weight: bold;
   text-align:right;
 }
