@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.59 April 1 2020'
+const VERSION = 'Exolve v0.60 April 1 2020'
 
 // ------ Begin globals.
 
@@ -1829,11 +1829,12 @@ function displayClues() {
     let col1 = document.createElement('td')
     col1.innerHTML = clues[clueIndex].displayLabel
 
-    let col1Chars = clues[clueIndex].displayLabel.replace(/&.*;/g, 'X')
+    let col1Chars = clues[clueIndex].displayLabel.replace(/&[^;]*;/g, '#')
     let col1NumChars = [...col1Chars].length
     if (col1Chars.substr(1,1) == ',') {
       // Linked clue that begins with a single-digit clue number. Indent!
       col1.style.textIndent = '1ch'
+      col1Chars = '0' + col1Chars
       col1NumChars++
     }
     if (!allCellsKnown(clueIndex)) {
@@ -1845,9 +1846,20 @@ function displayClues() {
     col2.innerHTML = clues[clueIndex].clue
     if (col1NumChars > 2) {
       // More than two unicode chars in col1. Need to indent col2.
+      col1Chars = col1Chars.substr(2)
+      // spaces and equal number of commas use 4
       let col1Spaces = col1Chars.split(' ').length - 1
-      let indent = (col1NumChars - 2 - (2 * col1Spaces)) * 8
-      indent = indent + (2 * col1Spaces * 4)
+      let indent = col1Spaces * 2 * 4
+      // digits use 8
+      let col1Digits = col1Chars.replace(/[^0-9]*/g, '').length
+      indent = indent + (col1Digits * 8)
+      // letters use 11
+      let col1Letters = col1Chars.replace(/[^a-zA-Z]*/g, '').length
+      indent = indent + (col1Letters * 11)
+      let rem = col1Chars.length - col1Letters - col1Digits - (2 * col1Spaces);
+      if (rem > 0) {
+        indent = indent + (rem * 14)
+      }
       if (indent < 4) {
         indent = 4
       }
@@ -2572,7 +2584,8 @@ function addOrphanEntryUI(elt, inCurr, len, placeholder, clueIndex) {
   }
   html = html + ' class="nobr">' +
     '<input size="' + len + '" class="incluefill" placeholder="' +
-    placeholder + '" type="text" ' +
+    placeholder.replace(/\?/g, '·') +
+    '" type="text" ' +
     'oninput="updateOrphanEntry(\'' + clueIndex + '\', ' + inCurr + ')" ' +
     'title="You can record your solution here before copying to squares" ' +
     'autocomplete="off" spellcheck="off"></input>'

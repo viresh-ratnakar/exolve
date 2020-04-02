@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.60 April 1 2020
+
+- For orphan clue placeholders, use middle dots (···) instead of question marks
+  (???) so that filled placeholders can more readily be visually distinguished
+  from unfilled ones.
+- Minor bugfixes for linked clue number rendering, when the linked numbers
+  are non-numeric.
+
 ### Version: Exolve v0.59 April 1 2020
 
 - Do proper styling of clue numbers for linked clues: let them spill into
