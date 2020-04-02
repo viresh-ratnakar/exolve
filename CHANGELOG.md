@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v0.61 April 2 2020
+
+- Clicking/tabbing in placeholders in clues table now keeps the focus there.
+- "Clear this" now respects crossers even when the current grid light does not
+  have a clue.
+- Add tooltip to "Clear this" to let users know about the second click for
+  needed for clearing full crossers.
+- Placeholders can be forcibly cleared with a second click on 'Clear all' when
+  there any orphan clues with placeholders. And for such puzzles, a tooltip
+  on 'Clear all' lets the user know of this functionality.
+
 ### Version: Exolve v0.60 April 1 2020
 
 - For orphan clue placeholders, use middle dots (···) instead of question marks

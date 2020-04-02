@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.60 April 1 2020
+### Version: Exolve v0.61 April 2 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -99,6 +99,13 @@ If the setter has asked additional questions in the puzzle (through
 exolve-question sections), then input fields for these get shown too.
 "Reveal/Clear all" controls buttons also include revealing/clearing
 answers to these questions apart from showing/hiding annos/explanations/ninas.
+
+If there are placeholder entries (for orphan clues—i.e., for clues without
+known cells), they do NOT get cleared with 'clear this/all'. For clearing all
+such placeholder entries forcibly, click on the 'Clear all' button when there
+are no entries in the grid (eg, by clicking it a _second_ time). This option is
+only there in puzzles that have such placeholder entries, and in such puzzles,
+a tooltip is shown over the 'Clear all' button to let the user know.
 
 If the setter has set up a submit URL (with an exolve-submit section—the URL
 can be set up using a Google Form, for instance), then there is a *Submit*

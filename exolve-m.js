@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.60 April 1 2020'
+const VERSION = 'Exolve v0.61 April 2 2020'
 
 // ------ Begin globals.
 
@@ -105,6 +105,7 @@ let activeClues = [];
 
 let numCellsToFill = 0
 let numCellsFilled = 0
+let numCellsPrefilled = 0
 
 let allClueIndices = []
 const CURR_ORPHAN_ID = 'curr-orphan'
@@ -2430,10 +2431,10 @@ function cnavToInner(activeClueIndex) {
     }
     addOrphanEntryUI(currClue, true, len, placeholder, parentIndex)
     updateOrphanEntry(parentIndex, false /* need to copy to curr */)
-    if (!usingGnav) {
-      let placeholders = currClue.getElementsByTagName('input')
-      if (placeholders && placeholders.length > 0) {
-        placeholders[0].focus()
+    if (!usingGnav && clues[parentIndex].clueTR) {
+      let plIns = clues[parentIndex].clueTR.getElementsByTagName('input')
+      if (plIns && plIns.length > 0) {
+        plIns[0].focus()
       }
     }
   }
@@ -3055,12 +3056,16 @@ function createListeners() {
 
 function displayGrid() {
   numCellsToFill = 0
+  numCellsPrefilled = 0
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       const cellGroup =
           document.createElementNS('http://www.w3.org/2000/svg', 'g');
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
         numCellsToFill++
+        if (grid[i][j].prefill) {
+          numCellsPrefilled++
+        }
         const cellRect =
             document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         const cellLeft = offsetLeft + GRIDLINE + j * (SQUARE_DIM + GRIDLINE);
@@ -3380,6 +3385,18 @@ function clearCurrent() {
         clues[clueIndex].annoSpan.style.display = 'none'
       }
     }
+    if (isOrphan(currentClueIndex) && activeCells.length > 0) {
+      // For determining crossers, use the current grid clue, if any.
+      clueIndices = []
+      if (usingGnav && currentRow >= 0 && currentCol >= 0) {
+        if (currentDir == 'A' && grid[currentRow][currentCol].acrossClueLabel) {
+          clueIndices.push('A' + grid[currentRow][currentCol].acrossClueLabel)
+        }
+        if (currentDir == 'D' && grid[currentRow][currentCol].downClueLabel) {
+          clueIndices.push('D' + grid[currentRow][currentCol].downClueLabel)
+        }
+      }
+    }
   }
   let fullCrossers = []
   let others = []
@@ -3429,7 +3446,14 @@ function clearCurrent() {
 }
 
 function clearAll() {
-  if (!confirm('Are you sure you want to clear the whole grid!?')) {
+  let message = 'Are you sure you want to clear every entry!?'
+  let clearingPls = false
+  if (lastOrphan && numCellsFilled == numCellsPrefilled) {
+    message = 'Are you sure you want to clear every entry including all the ' +
+              'placeholder entries!?'
+    clearingPls = true
+  }
+  if (!confirm(message)) {
     if (usingGnav) {
       gridInput.focus()
     }
@@ -3464,6 +3488,19 @@ function clearAll() {
 
   for (let ci of allClueIndices) {
     updateClueState(ci, false, 'unsolved')
+    if (clearingPls && isOrphan(ci) && clues[ci].clueTR) {
+      let clueInputs = clues[ci].clueTR.getElementsByTagName('input')
+      if (clueInputs.length != 1) {
+        continue
+      }
+      clueInputs[0].value = ''
+    }
+  }
+  if (clearingPls && currClue) {
+    let clueInputs = currClue.getElementsByTagName('input')
+    if (clueInputs.length == 1) {
+      clueInputs[0].value = ''
+    }
   }
   updateAndSaveState()
   if (usingGnav) {
@@ -3691,6 +3728,15 @@ function submitSolution() {
 }
 
 function displayButtons() {
+  clearButton.setAttributeNS(
+    null, 'title',
+    'Note: clear crossers from full clues with a second click');
+  if (lastOrphan) {
+    clearAllButton.setAttributeNS(
+      null, 'title',
+      'Note: second click clears all placeholder entries in clues ' +
+      'without known cells');
+  }
   clearButton.disabled = true
   if (!hasUnsolvedCells) {
     checkButton.style.display = ''
