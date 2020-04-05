@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.61 April 2 2020'
+const VERSION = 'Exolve v0.62 April 5 2020'
 
 // ------ Begin globals.
 
@@ -298,6 +298,15 @@ function parseColour(s) {
   }
 }
 
+function getAnswerListener(answer) {
+  return function() {
+    let cursor = answer.selectionStart
+    answer.value = answer.value.toUpperCase().trimLeft()
+    answer.selectionEnd = cursor 
+    updateAndSaveState()
+  };
+}
+
 // Parse a question line and create the question element for it (which includes
 // an input box for the answer). The solution answer may be provided after the
 // last ')'.
@@ -371,7 +380,7 @@ function parseQuestion(s) {
   answer.setAttributeNS(null, 'spellcheck', 'false');
   question.appendChild(answer)
   questions.appendChild(question)
-  answer.addEventListener('input', updateAndSaveState);
+  answer.addEventListener('input', getAnswerListener(answer));
 }
 
 function parseSubmit(s) {
@@ -1961,15 +1970,6 @@ function getGridStateAndNumFilled() {
 function updateDisplayAndGetState() {
   let state = getGridStateAndNumFilled();
   statusNumFilled.innerHTML = numCellsFilled
-  for (let a of answersList) {
-    if (a.isq) {
-      let cursor = a.input.selectionStart
-      a.input.value = a.input.value.toUpperCase().trimLeft()
-      a.input.selectionEnd = cursor 
-    } else {
-      break
-    }
-  }
   checkButton.disabled = (activeCells.length == 0)
   revealButton.disabled = (activeCells.length == 0) &&
                           (!currentClueIndex ||
@@ -3671,7 +3671,9 @@ function revealAll() {
 
 function scratchPadInput() {
   let scratchPad = document.getElementById('scratchpad')
+  let cursor = scratchPad.selectionStart
   scratchPad.value = scratchPad.value.toUpperCase()
+  scratchPad.selectionEnd = cursor
 }
 
 function scratchPadShuffle() {

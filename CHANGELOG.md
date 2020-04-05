@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.62 April 5 2020
+
+- Add an input handler for answers (otherwise we were stealing focus to the
+  last answer on Safari).
+- Fix cursor jumping in the scratch-pad.
+
 ### Version: Exolve v0.61 April 2 2020
 
 - Clicking/tabbing in placeholders in clues table now keeps the focus there.
