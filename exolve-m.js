@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.62 April 5 2020'
+const VERSION = 'Exolve v0.63 April 6 2020'
 
 // ------ Begin globals.
 
@@ -891,7 +891,7 @@ function parseEnum(clueLine) {
     'afterEnum': clueLine.length,
     'placeholder': '',
   };
-  let enumLocation = clueLine.search(/\([1-9]+[0-9\-,'’\s]*\)/)
+  let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\.'’\s]*\)/)
   if (enumLocation < 0) {
     // Look for the the string 'word'/'letter'/? in parens.
     enumLocation = clueLine.search(/\([^)]*(word|letter|\?)[^)]*\)/i)
@@ -926,6 +926,9 @@ function parseEnum(clueLine) {
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == ',') {
       nextSymbol = ' '
+      parse.wordEndAfter.push(parse.enumLen - 1)
+      enumLeft = enumLeft.substr(1)
+    } else if (nextSymbol == '.') {
       parse.wordEndAfter.push(parse.enumLen - 1)
       enumLeft = enumLeft.substr(1)
     } else if (nextSymbol == '\'') {
@@ -3448,10 +3451,16 @@ function clearCurrent() {
 function clearAll() {
   let message = 'Are you sure you want to clear every entry!?'
   let clearingPls = false
-  if (lastOrphan && numCellsFilled == numCellsPrefilled) {
-    message = 'Are you sure you want to clear every entry including all the ' +
-              'placeholder entries!?'
-    clearingPls = true
+  if (lastOrphan) {
+    if (numCellsFilled == numCellsPrefilled) {
+      message = 'Are you sure you want to clear every entry including all ' +
+                'the placeholder entries!?'
+      clearingPls = true
+    } else {
+      message = message + ' (The placeholder entries will not be cleared. To' +
+        ' clear the placeholders, click on clear-all again after clearing' +
+        ' the grid.)'
+    }
   }
   if (!confirm(message)) {
     if (usingGnav) {

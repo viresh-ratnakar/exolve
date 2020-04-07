@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.63 April 6 2020
+
+- Mention that placeholders will be cleared in the second "clear all" in
+  the confirmation dialog for the first click on "clear all" 
+- Allow enums to also use periods.
+
 ### Version: Exolve v0.62 April 5 2020
 
 - Add an input handler for answers (otherwise we were stealing focus to the
