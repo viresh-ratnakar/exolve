@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.63 April 6 2020'
+const VERSION = 'Exolve v0.64 April 13 2020'
 
 // ------ Begin globals.
 
@@ -2395,8 +2395,6 @@ function cnavToInner(activeClueIndex) {
     parentIndex = lastOrphan
     curr = clues[parentIndex]
     if (!curr || !curr.clue) {
-      addError('Grid light has no clue, and there are no orphan clues in the ' +
-               'clue list')
       return null
     }
     clueIndices = getAllLinkedClueIndices(parentIndex)

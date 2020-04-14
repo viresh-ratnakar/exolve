@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.64 April 13 2020
+
+- Allow grids without any clues at all.
+
 ### Version: Exolve v0.63 April 6 2020
 
 - Mention that placeholders will be cleared in the second "clear all" in
