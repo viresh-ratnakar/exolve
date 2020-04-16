@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v0.66 April 16 2020
+
+- The chessboard notation breaks down when there are more than 26 columns.
+  Extend it to allow squares to also be specified using an explicit row number
+  and column number, like "r12c33" or "c33r12" (both are allowed). Row numbers
+  are counted starting from the bottom row at 1, going upwards. Column numbers
+  are counted starting from the leftmost column at 1, going towards the right.
+- In exolve-nina and exolve-colour, also allow entire lights to be specified,
+  like "A12" and "D42".
+
 ### Version: Exolve v0.65 April 15 2020
 
 - Create all the puzzle HTML in the init() function, so that the HTML file

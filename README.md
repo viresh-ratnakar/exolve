@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.65 April 15 2020
+### Version: Exolve v0.66 April 16 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -313,6 +313,21 @@ a value in a light for which the clue association is not known, the highlighted
 "current clue" browsable interface runs through all the clues for which no
 grid cells are known.
 
+## Extended chessboard notation
+In a few places (such as when specifying colouring or ninas or locations of
+some clue numbers in diagramless puzzles), you will need to specify the location
+of a square in the grid. You can do that in one of the following ways:
+```
+a3 (column "a": the 1st column from the left, and row 3 from the bottom)
+f11 (column "f": the 6th column from the left, and row 11 from the bottom)
+```
+This chessboard notation is insufficient if your grid has more than 26 columns.
+You can directly specify the row and the column too, like this:
+```
+c1r3 (the 1st column from the left, and row 3 from the bottom)
+r11c6 (the 6th column from the left, and row 11 from the bottom)
+```
+
 ## Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
 in a light or is a blocked square—if the setter has used any bars, they do get
@@ -332,8 +347,8 @@ grid square any clue starts on. However, sometimes, even in a puzzle with
 diagramless squares, the setter does want to provide the clue start locations
 for *some* clues. Exolve provides a way to do this: the setter can optionally
 include the location of the square where a clue starts for any clue, using the
-chessboard notation. Details are provided in the exolve-across/down section
-below.
+extended chessboard notation. Details are provided in the exolve-across/down
+section below.
 
 ## exolve-across, exolve-down, exolve-nodir
 The exolve-across and exolve-down sections should be used to specify the across
@@ -396,18 +411,16 @@ unset) its "has-been-solved" state manually.
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue
 numbers in squares, they can do so by prepending the clue (in the exolve-across
-or exolve-down section) with "#xN", there x is the column ("a" being the first
-column, "b" being the second column, etc.) and N is the row number (1 being the
-bottom row, 2 being the row above the bottom row, etc.). This is essentially
-an extension of the chessboard notation. I considered using programming
-notation, but went with this for hopefully wider understanding. This notation
-is also used for specifying ninas. Example:
+or exolve-down section) with "#<L>", where <L> is the location of the square in
+the extended chessboard notation described earlier. Examples:
 ```
   exolve-across:
     #a9 15 Imprison and tie perhaps
+    #c17r42 31 Greeting
 ```
-In this example, the clue number (15) will get displayed in the square that is
-in the first column and the 9th row from the bottom.
+Here, the clue number 15 will get displayed in the square that is in the first
+column and the 9th row from the bottom, and 31 will get displayed in the 17th
+column and 31st row.
 
 ### Filler lines between clues
 Any line in a clues section (i.e., in exolve-across/exolve-down/exolve-nodir)
@@ -528,22 +541,22 @@ that case, a "Show ninas" control button will get displayed. Each nina should
 use its own "exolve-nina:" line, and the ninas will get displayed in different
 colours upon clicking "Show ninas" (as well as "Reveal all").
 
-The squares involved in a nina are specified in the same chessboard notation
-described above. Example:
+The squares involved in a nina are specified in the extended chessboard notation
+described above. It can also use clue indices like A12 and D33. Example:
 ```
-  exolve-nina: j5 j7 j9 j11 j13
-  exolve-nina: a7 b7 c7 d7 e7
+  exolve-nina: j5 j7 j9 c10r11 j13
+  exolve-nina: a7 b7 c7 d7 e7 A12
 ```
 This example is from a puzzle with two ninas. The first one is in the 10th
-column ("j"), and the second one is in the seventh row from the bottom.
+column ("j"), and the second one is in the seventh row from the bottom as well
+as all the cells in the A12 clue.
 
 You can also have ninas that involve arbitrary letters/words from within the
 text of the clues or the prelude. This involves a little bit of html.
 Just enclose the text that you want to highlight as a nina in a "span" tag,
 giving it a unique class name, and specify that class name in the exolve-nina
-(the name cannot be a letter followed by a number, so that it is not confused
-with the above chessboard notation).
-For example:
+(the name should not be a letter followed by a number, so that it is not
+confused with the extended chessboard notation or clue indices). For example:
 ```
   exolve-nina: acrostic-1
   exolve-across
@@ -559,9 +572,10 @@ such as:
 
 ## exolve-colour, exolve-color
 Specific cells in the grid may be coloured using this feature. The squares
-involved are again specified in the chessboard notation.
+involved are again specified in the extended chessboard notation or with clue
+indices like A12 and D32.
 ```
-  exolve-colour: palegreen j5 j7 j9 j11 j13
+  exolve-colour: palegreen j5 j7 c10r9 c10r11 j13 A12
 ```
 The colour itself can be any valid
 [HTML colour name](https://www.w3schools.com/colors/colors_names.asp).

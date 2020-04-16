@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.65 April 15 2020'
+const VERSION = 'Exolve v0.66 April 16 2020'
 
 // ------ Begin globals.
 
@@ -391,17 +391,17 @@ function parseToNextSection() {
           'value': line.substr(index + 1).trim()}
 }
 
-// Parse a nina line, which consists of cell locations of the nina specified
-// using "chess notation" (a1 = bottom-left, etc.). Convert the cell locations
-// to [row col] and push an array of these locations to the global ninas array.
+// Parse a nina line, which consists of cell locations or clue indices.
+// Convert the cell locations to [row col] and push an array of these to the
+// global ninas array.
 function parseNina(s) {
   let nina = []
-  let cellsOrClasses = s.split(' ')
-  for (let cellOrClass of cellsOrClasses) {
-    let cellLocation = parseCellLocation(cellOrClass)
+  let cellsOrOthers = s.split(' ')
+  for (let cellOrOther of cellsOrOthers) {
+    let cellLocation = parseCellLocation(cellOrOther)
     if (!cellLocation) {
-      // Must be a class name, for a span-class-specified nina
-      nina.push(cellOrClass)
+      // Must be a class name, for a span-class-specified nina OR a clue index
+      nina.push(cellOrOther)
     } else {
       nina.push(cellLocation)
     }
@@ -421,8 +421,7 @@ function parseColour(s) {
     }
     let cellLocation = parseCellLocation(c)
     if (!cellLocation) {
-      addError('Could not parse cell location in: ' + c)
-      return
+      cellColours.push([c, colour])  // clue index
     } else {
       cellColours.push(cellLocation.concat(colour))
     }
@@ -994,12 +993,31 @@ function adjustAfterEnum(clueLine, afterEnum) {
   return afterEnum
 }
 
-// Parse a cell location in "chess notation" (a1 = bottom-left, etc.) and
-// return a two-element array [row, col].
+// Parse a cell location in "chess notation" (a1 = bottom-left, etc.) or as
+// 1-based row/col like r7c2 or c2r7 and return a two-element array [row, col].
 function parseCellLocation(s) {
+  let row = -1
+  let col = -1
   s = s.trim()
-  let col = s.charCodeAt(0) - 'a'.charCodeAt(0)
-  let row = gridHeight - parseInt(s.substr(1))
+  let spaceAt = s.indexOf(' ')
+  if (spaceAt >= 0) {
+    s = s.substr(0, spaceAt)
+  }
+  let matches = s.match(/r(\d+)c(\d+)/)
+  if (matches && matches.length == 3) {
+    row = gridHeight - parseInt(matches[1])
+    col = parseInt(matches[2]) - 1
+  } else {
+    matches = s.match(/c(\d+)r(\d+)/)
+    if (matches && matches.length == 3) {
+      col = parseInt(matches[1]) - 1
+      row = gridHeight - parseInt(matches[2])
+    }
+  }
+  if (row < 0 || col < 0) {
+    col = s.charCodeAt(0) - 'a'.charCodeAt(0)
+    row = gridHeight - parseInt(s.substr(1))
+  }
   if (isNaN(row) || isNaN(col) ||
       row < 0 || row >= gridHeight || col < 0 || col >= gridWidth) {
     return null
@@ -1145,7 +1163,7 @@ function parseClueLabel(clueLine) {
 // clueIndex
 // clueLabel
 // isOffNum
-// children[]  (raw parseClueLabel() resutls, not yet clueIndices)
+// children[] (raw parseClueLabel() resutls, not yet clueIndices)
 // clue
 // enumLen
 // hyphenAfter[] (0-based indices)
@@ -1168,7 +1186,7 @@ function parseClue(dir, clueLine) {
     if (numCellsGiven == 0) {
       parse.startCell = cell
     }  
-    clueLine = clueLine.replace(/^#[a-z][0-9]*\s*/, '')
+    clueLine = clueLine.replace(/^#[a-z0-9]*\s*/, '')
     numCellsGiven += 1
     if (numCellsGiven == 2) {
       parse.cells.push(parse.startCell)
@@ -3273,11 +3291,26 @@ function displayGrid() {
 
   // Set colours specified through exolve-colour.
   for (let cellColour of cellColours) {
-    let row = cellColour[0]
-    let col = cellColour[1]
-    let colour = cellColour[2]
-    grid[row][col].colour = colour
-    grid[row][col].cellRect.style.fill = colour
+    if (cellColour.length == 2) {
+      let ci = cellColour[0]
+      if (!clues[ci] || !clues[ci].cells) {
+        continue
+      }
+      let colour = cellColour[1]
+      for (let cell of clues[ci].cells) {
+        grid[cell[0]][cell[1]].colour = colour
+        grid[cell[0]][cell[1]].cellRect.style.fill = colour
+      }
+    } else {
+      let row = cellColour[0]
+      let col = cellColour[1]
+      if (!grid[row][col].cellRect) {
+        continue
+      }
+      let colour = cellColour[2]
+      grid[row][col].colour = colour
+      grid[row][col].cellRect.style.fill = colour
+    }
   }
 
   // Bars/word-ends to the right and under; hyphens.
@@ -3406,13 +3439,23 @@ function displayNinas() {
   ];
   let ninaColorIndex = 0;
   for (let nina of ninas) {
-    for (let cellOrClass of nina) {
+    // First resolve clue indices to cells.
+    let nina2 = []
+    for (let cellOrOther of nina) {
+      if (!Array.isArray(cellOrOther) && clues[cellOrOther] &&
+          clues[cellOrOther].cells) {
+        nina2 = nina2.concat(clues[cellOrOther].cells)
+      } else {
+	nina2.push(cellOrOther)
+      }
+    }
+    for (let cellOrClass of nina2) {
       if (!Array.isArray(cellOrClass)) {
         // span-class-specified nina
         const elts = document.getElementsByClassName(cellOrClass)
         if (!elts || elts.length == 0) {
           addError('Nina ' + cellOrClass +
-                   ' is not a cell location nor a class with html tags');
+                   ' is not a cell/clue location nor a class with html tags');
           return
         }
         for (const elt of elts) {
