@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.65 April 15 2020
+
+- Create all the puzzle HTML in the init() function, so that the HTML file
+  looks much simpler. Future HTML changes are going to be made through
+  js. But keep the code backwards compatible (if the html already has an
+  'outermost-stack' element, just use it).
+
 ### Version: Exolve v0.64 April 13 2020
 
 - Allow grids without any clues at all.

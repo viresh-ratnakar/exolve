@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.64 April 13 2020'
+const VERSION = 'Exolve v0.65 April 15 2020'
 
 // ------ Begin globals.
 
@@ -172,8 +172,139 @@ let submitButton;
 
 // ------ Begin functions.
 
+// Create the basic HTML structure.
 // Set up globals, version number and user agent in bug link.
 function init() {
+  let outermost = document.getElementById('outermost-stack')
+  if (!outermost) {
+    // Do not change basicHTML, basically ever, to ensure
+    // backward compatibility. Use code to add/remove/modify
+    // the DOM tree, if needed.
+    const basicHTML = `
+<div class="flex-col" id="outermost-stack">
+  <h2 id="title">Title</h2>
+  <div id="setter"></div>
+  <div id="prelude"></div>
+  <div id="current-clue-parent">
+    <div id="current-clue"></div>
+  </div>
+  <div class="flex-row">
+    <div id="grid-panel">
+      <div id="grid-parent-centerer">
+        <div id="grid-parent">
+          <svg id="grid" zoomAndPan="disable"></svg>
+          <div id="grid-input-wrapper" style="display:none;left:0;top:0"><input id="grid-input" type="text" maxlength="2" autocomplete="off" spellcheck="false" class="cell-text"/></div>
+          <div id="nina-group" style="display:none;left:0;top:0"></div>
+        </div> <!-- #grid-parent -->
+      </div> <!-- #grid-parent-centerer -->
+      <div id="controls-etc">
+        <div id="controls" class="wide-box">
+          <div id="button-row-1" class="controls-row">
+            <button id="clear" class="button"
+                onclick="clearCurrent()">Clear this</button>
+            <button id="clear-all" class="button"
+                onclick="clearAll()">Clear all!</button>
+            <button id="check" class="button" style="display:none"
+                onclick="checkCurrent()">Check this</button>
+            <button id="check-all" class="button" style="display:none"
+                onclick="checkAll()">Check all!</button>
+          </div> <!-- #button-row-1 -->
+          <div id="button-row-2" class="controls-row">
+            <button id="reveal" class="button" style="display:none"
+                onclick="revealCurrent()">Reveal this</button>
+            <button id="ninas" class="button" style="display:none"
+                onclick="toggleNinas()">Show ninas</button>
+            <button id="reveal-all" class="button" style="display:none"
+                onclick="revealAll()">Reveal all!</button>
+          </div> <!-- #button-row-2 -->
+        </div> <!-- #controls -->
+        <div id="errors"></div>
+        <div id="status">
+          Squares filled:
+          <span id="status-num-filled">0</span>/<span
+                id="status-num-total"></span>
+        </div> <!-- #status -->
+        <div id="saving" class="wide-box">
+          Your entries are saved automatically in a cookie, for the most
+          recent puzzle that you open from this site. Bookmark/save the
+          <a id="saving-url" href="">URL</a> for more reliable recovery.
+        </div> <!-- #saving -->
+        <div id="small-print" class="wide-box">
+          <div id="control-keys-list" style="display:none">
+            <ul>
+              <li>
+                <b>Tab/Shift-Tab:</b>
+                Jump to the next/previous clue in the current direction
+              </li>
+              <li>
+                <b>Enter, Click/Tap:</b>
+                Toggle current direction
+              </li>
+              <li>
+                <b>Arrow keys:</b>
+                Move to the nearest light square in that direction
+              </li>
+              <li>
+                <b>Spacebar:</b>
+                Place/clear block in the current square if it's diagramless
+              </li>
+            </ul>
+            <div>
+              <span id="shuffle"
+                title="Shuffle selected text (or all text, if none selected)"
+                onclick="scratchPadShuffle()">
+                Scratch pad: (click here to shuffle)
+              </span>
+              <textarea oninput="scratchPadInput()"
+                id="scratchpad" spellcheck="false"
+                rows="2" cols="60"></textarea>
+            </div>
+          </div>
+          <a id="show-control-keys" href=""
+            title="Show/hide tools: list of control keys and scratch pad"
+            onclick="toggleShowControls();return false">Tools</a>
+          <a id="report-bug"
+            href="https://github.com/viresh-ratnakar/exolve/issues/new">Report
+            bug</a>
+          <a id="exolve-link"
+            href="https://github.com/viresh-ratnakar/exolve">Exolve on
+            GitHub</a>
+          <span id="copyright"></span>
+        </div> <!-- #small-print -->
+        <div id="questions" class="wide-box"></div> 
+        <div id="submit-parent">
+          <button id="submit" class="button" style="display:none"
+              onclick="submitSolution()">Submit!</button>
+        </div> <!-- submit-parent -->
+        <div id="explanations" class="wide-box" style="display:none"></div>
+      </div> <!-- #controls-etc -->
+      <br/>
+    </div> <!-- #grid-panel -->
+    <div id="clues" class="flex-row">
+      <div id="across-clues-panel" class="clues-box" style="display:none">
+        <hr/>
+        <b>Across</b>
+        <table id="across"></table>
+        <br/>
+      </div> <!-- #across-clues-panel -->
+      <div id="down-clues-panel" class="clues-box" style="display:none">
+        <hr/>
+        <b>Down</b>
+        <table id="down"></table>
+        <br/>
+      </div> <!-- #down-clues-panel -->
+      <div id="nodir-clues-panel" class="clues-box" style="display:none">
+        <hr/>
+        <table id="nodir"></table>
+        <br/>
+      </div> <!-- #nodir-clues-panel -->
+    </div> <!-- #clues -->
+  </div>
+</div> <!-- #outermost-stack -->
+  `
+    document.body.insertAdjacentHTML('beforeend', basicHTML)
+  }
+
   puzzleTextLines = []
   let rawLines = puzzleText.trim().split('\n');
   for (let rawLine of rawLines) {
