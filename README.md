@@ -553,7 +553,7 @@ A or D preceding the clue number) or like 12a, 12A, 33d, or 33D. Example:
 ```
 This example is from a puzzle with two ninas. The first one is in the 10th
 column ("j"), and the second one is in the seventh row from the bottom as well
-as all the cells in the A12 clue.
+as all the cells in the A12 and D16 clues.
 
 You can also have ninas that involve arbitrary letters/words from within the
 text of the clues or the prelude. This involves a little bit of html.
