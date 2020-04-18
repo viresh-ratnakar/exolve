@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.66 April 16 2020'
+const VERSION = 'Exolve v0.67 April 18 2020'
 
 // ------ Begin globals.
 
@@ -391,6 +391,15 @@ function parseToNextSection() {
           'value': line.substr(index + 1).trim()}
 }
 
+// If s is like 15a or 16D, return A15 or D16. Otherwise just return s.
+function maybeClueIndex(s) {
+  if (s.trim().match(/^\d+[aAdD]$/)) {
+    s = s.trim()
+    s = s.substr(s.length - 1).toUpperCase() + s.substr(0, s.length - 1)
+  }
+  return s 
+}
+
 // Parse a nina line, which consists of cell locations or clue indices.
 // Convert the cell locations to [row col] and push an array of these to the
 // global ninas array.
@@ -401,7 +410,7 @@ function parseNina(s) {
     let cellLocation = parseCellLocation(cellOrOther)
     if (!cellLocation) {
       // Must be a class name, for a span-class-specified nina OR a clue index
-      nina.push(cellOrOther)
+      nina.push(maybeClueIndex(cellOrOther))
     } else {
       nina.push(cellLocation)
     }
@@ -421,7 +430,7 @@ function parseColour(s) {
     }
     let cellLocation = parseCellLocation(c)
     if (!cellLocation) {
-      cellColours.push([c, colour])  // clue index
+      cellColours.push([maybeClueIndex(c), colour])  // clue index
     } else {
       cellColours.push(cellLocation.concat(colour))
     }
@@ -2463,12 +2472,14 @@ function isVisible(elt) {
 // The first entry in the list is the parent clue.
 function getAllLinkedClueIndices(clueIndex) {
   let clueIndices = [clueIndex]
-  if (clues[clueIndex].parentClueIndex) {
-    let parent = clues[clueIndex].parentClueIndex
-    clueIndices = [parent].concat(clues[parent].childrenClueIndices)
-  } else if (clues[clueIndex].childrenClueIndices) {
-    clueIndices =
-        clueIndices.concat(clues[clueIndex].childrenClueIndices)
+  if (clues[clueIndex]) {
+    if (clues[clueIndex].parentClueIndex) {
+      let parent = clues[clueIndex].parentClueIndex
+      clueIndices = [parent].concat(clues[parent].childrenClueIndices)
+    } else if (clues[clueIndex].childrenClueIndices) {
+      clueIndices =
+          clueIndices.concat(clues[clueIndex].childrenClueIndices)
+    }
   }
   return clueIndices
 }
@@ -2601,9 +2612,11 @@ function gnavIsClueless() {
     (grid[currentRow][currentCol].isDiagramless ||
      (currentDir == 'A' &&
       (!grid[currentRow][currentCol].acrossClueLabel ||
+       !clues['A' + grid[currentRow][currentCol].acrossClueLabel] ||
        !clues['A' + grid[currentRow][currentCol].acrossClueLabel].clue)) ||
      (currentDir == 'D' &&
       (!grid[currentRow][currentCol].downClueLabel ||
+       !clues['D' + grid[currentRow][currentCol].downClueLabel] ||
        !clues['D' + grid[currentRow][currentCol].downClueLabel].clue)) ||
      (currentDir.charAt(0) == 'X' &&
       (!grid[currentRow][currentCol].nodirClues ||
@@ -3446,7 +3459,7 @@ function displayNinas() {
           clues[cellOrOther].cells) {
         nina2 = nina2.concat(clues[cellOrOther].cells)
       } else {
-	nina2.push(cellOrOther)
+        nina2.push(cellOrOther)
       }
     }
     for (let cellOrClass of nina2) {

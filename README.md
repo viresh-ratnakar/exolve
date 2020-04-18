@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.66 April 16 2020
+### Version: Exolve v0.67 April 18 2020
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -321,6 +321,9 @@ of a square in the grid. You can do that in one of the following ways:
 a3 (column "a": the 1st column from the left, and row 3 from the bottom)
 f11 (column "f": the 6th column from the left, and row 11 from the bottom)
 ```
+The letters (a-z) must be in lower case and must precede the row number, with
+no intervening space.
+
 This chessboard notation is insufficient if your grid has more than 26 columns.
 You can directly specify the row and the column too, like this:
 ```
@@ -542,10 +545,11 @@ use its own "exolve-nina:" line, and the ninas will get displayed in different
 colours upon clicking "Show ninas" (as well as "Reveal all").
 
 The squares involved in a nina are specified in the extended chessboard notation
-described above. It can also use clue indices like A12 and D33. Example:
+described above. It can also use clue indices like A12 and D33 (with uppercase
+A or D preceding the clue number) or like 12a, 12A, 33d, or 33D. Example:
 ```
   exolve-nina: j5 j7 j9 c10r11 j13
-  exolve-nina: a7 b7 c7 d7 e7 A12
+  exolve-nina: a7 b7 c7 d7 e7 A12 16d
 ```
 This example is from a puzzle with two ninas. The first one is in the 10th
 column ("j"), and the second one is in the seventh row from the bottom as well
@@ -573,9 +577,10 @@ such as:
 ## exolve-colour, exolve-color
 Specific cells in the grid may be coloured using this feature. The squares
 involved are again specified in the extended chessboard notation or with clue
-indices like A12 and D32.
+indices like A12 and D32 (with uppercase A or D preceding the clue number) or
+like 12a, 12A, 33d, or 33D.
 ```
-  exolve-colour: palegreen j5 j7 c10r9 c10r11 j13 A12
+  exolve-colour: palegreen j5 j7 c10r9 c10r11 j13 A12 16D
 ```
 The colour itself can be any valid
 [HTML colour name](https://www.w3schools.com/colors/colors_names.asp).

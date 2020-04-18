@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.67 April 18 2020
+
+- Bug fix: For a non-numeric clue label (say, "P") with specified grid-position,
+  there were a couple of places where the code tried to deindex a non-existent
+  clue index like 'AP' or 'DP'.
+- Now allow "regular" clue numbers like 16a, 42a, 5d, and 17D in exolve-colour
+  and exolve-nina (apart from A16 and D17 as previously allowed).
+
 ### Version: Exolve v0.66 April 16 2020
 
 - The chessboard notation breaks down when there are more than 26 columns.
