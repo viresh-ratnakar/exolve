@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.68 May 1 2020
+
+- Bug fix: on Safari, setting selectionEnd moved focus. When setting up
+  the placeholder for an orphan clue at the top, we should not set selectionEnd
+  in the placeholder in the clue in the clues table.
+
 ### Version: Exolve v0.67 April 18 2020
 
 - Bug fix: For a non-numeric clue label (say, "P") with specified grid-position,

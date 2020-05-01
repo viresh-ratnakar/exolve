@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.67 April 18 2020'
+const VERSION = 'Exolve v0.68 May 1 2020'
 
 // ------ Begin globals.
 
@@ -2542,7 +2542,7 @@ function cnavToInner(activeClueIndex) {
   let parentIndex = clueIndices[0]
   let gnav = null
   if (clues[activeClueIndex] && clues[activeClueIndex].cells &&
-      clues[activeClueIndex] && clues[activeClueIndex].cells.length > 0) {
+      clues[activeClueIndex].cells.length > 0) {
     let dir = (activeClueIndex.charAt(0) == 'X') ? activeClueIndex :
               activeClueIndex.charAt(0)
     gnav = [clues[activeClueIndex].cells[0][0],
@@ -2591,7 +2591,7 @@ function cnavToInner(activeClueIndex) {
       len = placeholder.length
     }
     addOrphanEntryUI(currClue, true, len, placeholder, parentIndex)
-    updateOrphanEntry(parentIndex, false /* need to copy to curr */)
+    copyOrphanEntryToCurr(parentIndex)
     if (!usingGnav && clues[parentIndex].clueTR) {
       let plIns = clues[parentIndex].clueTR.getElementsByTagName('input')
       if (plIns && plIns.length > 0) {
@@ -2705,7 +2705,8 @@ function copyOrphanEntry(clueIndex) {
   updateAndSaveState()
 }
 
-// inCurr is set to true when this is called oninput in the currClue strip.
+// inCurr is set to true when this is called oninput in the currClue strip
+// and false when called oninput in the clues table.
 function updateOrphanEntry(clueIndex, inCurr) {
   if (!clueIndex || !clues[clueIndex] || !clues[clueIndex].clueTR ||
       !isOrphan(clueIndex) || clues[clueIndex].parentClueIndex) {
@@ -2739,6 +2740,27 @@ function updateOrphanEntry(clueIndex, inCurr) {
   } else {
     currInputs[0].value = clueInputs[0].value
   }
+}
+// Copy placeholder value from clue table to the newly created curr clue.
+function copyOrphanEntryToCurr(clueIndex) {
+  if (!clueIndex || !clues[clueIndex] || !clues[clueIndex].clueTR ||
+      !isOrphan(clueIndex) || clues[clueIndex].parentClueIndex) {
+    return
+  }
+  let clueInputs = clues[clueIndex].clueTR.getElementsByTagName('input')
+  if (clueInputs.length != 1) {
+    addError('Missing placeholder input for clue ' + clueIndex)
+    return
+  }
+  let curr = document.getElementById(CURR_ORPHAN_ID)
+  if (!curr) {
+    return
+  }
+  let currInputs = curr.getElementsByTagName('input')
+  if (clueInputs.length != 1) {
+    return
+  }
+  currInputs[0].value = clueInputs[0].value
 }
 
 function addOrphanEntryUI(elt, inCurr, len, placeholder, clueIndex) {
