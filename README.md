@@ -42,7 +42,7 @@ The format is very simple and uses plain text (but the parsing code is
 also simplistic and not very forgiving, so please go through the format
 documentation). The setter has the option to provide solutions (as in the
 example above), or just use 0 to indicate a square that needs to be filled
-(i.e., part of a "light," in crossword terms).
+(i.e., is a part of a "light," in crossword terms).
 
 A few example puzzles are also included in this directory, each in a file with
 the ".exolve" extension. These showcase some of the available features, such as
@@ -203,7 +203,7 @@ If your provide this, it will be displayed under the copyright. You can provide
 multiple instance of this.
 Example:
 ```
-  exolve-credits: Test solver: Zaphod Beelblebrox
+  exolve-credits: Test solver: Zaphod Beeblebrox
   exolve-credits: Custom code: H. A. C. Ker
 ```
 
@@ -229,10 +229,10 @@ prelude is rendered just above the grid, in the rendered puzzle. Example:
 ```
 
 ## exolve-grid
-The grid specification starts from the line *after* the exolve-grid and goes all
-the way to the next exolve- section. There should be exactly as many lines
-in this section as the height of the grid. On each line, the squares in that
-row of the grid are specified.
+The grid specification starts from the line *after* the exolve-grid line and
+goes all the way to the next exolve- section. There should be exactly as many
+lines in this section as the height of the grid. On each line, the squares in
+that row of the grid are specified.
 
 There are two kinds of puzzles: with solutions provided and without solutions.
 Here are simple examples of both:
@@ -340,7 +340,7 @@ If a puzzle with diagramless squares has specified all solutions, then
 check/reveal controls get displayed. For example, revealing a blocked
 diagramless square will show the dark square character, ⬛, in that square. 
 
-If the solver wants to *not* provide solutions for a puzzle that has some
+If the setter wants to *not* provide solutions for a puzzle that has some
 diagramless squares, then the blocked square marker (".") should not be used
 in the blocked squares that are also diagramless (otherwise the solver can peak
 into the HTML source and see where the blocked squares are). Each diagramless
@@ -462,13 +462,15 @@ prefix as described above and shown in the fourth clue example above.
 
 ### Trailing period in clue labels
 A trailing period after a clue number or label is considered to be just a
-punctuation mark and is ignored. All the five periods in the following
-example get ignored:
+punctuation mark and is ignored. The first five periods in the following
+example get ignored. If you have consecutive periods, they do not get ignored
+(as you're presumably using an ellipsis).
 ```
     2. Clue (4)
     3.Ignorance is _____ (5)
     4 . Time for every one to end, finally (6)
-    [Q.]. Hop (4)
+    [Q.]. Hop... (4)
+    [R] ... aboard! (6)
 ```
 
 ### Clues without a specified direction
@@ -524,6 +526,32 @@ specifying the exolve-option, hide-copy-placeholder-buttons. This is useful if
 you find the buttons distracting in appearance, or if copying from the
 placeholder is not very useful for some other reason (for eg., lights are split
 into parts).
+
+### Some clue numbering nuances
+If you have a non-numeric clue label (say, P) for an across (down) clue, and
+you have provided the location of its first cell, _and_ that location is
+actually an across (down) light for which a clue has _not_ been provided, then
+the software assumes that you wish to use the provided label, P, as the label
+for that across (down) light.
+
+You can use this feature to create a grid that has all non-numeric labels.
+Example:
+```
+  exolve-grid:
+    000
+    0.0
+    000
+  exolve-across:
+    #a3 [A] Ace (3)
+    #a1 [C] Den (3)
+  exolve-down:
+    #a3 [A] And (3)
+    #c3 [B] Ein (3)
+```
+Similarly, if you have a non-numeric clue label (say Q) for a nodir clue, and
+you have provided the locations of _all_ its cells (that is, you have provided
+the locations of at least two cells), _and_ these locations belong to an unclued
+light in the grid, then the software makes the label of that light be Q.
 
 ## exolve-explanations
 In a grid that includes solutions, the setter may provide additional notes,
@@ -667,7 +695,7 @@ The list of currently supported options is as follows:
 - **hide-copy-placeholder-buttons** This is an option that is only applicable
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
-  subsection below on "Jigsaw puzzle clues".
+  subsection below on "Jigsaw puzzle clues").
 
 ## Saving state
 The software automatically saves state. It does so in the URL (after the #)

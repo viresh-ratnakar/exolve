@@ -7,7 +7,7 @@
 <!--
 MIT License
 
-Copyright (c) 2019 Viresh Ratnakar
+Copyright (c) 2020 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
@@ -17,33 +17,35 @@ Version: Exolve v0.69 May 5 2020
 <link rel="stylesheet" type="text/css" href="exolve-m.css?v0.69"/>
 <script src="exolve-m.js?v0.69"></script>
 
-<title>Test-Questions</title>
+<title>Test-NonNum</title>
 
 <script>
 
 const puzzleText = `
 ======REPLACE WITH YOUR PUZZLE BELOW======
 exolve-begin
-  exolve-id: test-questions
-  exolve-title: Test-Questions
+  exolve-id: test-nonnum
+  exolve-title: Test-NonNum
   exolve-setter: Gussalufz
   exolve-copyright: 2020 Viresh Ratnakar
-  exolve-width: 2
-  exolve-height: 2
+  exolve-width: 5
+  exolve-height: 5
   exolve-grid:
-    00
-    00
+    00000
+    0.0.0
+    00000
+    0.0.0
+    00000
+  exolve-nodir:
+    [P] Nowhere (5)
   exolve-across:
-    1 AS (2)
-    3 TO (2)
-  exolve-down
-    1 AT (2)
-    2 SO (2)
-  exolve-question: Q with enum (4,2)
-  exolve-question: Q with enum and sol (4,2) ABCD EF
-  exolve-question: Q without enum (*)
-  exolve-question: Q without enum but with sol (one word) WINE
-  exolve-question: Q with a very long answer (10,10,10,10,10,10,5,4)
+    #a5 [A] Where (5)
+    #a3 [D] Bah (5)
+    #a1 [E] See (5)
+  exolve-down:
+    #a5 [A] Hm (5)
+    #c5 [B] Hm (5)
+    #e5 [C] Hm (5)
 exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;

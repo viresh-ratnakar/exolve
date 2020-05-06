@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v0.69 May 5 2020
+
+- When a non-numerically labeled across/down clue or a nodir clue can be
+  ascertained to point to an unclued light (because its start cell or all
+  its cell locations have been provided), we coalesce them now.
+- Documentation tweaks.
+- Typing answers takes the focus away from the grid now, allowing tab
+  navigation.
+- We start out without usingGnav=true now.
+
 ### Version: Exolve v0.68 May 1 2020
 
 - Bug fix: on Safari, setting selectionEnd moved focus. When setting up

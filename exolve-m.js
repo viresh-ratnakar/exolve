@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.68 May 1 2020'
+const VERSION = 'Exolve v0.69 May 5 2020'
 
 // ------ Begin globals.
 
@@ -98,7 +98,7 @@ let currentRow = -1
 let currentCol = -1
 let currentDir = 'A'
 let currentClueIndex = null
-let usingGnav = true
+let usingGnav = false
 let lastOrphan = null
 let activeCells = [];
 let activeClues = [];
@@ -439,6 +439,9 @@ function parseColour(s) {
 
 function getAnswerListener(answer) {
   return function() {
+    deactivateCurrentCell()
+    deactivateCurrentClue()
+    usingGnav = false
     let cursor = answer.selectionStart
     answer.value = answer.value.toUpperCase().trimLeft()
     answer.selectionEnd = cursor 
@@ -1157,14 +1160,82 @@ function parseClueLabel(clueLine) {
     parse.skip += commaParts[0].length
     clueLine = clueLine.substr(commaParts[0].length)
   }
-  // Consume trailing period if it is there.
+  // Consume trailing period if it is there (but not if it's followed
+  // immediately by another period (i.e., don't skip "...")
   periodParts = clueLine.match(/^\s*\./)
-  if (periodParts && periodParts.length == 1) {
+  if (periodParts && periodParts.length == 1 && !clueLine.match(/^\s*\.\./)) {
     parse.hasChildren = false
     parse.skip += periodParts[0].length
     clueLine = clueLine.substr(periodParts[0].length)
   }
   return parse
+}
+
+function sameCells(cells1, cells2) {
+  if ((!cells1 && cells2) || (cells1 && !cells2)) {
+    return false
+  }
+  if (!cells1 && !cells2) {
+    return true
+  }
+  if (cells1.length != cells2.length) {
+    return false
+  }
+  for (let i = 0; i < cells1.length; i++) {
+    const c1 = cells1[i]
+    const c2 = cells2[i]
+    if (c1.length != 2 || c2.length != 2 ||
+        c1[0] != c2[0] || c1[1] != c2[1]) {
+      return false
+    }
+  }
+  return true
+}
+
+// If clueIndex is an orphan clue but the parse has enough info
+// to resolve it to a known (and unspecified) grid clue, return
+// its index. Otherwise return clueIndex itself.
+function maybeRelocateClue(clueIndex, dir, parse) {
+  if (!parse.startCell) {
+    return clueIndex
+  }
+  if (!(parse.isOffNum && dir != 'X') &&
+      !(parse.cells && parse.cells.length > 0 && dir == 'X')) {
+    return clueIndex
+  }
+  const r = parse.startCell[0]
+  const c = parse.startCell[1]
+  if (!grid[r][c].startsClueLabel) {
+    return clueIndex
+  }
+  let replIndex = null
+  if (dir == 'X') {
+    if (grid[r][c].startsAcrossClue) {
+      replIndex = 'A' + grid[r][c].startsClueLabel
+      if (clues[replIndex] && !clues[replIndex].clue &&
+          sameCells(parse.cells, clues[replIndex].cells)) {
+        return replIndex
+      }
+    }
+    if (grid[r][c].startsDownClue) {
+      replIndex = 'D' + grid[r][c].startsClueLabel
+      if (clues[replIndex] && !clues[replIndex].clue &&
+          sameCells(parse.cells, clues[replIndex].cells)) {
+        return replIndex
+      }
+    }
+    return clueIndex
+  }
+  if (dir == 'A' && grid[r][c].startsAcrossClue) {
+    replIndex = 'A' + grid[r][c].startsClueLabel
+  } else if (dir == 'D' && grid[r][c].startsDownClue) {
+    replIndex = 'D' + grid[r][c].startsClueLabel
+  }
+  if (replIndex && clues[replIndex] && !clues[replIndex].clue &&
+      clues[replIndex].cells && clues[replIndex].cells.length > 0) {
+    return replIndex
+  }
+  return clueIndex
 }
 
 // Parse a single clue.
@@ -1230,6 +1301,8 @@ function parseClue(dir, clueLine) {
     offNumClueIndices[parse.clueLabel].push(offNumIndex)
     clueIndex = offNumIndex
   }
+
+  clueIndex = maybeRelocateClue(clueIndex, dir, parse)
   parse.clueIndex = clueIndex
 
   if (parse.cells.length > 0) {
@@ -1281,7 +1354,7 @@ function parseClue(dir, clueLine) {
 }
 
 // Parse across and down clues from their exolve sections previously
-// identified by parseOverallDisplayMost().
+// identified by parseOverallDisplayMost(). Sets lastOrphan, if any.
 function parseClueLists() {
   // Parse across, down, nodir clues
   let prev = null
@@ -1335,53 +1408,61 @@ function parseClueLists() {
       }
       lastClue = clueParse.clueIndex
       if (!clues[clueParse.clueIndex]) {
-        clues[clueParse.clueIndex] =  {}
+        clues[clueParse.clueIndex] =  {'cells': []}
       }
-      clues[clueParse.clueIndex].cells = clueParse.cells
-      clues[clueParse.clueIndex].clue = clueParse.clue
-      clues[clueParse.clueIndex].clueLabel = clueParse.clueLabel
-      clues[clueParse.clueIndex].isOffNum = clueParse.isOffNum
-      clues[clueParse.clueIndex].displayLabel = clueParse.clueLabel
-      clues[clueParse.clueIndex].clueDirection = clueDirection
-      clues[clueParse.clueIndex].fullDisplayLabel = clueParse.clueLabel
+      let theClue = clues[clueParse.clueIndex]
+      if (clueParse.cells && clueParse.cells.length > 0) {
+        if (theClue.cells && theClue.cells.length > 0) {
+          if (!sameCells(theClue.cells, clueParse.cells)) {
+            addError('Grid, clue diff in cells for ' + clueParse.clueIndex)
+            return
+          }
+        } else {
+          theClue.cells = clueParse.cells
+        }
+      }
+      theClue.clue = clueParse.clue
+      theClue.clueLabel = clueParse.clueLabel
+      theClue.isOffNum = clueParse.isOffNum
+      theClue.displayLabel = clueParse.clueLabel
+      // clueIndex may have a different (A/D) direction than clueDirection (X)
+      // if maybeRelocateClue() found one,
+      theClue.clueDirection = clueParse.clueIndex.substr(0,1)
+      if (clueDirection != theClue.clueDirection) {
+        theClue.clueTableDir = clueDirection
+      }
+      theClue.fullDisplayLabel = clueParse.clueLabel
       if (clueDirection != 'X' && clueParse.clueLabel) {
-        clues[clueParse.clueIndex].fullDisplayLabel =
-            clues[clueParse.clueIndex].fullDisplayLabel +
-            clueDirection.toLowerCase()
+        theClue.fullDisplayLabel =
+            theClue.fullDisplayLabel + clueDirection.toLowerCase()
       }
-      clues[clueParse.clueIndex].children = clueParse.children
-      clues[clueParse.clueIndex].childrenClueIndices = []
-      clues[clueParse.clueIndex].enumLen = clueParse.enumLen
-      clues[clueParse.clueIndex].hyphenAfter = clueParse.hyphenAfter
-      clues[clueParse.clueIndex].wordEndAfter = clueParse.wordEndAfter
-      clues[clueParse.clueIndex].placeholder = clueParse.placeholder
-      clues[clueParse.clueIndex].anno = clueParse.anno
+      theClue.children = clueParse.children
+      theClue.childrenClueIndices = []
+      theClue.enumLen = clueParse.enumLen
+      theClue.hyphenAfter = clueParse.hyphenAfter
+      theClue.wordEndAfter = clueParse.wordEndAfter
+      theClue.placeholder = clueParse.placeholder
+      theClue.anno = clueParse.anno
       if (clueParse.anno) {
         hasSomeAnnos = true
       }
       if (clueParse.startCell) {
         let row = clueParse.startCell[0]
         let col = clueParse.startCell[1]
-        grid[row][col].startsClueLabel = clueParse.clueLabel
-        grid[row][col].forcedClueLabel = true
-        if (clueDirection == 'A') {
-          grid[row][col].startsAcrossClue = true
-        } else if (clueDirection == 'D') {
-          grid[row][col].startsDownClue = true
-        }
+        grid[row][col].forcedClueLabel = clueParse.clueLabel
       }
-      clues[clueParse.clueIndex].prev = prev
-      clues[clueParse.clueIndex].next = null
+      theClue.prev = prev
+      theClue.next = null
       if (prev) {
         clues[prev].next = clueParse.clueIndex
       }
       prev = clueParse.clueIndex
       if (filler) {
-        clues[clueParse.clueIndex].filler = filler
+        theClue.filler = filler
         filler = ''
       }
       if (startNewTable) {
-        clues[clueParse.clueIndex].startNewTable = true
+        theClue.startNewTable = true
         startNewTable = false
       }
 
@@ -1397,6 +1478,12 @@ function parseClueLists() {
   if (firstClue && lastClue) {
     clues[firstClue].prev = lastClue
     clues[lastClue].next = firstClue
+  }
+  for (let clueIndex of allClueIndices) {
+    if (!clues[clueIndex].parentClueIndex && isOrphan(clueIndex)) {
+      lastOrphan = clueIndex
+      break
+    }
   }
 }
 
@@ -1431,7 +1518,8 @@ function allCellsKnown(clueIndex) {
 }
 
 // For each cell grid[i][j], set {across,down}ClueLabels using previously
-// marked clue starts. Sets lastOrphan, if any.
+// marked clue starts. Alse set clues[clueIndex].cells for across and down
+// clues.
 function setClueMemberships() {
   // Set across clue memberships
   for (let i = 0; i < gridHeight; i++) {
@@ -1454,24 +1542,8 @@ function setClueMemberships() {
       grid[i][j].acrossClueLabel = clueLabel
       let clueIndex = 'A' + clueLabel
       if (!clues[clueIndex]) {
-        clueIndex = 'X' + clueLabel
-      }
-      if (!clues[clueIndex]) {
-        if (!offNumClueIndices[clueLabel]) {
-          clueLabel = ''
-          continue
-        }
-        clueIndex = ''
-        for (ci of offNumClueIndices[clueLabel]) {
-          if (ci.charAt(0) == 'A' || ci.charAt(0) == 'X') {
-            clueIndex = ci
-            break
-          }
-        }
-        if (!clueIndex) {
-          clueLabel = ''
-          continue
-        }
+        addError('Somehow did not find clues table entry for ' + clueIndex)
+        return
       }
       clues[clueIndex].cells.push([i, j])
     }
@@ -1497,32 +1569,10 @@ function setClueMemberships() {
       grid[i][j].downClueLabel = clueLabel
       let clueIndex = 'D' + clueLabel
       if (!clues[clueIndex]) {
-        clueIndex = 'X' + clueLabel
-      }
-      if (!clues[clueIndex]) {
-        if (!offNumClueIndices[clueLabel]) {
-          clueLabel = ''
-          continue
-        }
-        clueIndex = ''
-        for (ci of offNumClueIndices[clueLabel]) {
-          if (ci.charAt(0) == 'D' || ci.charAt(0) == 'X') {
-            clueIndex = ci
-            break
-          }
-        }
-        if (!clueIndex) {
-          clueLabel = ''
-          continue
-        }
+        addError('Somehow did not find clues table entry for ' + clueIndex)
+        return
       }
       clues[clueIndex].cells.push([i, j])
-    }
-  }
-  for (let clueIndex of allClueIndices) {
-    if (!clues[clueIndex].parentClueIndex && isOrphan(clueIndex)) {
-      lastOrphan = clueIndex
-      break
     }
   }
 }
@@ -1958,22 +2008,23 @@ function displayClues() {
       addError('Found no clue text nor a parent clue for ' + clueIndex)
       return
     }
-    if (dir != clues[clueIndex].clueDirection) {
-      if (clues[clueIndex].clueDirection == 'A') {
+    let clueDir = clues[clueIndex].clueTableDir ||
+                  clues[clueIndex].clueDirection
+    if (dir != clueDir) {
+      if (clueDir == 'A') {
         table = acrossClues
         hasAcrossClues = true
-      } else if (clues[clueIndex].clueDirection == 'D') {
+      } else if (clueDir == 'D') {
         table = downClues
         hasDownClues = true
-      } else if (clues[clueIndex].clueDirection == 'X') {
+      } else if (clueDir == 'X') {
         table = nodirClues
         hasNodirClues = true
       } else {
-        addError('Unexpected clue direction ' +
-                 clues[clueIndex].clueDirection + ' in ' + clueIndex)
+        addError('Unexpected clue direction ' + clueDir + ' in ' + clueIndex)
         return
       }
-      dir = clues[clueIndex].clueDirection
+      dir = clueDir
     }
     if (clues[clueIndex].startNewTable) {
       let newPanel = document.createElement('div')
@@ -3221,6 +3272,7 @@ function getDeactivator() {
   return function() {
     deactivateCurrentCell()
     deactivateCurrentClue()
+    usingGnav = false
   };
 }
 
@@ -3307,8 +3359,10 @@ function displayGrid() {
         cellGroup.appendChild(cellCircle)
         cellCircle.addEventListener('click', getRowColActivator(i, j));
       }
-      if (grid[i][j].startsClueLabel && !grid[i][j].isDiagramless &&
-          (!hideInferredNumbers || grid[i][j].forcedClueLabel)) {
+      if ((grid[i][j].startsClueLabel &&
+           !grid[i][j].isDiagramless &&
+           !hideInferredNumbers) ||
+          grid[i][j].forcedClueLabel) {
         const cellNum =
             document.createElementNS('http://www.w3.org/2000/svg', 'text');
         cellNum.setAttributeNS(
@@ -3316,7 +3370,9 @@ function displayGrid() {
         cellNum.setAttributeNS(
             null, 'y', offsetTop + NUMBER_START_Y + i *(SQUARE_DIM + GRIDLINE));
         cellNum.setAttributeNS(null, 'class', 'cell-num');
-        const num = document.createTextNode(grid[i][j].startsClueLabel)
+        const numText = grid[i][j].forcedClueLabel ?
+            grid[i][j].forcedClueLabel : grid[i][j].startsClueLabel;
+        const num = document.createTextNode(numText)
         cellNum.appendChild(num);
         cellGroup.appendChild(cellNum)
       }
@@ -3994,9 +4050,9 @@ function createPuzzle() {
   checkIdAndConsistency();
   parseGrid();
   markClueStartsUsingGrid();
+  setClueMemberships();
   parseClueLists();
 
-  setClueMemberships();
   processClueChildren();
   fixFullDisplayLabels()
   setGridWordEndsAndHyphens();
