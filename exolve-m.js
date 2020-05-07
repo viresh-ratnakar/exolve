@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.69 May 5 2020'
+const VERSION = 'Exolve v0.70 May 7 2020'
 
 // ------ Begin globals.
 
@@ -48,6 +48,8 @@ let nodirFirstLine = -1
 let nodirLastLine = -1
 let explanationsFirstLine = -1
 let explanationsLastLine = -1
+let relabelFirstLine = -1
+let relabelLastLine = -1
 
 // Each nina will be an array containing location [i,j] pairs and/or span
 // class names.
@@ -117,6 +119,7 @@ const BLOCK_CHAR = '⬛';
 // 0 and 1 respectively, in solution states.
 const DIGIT0 = '-'
 const DIGIT1 = '~'
+let scriptRE = null
 const ACTIVE_COLOUR = 'mistyrose'
 const ORPHAN_COLOUR = 'linen'
 const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
@@ -136,6 +139,9 @@ let allowDigits = false
 let hideCopyPlaceholders = false
 let offsetLeft = 0
 let offsetTop = 0
+let language = ''
+let languageScript = ''
+let langMaxCharCodes = 1
 
 // Variables set in init().
 let puzzleTextLines;
@@ -220,7 +226,7 @@ function init() {
         </div> <!-- #controls -->
         <div id="errors"></div>
         <div id="status">
-          Squares filled:
+          <span id="squares-filled">Squares filled</span>:
           <span id="status-num-filled">0</span>/<span
                 id="status-num-total"></span>
         </div> <!-- #status -->
@@ -283,13 +289,13 @@ function init() {
     <div id="clues" class="flex-row">
       <div id="across-clues-panel" class="clues-box" style="display:none">
         <hr/>
-        <b>Across</b>
+        <span id="across-label" style="font-weight:bold">Across</span>
         <table id="across"></table>
         <br/>
       </div> <!-- #across-clues-panel -->
       <div id="down-clues-panel" class="clues-box" style="display:none">
         <hr/>
-        <b>Down</b>
+        <span id="down-label" style="font-weight:bold">Down</span>
         <table id="down"></table>
         <br/>
       </div> <!-- #down-clues-panel -->
@@ -517,7 +523,7 @@ function parseQuestion(s) {
   if (rows == 1) {
     answer.setAttributeNS(null, 'type', 'text');
   }
-  answer.setAttributeNS(null, 'maxlength', '' + inputLen);
+  answer.setAttributeNS(null, 'maxlength', '' + inputLen * langMaxCharCodes);
   answer.setAttributeNS(null, 'autocomplete', 'off');
   answer.setAttributeNS(null, 'spellcheck', 'false');
   question.appendChild(answer)
@@ -589,6 +595,34 @@ function parseOption(s) {
   }
 }
 
+function parseLanguage(s) {
+  const parts = s.trim().split(' ')
+  if (parts.length < 2) {
+    addErrror('Usage: exolve-language: ' + s + 'cannot be parsed ' +
+              'as "language-code Script [max-char-codes]"')
+    return
+  }
+  language = parts[0]
+  languageScript = parts[1]
+  try {
+    scriptRE = new RegExp('\\p{Script=' + languageScript + '}', 'u')
+  } catch {
+    addError('Unsupported script: ' + languageScript)
+    return
+  }
+  // Hard-code some known scripts requiring langMaxCharCodes
+  if (languageScript.toLowerCase() == 'devanagari') {
+    langMaxCharCodes = 4
+  }
+  if (parts.length > 2) {
+    langMaxCharCodes = parseInt(parts[2])
+    if (isNaN(langMaxCharCodes) || langMaxCharCodes < 1) {
+      addError('invalid max-char-codes in exolve-language: ' + parts[2])
+      return
+    }
+  }
+}
+
 // The overall parser for the puzzle text. Also takes care of parsing and
 // displaying all exolve-* sections except prelude, grid, across, down (for
 // these, it just captures where the start and end lines are).
@@ -607,7 +641,7 @@ function parseOverallDisplayMost() {
     } else if (sectionAndValue.section == 'setter') {
       if (sectionAndValue.value.trim() != '') {
         document.getElementById('setter').innerHTML =
-            'By ' + sectionAndValue.value
+            '<span id="setter-by">By</span> ' + sectionAndValue.value
       }
     } else if (sectionAndValue.section == 'copyright') {
       document.getElementById('copyright').innerHTML =
@@ -648,9 +682,14 @@ function parseOverallDisplayMost() {
       nodirLastLine = lastLine
     } else if (sectionAndValue.section == 'option') {
       parseOption(sectionAndValue.value)
+    } else if (sectionAndValue.section == 'language') {
+      parseLanguage(sectionAndValue.value)
     } else if (sectionAndValue.section == 'explanations') {
       explanationsFirstLine = firstLine
       explanationsLastLine = lastLine
+    } else if (sectionAndValue.section == 'relabel') {
+      relabelFirstLine = firstLine
+      relabelLastLine = lastLine
     }
     sectionAndValue = nextSectionAndValue
   }
@@ -687,6 +726,36 @@ function parseAndDisplayExplanations() {
   }
 }
 
+// Parses exolve-relabel, changing the text of various buttons etc.
+// Sets language of the page if exolve-language was specified.
+function parseAndDisplayRelabel() {
+  if (relabelFirstLine >= 0 && relabelFirstLine <= relabelLastLine) {
+    let l = relabelFirstLine
+    while (l <= relabelLastLine) {
+      const colon = puzzleTextLines[l].indexOf(':')
+      if (colon < 0) {
+        addError('Line in exolve-relabel does not look like ' +
+                 '"id: new-label":' + puzzleTextLines[l])
+        return
+      }
+      let id = puzzleTextLines[l].substr(0, colon).trim()
+      let elt = document.getElementById(id)
+      if (!elt) {
+        addError('exolve-relabel: no element found with id: ' + id)
+        return
+      }
+      elt.innerHTML = puzzleTextLines[l].substr(colon + 1).trim()
+      l++;
+    }
+  }
+  if (language) {
+    document.documentElement.lang = language
+    gridInput.lang = language
+    questions.lang = language
+    gridInput.maxLength = '' + (2 * langMaxCharCodes)
+  }
+}
+
 // Append an error message to the errors div. Scuttle everything by seting
 // gridWidth to 0.
 function addError(error) {
@@ -713,14 +782,6 @@ function checkIdAndConsistency() {
     addError('Mismatched width/height');
     return
   }
-  for (let i = 0; i < gridHeight; i++) {
-    let lineW = puzzleTextLines[i + gridFirstLine].toUpperCase().
-                    replace(/[^A-Z.0-9]/g, '').length
-    if (gridWidth != lineW) {
-      addError('Width in row ' + i + ' is ' + lineW + ', not ' + gridWidth);
-      return
-    }
-  }
   if (submitURL) {
     let numKeys = 1
     for (let a of answersList) {
@@ -738,6 +799,19 @@ function checkIdAndConsistency() {
   }
 }
 
+function caseCheck(c) {
+  if (scriptRE) {
+    if (scriptRE.test(c)) {
+      return ! /\p{Lowercase}/u.test(c)
+    }
+  } else {
+    if (c >= 'A' && c <= 'Z') {
+      return true
+    }
+  }
+  return false
+}
+
 // display chars: A-Z, ⬛, 0-9
 // state chars: A-Z, '-' (DIGIT0), '~' (DIGIT1), 2-9, '0' (blank), '1' (block
 // in diagramless cell), '.'
@@ -748,7 +822,7 @@ function checkIdAndConsistency() {
 //   other than 0.
 
 function isValidDisplayChar(c) {
-  if (c >= 'A' && c <= 'Z') {
+  if (caseCheck(c)) {
     return true
   }
   if (c == BLOCK_CHAR) {
@@ -761,7 +835,7 @@ function isValidDisplayChar(c) {
 }
 
 function isValidStateChar(c) {
-  if (c >= 'A' && c <= 'Z') {
+  if (caseCheck(c)) {
     return true
   }
   if (allowDigits && ((c >= '2' && c <= '9') || c == DIGIT0 || c == DIGIT1)) {
@@ -826,20 +900,47 @@ function displayCharToStateChar(c) {
 function parseGrid() {
   let hasSolvedCells = false
   let allEntriesAre0s = true
+  const DECORATORS = ' +|_@!*'
+  const reDecorators = new RegExp('[' + DECORATORS + ']')
+  const reNextChar = new RegExp('[\.0' + DECORATORS + ']')
   for (let i = 0; i < gridHeight; i++) {
     grid[i] = new Array(gridWidth)
-    let gridLine = puzzleTextLines[i + gridFirstLine].
-                       replace(/\s/g, '').toUpperCase()
+    let gridLine = puzzleTextLines[i + gridFirstLine].trim().toUpperCase()
+    if (langMaxCharCodes == 1) {
+      gridLine = gridLine.replace(/\s/g, '')
+    } else {
+      gridLine = gridLine.replace(/\s+/g, ' ')
+    }
     let gridLineIndex = 0
     for (let j = 0; j < gridWidth; j++) {
       grid[i][j] = {};
-      grid[i][j].solution = gridLine.charAt(gridLineIndex).toUpperCase()
+      if (gridLineIndex >= gridLine.length) {
+        let errmsg = 'Too few letters in the grid at 0-based row: ' + i
+        if (langMaxCharCodes > 1) {
+          errmsg = errmsg + '. Note that grid letters must be separated by ' +
+            'spaces or decorators for languages that have compund characters';
+        }
+        addError(errmsg)
+        return
+      }
+      let letter = gridLine.charAt(gridLineIndex++)
+      if (langMaxCharCodes > 1 && letter != '.' && letter != '0') {
+        let next = gridLineIndex
+        while (next < gridLine.length &&
+               !reNextChar.test(gridLine.charAt(next))) {
+          next++
+        }
+        letter = letter + gridLine.substring(gridLineIndex, next).trim()
+        gridLineIndex = next
+      }
+      grid[i][j].solution = letter.toUpperCase()
       // Deal with . and 0 and 1 in second pass
       grid[i][j].isLight = false
       if (grid[i][j].solution != '.') {
         if (grid[i][j].solution != '0' &&
             !isValidDisplayChar(grid[i][j].solution)) {
-          addError('Bad grid entry: ' + grid[i][j].solution);
+          addError('Bad grid entry at ' + i + ',' + j + ':' +
+                   grid[i][j].solution);
           gridWidth = 0
           return
         }
@@ -850,17 +951,10 @@ function parseGrid() {
       grid[i][j].hasCircle = false
       grid[i][j].isDiagramless = false
       grid[i][j].prefill = false
-      gridLineIndex++
       let thisChar = ''
       while (gridLineIndex < gridLine.length &&
              (thisChar = gridLine.charAt(gridLineIndex)) &&
-             (thisChar == '|' ||
-              thisChar == '_' ||
-              thisChar == '+' ||
-              thisChar == '@' ||
-              thisChar == '*' ||
-              thisChar == '!' ||
-              thisChar == ' ')) {
+             reDecorators.test(thisChar)) {
         if (thisChar == '|') {
           grid[i][j].hasBarAfter = true
         } else if (thisChar == '_') {
@@ -2164,7 +2258,11 @@ function getGridStateAndNumFilled() {
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
-        state = state + grid[i][j].currentLetter
+        if (langMaxCharCodes == 1) {
+          state = state + grid[i][j].currentLetter
+        } else {
+          state = state + grid[i][j].currentLetter + '$'
+        }
         if (grid[i][j].currentLetter != '0') {
           numFilled++
         }
@@ -2236,14 +2334,27 @@ function restoreState() {
   if (state == '') { 
     console.log('No saved state available')
     error = true
-  } else if (state.length < (gridWidth * gridHeight)) {
-    console.log('Not enough characters in state')
-    error = true
   }
   let index = 0
   for (let i = 0; i < gridHeight && !error; i++) {
     for (let j = 0; j < gridWidth && !error; j++) {
-      letter = state.charAt(index++);
+      if (index >= state.length) {
+        console.log('Not enough characters in saved state')
+        error = true
+        break
+      }
+      let letter = ''
+      letter = state.charAt(index++)
+      if (langMaxCharCodes > 1 && letter != '.') {
+        let dollar = state.indexOf('$', index)
+        if (dollar < 0) {
+          console.log('Missing compound-char separator in saved state')
+          error = true
+          break
+        }
+        letter = letter + state.substring(index, dollar)
+        index = dollar + 1
+      }
       if (grid[i][j].isLight || grid[i][j].isDiagramless) {
         if (grid[i][j].prefill) {
           grid[i][j].currentLetter = grid[i][j].solution
@@ -2383,7 +2494,7 @@ function gnavToInner(cell, dir) {
   }
 
   gridInputWrapper.style.width = '' + SQUARE_DIM + 'px'
-  gridInputWrapper.style.height = '' + SQUARE_DIM + 'px'
+  gridInputWrapper.style.height = '' + (SQUARE_DIM - 2) + 'px'
   gridInputWrapper.style.left =
     '' + grid[currentRow][currentCol].cellLeft + 'px'
   gridInputWrapper.style.top =
@@ -2702,7 +2813,7 @@ function copyOrphanEntry(clueIndex) {
   let letters = ''
   for (let i = 0; i < entry.length; i++) {
     let letter = entry[i]
-    if (letter < 'A' || letter > 'Z') {
+    if (!caseCheck(letter)) {
       if (!allowDigits || letter < '0' || letter > '9') {
         continue;
       }
@@ -3211,14 +3322,14 @@ function handleGridInput() {
   let currDisplayChar =
       stateCharToDisplayChar(grid[currentRow][currentCol].currentLetter)
   if (grid[currentRow][currentCol].currentLetter != '0' &&
-      newInput != currDisplayChar) {
+      newInput != currDisplayChar && langMaxCharCodes == 1) {
     // The "new" input may be before or after the old input.
     let index = newInput.indexOf(currDisplayChar)
     if (index == 0) {
       newInput = newInput.substr(1)
     }
   }
-  let displayChar = newInput.substr(0, 1)
+  let displayChar = newInput.substr(0, langMaxCharCodes)
   if (displayChar == ' ' && grid[currentRow][currentCol].isDiagramless) {
     // spacebar creates a blocked cell in a diagramless puzzle cell
     displayChar = BLOCK_CHAR
@@ -3263,7 +3374,7 @@ function handleGridInput() {
 
   updateAndSaveState()
 
-  if (isValidDisplayChar(displayChar)) {
+  if (isValidDisplayChar(displayChar) && langMaxCharCodes == 1) {
     advanceCursor()
   }
 }
@@ -3960,7 +4071,7 @@ function scratchPadShuffle() {
   let indices = []
   let toShuffle = []
   for (let i = start; i < end; i++) {
-    if (text[i] >= 'A' && text[i] <= 'Z') {
+    if (caseCheck(text[i])) {
       indices.push(i)
       toShuffle.push(text[i])
     }
@@ -4042,30 +4153,33 @@ function toggleShowControls() {
 }
 
 function createPuzzle() {
-  init();
+  init()
 
-  parseOverallDisplayMost();
-  parseAndDisplayPrelude();
-  parseAndDisplayExplanations();
-  checkIdAndConsistency();
-  parseGrid();
-  markClueStartsUsingGrid();
-  setClueMemberships();
-  parseClueLists();
+  parseOverallDisplayMost()
+  parseAndDisplayPrelude()
+  parseAndDisplayExplanations()
+  checkIdAndConsistency()
 
-  processClueChildren();
+  parseGrid()
+  markClueStartsUsingGrid()
+  setClueMemberships()
+  parseClueLists()
+
+  processClueChildren()
   fixFullDisplayLabels()
   setGridWordEndsAndHyphens();
-  setUpGnav();
+  setUpGnav()
 
-  displayClues();
-  displayGridBackground();
-  createListeners();
-  displayGrid();
-  displayNinas();
-  displayButtons();
+  displayClues()
+  displayGridBackground()
+  createListeners()
+  displayGrid()
+  displayNinas()
+  displayButtons()
 
-  restoreState();
+  parseAndDisplayRelabel()
+
+  restoreState()
 
   if (typeof customizePuzzle === 'function') {
     customizePuzzle()

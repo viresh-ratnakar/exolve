@@ -1,5 +1,20 @@
 # Changelog
 
+### Version: Exolve v0.70 May 7 2020
+
+- Added support for non-English languages:
+  - exolve-language: <language-code> <Script> [<max-char-codes-per-letter>]
+  - Required significant changes (but everything should be backward-compatible)
+    in how we check inputs, how we specify the grid, how we save and restore
+    state.
+- Non-English languages made a known issue slightly worse: the current grid
+  letter was getting rendered in a slightly blurry way, because of a slight
+  position mismatch between the cell-text and grid-input. Tweaked a bit to
+  improve.
+- Added an exolve-relabel section that can let you change the text of any
+  button (and any HTML element with an id). This should be particularly useful
+  for non-English crosswords.
+
 ### Version: Exolve v0.69 May 5 2020
 
 - When a non-numerically labeled across/down clue or a nodir clue can be

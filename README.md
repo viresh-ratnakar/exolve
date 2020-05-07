@@ -2,7 +2,11 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.69 May 5 2020
+### Version: Exolve v0.70 May 7 2020
+
+Exolve can help you create online interactively solvable crosswords (simple
+ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
+in any language.
 
 The file *exolve.html* contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
@@ -153,6 +157,8 @@ and the exolve-end line:
 * exolve-question
 * exolve-submit
 * exolve-option
+* exolve-language
+* exolve-relabel
 
 Each section has the section name (exolve-something), followed by a colon.
 Other than the exolve-prelude, exolve-grid, exolve-across, exolve-down,
@@ -293,7 +299,22 @@ must be provided). The solution letter will be pre-filled and will not be
 editable. If all entries in a light are prefilled, and an anno is provided
 for that clue, the anno will be shown automatically at start-up.
 
-Here again is the complete list of decorators:
+If you use a language/Script that uses compound letters made up of multiple
+Unicode characters (for example, Devanagari—see the exolve-language section),
+then your _must_ separate grid letters (when specifying a grid with solutions)
+with a space (unless they are already separated by decorator). For example,
+this will *not* work:
+```
+  exolve-grid:
+     सेहत
+```
+This will work:
+```
+  exolve-grid:
+     से ह त
+```
+
+As a convenient reference, here again is the complete list of decorators:
 ```
 | draw bar after
 _ draw bar under
@@ -696,6 +717,77 @@ The list of currently supported options is as follows:
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
   subsection below on "Jigsaw puzzle clues").
+
+## exolve-language
+
+You can create crosswords in pretty much any language apart from English,
+using Exolve. You need to specify a line that looks like:
+```
+  exolve-language: <lang> <Script> [<max-char-codes-per-letter>]
+```
+Here, &lt;lang&gt; is a
+[language code](https://www.w3schools.com/tags/ref_language_codes.asp)
+such as "ru" or "hi" and &lt;Script&gt; is the name of the
+[Script](https://tc39.es/ecma262/#table-unicode-script-values)
+to use for that language, such as "Devanagari" or "Cyrillic".
+Examples:
+```
+  exolve-language: hi Devanagari
+```
+```
+  exolve-language: ru Cyrillic
+```
+
+On an exolve-language line, you can optionally specify a third parameter,
+"&lt;max-char-codes-per-letter&gt;". In some languages such as those using the
+Devanagari script, multiple unicode characters are combined together to
+form a single compound letter (for example, स्सा in Devanagari is made up 
+of four characters). In these situations, you can specify
+&lt;max-char-codes-per-letter&gt; as the limit on how many characters you want
+to allow to go into a composite letter, at most. For Devanagari, the software
+already sets this to 4 (but you can override that if you specify a value
+here). When &lt;max-char-codes-per-letter&gt; is greater than 1, auto-advance is
+disabled, as the software cannot know when a letter being entered in a cell
+is finished—solvers need to use the arrow key or need to click on the next
+cell when they finish typing a letter.
+
+When you use a language other than English, you may also want to change the
+text displayed in various buttons etc. to that language. You can do that
+using an exolve-relabel section (see below). Further, you may want to let
+solvers know that they have to use a suitable input mechanism for the
+Script you have specified (Google Input Tools works well on Chrome).
+
+## exolve-relabel
+
+You can change the text of any button or label in the rendered grid. This is
+particularly useful if you want to set a crossword in a language other than
+English. The text of any HTML element that has an id can be modified in this
+section. It can be set to some other text (or HTML), using the syntax:
+```
+    <id>: <new label>
+```
+The section can contain multiple such relabelings, one per line. Example:
+```
+  exolve-relabel:
+    clear: <b>Erase</b> this entry
+    across-label: <i>Swimming Across!</i>
+    down-label: <i>Sinking Down (नीचे)!</i>
+```
+Here are some of the ids that you can relabel:
+| ID             | Current label (that you can replace) |
+|----------------|--------------------------------------|
+| clear          | Clear this                           |
+| clear-all      | Clear all!                           |
+| check          | Check this                           |
+| check-all      | Check all!                           |
+| reveal         | Reveal this                          |
+| reveal-all     | Reveal all!                          |
+| setter-by      | By                                   |
+| squares-filled | Squares filled                       |
+| submit         | Submit                               |
+| across-label   | Across                               |
+| down-label     | Down                                 |
+
 
 ## Saving state
 The software automatically saves state. It does so in the URL (after the #)
