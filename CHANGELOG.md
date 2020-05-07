@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.71 May 7 2020
+
+- Bug-fix: Unicode property escapes in regexpes (added to the code in v0.70)
+  do not work on some browsers such as Firefox (support is coming soon though).
+  Exolve was failing on Firefox because of this, even for English. Fixed so
+  that it only fails for non-English, and that too with a useful error
+  message.
+
 ### Version: Exolve v0.70 May 7 2020
 
 - Added support for non-English languages:

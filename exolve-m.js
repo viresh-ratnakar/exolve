@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.70 May 7 2020'
+const VERSION = 'Exolve v0.71 May 7 2020'
 
 // ------ Begin globals.
 
@@ -120,6 +120,7 @@ const BLOCK_CHAR = '⬛';
 const DIGIT0 = '-'
 const DIGIT1 = '~'
 let scriptRE = null
+let scriptLowerCaseRE = null
 const ACTIVE_COLOUR = 'mistyrose'
 const ORPHAN_COLOUR = 'linen'
 const TRANSPARENT_WHITE = 'rgba(255,255,255,0.0)'
@@ -606,8 +607,12 @@ function parseLanguage(s) {
   languageScript = parts[1]
   try {
     scriptRE = new RegExp('\\p{Script=' + languageScript + '}', 'u')
+    scriptLowerCaseRE = new RegExp('\\p{Lowercase}', 'u')
   } catch {
-    addError('Unsupported script: ' + languageScript)
+    addError('Your browser ' +
+      '<a href="https://caniuse.com/#search=Unicode%20property%20escapes"' +
+      '>does not support Unicode property escapes</a> OR you\'ve provided ' +
+      'an invalid Script name: ' + languageScript)
     return
   }
   // Hard-code some known scripts requiring langMaxCharCodes
@@ -802,7 +807,7 @@ function checkIdAndConsistency() {
 function caseCheck(c) {
   if (scriptRE) {
     if (scriptRE.test(c)) {
-      return ! /\p{Lowercase}/u.test(c)
+      return !scriptLowerCaseRE.test(c)
     }
   } else {
     if (c >= 'A' && c <= 'Z') {
