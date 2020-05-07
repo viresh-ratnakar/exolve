@@ -3,8 +3,8 @@
 ### Version: Exolve v0.70 May 7 2020
 
 - Added support for non-English languages:
-  - exolve-language: &lt;language-code:gt; &lt;Script:gt;
-    [&lt;max-char-codes-per-letter:gt;]
+  - exolve-language: &lt;language-code&gt; &lt;Script:gt;
+    [&lt;max-char-codes-per-letter&gt;]
   - Required significant changes (but everything should be backward-compatible)
     in how we check inputs, how we specify the grid, how we save and restore
     state.
