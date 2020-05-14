@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.72 May 14 2020
+
+- No functionality change. Only some optimizations: use object references
+  when possible, instead of deindexing arrays with the same indices
+  repeatedly.
+- Change the example crossword in exolve.html and exolve-m.html to
+  something smaller and simpler.
+
 ### Version: Exolve v0.71 May 7 2020
 
 - Bug-fix: Unicode property escapes in regexpes (added to the code in v0.70)
