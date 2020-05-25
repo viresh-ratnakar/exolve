@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.73 May 25 2020
+
+- Bug fix: "catch" needs a paramter (IE/Edge require it strictly).
+- Make the grid-input text invisible, as not matter how much I tweak
+  its alignment with the underlying svg text in the cell, there is
+  still some doubling effect seen in some platforms. 
+
 ### Version: Exolve v0.72 May 14 2020
 
 - No functionality change. Only some optimizations: use object references

@@ -58,7 +58,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.72 May 14 2020'
+const VERSION = 'Exolve v0.73 May 25 2020'
 
 // ------ Begin globals.
 
@@ -640,7 +640,7 @@ function parseLanguage(s) {
   try {
     scriptRE = new RegExp('\\p{Script=' + languageScript + '}', 'u')
     scriptLowerCaseRE = new RegExp('\\p{Lowercase}', 'u')
-  } catch {
+  } catch (err) {
     addError('Your browser ' +
       '<a href="https://caniuse.com/#search=Unicode%20property%20escapes"' +
       '>does not support Unicode property escapes</a> OR you\'ve provided ' +
@@ -4381,6 +4381,8 @@ td:first-child:not(.filler) {
   width: 100%;
   height: 100%;
   padding: 2px 0 0 0;
+  color: rgba(0,0,0,0.0);
+  caret-color: gray;
   background: rgba(255,0,0,0.2);
 }
 #controls-etc {

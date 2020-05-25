@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.72 May 14 2020'
+const VERSION = 'Exolve v0.73 May 25 2020'
 
 // ------ Begin globals.
 
@@ -607,7 +607,7 @@ function parseLanguage(s) {
   try {
     scriptRE = new RegExp('\\p{Script=' + languageScript + '}', 'u')
     scriptLowerCaseRE = new RegExp('\\p{Lowercase}', 'u')
-  } catch {
+  } catch (err) {
     addError('Your browser ' +
       '<a href="https://caniuse.com/#search=Unicode%20property%20escapes"' +
       '>does not support Unicode property escapes</a> OR you\'ve provided ' +
