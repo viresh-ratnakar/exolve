@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.73 May 25 2020
+Version: Exolve v0.74 May 26 2020
 */
 
 .background {
@@ -145,6 +145,7 @@ td:first-child:not(.filler) {
   color: rgba(0,0,0,0.0);
   caret-color: gray;
   background: rgba(255,0,0,0.2);
+  outline: none;
 }
 #controls-etc {
   padding: 8px 0 6px 0;

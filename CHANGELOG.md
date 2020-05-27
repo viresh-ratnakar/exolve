@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.74 May 26 2020
+
+- The latest version of Chrome adds a black outline on focus to #grid-input,
+  which does not look that great. Add css to counteract.
+
 ### Version: Exolve v0.73 May 25 2020
 
 - Bug fix: "catch" needs a paramter (IE/Edge require it strictly).

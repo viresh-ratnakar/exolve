@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.73 May 25 2020'
+const VERSION = 'Exolve v0.74 May 26 2020'
 
 // ------ Begin globals.
 
