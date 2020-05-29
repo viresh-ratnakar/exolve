@@ -5,30 +5,41 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.74 May 26 2020
+Version: Exolve v0.75 May 28 2020
+
+The --col-* color variables in :root{} are set by JavaScript.
 */
 
 .background {
-  fill: black;
+  fill: var(--col-background);
 }
 .cell {
-  fill: white;
+  fill: var(--col-cell);
   cursor: pointer;
 }
 .cell-num {
   font-size: 9px;
   font-family: sans-serif;
+  fill: var(--col-light-label);
 }
 .cell-text {
   font-size: 16px;
   font-family: sans-serif;
   cursor: text;
+  fill: var(--col-light-text);
 }
-.prefill, .wordend {
-  fill: blue;
+.cell-circle {
+  fill: rgba(0,0,0,0.0);
+  stroke: var(--col-circle);
+}
+.prefill {
+  fill: var(--col-prefill);
+}
+.wordend {
+  fill: var(--col-separator);
 }
 span.solved, .solved td:first-child {
-  color: dodgerblue;
+  color: var(--col-solved);
 }
 table {
   border-collapse: collapse;
@@ -39,7 +50,7 @@ td {
   vertical-align: top;
 }
 td:first-child:not(.filler) {
-  max-width: 16px;
+  max-width: 2ch;
   white-space: nowrap;
   overflow: visible;
   font-weight: bold;
@@ -50,7 +61,7 @@ td:first-child:not(.filler) {
 }
 .anno-text {
   font-style: italic;
-  color: darkgreen;
+  color: var(--col-anno);
 }
 .flex-row {
   display: flex;
@@ -70,7 +81,7 @@ td:first-child:not(.filler) {
 }
 #setter {
   text-align: center;
-  color: darkgreen;
+  color: var(--col-imp-text);
   margin: 0 0 8px 0;
 }
 #prelude {
@@ -102,6 +113,13 @@ td:first-child:not(.filler) {
   margin: 0 0 0 8px;
   padding: 2px 4px 2px 0;
 }
+#curr-orphan,
+#current-clue-label {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  line-height: 0.8;
+}
 #grid-panel {
   margin: 0 8px 0 8px;
 }
@@ -125,14 +143,14 @@ td:first-child:not(.filler) {
   position: relative;
   right: -12px;
   top: -24px;
-  color: mistyrose;
+  color: var(--col-arrow);
   font-size: small;
 }
 #grid-input-darr {
   position: relative;
   right: 0;
   top: -12px;
-  color: mistyrose;
+  color: var(--col-arrow);
   font-size: small;
 }
 #grid-input {
@@ -143,8 +161,8 @@ td:first-child:not(.filler) {
   height: 100%;
   padding: 2px 0 0 0;
   color: rgba(0,0,0,0.0);
-  caret-color: gray;
-  background: rgba(255,0,0,0.2);
+  caret-color: var(--col-caret);
+  background: rgba(0,0,0,0.0);
   outline: none;
 }
 #controls-etc {
@@ -166,13 +184,13 @@ td:first-child:not(.filler) {
 }
 hr {
   margin: 0 0 4px 0;
-  background-color: lightgreen;
+  background-color: var(--col-imp-text);
 }
 .button {
-  background-color: #4CAF50; /* Green */
+  background-color: var(--col-button);
   border: none;
   outline: none;
-  color: white;
+  color: var(--col-button-text);
   padding: 8px 8px;
   text-align: center;
   text-decoration: none;
@@ -182,7 +200,7 @@ hr {
   font-size: 14px;
 }
 .button:hover {
-  background-color: darkgreen;
+  background-color: var(--col-button-hover);
   cursor: pointer;
 }
 .button:disabled {
@@ -190,7 +208,7 @@ hr {
   cursor: not-allowed;
 }
 .small-button {
-  background-color: inherit;
+  background-color: var(--col-small-button);
   border: 1px solid gray;
   outline: none;
   padding: 0 4px 2px 4px;
@@ -199,10 +217,10 @@ hr {
   display: inline-block;
   font-family: monospace;
   font-weight: bold;
-  color: darkgreen;
+  color: var(--col-small-button-text);
 }
 .small-button:hover {
-  background-color: lightpink;
+  background-color: var(--col-small-button-hover);
   cursor: pointer;
 }
 #nina-group {
@@ -222,7 +240,7 @@ hr {
   font-family: monospace;
   font-size: 12px;
   margin: 6px 0 6px 0;
-  color: darkgreen;
+  color: var(--col-imp-text);
 }
 #saving {
   font-size: x-small;
@@ -239,7 +257,7 @@ hr {
   outline: none;
   font-family: monospace;
   font-size: 12px;
-  color: darkgreen;
+  color: var(--col-imp-text);
   background-image:
     repeating-linear-gradient(to bottom, white, white 13px, black 14px);
 }
@@ -250,17 +268,17 @@ hr {
   outline: none;
   font-family: monospace;
   font-size: 12px;
-  color: darkgreen;
+  color: var(--col-imp-text);
   border-bottom: solid 2px #c9c9c9;
   background-color: inherit;
 }
 #scratchpad {
-  border: 1px solid darkgreen;
+  border: 1px solid var(--col-imp-text);
   padding: 8px;
   outline: none;
   font-family: monospace;
   font-size: 12px;
-  color: darkgreen;
+  color: var(--col-imp-text);
 }
 #shuffle {
   font-family: monospace;

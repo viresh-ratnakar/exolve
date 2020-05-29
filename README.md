@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.74 May 26 2020
+### Version: Exolve v0.75 May 28 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
@@ -435,8 +435,8 @@ unset) its "has-been-solved" state manually.
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue
 numbers in squares, they can do so by prepending the clue (in the exolve-across
-or exolve-down section) with "#<L>", where <L> is the location of the square in
-the extended chessboard notation described earlier. Examples:
+or exolve-down section) with "#&lt;L&gt;", where &lt;L&gt; is the location of
+the square in the extended chessboard notation described earlier. Examples:
 ```
   exolve-across:
     #a9 15 Imprison and tie perhaps
@@ -506,8 +506,9 @@ section with non-numeric clue labels. Example:
     [Q] Server spilling one's drink (5)
     ...
 ```
-The clue label can be numeric too, and the starting cell can also be specified
-using the "#xN" prefix as described above.
+The clue label in [] can be numeric too, (like [42]), and the starting cell can
+also be specified using a "#&lt;L&gt;" prefix (with &lt;L&gt; being a cell
+location in the extended chessboard notation) as described above.
 
 If the setter is using  nun-numeric clue labels or clues without a specified
 direction, then they should probably also use the option "hide-inferred-numbers"
@@ -540,13 +541,59 @@ in the highlighted scrollable 'orphan' clues widget, whenever the currently
 highlighed squares do not have a known clue association.
 
 The copy-placeholder button feature does not get activated if there are any
-diagramless cells (as only one diagramless is active generally).
+diagramless cells (as only one diagramless cell is active at a time generally).
 
 The copy-placeholder buttons can be disabled (i.e., not shown at all) by
 specifying the exolve-option, hide-copy-placeholder-buttons. This is useful if
 you find the buttons distracting in appearance, or if copying from the
 placeholder is not very useful for some other reason (for eg., lights are split
 into parts).
+
+Within such clues, in grids with solutions provided, it is possible to indicate
+which cells in the grid belong to the clue, for use in "Reveal this" and "Check
+this." This is done by listing in square brackets a space-separated sequence of
+clue indices and/or cell locations. Clue indices can be like 12a or 12A or 13d
+or 13D (must include direction, just like the way these are specified in
+exolve-nina and exolve-colour). If any clue indices are used in the specified
+sequence, then those clues themselves must have some of their cell locations
+known. This listing should be present right after the enum part, if at all.
+Examples:
+```
+  exolve-nodir:
+    [A] Some clue (5) [1a]
+    [B] One hundred years lived in prison (4) [2d]
+    [C] Some other clue ... (?) [3d 4a c4 c5 r5c3] Anno...
+```
+Individually listed cells, if highlighted just by themselves (which would be
+the case if they are diagramless) do not let solvers reveal/check the whole
+orphan clue: a single cell may be a part of multiple clues.
+
+There are some subtle implications of providing revelations for orphan clues
+in this manner. In the above example, if a light in the grid (such as 1a) that
+belongs to some orphan clue (A in this case) is highlighted by clicking on one
+of its cells, but the solver then clicks on the B clue in the list of clues,
+then 1a in the grid as well as B in the clues list are higlighted (B will be
+highlighted in the different colour used for highlighting orphan clues). Now,
+if "Reveal this" or "Check this" is clicked, we reveal/check only based on the
+cells of 1a; i.e., the fact that B is also highlighted, is ignored. Further,
+in revealing 1a, we will change the currently highlighted clue in the list of
+clues from B to A. However, if nothing is highlighted in the grid, but some
+orphan clue is highlighted in the clues list (this can happen by clicking on a
+blocked cell in the grid and then clicking/navigating to an orphan clue in the
+clues list, for example), then "Reveal this" and "Check this" are applicable
+to that orphan clue.
+
+Another subtle point is that in a puzzle with diagramless cells, it's possible
+for a clue to have specified some of its cells (the first few), but not all.
+Its cells can be revealed by naming itself, and listing the additional cells.
+For example:
+```
+    15 Imprison and tie perhaps (one word) [15a e9 f9] DETAIN.
+```
+
+Note also that "Reveal all" does not reveal orphan-clue-to-grid-light
+associations. But, even after "Reveal all," solvers may go through orphan
+clues, clicking "Reveal this" for each.
 
 ### Some clue numbering nuances
 If you have a non-numeric clue label (say, P) for an across (down) clue, and
@@ -697,6 +744,7 @@ keys.
 
 ## exolve-option
 In this single-line, repeatable section, the setter can specify certain options.
+Multiple, space-separated options may be provided on each exolve-option line.
 The list of currently supported options is as follows:
 - **hide-inferred-numbers** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
@@ -709,14 +757,66 @@ The list of currently supported options is as follows:
 - **offset-left:&lt;N&gt;** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using customizePuzzle(), for example.
-- **grid-background:&lt;C&gt;** Set the colour of the black cells to C, which
-  should be a valid HTML colour name/code.
+- **grid-background:&lt;c&gt;** Set the colour of the black cells to &lt;c&gt;,
+  which should be a valid HTML colour name/code. This option is deprecated.
+  Please use color-background (see below).
 - **allow-digits** If this option is specified, then we allow solvers to enter
   digits in cells.
 - **hide-copy-placeholder-buttons** This is an option that is only applicable
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
   subsection below on "Jigsaw puzzle clues").
+- **colour-&lt;name&gt;:&lt;c&gt; or color-&lt;name&gt;:&lt;c&gt;** Set the
+  colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
+  valid HTML colour name/code (do not include spaces within it though). See the
+  "Colour schemes" subsection below for details.
+
+### Colour schemes
+Using a bunch of exolve-option:colour-&lt;name&gt;:&lt;c&gt; (or, of course,
+exolve-option:color-&lt;name&gt;:&lt;c&gt;) options, the colour scheme of
+a puzzle can be altered comprehensively. The following table lists all possible
+supported values for colour-&lt;name&gt;, their default values (that you would
+be overriding), and descriptions.
+
+| Option                   | Default value | What gets coloured                |
+|--------------------------|---------------|-----------------------------------|
+| colour-background        | black         | The background: blocked squares and bars.|
+| colour-cell              | white         | Light squares.                    |
+| colour-active            | mistyrose     | Squares for the light(s) currently active. The current clue(s) also get(s) this as background colour.|
+| colour-input             | #ffb6b4       | The light square where the solver is typing.|
+| colour-orphan            | linen         | The colour of the current clue(s) without known location(s) in the grid.|
+| colour-light-label       | black         | The number (or nun-numeric label) of a clue, in its first square. |
+| colour-light-label-input | black         | Same as above, in the square where the solver is typing.|
+| colour-light-text        | black         | The typed solution letters in lights.|
+| colour-light-text-input  | black         | Same as above, in the square where the solver is typing.|
+| colour-circle            | gray          | Any circles drawn with the @ decorator.|
+| colour-circle-input      | gray          | Same as above, in the square where the solver is typing.|
+| colour-caret             | gray          | The flashing cursor in the square where the solver is typing.|
+| colour-arrow             | mistyrose     | The right- or down-arrow in the square where the solver is typing.|
+| colour-prefill           | blue          | Any letters pre-filled with the ! decorator.|
+| colour-anno              | darkgreen     | The text of the annotation.       |
+| colour-solved            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
+| colour-separator         | blue          | The hyphens and dashes in multi-word lights. |
+| colour-imp-text          | darkgreen     | "Important" text: setter's name, answer entries, placeholder entries, grid-filling status.|
+| colour-button            | #4caf50       | Buttons (Check/Reveal etc).       |
+| colour-button-hover      | darkgreen     | Buttons with mouseover.           |
+| colour-button-text       | white         | The text in buttons.              |
+| colour-small-button      | inherit       | Small buttons in the current clue(s).|
+| colour-small-button-hover| lightpink     | Small buttons with mouseover.     |
+| colour-small-button-text | darkgreen     | The text in small buttons.        |
+
+Setting "colour-arrow" and "colour-caret" to the same colour as "colour-input"
+will make them invisible (if so desired).
+
+For example, the following options will make the rendering look quite
+similar to the Guardian's colour scheme (in May 2020).
+```
+  exolve-option: colour-active:lightyellow
+  exolve-option: colour-input:#bb3b80 color-arrow:lightyellow
+  exolve-option: colour-light-label-input:white
+  exolve-option: colour-light-text-input:white
+  exolve-option: colour-button:#bb3b80 color-button-hover:purple
+```
 
 ## exolve-language
 

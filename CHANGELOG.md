@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.75 May 28 2020
+
+- Add support to completely customize the colour scheme of the puzzle by
+  using options like "exolve-option: color-button:blue".
+- Add support for specifying orphan-clue to grid-clue (and/or or grid-cells)
+  mappings: eg., in a nodir clue like "[P] Some clue (4) [4d]"
+- Tweak linked clue indentation a little for non-numeric labels and for Firefox.
+- Bug fix: HTMLCollection is not iterable on Edge, fixed in displayNinas()
+
 ### Version: Exolve v0.74 May 26 2020
 
 - The latest version of Chrome adds a black outline on focus to #grid-input,
