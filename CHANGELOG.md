@@ -1,5 +1,18 @@
 # Changelog
 
+### Version: Exolve v0.76 June 13 2020
+
+- Allow 'exolve-preamble' as an alias for 'exolve-prelude' as "preamble" is
+  more commonly used in crosswordese.
+- Add 'exolve-postscript' section to add a section at the bottom of the puzzle
+  panel. This can be used, for example, to add nav links.
+- Add option to allow exolve-question to not convert all answer letters into
+  uppercase (for long-form answers, for example). This is done by optionally
+  including the phrase "[lowercase-ok]" (without the quotes) immediately after
+  the enum specified in the question.
+- When exolve-submit is specified, allow submitting partial solutions too,
+  but with an extra warning in the confirmation dialog.
+
 ### Version: Exolve v0.75 May 28 2020
 
 - Add support to completely customize the colour scheme of the puzzle by

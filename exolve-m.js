@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.75 May 28 2020'
+const VERSION = 'Exolve v0.76 June 13 2020'
 
 // ------ Begin globals.
 
@@ -40,6 +40,8 @@ let gridFirstLine = -1
 let gridLastLine = -1
 let preludeFirstLine = -1
 let preludeLastLine = -1
+let psFirstLine = -1
+let psLastLine = -1
 let acrossFirstLine = -1
 let acrossLastLine = -1
 let downFirstLine = -1
@@ -173,6 +175,7 @@ let languageScript = ''
 let langMaxCharCodes = 1
 
 // Variables set in init().
+let outermost;
 let puzzleTextLines;
 let numPuzzleTextLines;
 let svg;
@@ -210,7 +213,7 @@ let submitButton;
 // Create the basic HTML structure.
 // Set up globals, version number and user agent in bug link.
 function init() {
-  let outermost = document.getElementById('outermost-stack')
+  outermost = document.getElementById('outermost-stack')
   if (!outermost) {
     // Do not remove things from basicHTML, basically ever, to ensure backward
     // compatibility. Use code to add/remove/modify the DOM tree, if needed.
@@ -337,6 +340,7 @@ function init() {
 </div> <!-- #outermost-stack -->
   `
     document.body.insertAdjacentHTML('beforeend', basicHTML)
+    outermost = document.getElementById('outermost-stack')
   }
 
   puzzleTextLines = []
@@ -477,13 +481,17 @@ function parseColour(s) {
   }
 }
 
-function getAnswerListener(answer) {
+function getAnswerListener(answer, forceUpper) {
   return function() {
     deactivateCurrentCell()
     deactivateCurrentClue()
     usingGnav = false
     let cursor = answer.selectionStart
-    answer.value = answer.value.toUpperCase().trimLeft()
+    if (forceUpper) {
+      answer.value = answer.value.toUpperCase().trimLeft()
+    } else {
+      answer.value = answer.value.trimLeft()
+    }
     answer.selectionEnd = cursor 
     updateAndSaveState()
   };
@@ -512,8 +520,15 @@ function parseQuestion(s) {
       hideEnum = true
     }
   }
+  s = s.substr(afterEnum).trim();
 
-  let correctAnswer = s.substr(afterEnum).trim()
+  let forceUpper = true;
+  if (s.substr(0,14) == "[lowercase-ok]") {
+    forceUpper = false;
+    s = s.substr(14).trim();
+  }
+
+  let correctAnswer = s;
   const question = document.createElement('div')
   question.setAttributeNS(null, 'class', 'question');
   const questionText = document.createElement('span')
@@ -562,7 +577,7 @@ function parseQuestion(s) {
   answer.setAttributeNS(null, 'spellcheck', 'false');
   question.appendChild(answer)
   questions.appendChild(question)
-  answer.addEventListener('input', getAnswerListener(answer));
+  answer.addEventListener('input', getAnswerListener(answer, forceUpper));
 }
 
 function parseSubmit(s) {
@@ -672,8 +687,8 @@ function parseLanguage(s) {
 }
 
 // The overall parser for the puzzle text. Also takes care of parsing and
-// displaying all exolve-* sections except prelude, grid, across, down (for
-// these, it just captures where the start and end lines are).
+// displaying all exolve-* sections except premable, grid, across, down,
+// postscript (for these, it just captures where the start and end lines are).
 function parseOverallDisplayMost() {
   let sectionAndValue = parseToNextSection()
 
@@ -704,9 +719,13 @@ function parseOverallDisplayMost() {
     } else if (sectionAndValue.section == 'height') {
       gridHeight = parseInt(sectionAndValue.value)
       boxHeight = (SQUARE_DIM * gridHeight) + gridHeight + 1
-    } else if (sectionAndValue.section == 'prelude') {
+    } else if (sectionAndValue.section == 'preamble' ||
+               sectionAndValue.section == 'prelude') {
       preludeFirstLine = firstLine
       preludeLastLine = lastLine
+    } else if (sectionAndValue.section == 'postscript') {
+      psFirstLine = firstLine
+      psLastLine = lastLine
     } else if (sectionAndValue.section == 'grid') {
       gridFirstLine = firstLine
       gridLastLine = lastLine
@@ -754,6 +773,19 @@ function parseAndDisplayPrelude() {
       l++;
     }
     document.getElementById('prelude').innerHTML = preludeText
+  }
+}
+
+function parseAndDisplayPS() {
+  if (psFirstLine >= 0 && psFirstLine <= psLastLine) {
+    let psText = puzzleTextLines[psFirstLine]
+    let l = psFirstLine + 1
+    while (l <= psLastLine) {
+      psText = psText + '\n' + puzzleTextLines[l]
+      l++;
+    }
+    psHTML = "<div id='postscript'><hr>" + psText + "</div>";
+    outermost.insertAdjacentHTML('beforeend', psHTML);
   }
 }
 
@@ -2413,7 +2445,6 @@ function updateDisplayAndGetState() {
   revealButton.disabled = (activeCells.length == 0) &&
                           !(ci && theClue && (theClue.anno || revOrphan))
   clearButton.disabled = revealButton.disabled
-  submitButton.disabled = (numCellsFilled != numCellsToFill)
   return state
 }
 
@@ -3538,8 +3569,7 @@ function getDeactivator() {
 function createListeners() {
   gridInput.addEventListener('keyup', function(e) {handleKeyUp(e);});
   // Listen for tab/shift tab everywhere in the puzzle area.
-  const outer = document.getElementById('outermost-stack')
-  outer.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
+  outermost.addEventListener('keydown', function(e) {handleTabKeyDown(e);});
   gridInput.addEventListener('input', handleGridInput);
   gridInputWrapper.addEventListener('click', toggleCurrentDirAndActivate);
   background.addEventListener('click', getDeactivator());
@@ -4323,10 +4353,14 @@ function scratchPadShuffle() {
 }
 
 function submitSolution() {
-  if (!confirm('Are you sure you are ready to submit!?')) {
+  let message = 'Are you sure you are ready to submit!?';
+  let state = updateDisplayAndGetState()
+  if (numCellsFilled != numCellsToFill) {
+    message = 'Are you sure you want to submit an INCOMPLETE solution!?';
+  }
+  if (!confirm(message)) {
     return
   }
-  let state = updateDisplayAndGetState()
   let fullSubmitURL = submitURL + '&' + submitKeys[0] + '=' +
                       encodeURIComponent(state)
   for (let i = 0; i < answersList.length; i++) {
@@ -4334,7 +4368,7 @@ function submitSolution() {
       break
     }
     fullSubmitURL = fullSubmitURL + '&' + submitKeys[i + 1] + '=' +
-      encodeURIComponent(answersList[i].input.value.toUpperCase())
+      encodeURIComponent(answersList[i].input.value)
   }
   document.body.style.cursor = 'wait'
   window.location.replace(fullSubmitURL)
@@ -4357,7 +4391,6 @@ function displayButtons() {
     revealAllButton.style.display = ''
 
     checkButton.disabled = true
-    submitButton.disabled = true
   }
   if (!hasUnsolvedCells || hasReveals) {
     revealButton.style.display = ''
@@ -4407,6 +4440,7 @@ function createPuzzle() {
   displayButtons()
 
   parseAndDisplayRelabel()
+  parseAndDisplayPS()
 
   restoreState()
 

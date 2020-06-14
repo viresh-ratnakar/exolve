@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.75 May 28 2020
+### Version: Exolve v0.76 June 13 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
@@ -144,16 +144,17 @@ and the exolve-end line:
 * exolve-setter
 * exolve-copyright
 * exolve-credits
-* exolve-prelude
 * **exolve-width**
 * **exolve-height**
+* exolve-preamble / exolve-prelude
+* exolve-postscript
 * **exolve-grid**
 * exolve-across
 * exolve-down
 * exolve-nodir
 * exolve-explanations
 * exolve-nina
-* exolve-colour
+* exolve-colour / exolve-color
 * exolve-question
 * exolve-submit
 * exolve-option
@@ -161,10 +162,11 @@ and the exolve-end line:
 * exolve-relabel
 
 Each section has the section name (exolve-something), followed by a colon.
-Other than the exolve-prelude, exolve-grid, exolve-across, exolve-down,
-exolve-nodir, and exolve-explanations sections, all other sections occupy a
-single line (some can be repeated though). For such single-line sections, the
-"value" of the section is the text following the colon on the same line.
+Other than the exolve-preamble/exolve-prelude, exolve-grid, exolve-across,
+exolve-down, exolve-nodir, exolve-explanations, and exolve-postscript sections,
+all other sections occupy a single line (some can be repeated though). For such
+single-line sections, the "value" of the section is the text following the
+colon on the same line.
 
 The bolded sections, namely, exolve-width, exolve-height, and exolve-grid
 are required. The other sections are optional, but exolve-across, exolve-down,
@@ -221,17 +223,31 @@ squares down is the crossword grid. Example:
   exolve-height: 15
 ```
 
-## exolve-prelude
-Crossword puzzles often come with a prelude that contains special instructions
-and/or hints. The prelude text occupies multiple lines—starting from the
-line *after* the exolve-prelude: line, and going all they way down to the line
-preceding the next exolve-foo section. The prelude may include html tags. The
-prelude is rendered just above the grid, in the rendered puzzle. Example:
+## exolve-preamble, exolve-prelude
+Crossword puzzles often come with a preamble that contains special instructions
+and/or hints. The preamble text occupies multiple lines—starting from the
+line *after* the exolve-preamble: (or exolve-prelude:) line, and going all the
+way down to the line preceding the next exolve-foo section. The preamble may
+include HTML tags. The preamble is rendered just above the grid, in the
+rendered puzzle. Example:
 ```
-  exolve-prelude:
+  exolve-preamble:
     Words should be entered in the grid <i>after</i> deleting one letter. The
     letters thus deleted, in clue order, form the name of a famous farm
     animal.
+```
+
+## exolve-postscript
+If this section is provided, it gets rendered under the whole puzzle. Like
+exolve-preamble, this is also a multiline section and can include arbitrary
+HTML. Example:
+```
+  exolve-postscript:
+    <ul>
+     <li><a href="puzzle-41.html">Previous puzzle</a></li>
+     <li><a href="index.html">Home</a></li>
+     <li><a href="puzzle-43.html">Next puzzle</a></li>
+   </ul>
 ```
 
 ## exolve-grid
@@ -625,7 +641,7 @@ light in the grid, then the software makes the label of that light be Q.
 In a grid that includes solutions, the setter may provide additional notes,
 explanations, commentary, etc., in an exolve-explanations section. Just like the
 exolve-prelude section, this section also has multiple lines, and these lines
-can include html tags. The contents get revealed when the solver clicks on
+can include HTML tags. The contents get revealed when the solver clicks on
 "Reveal all".
 ```
   exolve-explanations:
@@ -652,7 +668,7 @@ column ("j"), and the second one is in the seventh row from the bottom as well
 as all the cells in the A12 and D16 clues.
 
 You can also have ninas that involve arbitrary letters/words from within the
-text of the clues or the prelude. This involves a little bit of html.
+text of the clues or the prelude. This involves a little bit of HTML.
 Just enclose the text that you want to highlight as a nina in a "span" tag,
 giving it a unique class name, and specify that class name in the exolve-nina
 (the name should not be a letter followed by a number, so that it is not
@@ -698,10 +714,22 @@ details on enums). The answer is not shown in the displayed question. When the
 solver clicks "Reveal all", answers to all questions for which answers have
 been provided do get revealed.
 
+Questions that specify an enum get displayed with placeholder question-marks
+formatted according to the enum: ??? for (3), ??? ?? for (3,2), and ??-??? for
+(2,3), when no entry has been made in the answer slot.
+
 If an enum in an exolve-question is immediately followed by an asterisk (like
-"(30)*" above—note that there is no space before the asterisk), then the enum
+"(30)\*" above—note that there is no space before the asterisk), then the enum
 is not displayed to the solver; it is only used to determine the size of the
-answer box to show.
+answer box to show. The placeholder questionmarks are also not shown.
+
+Answers are automatically converted to uppercase. But lowercase answers can
+be permitted by adding "[lowercase-ok]" immediately after the enum. For
+example:
+```
+  exolve-question: That quirky poet? (1,1,8) [lowercase-ok] e e cummings
+  exolve-question: A long comment from you, please (300)* [lowercase-ok]
+```
 
 If the setter has created an exolve-submit section (see below), then answers to
 each exolve-question are also sent to the submit URL (see below for details).
@@ -733,8 +761,7 @@ submission will be:
   https://something&k=ACER.REAR&k1=ANSWER1&k2=ANSWER2
 ``` 
 
-The submission is made using HTTP GET. All answers are converted to upper case
-for submission.
+The submission is made using HTTP GET.
 
 One easy way to set up submissions is to create a Google Form with one Google
 Form question for the solution letters, and one Google Form question for each
@@ -905,17 +932,17 @@ Setters can customize their grids by directly making changes to the Exolve
 files outside of the puzzle specs area. However, this may get hard to maintain
 over time, as Exolve goes through new versions. A conservative option is to
 simply not update the HTML part of your puzzle: I do try to make sure that all
-Exolve Javascript/CSS changes are backwards compatible (so, for example, I do
-not change element IDs in the html, and for newly introduced IDs, the
-Javascript code checks first that such an element exists).
+Exolve JavaScript/CSS changes are backwards compatible (so, for example, I do
+not change element IDs in the HTML, and for newly introduced IDs, the
+JavaScript code checks first that such an element exists).
 
-The recommended way to customize is to load separate, additional Javascript
-and/or CSS files. Exolve provides a Javascript hook to do any custom
-initialization and/or to modify the html using Javascript. If the setter has
+The recommended way to customize is to load separate, additional JavaScript
+and/or CSS files. Exolve provides a JavaScript hook to do any custom
+initialization and/or to modify the HTML using JavaScript. If the setter has
 defined a function called `customizePuzzle()`, then it gets called after
 Exolve has finished with its own set-up. For example, the following code,
 if added within the &lt;script&gt; tag or loaded from a script file, will
-customize the html by inserting the italicized red text *New!* after the
+customize the HTML by inserting the italicized red text *New!* after the
 Tools link:
 ```
   function customizePuzzle() {
@@ -947,8 +974,8 @@ License.
 **Which files should I use? exolve.html or exolve-m.html, exolve-m.css, exolve-m.js?**
 
 I want to maintain a released version in the simple state of a single,
-self-contained HTML file containing all the CSS and all the Javascript it needs.
-Vanilla Javascript, nothing to import, no scripts to run, absolutely zero
+self-contained HTML file containing all the CSS and all the JavaScript it needs.
+Vanilla JavaScript, nothing to import, no scripts to run, absolutely zero
 dependencies. If you have just one or two puzzles that you want to render,
 and/or you do not have much experience with HTML, then use this file.
 
