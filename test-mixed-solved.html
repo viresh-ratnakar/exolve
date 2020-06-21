@@ -11,11 +11,11 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.76 June 13 2020
+Version: Exolve v0.77 June 13 2020
 -->
 
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.76"/>
-<script src="exolve-m.js?v0.76"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.77"/>
+<script src="exolve-m.js?v0.77"></script>
 
 <title>Test-Mixed</title>
 
@@ -49,6 +49,7 @@ exolve-begin
   exolve-nina: c8 e8 g8 i8 k8 m8
   exolve-nina: a2 c2 g2 i2 m2 o2
   exolve-nina: h15 h11 h9 h7 h5 h1
+  exolve-option: no-auto-solution-in-anno
 
   exolve-question: What is the hidden message? (6,6,6,6) BETTER ONLINE SOLVER PLEASE
   exolve-option: hide-inferred-numbers
@@ -84,10 +85,10 @@ exolve-begin
     20 Synapse (7)
     24 Chaos (5)
   exolve-nodir
-    [A] CHECK "clear/reveal this" enabled Subsidies (9) [16a] SUBSIDIES. Some bogus anno.
-    [B] Annul (3,2)
+    [A] CHECK "clear/reveal this" enabled Subsidies (9) [16a] [SUBSIDIES]. Some bogus anno. But should not see SUBSIDIES duplicated at the head of the anno, testing no-auto-solution-in-anno
+    [B] Annul (3,2) [k9 l9 m9 n9 o9] Anno for annul.
     [C] Skeletal (4-4) [13a]
-    [d, p, q] Hereto (6) HERETO.
+    [d, p, q] Hereto (6) [HERETO]
     [E, F, G] Yammers (7)
     [&#128274;, &#128274;, &#128274;] Jolt (4)
     [&#128273;] Above (5)

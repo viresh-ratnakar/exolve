@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.76 June 13 2020
+Version: Exolve v0.77 June 20 2020
 
 The --col-* color variables in :root{} are set by JavaScript.
 */
@@ -60,7 +60,7 @@ td:first-child:not(.filler) {
   cursor: pointer;
 }
 .anno-text {
-  font-style: italic;
+  font-family: monospace;
   color: var(--col-anno);
 }
 .flex-row {
@@ -248,6 +248,10 @@ hr {
   color: gray;
   margin: 0px 0 6px 0;
 }
+.solution {
+  font-family: monospace;
+  font-weight: bold;
+}
 .question {
   margin: 20px 0 20px 0;
 }
@@ -267,6 +271,7 @@ hr {
   margin: 0 0 0 4px;
   outline: none;
   font-family: monospace;
+  font-weight: bold;
   font-size: 12px;
   color: var(--col-imp-text);
   border-bottom: solid 2px #c9c9c9;

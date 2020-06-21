@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.76 June 13 2020
+### Version: Exolve v0.77 June 20 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
@@ -94,6 +94,19 @@ solutions are not provided, the "Reveal this" button will still get shown if
 there are any clues for which annotations are present (these annotations may be
 full solutions or just hints, possibly).
 
+If an anno is provided, the software appends the solution inferred from
+the grid and the enum to the beginning of the anno (creating an anno
+automatically if it's not provided). This would have meant that if in an older
+grid the the solution was explicitly included in the anno, it would have got
+duplicated. So, the code does check to see if the solution string
+(punctuation/markup notwithstanding) is present at the head of the anno, and
+avoids duplicating it if so. If the solver wants to present the solution in some
+other way, they can suppress this by adding this line to the puzzle specs:
+    exolve-option: no-auto-solution-in-anno
+This option only suprresses the solution getting added to the anno appearing
+after the clue. The solution does still get added to the placeholder blank
+slot of an orphan clue, upon "Reveal this," even with this option.
+
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
 shown, for the solver to see where the ninas are. The button can be clicked
@@ -105,11 +118,12 @@ exolve-question sections), then input fields for these get shown too.
 answers to these questions apart from showing/hiding annos/explanations/ninas.
 
 If there are placeholder entries (for orphan clues—i.e., for clues without
-known cells), they do NOT get cleared with 'clear this/all'. For clearing all
-such placeholder entries forcibly, click on the 'Clear all' button when there
-are no entries in the grid (eg, by clicking it a _second_ time). This option is
-only there in puzzles that have such placeholder entries, and in such puzzles,
-a tooltip is shown over the 'Clear all' button to let the user know.
+known cells), they do NOT get cleared with 'clear this/all' (they can simply
+by erased manually though). For clearing all such placeholder entries forcibly,
+click on the 'Clear all' button when there are no entries in the grid (eg, by
+clicking it a _second_ time). This option is only there in puzzles that have
+such placeholder entries, and in such puzzles, a tooltip is shown over the
+'Clear all' button to let the user know.
 
 If the setter has set up a submit URL (with an exolve-submit section—the URL
 can be set up using a Google Form, for instance), then there is a *Submit*
@@ -313,7 +327,9 @@ some cells being diagramless:
 The decorator "!" can be used to mark a cell as pre-filled (its solution letter
 must be provided). The solution letter will be pre-filled and will not be
 editable. If all entries in a light are prefilled, and an anno is provided
-for that clue, the anno will be shown automatically at start-up.
+for that clue, the anno will be shown automatically at start-up. Even if no anno
+is given for a fully prefilled clue, the solution will be displayed at the
+end of the clue (unless the no-auto-solution-in-anno option is set).
 
 If you use a language/Script that uses compound letters made up of multiple
 Unicode characters (for example, Devanagari—see the exolve-language section),
@@ -578,26 +594,33 @@ Examples:
   exolve-nodir:
     [A] Some clue (5) [1a]
     [B] One hundred years lived in prison (4) [2d]
-    [C] Some other clue ... (?) [3d 4a c4 c5 r5c3] Anno...
+    [C] Some other clue ... (?) [3d 4a c4 c5 r5c3] [SOLUTION HERE] Anno...
 ```
+In the last clue above, there is no enum provided. Even though the software
+knows all the cells of this clue, it does not know if there are multiple
+words or hyphens. The solution in such cases can be provided in square brackets
+at the beginning of the anno.
+
+The inferred or provided solution for an orphan clue gets revealed in its
+placeholder blank upon "Reveal this" and "Reveal all."
+
 Individually listed cells, if highlighted just by themselves (which would be
 the case if they are diagramless) do not let solvers reveal/check the whole
 orphan clue: a single cell may be a part of multiple clues.
 
 There are some subtle implications of providing revelations for orphan clues
-in this manner. In the above example, if a light in the grid (such as 1a) that
+in this manner. In the above example, say a light in the grid (such as 1a) that
 belongs to some orphan clue (A in this case) is highlighted by clicking on one
-of its cells, but the solver then clicks on the B clue in the list of clues,
-then 1a in the grid as well as B in the clues list are higlighted (B will be
-highlighted in the different colour used for highlighting orphan clues). Now,
-if "Reveal this" or "Check this" is clicked, we reveal/check only based on the
-cells of 1a; i.e., the fact that B is also highlighted, is ignored. Further,
-in revealing 1a, we will change the currently highlighted clue in the list of
-clues from B to A. However, if nothing is highlighted in the grid, but some
-orphan clue is highlighted in the clues list (this can happen by clicking on a
-blocked cell in the grid and then clicking/navigating to an orphan clue in the
-clues list, for example), then "Reveal this" and "Check this" are applicable
-to that orphan clue.
+of its cells. The current clue shown in the clues list will be last orphan clue
+that the solver looked at, say B (different from A). If the solver clicks
+"Reveal this" then 1a will be revealed in the grid, and A till get highlighted
+in the clues list.
+
+If, after clicking on 1a in the grid, say the solver clicks on clue C in the
+clues list and then clicks "Reveal this." We infer the solver's intent from
+their last click. In this case, C in the clues list will get revealed, and
+the highlighting in the grid will change from 1a to whatever is the correct
+light for C.
 
 Another subtle point is that in a puzzle with diagramless cells, it's possible
 for a clue to have specified some of its cells (the first few), but not all.
@@ -793,6 +816,11 @@ The list of currently supported options is as follows:
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
   subsection below on "Jigsaw puzzle clues").
+  **no-auto-solution-in-anno** In a grid with solutions, we automatically
+  show the solution next to the clue, when "Reveal all" or "Reveal this" is
+  used. Set this option to disable that. Useful if you want to control
+  how the solution appears in the anno. Also see the note on "anno" in the
+  section on clues.
 - **colour-&lt;name&gt;:&lt;c&gt; or color-&lt;name&gt;:&lt;c&gt;** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
@@ -977,9 +1005,10 @@ I want to maintain a released version in the simple state of a single,
 self-contained HTML file containing all the CSS and all the JavaScript it needs.
 Vanilla JavaScript, nothing to import, no scripts to run, absolutely zero
 dependencies. If you have just one or two puzzles that you want to render,
-and/or you do not have much experience with HTML, then use this file.
+and/or you do not have much experience with HTML, then make a copy of
+exolve.html and modify it only between the exolve-begin and exolve-end lines.
 
 If you are serving multiple puzzles, use one copy each of exolve-m.css and
 exolve-m.js, and create one copy of exolve-m.html for each puzzle (renaming
-it suitably).
+it suitably and then editing it between the exolve-begin and exolve-end lines).
 

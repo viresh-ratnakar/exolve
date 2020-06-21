@@ -1,5 +1,41 @@
 # Changelog
 
+### Version: Exolve v0.77 June 20 2020
+
+- In puzzles with solutions, we now automatically add to the anno (or create
+  an ano consisting of) the solution to the clue, derived from the grid
+  letters and the enum (for spaces, hyphens, etc.). For orphan clues,
+  the solution gets placed inside the placeholder blank slot instead of
+  the head of the anno.
+
+- This would have meant that if in an older grid the the solution was explicitly
+  included in the anno, it would have got duplicated. So, the code does check
+  to see if the solution string (punctuation/markup notwithstanding) is present
+  at the head of the anno, and avoids duplicating it if so. If the solver wants
+  to present the solution in some other way, they can suppress this by adding
+  this line to the puzzle specs:
+    exolve-option: no-auto-solution-in-anno
+  This option only suprresses the solution getting added to the anno appearing
+  after the clue. The solution does still get added to the placeholder blank
+  slot of an orphan clue, upon "Reveal this," even with this option.
+
+- If a clue does not provide its enum (using "(?)" or "(one word)" for eg),
+  the setter can still provide its correct solution in square brackets,
+  at the beginning of the anno. For example,
+  "[A] Lack of understanding (?) [NO CLUE]"
+
+- For orphan clues (such as in a jigsaw puzzle), if the solver is navigating
+  in the clues list having clicked there last (rather than the grid), then
+  we now make "Reveal this" reveal the current clue rather than the current
+  light in the grid.
+
+- The styling of the anno is now normal monospace instead of italic. The
+  solution text within the anno is bold monospace (and has the class name
+  "solution" for use in css overrides if desired).
+
+- Backspace now does not go back beyond a light boundary (except in linked
+  clues).
+
 ### Version: Exolve v0.76 June 13 2020
 
 - Allow 'exolve-preamble' as an alias for 'exolve-prelude' as "preamble" is

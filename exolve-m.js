@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.76 June 13 2020'
+const VERSION = 'Exolve v0.77 June 20 2020'
 
 // ------ Begin globals.
 
@@ -115,7 +115,7 @@ let numCellsPrefilled = 0
 
 let allClueIndices = []
 const CURR_ORPHAN_ID = 'curr-orphan'
-const DEFAULT_ORPHAN_LEN = 10
+const DEFAULT_ORPHAN_LEN = 15
 
 const BLOCK_CHAR = '⬛';
 // We have special meanings for 0 (unfilled) and 1 (block in diagramless cell)
@@ -168,6 +168,7 @@ let hideInferredNumbers = false
 let cluesPanelLines = -1
 let allowDigits = false
 let hideCopyPlaceholders = false
+let addSolutionToAnno = true
 let offsetLeft = 0
 let offsetTop = 0
 let language = ''
@@ -607,6 +608,10 @@ function parseOption(s) {
     }
     if (spart == "hide-copy-placeholder-buttons") {
       hideCopyPlaceholders = true
+      continue
+    }
+    if (spart == "no-auto-solution-in-anno") {
+      addSolutionToAnno = false
       continue
     }
     let kv = spart.split(':')
@@ -1564,6 +1569,87 @@ function parseCellsOfOrphan(s) {
   return cells.length == 0 ? null : {'cells': cells, 'segments': segments}
 }
 
+function setClueSolution(ci) {
+  let theClue = clues[ci]
+  if (!theClue) {
+    return;
+  }
+  if (theClue.solution || theClue.parentClueIndex) {
+    return;
+  }
+  let clueIndices = getAllLinkedClueIndices(ci)
+  let cells = []
+  for (let clueIndex of clueIndices) {
+    if (clues[clueIndex].cellsOfOrphan) {
+      for (let rowcol of clues[clueIndex].cellsOfOrphan) {
+        cells.push(rowcol)
+      }
+    } else {
+      for (let rowcol of clues[clueIndex].cells) {
+        cells.push(rowcol)
+      }
+    }
+  }
+  if (!cells || cells.length == 0) {
+    return;
+  }
+  let solution = '';
+  for (let cell of cells) {
+    let c = stateCharToDisplayChar(grid[cell[0]][cell[1]].solution)
+    if (!c) {
+      return
+    }
+    solution = solution + c;
+  }
+  if (!solution) {
+    return;
+  }
+  if (theClue.placeholder) {
+    let s = ''
+    let index = 0;
+    for (let i = 0; i < theClue.placeholder.length; i++) {
+      if (theClue.placeholder.charAt(i) == '?') {
+        if (index >= solution.length) {
+          return;
+        }
+        s = s + solution[index++];
+      } else {
+        s = s + theClue.placeholder.charAt(i)
+      }
+    }
+    solution = s;
+  }
+  theClue.solution = solution;
+}
+
+function parseAnno(anno, clueIndex) {
+  let theClue = clues[clueIndex]
+  anno = anno.trim()
+  while (anno && anno.substr(0, 1) == '[') {
+    let indexOfBrac = anno.indexOf(']')
+    if (indexOfBrac <= 0) {
+      break;
+    }
+    let inBrac = anno.substring(1, indexOfBrac).trim();
+    let cellsOfOrphan = parseCellsOfOrphan(inBrac);
+    if (!theClue.cellsOfOrphan &&
+        cellsOfOrphan && cellsOfOrphan.cells.length > 0) {
+      theClue.cellsOfOrphan = cellsOfOrphan.cells
+      for (let segment of cellsOfOrphan.segments) {
+        cellsToOrphan[JSON.stringify(segment)] = clueIndex
+        numCellsToOrphan++
+      }
+    } else if (inBrac && !theClue.solution) {
+      theClue.solution = inBrac;
+    } else {
+      break;
+    }
+    anno = anno.substr(indexOfBrac + 1).trim()
+    hasReveals = true
+  }
+  theClue.anno = anno;
+}
+
 // Parse across and down clues from their exolve sections previously
 // identified by parseOverallDisplayMost(). Sets lastOrphan, if any.
 // Sets cellsToOrphan[] for orphan clues for which revelations are provided.
@@ -1655,27 +1741,8 @@ function parseClueLists() {
       theClue.wordEndAfter = clueParse.wordEndAfter
       theClue.placeholder = clueParse.placeholder
 
-      let annoPart = clueParse.anno
-      if (annoPart && annoPart.substr(0, 1) == '[') {
-        let indexOfBrac = annoPart.indexOf(']')
-        if (indexOfBrac > 0) {
-          let cellsOfOrphan = parseCellsOfOrphan(
-            annoPart.substring(1, indexOfBrac))
-          if (cellsOfOrphan && cellsOfOrphan.cells.length > 0) {
-            theClue.cellsOfOrphan = cellsOfOrphan.cells
-            hasReveals = true
-            annoPart = annoPart.substr(indexOfBrac + 1).trim()
-            for (let segment of cellsOfOrphan.segments) {
-              cellsToOrphan[JSON.stringify(segment)] = clueParse.clueIndex
-              numCellsToOrphan++
-            }
-          }
-        }
-      }
-      theClue.anno = annoPart
-      if (clueParse.anno) {
-        hasReveals = true
-      }
+      parseAnno(clueParse.anno, clueParse.clueIndex)
+
       if (clueParse.startCell) {
         let row = clueParse.startCell[0]
         let col = clueParse.startCell[1]
@@ -1743,10 +1810,16 @@ function allCellsKnown(clueIndex) {
   let numCells = 0
   let numPrefilled = 0
   for (let ci of cis) {
-    if (!clues[ci] || !clues[ci].cells || !clues[ci].cells.length) {
+    if (!clues[ci]) {
       return false
     }
-    numCells += clues[ci].cells.length
+    if (clues[ci].cells && clues[ci].cells.length) {
+      numCells += clues[ci].cells.length
+    } else if (clues[ci].cellsOfOrphan && clues[ci].cellsOfOrphan.length) {
+      numCells += clues[ci].cellsOfOrphan.length
+    } else {
+      return false
+    }
   }
   return numCells == clue.enumLen
 }
@@ -1959,14 +2032,33 @@ function processClueChildren() {
   }
 }
 
+function roughlyStartsWith(s, prefix) {
+  const punct = /[\s'.,-]*/gi
+  let normS = s.trim().replace(/<[^>]*>/gi, '').replace(punct, '').trim().toUpperCase();
+  let normP = prefix.trim().replace(punct, '').trim().toUpperCase();
+  return normS.startsWith(normP);
+}
+
+// Copy clue solutions to annos if warranted.
 // Place a trailing period and space at the end of clue full display labels that
 // end in letter/digit. Wrap in a clickable span if all cells are not known.
-function fixFullDisplayLabels() {
+function finalClueTweaks() {
   for (let clueIndex of allClueIndices) {
-    if (!clues[clueIndex].fullDisplayLabel) {
+    let theClue = clues[clueIndex]
+    setClueSolution(clueIndex)
+    if (addSolutionToAnno && theClue.solution && !isOrphan(clueIndex) &&
+        !roughlyStartsWith(theClue.anno, theClue.solution)) {
+      // For orphans, we reveal in their placeholder blanks.
+      theClue.anno = '<span class="solution">' + theClue.solution +
+                     '</span>. ' + theClue.anno;
+    }
+    if (theClue.anno) {
+      hasReveals = true
+    }
+    if (!theClue.fullDisplayLabel) {
       continue
     }
-    let label = clues[clueIndex].fullDisplayLabel
+    let label = theClue.fullDisplayLabel
     let l = label.length
     if (l < 1) {
       continue
@@ -1978,13 +2070,13 @@ function fixFullDisplayLabels() {
       label = label + ' '
     }
     if (!allCellsKnown(clueIndex)) {
-      clues[clueIndex].fullDisplayLabel = '<span class="clickable">' +
+      theClue.fullDisplayLabel = '<span class="clickable">' +
           '<span id="current-clue-label" ' +
           ' title="' + MARK_CLUE_TOOLTIP +
           '" onclick="toggleClueSolvedState(\'' + clueIndex + '\')">' +
           label + '</span></span>';
     } else {
-      clues[clueIndex].fullDisplayLabel = '<span id="current-clue-label">' +
+      theClue.fullDisplayLabel = '<span id="current-clue-label">' +
           label + '</span>';
     }
   }
@@ -2345,8 +2437,10 @@ function displayClues() {
         len = placeholder.length
       }
       addOrphanEntryUI(col2, false, len, placeholder, clueIndex)
+      clues[clueIndex].orphanPlaceholder =
+        col2.lastElementChild.firstElementChild;
       answersList.push({
-        'input': col2.lastElementChild.firstElementChild,
+        'input': clues[clueIndex].orphanPlaceholder,
         'isq': false,
       });
     }
@@ -2442,9 +2536,18 @@ function updateDisplayAndGetState() {
   let revOrphan = isOrphanWithReveals(ci)
   checkButton.disabled = (activeCells.length == 0) && !revOrphan
   let theClue = clues[ci]
-  revealButton.disabled = (activeCells.length == 0) &&
-                          !(ci && theClue && (theClue.anno || revOrphan))
-  clearButton.disabled = revealButton.disabled
+  let haveReveals = (activeCells.length > 0 && !hasUnsolvedCells) ||
+    (theClue && (theClue.anno || theClue.solution || revOrphan));
+  if (!haveReveals && numCellsToOrphan > 0 && activeCells.length > 0) {
+    let orphanClue = cellsToOrphan[JSON.stringify(activeCells)];
+    if (orphanClue) {
+      let oc = clues[orphanClue]
+      haveReveals =
+        oc && (oc.anno || oc.solution || isOrphanWithReveals(orphanClue));
+    }
+  }
+  revealButton.disabled = !haveReveals;
+  clearButton.disabled = revealButton.disabled && activeCells.length == 0;
   return state
 }
 
@@ -3057,7 +3160,7 @@ function updateOrphanEntry(clueIndex, inCurr) {
   }
   let clueInputs = clues[clueIndex].clueTR.getElementsByTagName('input')
   if (clueInputs.length != 1) {
-    addError('Missing placeholder input for clue ' + clueIndex)
+    console.log('Missing placeholder input for clue ' + clueIndex)
     return
   }
   let theInput = clueInputs[0]
@@ -3095,7 +3198,7 @@ function copyOrphanEntryToCurr(clueIndex) {
   }
   let clueInputs = clues[clueIndex].clueTR.getElementsByTagName('input')
   if (clueInputs.length != 1) {
-    addError('Missing placeholder input for clue ' + clueIndex)
+    console.log('Missing placeholder input for clue ' + clueIndex)
     return
   }
   let curr = document.getElementById(CURR_ORPHAN_ID)
@@ -3226,6 +3329,7 @@ function handleKeyUpInner(key) {
       currentCol < 0 || currentCol >= gridWidth) {
     return false
   }
+
   usingGnav = true
   if (key == 8) {
     if (grid[currentRow][currentCol].currentLetter != '0' &&
@@ -3233,17 +3337,8 @@ function handleKeyUpInner(key) {
       return true
     }
     // backspace in an empty or prefilled cell
-    if (retreatCursorIfPred()) {
-      // retreated across linked clue!
-      return true
-    }
-    if (currentDir == 'A') {
-      key = 37  // left
-    } else if (currentDir == 'D') {
-      key = 38  // up
-    } else {
-      return true
-    }
+    retreatCursorInLight();
+    return true
   }
   if (key == 13) {
     // Enter
@@ -3341,21 +3436,31 @@ function advanceCursor() {
   }
 }
 
-function retreatCursorIfPred() {
+function retreatCursorInLight() {
+  if (currentDir == 'A' && currentCol - 1 >= 0 &&
+      grid[currentRow][currentCol - 1].acrossClueLabel ==
+        grid[currentRow][currentCol].acrossClueLabel) {
+    activateCell(currentRow, currentCol - 1);
+    return
+  } else if (currentDir == 'D' && currentRow - 1 >= 0 &&
+             grid[currentRow - 1][currentCol].downClueLabel ==
+               grid[currentRow][currentCol].downClueLabel) {
+    activateCell(currentRow - 1, currentCol);
+    return
+  }
   let predProperty = 'pred' + currentDir
   if (!grid[currentRow][currentCol][predProperty]) {
-    return false
+    return
   }
   let pred = grid[currentRow][currentCol][predProperty]
   currentDir = pred.dir
   activateCell(pred.cell[0], pred.cell[1]);
-  return true
 }
 
 function toggleClueSolvedState(clueIndex) {
   if (allCellsKnown(clueIndex)) {
-    addError('toggleClueSolvedState() called on ' + clueIndex +
-             ' with all cells known')
+    console.log('toggleClueSolvedState() called on ' + clueIndex +
+                ' with all cells known')
     return
   }
   let clue = clues[clueIndex]
@@ -3387,7 +3492,7 @@ function getClueStateToggler(ci) {
 }
 
 // Mark the clue as solved by setting its number's colour, if filled.
-// if annoPrefilled is true and the clue is fully prefilled, reveal its anno.
+// If annoPrefilled is true and the clue is fully prefilled, reveal its anno.
 // forceSolved can be passed as null or 'solved' or 'unsolved'.
 function updateClueState(clueIndex, annoPrefilled, forceSolved) {
   let cis = getAllLinkedClueIndices(clueIndex)
@@ -3412,13 +3517,13 @@ function updateClueState(clueIndex, annoPrefilled, forceSolved) {
       break
     }
     let isFullRet = isFull(ci)
-    if (!isFullRet) {
+    if (!isFullRet[0]) {
       numFilled = 0
       break
     }
-    numFilled += theClue.cells.length
-    if (isFullRet == 2) {
-      numPrefilled += theClue.cells.length
+    numFilled += isFullRet[1]
+    if (isFullRet[0] == 2) {
+      numPrefilled += isFullRet[1]
     }
   }
   if (forceSolved) {
@@ -3436,8 +3541,9 @@ function updateClueState(clueIndex, annoPrefilled, forceSolved) {
   } else if (allCellsKnown(clueIndex)) {
     solved = numFilled == clue.enumLen
   }
-  if (solved && numFilled == numPrefilled && annoPrefilled && clue.annoSpan) {
-    clue.annoSpan.style.display = ''
+  if (solved && numFilled == numPrefilled && annoPrefilled &&
+      (clue.annoSpan || clue.solution)) {
+    revealClueAnno(clueIndex);
   }
   let cls = solved ? 'solved' : ''
   for (let ci of cis) {
@@ -3911,24 +4017,33 @@ function clearCell(row, col) {
   }
 }
 
-// Returns 0 if not full. 1 if full, 2 if full entirely with prefills.
+// Returns a pair of numbers. The first number is  0 if not full, 1 if full,
+// 2 if full entirely with prefills. The second number is the number of
+// full cells.
 function isFull(clueIndex) {
-  if (!clues[clueIndex] || !clues[clueIndex].cells ||
-      clues[clueIndex].cells.length < 1) {
-    return 0;
+  let theClue = clues[clueIndex]
+  if (!theClue) {
+    return [0, 0];
+  }
+  let cells = theClue.cells
+  if (!cells || cells.length < 1) {
+    cells = theClue.cellsOfOrphan
+    if (!cells || cells.length < 1) {
+      return [0, 0];
+    }
   }
   let numPrefills = 0;
-  for (let x of clues[clueIndex].cells) {
+  for (let x of cells) {
     let gridCell = grid[x[0]][x[1]]
     if (gridCell.prefill) {
       numPrefills++;
       continue
     }
     if (gridCell.currentLetter == '0') {
-      return 0;
+      return [0, 0];
     }
   }
-  return (numPrefills == clues[clueIndex].cells.length) ? 2 : 1;
+  return (numPrefills == cells.length) ? [2, cells.length] : [1, cells.length];
 }
 
 function clearCurrent() {
@@ -3975,7 +4090,7 @@ function clearCurrent() {
       } else if (!clueIndices.includes(across) && clueIndices.includes(down)) {
         crosser = across
       }
-      if (crosser && isFull(crosser)) {
+      if (crosser && isFull(crosser)[0]) {
         fullCrossers.push([row, col])
       } else {
         others.push([row, col])
@@ -4052,12 +4167,8 @@ function clearAll() {
 
   for (let ci of allClueIndices) {
     updateClueState(ci, false, 'unsolved')
-    if (clearingPls && isOrphan(ci) && clues[ci].clueTR) {
-      let clueInputs = clues[ci].clueTR.getElementsByTagName('input')
-      if (clueInputs.length != 1) {
-        continue
-      }
-      clueInputs[0].value = ''
+    if (clearingPls && isOrphan(ci) && clues[ci].orphanPlaceholder) {
+      clues[ci].orphanPlaceholder.value = ''
     }
   }
   if (clearingPls && currClue) {
@@ -4114,16 +4225,21 @@ function checkCurrent() {
       neededAllCorrectNum = activeCells.length
     }
     activeCells = []
-  } else {
-    if (currentClueIndex) {
-      let ci = currentClueIndex
-      let theClue = clues[ci]
-      if (theClue && theClue.parentClueIndex) {
-        ci = theClue.parentClueIndex
-        theClue = clues[ci]
-      }
-      if (allCellsKnown(ci)) {
-        neededAllCorrectNum = theClue.enumLen
+  } else if (currentClueIndex) {
+    let ci = currentClueIndex
+    let theClue = clues[ci]
+    if (theClue && theClue.parentClueIndex) {
+      ci = theClue.parentClueIndex
+      theClue = clues[ci]
+    }
+    if (!isOrphan(ci) && allCellsKnown(ci)) {
+      neededAllCorrectNum = theClue.enumLen
+    } else if (activeCells.length > 0 && numCellsToOrphan > 0) {
+      let orphanClueForCells = cellsToOrphan[JSON.stringify(activeCells)];
+      if (orphanClueForCells &&
+          clues[orphanClueForCells].cellsOfOrphan.length ==
+            activeCells.length) {
+        neededAllCorrectNum = activeCells.length
       }
     }
   }
@@ -4176,17 +4292,36 @@ function checkAll() {
   }
 }
 
+function revealClueAnno(ci) {
+  let clueIndices = getAllLinkedClueIndices(ci);
+  for (let clueIndex of clueIndices) {
+    let theClue = clues[clueIndex]
+    if (theClue.annoSpan) {
+      theClue.annoSpan.style.display = ''
+    }
+    if (theClue.orphanPlaceholder) {
+      if (theClue.solution) {
+        theClue.orphanPlaceholder.value = theClue.solution
+        if (clueIndex == currentClueIndex) {
+          copyOrphanEntryToCurr(clueIndex)
+        }
+      }
+    }
+  }
+}
+
 function revealCurrent() {
-  // If active cells are present, we reveal only those (the current clue
-  // might be pointing to a random orphan).
+  // If active cells are present and usingGnav, we reveal only those (the
+  // current clue might be pointing to a random orphan).
   let clueIndexForAnnoReveal = null
   let addCellsFromOrphanClue = null
-  if (activeCells.length > 0) {
+  if (usingGnav && activeCells.length > 0) {
     if (currentClueIndex && !isOrphan(currentClueIndex)) {
       clueIndexForAnnoReveal = currentClueIndex
     }
     if (currentClueIndex && activeCells.length > 1 &&
-        !allCellsKnown(currentClueIndex) && numCellsToOrphan > 0) {
+        (isOrphan(currentClueIndex) || !allCellsKnown(currentClueIndex)) &&
+        numCellsToOrphan > 0) {
       let orphanClueForCells = cellsToOrphan[JSON.stringify(activeCells)];
       if (orphanClueForCells) {
         deactivateCurrentClue();
@@ -4195,26 +4330,17 @@ function revealCurrent() {
         addCellsFromOrphanClue = clues[orphanClueForCells]
       }
     }
-  } else {
-    if (currentClueIndex && isOrphan(currentClueIndex)) {
-      clueIndexForAnnoReveal = currentClueIndex
-      let parentClueIndex = clues[currentClueIndex].parentClueIndex
-      if (!parentClueIndex) {
-        parentClueIndex = currentClueIndex
-      }
-      if (isOrphanWithReveals(parentClueIndex)) {
-        addCellsFromOrphanClue = clues[parentClueIndex]
-      }
+  } else if (currentClueIndex) {
+    clueIndexForAnnoReveal = currentClueIndex
+    let parentClueIndex =
+      clues[currentClueIndex].parentClueIndex || currentClueIndex
+    if (isOrphanWithReveals(parentClueIndex)) {
+      deactivateCurrentCell();
+      addCellsFromOrphanClue = clues[parentClueIndex]
     }
   }
   if (clueIndexForAnnoReveal) {
-    let clueIndices = getAllLinkedClueIndices(clueIndexForAnnoReveal)
-    for (let clueIndex of clueIndices) {
-      let theClue = clues[clueIndex]
-      if (theClue.annoSpan) {
-        theClue.annoSpan.style.display = ''
-      }
-    }
+    revealClueAnno(clueIndexForAnnoReveal)
   }
   if (addCellsFromOrphanClue) {
     let activeCellsSet = {}
@@ -4302,6 +4428,7 @@ function revealAll() {
   }
   showNinas()
   for (let ci of allClueIndices) {
+    revealClueAnno(ci);
     updateClueState(ci, false, 'solved')
   }
   updateAndSaveState()
@@ -4427,7 +4554,7 @@ function createPuzzle() {
   parseClueLists()
 
   processClueChildren()
-  fixFullDisplayLabels()
+  finalClueTweaks()
   setGridWordEndsAndHyphens();
   setUpGnav()
 
