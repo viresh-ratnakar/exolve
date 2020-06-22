@@ -101,11 +101,17 @@ grid the the solution was explicitly included in the anno, it would have got
 duplicated. So, the code does check to see if the solution string
 (punctuation/markup notwithstanding) is present at the head of the anno, and
 avoids duplicating it if so. If the solver wants to present the solution in some
-other way, they can suppress this by adding this line to the puzzle specs:
+other way, they can suppress the automatic addition of the solution to the anno
+by adding this line to the puzzle specs:
     exolve-option: no-auto-solution-in-anno
 This option only suprresses the solution getting added to the anno appearing
 after the clue. The solution does still get added to the placeholder blank
 slot of an orphan clue, upon "Reveal this," even with this option.
+
+If the leading part of the anno needs to be something in square brackets, such
+as "... (6) [t]WITTER ...," then setters should include the solution before
+that (even if it can be inferred from the grid), to avoid misinterpreting the
+leading part as the solution, like "... (6) [WITTER] [t]WITTER ..."
 
 If the setter has provided the location of one or more ninas (through
 exolve-nina sections), then an additional button control, *Show ninas*, gets
