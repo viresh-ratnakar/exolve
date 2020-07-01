@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.78 June 30 2020
+
+- If an HTML element with the id "exolve" is present, insert the puzzle
+  within it.
+
 ### Version: Exolve v0.77 June 20 2020
 
 - In puzzles with solutions, we now automatically add to the anno (or create

@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.77 June 20 2020'
+const VERSION = 'Exolve v0.78 June 30 2020'
 
 // ------ Begin globals.
 
@@ -340,7 +340,12 @@ function init() {
   </div>
 </div> <!-- #outermost-stack -->
   `
-    document.body.insertAdjacentHTML('beforeend', basicHTML)
+    const exolveHolder = document.getElementById('exolve')
+    if (exolveHolder) {
+      exolveHolder.insertAdjacentHTML('beforeend', basicHTML)
+    } else {
+      document.body.insertAdjacentHTML('beforeend', basicHTML)
+    }
     outermost = document.getElementById('outermost-stack')
   }
 

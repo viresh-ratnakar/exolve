@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.77 June 20 2020
+### Version: Exolve v0.78 June 30 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
@@ -991,6 +991,12 @@ Tools link:
 
 It will be easier to keep your files synced up to the latest Exolve version
 with these recommendations for customizations.
+
+## Placing the puzzle in a specific HTML element
+By default, the puzzle content gets created as a new last element in the HTML
+Dom. But you can direct it to be placed at different spot by creating an empty
+element (typically a DIV) with id="exolve" anywhere in the HTML file. The
+puzzle content will then be added inside this element.
 
 ## Frequently Asked Questions
 
