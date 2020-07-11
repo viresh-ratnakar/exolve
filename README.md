@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.78 June 30 2020
+### Version: Exolve v0.79 July 10 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
