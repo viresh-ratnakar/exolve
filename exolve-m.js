@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.78 June 30 2020'
+const VERSION = 'Exolve v0.79 July 10 2020'
 
 // ------ Begin globals.
 
@@ -33,8 +33,6 @@ let puzzleId = 'exolve-grid'
 
 let gridWidth = 0
 let gridHeight = 0
-let boxWidth = 0
-let boxHeight = 0
 
 let gridFirstLine = -1
 let gridLastLine = -1
@@ -80,21 +78,23 @@ let cellsToOrphan = {}
 let numCellsToOrphan = 0
 
 const MAX_GRID_SIZE = 100
-const SQUARE_DIM = 31
-const SQUARE_DIM_BY2 = 16
 const GRIDLINE = 1
 const BAR_WIDTH = 3
 const BAR_WIDTH_BY2 = 2
 const SEP_WIDTH = 2
 const SEP_WIDTH_BY2 = 1.5
-const HYPHEN_WIDTH = 9
-const HYPHEN_WIDTH_BY2 = 5
-const CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
-
 const NUMBER_START_X = 2
-const NUMBER_START_Y = 10
-const LIGHT_START_X = 16.5
-const LIGHT_START_Y = 21.925
+
+let SQUARE_DIM = 31
+let SQUARE_DIM_BY2 = 16
+let NUMBER_START_Y = 10
+let LIGHT_START_X = 16.5
+let LIGHT_START_Y = 21.925
+let HYPHEN_WIDTH = 9
+let HYPHEN_WIDTH_BY2 = 5
+let CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
+let boxWidth = 0
+let boxHeight = 0
 
 let answersList = []
 let revelationList = []
@@ -179,6 +179,8 @@ let langMaxCharCodes = 1
 let outermost;
 let puzzleTextLines;
 let numPuzzleTextLines;
+let textAreaCols;
+let gridPanel;
 let svg;
 let gridInputWrapper;
 let gridInputRarrow;
@@ -215,10 +217,12 @@ let submitButton;
 // Set up globals, version number and user agent in bug link.
 function init() {
   outermost = document.getElementById('outermost-stack')
-  if (!outermost) {
-    // Do not remove things from basicHTML, basically ever, to ensure backward
-    // compatibility. Use code to add/remove/modify the DOM tree, if needed.
-    const basicHTML = `
+  if (outermost) {
+    outermost.remove();
+  }
+  // Do not remove things from basicHTML, basically ever, to ensure backward
+  // compatibility. Use code to add/remove/modify the DOM tree, if needed.
+  const basicHTML = `
 <div class="flex-col" id="outermost-stack">
   <h2 id="title">Title</h2>
   <div id="setter"></div>
@@ -295,7 +299,7 @@ function init() {
               </span>
               <textarea oninput="scratchPadInput()"
                 id="scratchpad" spellcheck="false"
-                rows="2" cols="60"></textarea>
+                rows="2"></textarea>
             </div>
           </div>
           <a id="show-control-keys" href=""
@@ -340,14 +344,13 @@ function init() {
   </div>
 </div> <!-- #outermost-stack -->
   `
-    const exolveHolder = document.getElementById('exolve')
-    if (exolveHolder) {
-      exolveHolder.insertAdjacentHTML('beforeend', basicHTML)
-    } else {
-      document.body.insertAdjacentHTML('beforeend', basicHTML)
-    }
-    outermost = document.getElementById('outermost-stack')
+  const exolveHolder = document.getElementById('exolve')
+  if (exolveHolder) {
+    exolveHolder.insertAdjacentHTML('beforeend', basicHTML)
+  } else {
+    document.body.insertAdjacentHTML('beforeend', basicHTML)
   }
+  outermost = document.getElementById('outermost-stack')
 
   puzzleTextLines = []
   let rawLines = puzzleText.trim().split('\n');
@@ -368,6 +371,7 @@ function init() {
   }
   numPuzzleTextLines = puzzleTextLines.length
 
+  gridPanel = document.getElementById('grid-panel');
   svg = document.getElementById('grid');
   gridInputWrapper = document.getElementById('grid-input-wrapper');
   gridInputWrapper.insertAdjacentHTML('beforeend',
@@ -410,6 +414,8 @@ function init() {
   document.getElementById('report-bug').href =
       'https://github.com/viresh-ratnakar/exolve/issues/new?body=' +
       encodeURIComponent(info);
+
+  setTextAreaCols()
 }
 
 // puzzleTextLines[] has been parsed till line # nextPuzzleTextLine. Fine the
@@ -546,12 +552,11 @@ function parseQuestion(s) {
     hideEnum = true
     inputLen = '30'
   }
-  const TEXTAREA_COLS = 68
-  let rows = Math.floor(inputLen / TEXTAREA_COLS)
-  if (rows * TEXTAREA_COLS < inputLen) {
+  let rows = Math.floor(inputLen / textAreaCols)
+  if (rows * textAreaCols < inputLen) {
     rows++
   }
-  let cols = (rows > 1) ? TEXTAREA_COLS : inputLen
+  let cols = (rows > 1) ? textAreaCols : inputLen
 
   let aType = 'input'
   if (rows > 1) {
@@ -725,10 +730,8 @@ function parseOverallDisplayMost() {
         '<div>' + sectionAndValue.value + '</div>')
     } else if (sectionAndValue.section == 'width') {
       gridWidth = parseInt(sectionAndValue.value)
-      boxWidth = (SQUARE_DIM * gridWidth) + gridWidth + 1
     } else if (sectionAndValue.section == 'height') {
       gridHeight = parseInt(sectionAndValue.value)
-      boxHeight = (SQUARE_DIM * gridHeight) + gridHeight + 1
     } else if (sectionAndValue.section == 'preamble' ||
                sectionAndValue.section == 'prelude') {
       preludeFirstLine = firstLine
@@ -2489,6 +2492,38 @@ function displayClues() {
   }
 }
 
+// Needs to be called early, for correct sizing.
+function setTextAreaCols() {
+  const viewportDim = Math.min(getViewportWidth(), getViewportHeight())
+  textAreaCols = Math.min(65, Math.max(30, Math.floor((viewportDim - 8) / 8)))
+}
+
+function computeGridSize() {
+  const viewportDim = Math.min(getViewportWidth(), getViewportHeight())
+  SQUARE_DIM = 31
+  if (gridWidth <= 30 &&  // For jumbo grids, give up.
+      (SQUARE_DIM + GRIDLINE) * gridWidth + GRIDLINE > viewportDim - 8) {
+    SQUARE_DIM = Math.max(20,
+      Math.floor((viewportDim - 8 - GRIDLINE) / gridWidth) - GRIDLINE)
+  }
+  SQUARE_DIM_BY2 = Math.floor((SQUARE_DIM + 1) / 2)
+  NUMBER_START_Y = Math.floor(SQUARE_DIM / 3)
+  LIGHT_START_X = 1.0 + SQUARE_DIM / 2.0
+  LIGHT_START_Y = 1.925 + Math.floor((2 * SQUARE_DIM) / 3)
+  HYPHEN_WIDTH = Math.max(7, Math.floor(SQUARE_DIM / 3) - 1)
+  HYPHEN_WIDTH_BY2 = Math.floor((HYPHEN_WIDTH + 1) / 2)
+  CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
+  boxWidth = (SQUARE_DIM * gridWidth) + ((gridWidth + 1) * GRIDLINE)
+  boxHeight = (SQUARE_DIM * gridHeight) + ((gridHeight + 1) * GRIDLINE)
+  let letterSize = Math.max(10, SQUARE_DIM_BY2)
+  let numberSize = Math.max(7, Math.floor(SQUARE_DIM / 3) - 1)
+  let arrowSize = Math.max(8, Math.floor(13 * SQUARE_DIM / 31))
+  let root = document.documentElement
+  root.style.setProperty('--sz-letter', letterSize + 'px')
+  root.style.setProperty('--sz-number', numberSize + 'px')
+  root.style.setProperty('--sz-arrow', arrowSize + 'px')
+}
+
 function displayGridBackground() {
   let svgWidth = boxWidth + (2 * offsetLeft)
   let svgHeight = boxHeight + (2 * offsetTop)
@@ -2740,6 +2775,9 @@ function makeCurrentClueVisible() {
   if (!windowH || windowH <= 0) {
     return
   }
+  const bPos = outermost.getBoundingClientRect();
+  const gpPos = gridPanel.getBoundingClientRect();
+  currClue.style.left = (gpPos.left - bPos.left) + 'px';
   if (inputPos.bottom >= windowH) {
     currClue.style.top = '0'
     return
@@ -2899,6 +2937,14 @@ function getViewportHeight() {
     window.innerHeight || 
     document.documentElement.clientHeight || 
     document.getElementsByTagName('body')[0].clientHeight;
+}
+
+function getViewportWidth() {
+  return window.innerWidth && document.documentElement.clientWidth ? 
+    Math.min(window.innerWidth, document.documentElement.clientWidth) : 
+    window.innerWidth || 
+    document.documentElement.clientWidth || 
+    document.getElementsByTagName('body')[0].clientWidth;
 }
 
 // Check if an element is visible, vertically.
@@ -3689,6 +3735,7 @@ function createListeners() {
   document.getElementById('title').addEventListener(
     'click', getDeactivator());
   window.addEventListener('scroll', makeCurrentClueVisible);
+  window.addEventListener('resize', makeCurrentClueVisible);
 }
 
 function displayGrid() {
@@ -4534,6 +4581,8 @@ function displayButtons() {
   if (submitURL) {
     submitButton.style.display = ''
   }
+  let scratchPad = document.getElementById('scratchpad')
+  scratchPad.cols = Math.max(30, Math.floor(textAreaCols * 3 / 4))
 }
 
 function toggleShowControls() {
@@ -4564,6 +4613,9 @@ function createPuzzle() {
   setUpGnav()
 
   applyColorScheme()
+
+  computeGridSize()
+
   displayClues()
   displayGridBackground()
   createListeners()

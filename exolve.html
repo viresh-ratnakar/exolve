@@ -58,7 +58,7 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `;
 
-const VERSION = 'Exolve v0.78 June 30 2020'
+const VERSION = 'Exolve v0.79 July 10 2020'
 
 // ------ Begin globals.
 
@@ -66,8 +66,6 @@ let puzzleId = 'exolve-grid'
 
 let gridWidth = 0
 let gridHeight = 0
-let boxWidth = 0
-let boxHeight = 0
 
 let gridFirstLine = -1
 let gridLastLine = -1
@@ -113,21 +111,23 @@ let cellsToOrphan = {}
 let numCellsToOrphan = 0
 
 const MAX_GRID_SIZE = 100
-const SQUARE_DIM = 31
-const SQUARE_DIM_BY2 = 16
 const GRIDLINE = 1
 const BAR_WIDTH = 3
 const BAR_WIDTH_BY2 = 2
 const SEP_WIDTH = 2
 const SEP_WIDTH_BY2 = 1.5
-const HYPHEN_WIDTH = 9
-const HYPHEN_WIDTH_BY2 = 5
-const CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
-
 const NUMBER_START_X = 2
-const NUMBER_START_Y = 10
-const LIGHT_START_X = 16.5
-const LIGHT_START_Y = 21.925
+
+let SQUARE_DIM = 31
+let SQUARE_DIM_BY2 = 16
+let NUMBER_START_Y = 10
+let LIGHT_START_X = 16.5
+let LIGHT_START_Y = 21.925
+let HYPHEN_WIDTH = 9
+let HYPHEN_WIDTH_BY2 = 5
+let CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
+let boxWidth = 0
+let boxHeight = 0
 
 let answersList = []
 let revelationList = []
@@ -212,6 +212,8 @@ let langMaxCharCodes = 1
 let outermost;
 let puzzleTextLines;
 let numPuzzleTextLines;
+let textAreaCols;
+let gridPanel;
 let svg;
 let gridInputWrapper;
 let gridInputRarrow;
@@ -248,10 +250,12 @@ let submitButton;
 // Set up globals, version number and user agent in bug link.
 function init() {
   outermost = document.getElementById('outermost-stack')
-  if (!outermost) {
-    // Do not remove things from basicHTML, basically ever, to ensure backward
-    // compatibility. Use code to add/remove/modify the DOM tree, if needed.
-    const basicHTML = `
+  if (outermost) {
+    outermost.remove();
+  }
+  // Do not remove things from basicHTML, basically ever, to ensure backward
+  // compatibility. Use code to add/remove/modify the DOM tree, if needed.
+  const basicHTML = `
 <div class="flex-col" id="outermost-stack">
   <h2 id="title">Title</h2>
   <div id="setter"></div>
@@ -328,7 +332,7 @@ function init() {
               </span>
               <textarea oninput="scratchPadInput()"
                 id="scratchpad" spellcheck="false"
-                rows="2" cols="60"></textarea>
+                rows="2"></textarea>
             </div>
           </div>
           <a id="show-control-keys" href=""
@@ -373,14 +377,13 @@ function init() {
   </div>
 </div> <!-- #outermost-stack -->
   `
-    const exolveHolder = document.getElementById('exolve')
-    if (exolveHolder) {
-      exolveHolder.insertAdjacentHTML('beforeend', basicHTML)
-    } else {
-      document.body.insertAdjacentHTML('beforeend', basicHTML)
-    }
-    outermost = document.getElementById('outermost-stack')
+  const exolveHolder = document.getElementById('exolve')
+  if (exolveHolder) {
+    exolveHolder.insertAdjacentHTML('beforeend', basicHTML)
+  } else {
+    document.body.insertAdjacentHTML('beforeend', basicHTML)
   }
+  outermost = document.getElementById('outermost-stack')
 
   puzzleTextLines = []
   let rawLines = puzzleText.trim().split('\n');
@@ -401,6 +404,7 @@ function init() {
   }
   numPuzzleTextLines = puzzleTextLines.length
 
+  gridPanel = document.getElementById('grid-panel');
   svg = document.getElementById('grid');
   gridInputWrapper = document.getElementById('grid-input-wrapper');
   gridInputWrapper.insertAdjacentHTML('beforeend',
@@ -443,6 +447,8 @@ function init() {
   document.getElementById('report-bug').href =
       'https://github.com/viresh-ratnakar/exolve/issues/new?body=' +
       encodeURIComponent(info);
+
+  setTextAreaCols()
 }
 
 // puzzleTextLines[] has been parsed till line # nextPuzzleTextLine. Fine the
@@ -579,12 +585,11 @@ function parseQuestion(s) {
     hideEnum = true
     inputLen = '30'
   }
-  const TEXTAREA_COLS = 68
-  let rows = Math.floor(inputLen / TEXTAREA_COLS)
-  if (rows * TEXTAREA_COLS < inputLen) {
+  let rows = Math.floor(inputLen / textAreaCols)
+  if (rows * textAreaCols < inputLen) {
     rows++
   }
-  let cols = (rows > 1) ? TEXTAREA_COLS : inputLen
+  let cols = (rows > 1) ? textAreaCols : inputLen
 
   let aType = 'input'
   if (rows > 1) {
@@ -758,10 +763,8 @@ function parseOverallDisplayMost() {
         '<div>' + sectionAndValue.value + '</div>')
     } else if (sectionAndValue.section == 'width') {
       gridWidth = parseInt(sectionAndValue.value)
-      boxWidth = (SQUARE_DIM * gridWidth) + gridWidth + 1
     } else if (sectionAndValue.section == 'height') {
       gridHeight = parseInt(sectionAndValue.value)
-      boxHeight = (SQUARE_DIM * gridHeight) + gridHeight + 1
     } else if (sectionAndValue.section == 'preamble' ||
                sectionAndValue.section == 'prelude') {
       preludeFirstLine = firstLine
@@ -2522,6 +2525,38 @@ function displayClues() {
   }
 }
 
+// Needs to be called early, for correct sizing.
+function setTextAreaCols() {
+  const viewportDim = Math.min(getViewportWidth(), getViewportHeight())
+  textAreaCols = Math.min(65, Math.max(30, Math.floor((viewportDim - 8) / 8)))
+}
+
+function computeGridSize() {
+  const viewportDim = Math.min(getViewportWidth(), getViewportHeight())
+  SQUARE_DIM = 31
+  if (gridWidth <= 30 &&  // For jumbo grids, give up.
+      (SQUARE_DIM + GRIDLINE) * gridWidth + GRIDLINE > viewportDim - 8) {
+    SQUARE_DIM = Math.max(20,
+      Math.floor((viewportDim - 8 - GRIDLINE) / gridWidth) - GRIDLINE)
+  }
+  SQUARE_DIM_BY2 = Math.floor((SQUARE_DIM + 1) / 2)
+  NUMBER_START_Y = Math.floor(SQUARE_DIM / 3)
+  LIGHT_START_X = 1.0 + SQUARE_DIM / 2.0
+  LIGHT_START_Y = 1.925 + Math.floor((2 * SQUARE_DIM) / 3)
+  HYPHEN_WIDTH = Math.max(7, Math.floor(SQUARE_DIM / 3) - 1)
+  HYPHEN_WIDTH_BY2 = Math.floor((HYPHEN_WIDTH + 1) / 2)
+  CIRCLE_RADIUS = 0.0 + SQUARE_DIM / 2.0
+  boxWidth = (SQUARE_DIM * gridWidth) + ((gridWidth + 1) * GRIDLINE)
+  boxHeight = (SQUARE_DIM * gridHeight) + ((gridHeight + 1) * GRIDLINE)
+  let letterSize = Math.max(10, SQUARE_DIM_BY2)
+  let numberSize = Math.max(7, Math.floor(SQUARE_DIM / 3) - 1)
+  let arrowSize = Math.max(8, Math.floor(13 * SQUARE_DIM / 31))
+  let root = document.documentElement
+  root.style.setProperty('--sz-letter', letterSize + 'px')
+  root.style.setProperty('--sz-number', numberSize + 'px')
+  root.style.setProperty('--sz-arrow', arrowSize + 'px')
+}
+
 function displayGridBackground() {
   let svgWidth = boxWidth + (2 * offsetLeft)
   let svgHeight = boxHeight + (2 * offsetTop)
@@ -2773,6 +2808,9 @@ function makeCurrentClueVisible() {
   if (!windowH || windowH <= 0) {
     return
   }
+  const bPos = outermost.getBoundingClientRect();
+  const gpPos = gridPanel.getBoundingClientRect();
+  currClue.style.left = (gpPos.left - bPos.left) + 'px';
   if (inputPos.bottom >= windowH) {
     currClue.style.top = '0'
     return
@@ -2932,6 +2970,14 @@ function getViewportHeight() {
     window.innerHeight || 
     document.documentElement.clientHeight || 
     document.getElementsByTagName('body')[0].clientHeight;
+}
+
+function getViewportWidth() {
+  return window.innerWidth && document.documentElement.clientWidth ? 
+    Math.min(window.innerWidth, document.documentElement.clientWidth) : 
+    window.innerWidth || 
+    document.documentElement.clientWidth || 
+    document.getElementsByTagName('body')[0].clientWidth;
 }
 
 // Check if an element is visible, vertically.
@@ -3722,6 +3768,7 @@ function createListeners() {
   document.getElementById('title').addEventListener(
     'click', getDeactivator());
   window.addEventListener('scroll', makeCurrentClueVisible);
+  window.addEventListener('resize', makeCurrentClueVisible);
 }
 
 function displayGrid() {
@@ -4567,6 +4614,8 @@ function displayButtons() {
   if (submitURL) {
     submitButton.style.display = ''
   }
+  let scratchPad = document.getElementById('scratchpad')
+  scratchPad.cols = Math.max(30, Math.floor(textAreaCols * 3 / 4))
 }
 
 function toggleShowControls() {
@@ -4597,6 +4646,9 @@ function createPuzzle() {
   setUpGnav()
 
   applyColorScheme()
+
+  computeGridSize()
+
   displayClues()
   displayGridBackground()
   createListeners()
@@ -4619,6 +4671,50 @@ function createPuzzle() {
 </script>
 
 <style>
+@media (max-width: 500px) {
+  body {
+    margin: 4px;
+  }
+}
+
+@media (max-width: 800px) {
+  .wide-box {
+    width: 100%;
+    max-width: 480px;
+  }
+  #current-clue {
+    width: 100%;
+    max-width: 480px;
+  }
+  .clues-box {
+    width: 100%;
+    max-width: 480px;
+    margin: 0;
+  }
+  .button {
+    font-size: 11px;
+    padding: 5px;
+    border-radius: 8px;
+  }
+}
+@media (min-width: 801px) {
+  .wide-box {
+    width: 480px;
+  }
+  #current-clue {
+    width: 480px;
+  }
+  .clues-box {
+    width: 480px;
+    margin: 0 0 0 8px;
+  }
+  .button {
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+}
+
 .background {
   fill: var(--col-background);
 }
@@ -4627,12 +4723,12 @@ function createPuzzle() {
   cursor: pointer;
 }
 .cell-num {
-  font-size: 9px;
+  font-size: var(--sz-number);
   font-family: sans-serif;
   fill: var(--col-light-label);
 }
 .cell-text {
-  font-size: 16px;
+  font-size: var(--sz-letter);
   font-family: sans-serif;
   cursor: text;
   fill: var(--col-light-text);
@@ -4676,13 +4772,12 @@ td:first-child:not(.filler) {
   display: flex;
   flex-flow: row wrap;
   align-items: flex-start;
+  justify-content: center;
 }
 .flex-col {
   display: flex;
   flex-flow: column wrap;
-}
-.wide-box {
-  width: 481px;
+  align-items: center;
 }
 #title {
   text-align: center;
@@ -4694,7 +4789,7 @@ td:first-child:not(.filler) {
   margin: 0 0 8px 0;
 }
 #prelude {
-  margin: 8px 8px 0 8px;
+  margin: 8px 0;
   padding: 0;
 }
 #small-print {
@@ -4709,18 +4804,18 @@ td:first-child:not(.filler) {
   color: red;
 }
 #current-clue-parent {
+  width: 100%;
   height: 40px;
-  width: 481px;
   position:relative;
-  margin: 8px 8px 8px 0;
+  margin: 8px 0;
 }
 #current-clue {
   position: absolute;
   z-index: 2;
   word-wrap: break-word;
   font-weight: bold;
-  margin: 0 0 0 8px;
-  padding: 2px 4px 2px 0;
+  margin: 0;
+  padding: 2px 0;
 }
 #curr-orphan,
 #current-clue-label {
@@ -4728,9 +4823,6 @@ td:first-child:not(.filler) {
   padding: 0;
   margin: 0;
   line-height: 0.8;
-}
-#grid-panel {
-  margin: 0 8px 0 8px;
 }
 .nobr {
   white-space: nowrap;
@@ -4740,27 +4832,26 @@ td:first-child:not(.filler) {
 }
 #grid-parent {
   position: relative;
-  margin: 0 20px 0 0;
   display: inline-block;
 }
 #grid-input-wrapper {
   position: absolute;
   border: none;
-  border-width:0;
+  border-width: 0;
 }
 #grid-input-rarr {
   position: relative;
-  right: -12px;
-  top: -24px;
+  right: -40%;
+  top: -85%;
   color: var(--col-arrow);
-  font-size: small;
+  font-size: var(--sz-arrow);
 }
 #grid-input-darr {
   position: relative;
   right: 0;
-  top: -12px;
+  top: -40%;
   color: var(--col-arrow);
-  font-size: small;
+  font-size: var(--sz-arrow);
 }
 #grid-input {
   text-align: center;
@@ -4781,11 +4872,9 @@ td:first-child:not(.filler) {
   margin: 6px 0 6px 0;
 }
 #clues {
-  max-width: 940px;
+  max-width: 980px;
 }
 .clues-box {
-  width: 460px;
-  margin: 0 8px 0 0;
   overflow-y: auto;
 }
 #explanations {
@@ -4800,13 +4889,10 @@ hr {
   border: none;
   outline: none;
   color: var(--col-button-text);
-  padding: 8px 8px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  border-radius: 12px;
   font-family: monospace;
-  font-size: 14px;
 }
 .button:hover {
   background-color: var(--col-button-hover);
@@ -4835,13 +4921,13 @@ hr {
 #nina-group {
   position: absolute;
   border: none;
-  border-width:0;
+  border-width: 0;
   outline: none;
 }
 .nina {
   position: absolute;
   border: none;
-  border-width:0;
+  border-width: 0;
   outline: none;
   cursor: pointer;
 }
@@ -4898,6 +4984,9 @@ hr {
   font-family: monospace;
   font-size: 12px;
   cursor: pointer;
+}
+#postscript {
+  width: 100%;
 }
 @media print {
   @page {

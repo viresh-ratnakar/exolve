@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.79 July 10 2020
+
+- Changes to make puzzles more responsive on mobile devices.
+  - Set the grid size and clues panel sizes depending upon the viewport size.
+  - Most of the time, the user will not have to "pinch" to size, the UI
+    should be correctly sized already.
+- If the 'outermost-stack' div already exists (old html file, likely),
+  replace it with current HTML.
+
 ### Version: Exolve v0.78 June 30 2020
 
 - If an HTML element with the id "exolve" is present, insert the puzzle
