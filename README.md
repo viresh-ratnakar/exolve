@@ -1090,7 +1090,7 @@ into your blog or website:
     "https://viresh-ratnakar.github.io/exolve-widget.html");
   </script>
 ```
-Then, as with all ohter options, just edit the puzzle specs between the
+Then, as with all other options, just edit the puzzle specs between the
 exolve-begin and exolve-end lines.
 
 This creates an "Exolve widget," which is an iframe with width="100%" and
