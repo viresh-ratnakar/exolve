@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.80 July 20 2020
+
+- Supporting code and documentation for creating Exolve widgets.
+- Set some cookie attributes to allow websites to use Exolve code served by a 
+  different site.
+- Some crossrefs in README.md.
+
 ### Version: Exolve v0.79 July 10 2020
 
 - Changes to make puzzles more responsive on mobile devices.

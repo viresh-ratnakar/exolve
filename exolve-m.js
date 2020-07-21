@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.79 July 10 2020'
+const VERSION = 'Exolve v0.80 July 20 2020'
 
 // ------ Begin globals.
 
@@ -215,7 +215,7 @@ let submitButton;
 
 // Create the basic HTML structure.
 // Set up globals, version number and user agent in bug link.
-function init() {
+function init(inWidget=false) {
   outermost = document.getElementById('outermost-stack')
   if (outermost) {
     outermost.remove();
@@ -268,8 +268,7 @@ function init() {
         </div> <!-- #status -->
         <div id="saving" class="wide-box">
           Your entries are saved automatically in a cookie, for the most
-          recent puzzle that you open from this site. Bookmark/save the
-          <a id="saving-url" href="">URL</a> for more reliable recovery.
+          recent puzzles that you open from this site.
         </div> <!-- #saving -->
         <div id="small-print" class="wide-box">
           <div id="control-keys-list" style="display:none">
@@ -399,7 +398,12 @@ function init() {
 
   statusNumFilled = document.getElementById('status-num-filled')
   statusNumTotal = document.getElementById('status-num-total')
-  savingURL = document.getElementById('saving-url')
+  if (!inWidget) {
+    document.getElementById('saving').insertAdjacentHTML('beforeend',
+        ' Bookmark/save the <a id="saving-url" href="">URL</a>' +
+        ' for more reliable recovery.');
+    savingURL = document.getElementById('saving-url')
+  }
 
   clearButton = document.getElementById('clear')
   clearAllButton = document.getElementById('clear-all')
@@ -2604,7 +2608,8 @@ function updateAndSaveState() {
   let d = new Date();
   d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
   let expires = 'expires=' + d.toUTCString();
-  document.cookie = puzzleId + '=' + state + ';' + expires + ';path=/';
+  document.cookie = puzzleId + '=' + state +
+                    '; samesite=none; secure; ' + expires + ';path=/';
 
   // Also save the state in location.hash.
   location.hash = '#' + state
@@ -4594,8 +4599,8 @@ function toggleShowControls() {
   }
 }
 
-function createPuzzle() {
-  init()
+function createPuzzle(inWidget=false) {
+  init(inWidget)
 
   parseOverallDisplayMost()
   parseAndDisplayPrelude()

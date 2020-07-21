@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
-  This is a copy of exolve-m.html that can be used without hosting the
-  exolve-m.js and exolve-m.css files, as this links to their latest
-  copies on the https://viresh-ratnakar.github.io/ website.
+  This file can be hosted for use by any site as an iframe src, where
+  the puzzle specs is provided to Exolve via a message. To use this widget,
+  follow the instructions at:
+
+    https://github.com/viresh-ratnakar/exolve#exolve-widget
+
+  Version: Exolve v0.80 July 20 2020
 -->
 
 <!--
@@ -37,41 +37,36 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 -->
 
-<link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css?v0.80"/>
-<script src="https://viresh-ratnakar.github.io/exolve-m.js?v0.80"></script>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Exolve (replace with puzzle title)</title>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.80"/>
+<script src="exolve-m.js?v0.80"></script>
 
 <script>
-
-const puzzleText = `
-======REPLACE WITH YOUR PUZZLE BELOW======
-exolve-begin
-  exolve-id: some-unique-identifier
-  exolve-title: Quick 3x3 (replace with puzzle title)
-  exolve-setter: Gussalufz (replace with setter's pseudonym)
-  exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
-  exolve-width: 3
-  exolve-height: 3
-  exolve-grid:
-    000
-    0.0
-    000
-  exolve-across:
-    1 Running with placement, essentially, for single (3)
-    3 Oddly fluent and entertaining (3)
-  exolve-down:
-    1 Retreating thief forgot to hide bananas (3)
-    2 One suffering for a long time (3)
-exolve-end
-======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
-
+  let puzzleText = '';
+  function receivePuzzle(event) {
+    if (event.data.indexOf('exolve-begin') < 0) {
+      return;
+    }
+    puzzleText = event.data;
+    createPuzzle(true);
+    window.removeEventListener("message", receivePuzzle);
+  }
+  function prepareToReceivePuzzle() {
+    window.addEventListener("message", receivePuzzle, false);
+    let params = new URLSearchParams(document.location.search.substring(1));
+    let id = params.get("id");
+    window.parent.postMessage("EXOLVE-READY-" + id, "*");
+  }
 </script>
+
+<title>Exolve Crossword Widget</title>
 
 </head>
 
-<body onload="createPuzzle()">
+<body onload="prepareToReceivePuzzle()">
 </body>
 
 </html>
