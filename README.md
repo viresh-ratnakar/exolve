@@ -1078,7 +1078,7 @@ into your blog or website:
         0.0
         000
       exolve-across:
-        1 Running to the opposite end for single (3)
+        1 Running with placement, essentially, for single (3)
         3 Oddly fluent and entertaining (3)
       exolve-down:
         1 Retreating thief forgot to hide bananas (3)
