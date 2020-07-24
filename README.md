@@ -1128,7 +1128,49 @@ widget code:
 The JavaScript actually changes the id of this DIV to be a unique,
 puzzle-specific ID, and inserts an iframe with a puzzle-specific id within it.
 
-Of course, you do not need to use the widget code hosted on my website: you
+If you want a widget-like solution and only plan have one puzzle on a page, you
+can also use the following alternative that uses exolve-m-simple.html. Note
+that most blogging providers such as Blogger and WordPress create HTML pages
+containing multiple posts, so this solution will *not* work if you have more
+than one blog post containing a puzzle. But this solution does not suffer from
+two of the drawbacks of the exolve-widget.html approach: this *does* also save
+the state in the URL, and this *does* make the current clue scroll, staying
+visible.
+```
+  <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css?v0.80"/>
+  <script src="https://viresh-ratnakar.github.io/exolve-m.js?v0.80"></script>
+
+  <div id="exolve"></div>
+  <script>
+    const puzzleText = `
+    ======REPLACE WITH YOUR PUZZLE BELOW======
+
+    exolve-begin
+      exolve-id: some-unique-id-for-this-puzzle
+      exolve-title: Quick 3x3 (replace with puzzle title)
+      exolve-setter: Gussalufz (replace with setter's pseudonym)
+      exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
+      exolve-width: 3
+      exolve-height: 3
+      exolve-grid:
+        000
+        0.0
+        000
+      exolve-across:
+        1 Running with placement, essentially, for single (3)
+        3 Oddly fluent and entertaining (3)
+      exolve-down:
+        1 Retreating thief forgot to hide bananas (3)
+        2 One suffering for a long time (3)
+    exolve-end
+
+    ======REPLACE WITH YOUR PUZZLE ABOVE======
+    `;
+    createPuzzle();
+  </script>
+```
+
+You do not have to use the widget code copy that I host on my website: you
 can host your own versions of these files: exolve-m.js, exolve-m.css,
 exolve-widget-creator.js, and exolve-widget.html.
 
