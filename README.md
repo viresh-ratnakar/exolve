@@ -588,7 +588,7 @@ the placeholder area, whenever they have some squares highlighted for entry in
 the grid.
 
 The same placeholder text and the copy-placeholder button ([⇲]) are also shown
-in the highlighted scrollable 'orphan' clues widget, whenever the currently
+in the highlighted scrollable 'orphan' clues strip, whenever the currently
 highlighed squares do not have a known clue association.
 
 The copy-placeholder button feature does not get activated if there are any
@@ -1137,8 +1137,8 @@ two of the drawbacks of the exolve-widget.html approach: this *does* also save
 the state in the URL, and this *does* make the current clue scroll, staying
 visible.
 ```
-  <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css?v0.80"/>
-  <script src="https://viresh-ratnakar.github.io/exolve-m.js?v0.80"></script>
+  <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css"/>
+  <script src="https://viresh-ratnakar.github.io/exolve-m.js"></script>
 
   <div id="exolve"></div>
   <script>
