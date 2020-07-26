@@ -588,7 +588,7 @@ the placeholder area, whenever they have some squares highlighted for entry in
 the grid.
 
 The same placeholder text and the copy-placeholder button ([⇲]) are also shown
-in the highlighted scrollable 'orphan' clues strip, whenever the currently
+in the highlighted scrollable 'orphan' clues widget, whenever the currently
 highlighed squares do not have a known clue association.
 
 The copy-placeholder button feature does not get activated if there are any
@@ -1048,95 +1048,18 @@ otherwise, you also have the widget option, detailed in the next subsection.
 
 ### Exolve widget
 
-The simplest serving option might be to embed the "Exolve widget" in your
-blog or website. This uses some simple code (exolve-widget-creator.js and
-exolve-widget.html, also included in this repository) hosted on my website,
-apart from using exolve-m.js and exolve-m.css (also from the hosted copies
-on my website).
+The simplest serving option might be to embed an "Exolve widget" in your
+blog or website. If you only need to place *one* puzzle on any single page/post
+(which would typically be the case), you can use the following HTML snippet
+anywhere within the HTML of your website/blog-post (replace the puzzle specs
+between exolve-begin and exolve-end with your own puzzle).
 
-To create an Exolve widget, you copy and paste the following HTML snippet
-into your blog or website:
-```
-  <script
-    src="https://viresh-ratnakar.github.io/exolve-widget-creator.js">
-  </script>
-  <div id="exolve-widget-placeholder"></div>
-  <script>
-    exolveWidget = new ExolveWidgetCreator(
-    `
-    ======REPLACE WITH YOUR PUZZLE BELOW======
-
-    exolve-begin
-      exolve-id: some-unique-id-for-this-puzzle
-      exolve-title: Quick 3x3 (replace with puzzle title)
-      exolve-setter: Gussalufz (replace with setter's pseudonym)
-      exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
-      exolve-width: 3
-      exolve-height: 3
-      exolve-grid:
-        000
-        0.0
-        000
-      exolve-across:
-        1 Running with placement, essentially, for single (3)
-        3 Oddly fluent and entertaining (3)
-      exolve-down:
-        1 Retreating thief forgot to hide bananas (3)
-        2 One suffering for a long time (3)
-    exolve-end
-
-    ======REPLACE WITH YOUR PUZZLE ABOVE======
-    `,
-    "https://viresh-ratnakar.github.io/exolve-widget.html");
-  </script>
-```
-Then, as with all other options, just edit the puzzle specs between the
-exolve-begin and exolve-end lines.
-
-This creates an "Exolve widget," which is an iframe with width="100%" and
-height="1500". You can change the height by passing it as a parameter to the
-ExolveWidgetCreator() constructor, if needed, like this, where height is set
-to 400:
 ```
   ...
-    exolveWidget = new ExolveWidgetCreator(
-    `
-    ======REPLACE WITH YOUR PUZZLE BELOW======
+  Any introductory part that precedes the puzzle.
+  ...
+  <!--more-->
 
-    exolve-begin
-      ...
-    exolve-end
-
-    ======REPLACE WITH YOUR PUZZLE ABOVE======
-    `,
-    "https://viresh-ratnakar.github.io/exolve-widget.html", 400);
-  </script>
-```
-The widget option should work across devices and browsers, just like the
-non-widget option (bug reports are welcome!). One shortcoming is that
-the state from a widget is only saved in a cookie, not in the URL. Another
-shortcoming of the widget is that the current clue (shown above the grid)
-does not move up and down while scrolling, to stay visible near the currently
-active grid square, as it does in the non-widget experience. On the other
-hand, there is an advantage too: with the widget approach, you can embed
-multiple puzzles in the same web page: just paste multiple copies of the widget
-code, changing the puzzle specs in each. Note the DIV that's included in the
-widget code:
-```
-<div id="exolve-widget-placeholder"></div>
-```
-The JavaScript actually changes the id of this DIV to be a unique,
-puzzle-specific ID, and inserts an iframe with a puzzle-specific id within it.
-
-If you want a widget-like solution and only plan have one puzzle on a page, you
-can also use the following alternative that uses exolve-m-simple.html. Note
-that most blogging providers such as Blogger and WordPress create HTML pages
-containing multiple posts, so this solution will *not* work if you have more
-than one blog post containing a puzzle. But this solution does not suffer from
-two of the drawbacks of the exolve-widget.html approach: this *does* also save
-the state in the URL, and this *does* make the current clue scroll, staying
-visible.
-```
   <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css"/>
   <script src="https://viresh-ratnakar.github.io/exolve-m.js"></script>
 
@@ -1170,8 +1093,70 @@ visible.
   </script>
 ```
 
-You do not have to use the widget code copy that I host on my website: you
-can host your own versions of these files: exolve-m.js, exolve-m.css,
+Note that most blogging providers such as Blogger and WordPress create HTML
+home pages containing snippets from multiple posts, which may conflate multiple
+puzzles on such pages. But that can be avoided by making sure that the post
+snippet ends before the puzzle part starts (for Blogger, that can be done
+by adding &lt;!--more--&gt; before the puzzle, as shown in the above example).
+
+If you do want to include multiple puzzles within a single page (or if your
+website's HTML ids/classes conflict with those used in Exolve—mea culpa for not
+using distinctive ids: perhaps I'll fix that at some point), you can create
+Exolve iframe widgets like this (as always, just edit the puzzle specs between
+the exolve-begin and exolve-end lines):
+
+```
+  ...
+  Any introductory part that precedes the puzzle.
+  ...
+
+  <script
+    src="https://viresh-ratnakar.github.io/exolve-widget-creator.js">
+  </script>
+  <div id="exolve-widget-placeholder"></div>
+  <script>
+    exolveWidget = new ExolveWidgetCreator(
+    `
+    ======REPLACE WITH YOUR PUZZLE BELOW======
+
+    exolve-begin
+      exolve-id: some-unique-id-for-this-puzzle
+      exolve-title: Quick 3x3 (replace with puzzle title)
+      exolve-setter: Gussalufz (replace with setter's pseudonym)
+      exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
+      exolve-width: 3
+      exolve-height: 3
+      exolve-grid:
+        000
+        0.0
+        000
+      exolve-across:
+        1 Running with placement, essentially, for single (3)
+        3 Oddly fluent and entertaining (3)
+      exolve-down:
+        1 Retreating thief forgot to hide bananas (3)
+        2 One suffering for a long time (3)
+    exolve-end
+
+    ======REPLACE WITH YOUR PUZZLE ABOVE======
+    `,
+    "https://viresh-ratnakar.github.io/exolve-widget.html", 1000);
+  </script>
+```
+
+This solution does have a few shortcomings: (1) The state from an ifram widget
+is only saved in a cookie, not in the URL. (2) The current clue strip (shown
+above the grid) does not move up and down to remain visible near the active
+grid cell while scrolling. (3) You have to guess a height for the iframe (1000
+above, but that parameter can be omitted for a default of 1500).
+
+The widget options should work across devices and browsers (bug reports are
+welcome!).
+
+The additional files used in this iframe widget (exolve-widget-creator.js and
+exolve-widget.html) are also included in the repository. You do not have to use
+these files from the copies that I host on my website: you can host your own
+versions of these files on your site: exolve-m.js, exolve-m.css,
 exolve-widget-creator.js, and exolve-widget.html.
 
 ## Frequently Asked Questions
