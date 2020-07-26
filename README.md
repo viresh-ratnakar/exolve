@@ -1144,7 +1144,7 @@ the exolve-begin and exolve-end lines):
   </script>
 ```
 
-This solution does have a few shortcomings: (1) The state from an ifram widget
+This solution does have a few shortcomings: (1) The state from an iframe widget
 is only saved in a cookie, not in the URL. (2) The current clue strip (shown
 above the grid) does not move up and down to remain visible near the active
 grid cell while scrolling. (3) You have to guess a height for the iframe (1000
