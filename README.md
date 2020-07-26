@@ -1113,7 +1113,7 @@ the exolve-begin and exolve-end lines):
   <script
     src="https://viresh-ratnakar.github.io/exolve-widget-creator.js">
   </script>
-  <div id="exolve-widget-placeholder"></div>
+  <div id="exolve"></div>
   <script>
     exolveWidget = new ExolveWidgetCreator(
     `
