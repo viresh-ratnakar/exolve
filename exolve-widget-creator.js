@@ -3,26 +3,7 @@ MIT License
 
 Copyright (c) 2019 Viresh Ratnakar
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-The latest code and documentation for exolve can be found at:
-https://github.com/viresh-ratnakar/exolve
+See the full Exolve license notice in exolve-m.js.
 */
 
 if (typeof exolveWidgets === 'undefined') {
@@ -30,14 +11,14 @@ if (typeof exolveWidgets === 'undefined') {
 }
 
 /**
- * Expects an HTMLElement with id exolve-widget-placeholder to be present.
- *     (changes its id to something unique).
+ * Expects an HTMLElement with id exolve or exolve-widget-placeholder
+ * to be present. Changes that element's id to something unique.
+ *
  * puzzleText: exolve spec.
  * url: url of exolve-widget.html
  * height: optional height (in px) of iframe.
  */
 function ExolveWidgetCreator(puzzleText, url, height=1500) {
-  this.VERSION = 'Exolve v0.80 July 20 2020';
   this.id = "xlv" + Math.random().toString(36).substring(2, 15);
   this.puzzleText = puzzleText;
   this.sendPuzzleToExolveWidget = () => {
@@ -53,10 +34,15 @@ function ExolveWidgetCreator(puzzleText, url, height=1500) {
   }
   exolveWidgets[this.id] = this;
   window.addEventListener("message", this.receiveExolveReady, false);
-  let placeholder = document.getElementById("exolve-widget-placeholder");
+  let placeholder = document.getElementById("exolve");
   if (!placeholder) {
-    console.log('Did not find expected DIV with id: exolve-widget-placeholder');
-    return;
+    // Try legacy name.
+    placeholder = document.getElementById("exolve-widget-placeholder");
+    if (!placeholder) {
+      console.log('Did not find expected DIV with id: ' +
+                  'exolve/exolve-widget-placeholder');
+      return;
+    }
   }
   placeholder.id = "exolve-widget-" + this.id;
   placeholder.insertAdjacentHTML('beforeend', `
