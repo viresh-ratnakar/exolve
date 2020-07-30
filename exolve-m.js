@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.80 July 20 2020'
+const VERSION = 'Exolve v0.81 July 30 2020'
 
 // ------ Begin globals.
 
@@ -2611,9 +2611,9 @@ function updateAndSaveState() {
   document.cookie = puzzleId + '=' + state +
                     '; samesite=none; secure; ' + expires + ';path=/';
 
-  // Also save the state in location.hash.
-  location.hash = '#' + state
   if (savingURL) {
+    // Also save the state in location.hash.
+    location.hash = '#' + state
     savingURL.href = location.href
   }
 }
@@ -2782,24 +2782,36 @@ function makeCurrentClueVisible() {
   }
   const bPos = outermost.getBoundingClientRect();
   const gpPos = gridPanel.getBoundingClientRect();
+  const cluePos = currClue.getBoundingClientRect();
+  const clueParentPos = currClueParent.getBoundingClientRect();
+
   currClue.style.left = (gpPos.left - bPos.left) + 'px';
+
+  let normalTop = 0;
+  const clearance = 4;
+  if (gpPos.top - clueParentPos.top < cluePos.height + clearance) {
+    normalTop = (gpPos.top - clueParentPos.top) - (cluePos.height + clearance);
+  }
+
   if (inputPos.bottom >= windowH) {
-    currClue.style.top = '0'
+    currClue.style.top = normalTop + 'px';
     return
   }
   // gridInput is visible
-  const cluePos = currClue.getBoundingClientRect();
   const top = cluePos.top
-  const clueParentPos = currClueParent.getBoundingClientRect();
   const parentTop = clueParentPos.top
   // Reposition
   let newTop = 0
-  // If parent is below viewport top, go back to standard position.
   if (parentTop >= 0) {
-    currClue.style.top = '0'
+    // Parent is below viewport top: use normal positioning.
+    currClue.style.top = normalTop + 'px';
     return
   }
-  currClue.style.top = '' + (0 - parentTop) + 'px';
+  let adjustment = cluePos.height + clearance - inputPos.top;
+  if (adjustment < 0) {
+    adjustment = 0;
+  }
+  currClue.style.top = (0 - parentTop - adjustment) + 'px';
 }
 
 function gnavToInner(cell, dir) {

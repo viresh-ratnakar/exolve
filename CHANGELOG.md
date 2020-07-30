@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.81 July 30 2020
+
+- Move the current clue strip up a bit to clear the top of the grid or top
+  of the active cell (depending upon whether it is in its normal position
+  or scrolled position).
+- Set font family for small-print (otherwise it gets inherited and looked
+  bad in Blogger).
+- Do not set location-hash state when used in an iframe widget.
+
 ### Version: Exolve v0.80 July 20 2020
 
 - Supporting code and documentation for creating Exolve widgets.

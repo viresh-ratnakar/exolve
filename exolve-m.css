@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.80 July 20 2020
+Version: Exolve v0.81 July 30 2020
 
 The --col-* color and --sz-* size variables in :root{} are set by JavaScript.
 */
@@ -36,6 +36,7 @@ The --col-* color and --sz-* size variables in :root{} are set by JavaScript.
     border-radius: 8px;
   }
 }
+
 @media (min-width: 801px) {
   .wide-box {
     width: 480px;
@@ -132,7 +133,8 @@ td:first-child:not(.filler) {
   padding: 0;
 }
 #small-print {
-  font-size: small;
+  font-family: monospace;
+  font-size: 12px;
   margin: 0 0 4px 0;
 }
 #small-print > a {
