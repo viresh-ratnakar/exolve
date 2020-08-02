@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.82 August 2 2020
+
+- With Exolve puzzles embedded inline (not via iframes) in sites, we have
+  to deal with location-hash-parts that are not Exolve state. Modified
+  state parsing to now try the cookie if there is a location hash but its
+  parsing fails.
+
 ### Version: Exolve v0.81 July 30 2020
 
 - Move the current clue strip up a bit to clear the top of the grid or top

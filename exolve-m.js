@@ -25,7 +25,7 @@ The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 */
 
-const VERSION = 'Exolve v0.81 July 30 2020'
+const VERSION = 'Exolve v0.82 August 2 2020'
 
 // ------ Begin globals.
 
@@ -2618,36 +2618,18 @@ function updateAndSaveState() {
   }
 }
 
-// Restore state from cookie (or location.hash).
-function restoreState() {
-  let state = decodeURIComponent(location.hash.substr(1))
-  if (!state) {
-    let name = puzzleId + '=';
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        state = c.substring(name.length, c.length);
-      }
-    }
-  }
-  state = state.trim()
-  let error = false
+// Returns the size of the state (0 if state could not be parsed).
+function parseState(state) {
   if (state == '') { 
     console.log('No saved state available')
-    error = true
+    return 0
   }
   let index = 0
-  for (let i = 0; i < gridHeight && !error; i++) {
-    for (let j = 0; j < gridWidth && !error; j++) {
+  for (let i = 0; i < gridHeight; i++) {
+    for (let j = 0; j < gridWidth; j++) {
       if (index >= state.length) {
         console.log('Not enough characters in saved state')
-        error = true
-        break
+        return 0
       }
       let letter = ''
       letter = state.charAt(index++)
@@ -2655,8 +2637,7 @@ function restoreState() {
         let dollar = state.indexOf('$', index)
         if (dollar < 0) {
           console.log('Missing compound-char separator in saved state')
-          error = true
-          break
+          return 0
         }
         letter = letter + state.substring(index, dollar)
         index = dollar + 1
@@ -2670,28 +2651,54 @@ function restoreState() {
         if (letter == '1') {
            if (!gridCell.isDiagramless) {
              console.log('Unexpected ⬛ in non-diagramless location');
-             error = true
-             break
+             return 0
            }
            gridCell.currentLetter = '1'
         } else {
            if (!isValidStateChar(letter)) {
-             console.log('Unexpected letter/digit ' + letter + ' in state');
-             error = true
-             break
+             console.log('Unexpected letter/digit ' + letter + ' in state:' + state);
+             return 0
            }
            gridCell.currentLetter = letter
         }
       } else {
         if (letter != '.') {
           console.log('Unexpected letter ' + letter + ' in state, expected .');
-          error = true
-          break
+          return 0
         }
       }
     }
   }
-  if (error) {
+  return index
+}
+
+// Restore state from cookie (or location.hash).
+function restoreState() {
+  let state = ''
+  let index = 0
+  try {
+    state = decodeURIComponent(location.hash.substr(1)).trim()
+    index = parseState(state)
+  } catch(e) { 
+    index = 0
+  }
+  if (index <= 0) {
+    let name = puzzleId + '=';
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        state = c.substring(name.length, c.length).trim();
+        index = parseState(state)
+        break
+      }
+    }
+  }
+  if (index <= 0) {
     for (let i = 0; i < gridHeight; i++) {
       for (let j = 0; j < gridWidth; j++) {
         let gridCell = grid[i][j]
