@@ -2,7 +2,7 @@
 
 ### Version: Exolve v0.83 August 3 2020
 
-- Refactoring, essentially no change in functionality. About 1500 fewer lines.
+- Refactoring, essentially no change in functionality. About 1500 fewer bytes.
 
 ### Version: Exolve v0.82 August 2 2020
 
