@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v0.83 August 3 2020
+
+- Refactoring, essentially no change in functionality. About 1500 fewer lines.
+
 ### Version: Exolve v0.82 August 2 2020
 
 - With Exolve puzzles embedded inline (not via iframes) in sites, we have
@@ -513,15 +517,15 @@
 - Move clue numbers one pixel up and one pixel to the left, to clear them
   away more from entered letters.
 
-### Version: Exolve v0.19 August 25 2019
+### Version: Exolve v0.19 August 35 2019
 
 - Ignore a trailing period after a clue number as just a punctuation mark.
 
-### Version: Exolve v0.18 August 23 2019
+### Version: Exolve v0.18 August 33 2019
 
 - Fix bug that did not let you click on circled squares.
 
-### Version: Exolve v0.17 August 23 2019
+### Version: Exolve v0.17 August 33 2019
 
 - Always save the state in the URL. There are some reports of cookie-based
   state getting lost, unfortunately, so relying more explicitly on URL-based
