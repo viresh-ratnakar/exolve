@@ -8,7 +8,7 @@ Exolve can help you create online interactively solvable crosswords (simple
 ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
 in any language.
 
-The file *exolve.html* contains *all* the code you need: just make a copy and
+The file [exolve.html](exolve.html) contains *all* the code you need: just make a copy and
 then replace the part that contains the example grid with your own puzzle
 specification, starting at the "exolve-begin" line and ending at the
 "exolve-end" line.
