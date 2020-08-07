@@ -1,3 +1,12 @@
+/**
+ * NOTE: THIS IS A DEPRECATED COPY OF exolve-m.css FROZEN AT v0.83.
+ * AT v0.84, THERE WERE BACKWARD-INCOMPATIBLE CHANGES IN EXOLVE, TO
+ * BETTER SUPPORT EMBEDDING EXOLVE IN ARBIRARY WEB SITES.
+ *
+ * PLEASE USE THIS FILE (ALONG WITH exolve-m-old.js) ONLY IF YOU
+ * KNOW WHAT YOU ARE DOING!
+ */
+
 /*
 MIT License
 
@@ -5,7 +14,9 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.84 August 7 2020
+Version: Exolve v0.83 August 3 2020
+
+The --col-* color and --sz-* size variables in :root{} are set by JavaScript.
 */
 
 @media (max-width: 500px) {
@@ -15,20 +26,20 @@ Version: Exolve v0.84 August 7 2020
 }
 
 @media (max-width: 800px) {
-  .xlv-wide-box {
+  .wide-box {
     width: 100%;
     max-width: 480px;
   }
-  .xlv-curr-clue {
+  #current-clue {
     width: 100%;
     max-width: 480px;
   }
-  .xlv-clues-box {
+  .clues-box {
     width: 100%;
     max-width: 480px;
     margin: 0;
   }
-  .xlv-button {
+  .button {
     font-size: 11px;
     padding: 5px;
     border-radius: 8px;
@@ -36,102 +47,119 @@ Version: Exolve v0.84 August 7 2020
 }
 
 @media (min-width: 801px) {
-  .xlv-wide-box {
+  .wide-box {
     width: 480px;
   }
-  .xlv-curr-clue {
+  #current-clue {
     width: 480px;
   }
-  .xlv-clues-box {
+  .clues-box {
     width: 480px;
     margin: 0 0 0 12px;
   }
-  .xlv-button {
+  .button {
     font-size: 14px;
     padding: 8px;
     border-radius: 12px;
   }
 }
 
-.xlv-cell {
+.background {
+  fill: var(--col-background);
+}
+.cell {
+  fill: var(--col-cell);
   cursor: pointer;
 }
-.xlv-cell-num {
+.cell-num {
+  font-size: var(--sz-number);
   font-family: sans-serif;
+  fill: var(--col-light-label);
 }
-.xlv-cell-text {
+.cell-text {
+  font-size: var(--sz-letter);
   font-family: sans-serif;
   cursor: text;
+  fill: var(--col-light-text);
 }
-.xlv-cell-circle {
+.cell-circle {
   fill: rgba(0,0,0,0.0);
+  stroke: var(--col-circle);
 }
-.xlv-frame table {
+.prefill {
+  fill: var(--col-prefill);
+}
+.wordend {
+  fill: var(--col-separator);
+}
+span.solved, .solved td:first-child {
+  color: var(--col-solved);
+}
+table {
   border-collapse: collapse;
   border-spacing: 0;
 }
-.xlv-frame td {
+td {
   padding: 4px 6px 0 0;
   vertical-align: top;
 }
-.xlv-frame td:first-child:not(.xlv-filler) {
+td:first-child:not(.filler) {
   max-width: 2ch;
   white-space: nowrap;
   overflow: visible;
   font-weight: bold;
   text-align:right;
 }
-.xlv-clickable:hover {
+.clickable:hover {
   cursor: pointer;
 }
-.xlv-anno-text {
+.anno-text {
   font-family: monospace;
+  color: var(--col-anno);
 }
-.xlv-flex-row {
+.flex-row {
   display: flex;
   flex-flow: row wrap;
   align-items: flex-start;
   justify-content: center;
 }
-.xlv-flex-col {
+.flex-col {
   display: flex;
   flex-flow: column wrap;
   align-items: center;
 }
-.xlv-title {
+#title {
   text-align: center;
   font-weight: bold;
 }
-.xlv-setter {
+#setter {
   text-align: center;
+  color: var(--col-imp-text);
   margin: 0 0 8px 0;
 }
-.xlv-preamble {
+#prelude {
   margin: 8px 0;
   padding: 0;
 }
-.xlv-small-print {
+#small-print {
   font-family: monospace;
   font-size: 12px;
   margin: 0 0 4px 0;
 }
-.xlv-small-print > * {
-  padding: 4px 4px 0 0;
+#small-print > a {
+  padding: 0 4px 0 0;
 }
-.xlv-errors {
+#errors {
   font-weight: bold;
   color: red;
 }
-.xlv-curr-clue-parent {
+#current-clue-parent {
   width: 100%;
   height: 40px;
   position:relative;
   margin: 8px 0;
 }
-.xlv-curr-clue-label {
-  margin: 0 0 0 4px;
-}
-.xlv-curr-clue {
+#current-clue {
   position: absolute;
   z-index: 2;
   word-wrap: break-word;
@@ -139,38 +167,43 @@ Version: Exolve v0.84 August 7 2020
   margin: 0;
   padding: 2px 0;
 }
-.xlv-curr-orphan,
-.xlv-curr-clue-label {
+#curr-orphan,
+#current-clue-label {
   display: inline;
   padding: 0;
+  margin: 0;
   line-height: 0.8;
 }
-.xlv-nobr {
+.nobr {
   white-space: nowrap;
 }
-.xlv-grid-parent-centerer {
+#grid-parent-centerer {
   text-align: center;
 }
-.xlv-grid-parent {
+#grid-parent {
   position: relative;
   display: inline-block;
 }
-.xlv-grid-input-wrapper {
+#grid-input-wrapper {
   position: absolute;
   border: none;
   border-width: 0;
 }
-.xlv-grid-input-rarr {
+#grid-input-rarr {
   position: relative;
   right: -40%;
   top: -85%;
+  color: var(--col-arrow);
+  font-size: var(--sz-arrow);
 }
-.xlv-grid-input-darr {
+#grid-input-darr {
   position: relative;
   right: 0;
   top: -40%;
+  color: var(--col-arrow);
+  font-size: var(--sz-arrow);
 }
-.xlv-grid-input {
+#grid-input {
   text-align: center;
   text-anchor: middle;
   border: none;
@@ -178,42 +211,49 @@ Version: Exolve v0.84 August 7 2020
   height: 100%;
   padding: 2px 0 0 0;
   color: rgba(0,0,0,0.0);
+  caret-color: var(--col-caret);
   background: rgba(0,0,0,0.0);
   outline: none;
 }
-.xlv-controls-etc {
+#controls-etc {
   padding: 8px 0 6px 0;
 }
-.xlv-controls-row {
+.controls-row {
   margin: 6px 0 6px 0;
 }
-.xlv-clues {
+#clues {
   max-width: 984px;
 }
-.xlv-clues-box {
+.clues-box {
   overflow-y: auto;
 }
-.xlv-explanations {
+#explanations {
   margin: 10px 0 0 0;
 }
-.xlv-frame hr {
+hr {
   margin: 0 0 4px 0;
+  background-color: var(--col-imp-text);
 }
-.xlv-button {
+.button {
+  background-color: var(--col-button);
   border: none;
   outline: none;
+  color: var(--col-button-text);
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-family: monospace;
 }
-.xlv-button:hover {
+.button:hover {
+  background-color: var(--col-button-hover);
   cursor: pointer;
 }
-.xlv-button:disabled {
+.button:disabled {
+  background-color: gray;
   cursor: not-allowed;
 }
-.xlv-small-button {
+.small-button {
+  background-color: var(--col-small-button);
   border: 1px solid gray;
   outline: none;
   padding: 0 4px 2px 4px;
@@ -222,51 +262,55 @@ Version: Exolve v0.84 August 7 2020
   display: inline-block;
   font-family: monospace;
   font-weight: bold;
+  color: var(--col-small-button-text);
 }
-.xlv-small-button:hover {
+.small-button:hover {
+  background-color: var(--col-small-button-hover);
   cursor: pointer;
 }
-.xlv-nina-group {
+#nina-group {
   position: absolute;
   border: none;
   border-width: 0;
   outline: none;
 }
-.xlv-nina {
+.nina {
   position: absolute;
   border: none;
   border-width: 0;
   outline: none;
   cursor: pointer;
 }
-.xlv-status {
+#status {
   font-family: monospace;
   font-size: 12px;
   margin: 6px 0 6px 0;
+  color: var(--col-imp-text);
 }
-.xlv-saving {
+#saving {
   font-size: x-small;
   font-family: monospace;
   color: gray;
   margin: 0px 0 6px 0;
 }
-.xlv-solution {
+.solution {
   font-family: monospace;
   font-weight: bold;
 }
-.xlv-question {
+.question {
   margin: 20px 0 20px 0;
 }
-.xlv-answer {
+.answer {
   border: none;
   padding: 0 0 6px 0;
   outline: none;
   font-family: monospace;
   font-size: 12px;
+  color: var(--col-imp-text);
   background-image:
     repeating-linear-gradient(to bottom, white, white 13px, black 14px);
 }
-.xlv-incluefill {
+.incluefill {
   border: none;
   padding: 0 0 2px 0px;
   margin: 0 0 0 4px;
@@ -274,22 +318,24 @@ Version: Exolve v0.84 August 7 2020
   font-family: monospace;
   font-weight: bold;
   font-size: 12px;
+  color: var(--col-imp-text);
   border-bottom: solid 2px #c9c9c9;
   background-color: inherit;
 }
-.xlv-scratchpad {
-  border: 1px solid black;
+#scratchpad {
+  border: 1px solid var(--col-imp-text);
   padding: 8px;
   outline: none;
   font-family: monospace;
   font-size: 12px;
+  color: var(--col-imp-text);
 }
-.xlv-shuffle {
+#shuffle {
   font-family: monospace;
   font-size: 12px;
   cursor: pointer;
 }
-.xlv-postscript {
+#postscript {
   width: 100%;
 }
 @media print {
@@ -299,10 +345,10 @@ Version: Exolve v0.84 August 7 2020
   body {
     zoom: 100%;
   }
-  .xlv-controls-etc {
+  #controls-etc {
     display: none;
   }
-  .xlv-clues-box {
+  .clues-box {
     overflow-y: visible;
   }
 }

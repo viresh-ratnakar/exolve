@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
 MIT License
 
@@ -11,18 +10,19 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.83 August 3 2020
+Version: Exolve v0.84 August 7 2020
 -->
-
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.83"/>
-<script src="exolve-m.js?v0.83"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
+<script src="exolve-m.js?v0.84"></script>
 
 <title>Test-Jigsaw</title>
 
+</head>
+<body>
 <script>
-
-const puzzleText = `
+createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
+
 exolve-begin
   exolve-id: test-jigsaw
   exolve-title: Test-Jigsaw
@@ -44,14 +44,9 @@ exolve-begin
     [D] ASH (3)
     [E] ACE (3) [1a] Anno
 exolve-end
+
 ======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
-
+`);
 </script>
-
-</head>
-
-<body onload="createPuzzle()">
 </body>
-
 </html>

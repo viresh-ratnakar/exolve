@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
 MIT License
 
@@ -11,67 +10,65 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.83 August 3 2020
+Version: Exolve v0.84 August 7 2020
 -->
-
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.83"/>
-<script src="exolve-m.js?v0.83"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
+<script src="exolve-m.js?v0.84"></script>
 
 <script>
-function customizePuzzle() {
-  background.setAttributeNS(null, 'fill', 'red')
+function customizeExolve(p) {
+  p.background.setAttributeNS(null, 'fill', 'red')
   let expectedVars = [
-    'currentRow',
-    'currentCol',
-    'currentClueIndex',
-    'gridInput',
-    'gridWidth',
-    'gridHeight',
-    'gridBackground',
-    'numCellsFilled',
-    'numCellsToFill',
-    'offsetLeft',
-    'offsetTop',
-    'svg',
-    'GRIDLINE',
-    'SQUARE_DIM',
-    'CIRCLE_RADIUS',
+    'p.currRow',
+    'p.currCol',
+    'p.currClueIndex',
+    'p.gridInput',
+    'p.gridWidth',
+    'p.gridHeight',
+    'p.numCellsFilled',
+    'p.numCellsToFill',
+    'p.offsetLeft',
+    'p.offsetTop',
+    'p.svg',
+    'p.GRIDLINE',
+    'p.squareDim',
+    'p.circleR',
   ]
   for (let v of expectedVars) {
     eval('console.log("' + v + ' = " + ' + v + ')')
   }
   let expectedFunctions = [
-    'deactivateCurrentCell',
-    'activateCell',
-    'advanceCursor',
-    'updateAndSaveState',
-    'updateDisplayAndGetState',
-    'showNinas',
-    'hideNinas',
-    'checkCurrent',
-    'checkAll',
-    'revealCurrent',
-    'revealAll',
-    'clearCurrent',
-    'clearAll',
+    'p.deactivateCurrCell',
+    'p.activateCell',
+    'p.advanceCursor',
+    'p.updateAndSaveState',
+    'p.updateDisplayAndGetState',
+    'p.showNinas',
+    'p.hideNinas',
+    'p.checkCurrent',
+    'p.checkAll',
+    'p.revealCurrent',
+    'p.revealAll',
+    'p.clearCurrent',
+    'p.clearAll',
   ]
   for (let f of expectedFunctions) {
     eval('console.log("func ' + f + ' = " + (' + f + '!= null))')
   }
   let expectedIds = [
-    'clear',
-    'clear-all',
-    'check',
-    'check-all',
-    'reveal',
-    'reveal-all',
-    'setter-by',
-    'squares-filled',
-    'ninas',
-    'submit',
-    'across-label',
-    'down-label',
-    'saving',
+    'xlv1-clear',
+    'xlv1-clear-all',
+    'xlv1-check',
+    'xlv1-check-all',
+    'xlv1-reveal',
+    'xlv1-reveal-all',
+    'xlv1-setter-by',
+    'xlv1-squares-filled',
+    'xlv1-ninas',
+    'xlv1-submit',
+    'xlv1-across-label',
+    'xlv1-down-label',
+    'xlv1-saving',
   ]
   for (let id of expectedIds) {
     let elt = document.getElementById(id)
@@ -80,16 +77,18 @@ function customizePuzzle() {
       return
     }
   }
-  background.setAttributeNS(null, 'fill', 'green')
+  p.background.setAttributeNS(null, 'fill', 'green')
 }
 </script>
 
 <title>Test-Customize-Puzzle</title>
 
+</head>
+<body>
 <script>
-
-const puzzleText = `
+createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
+
 exolve-begin
   exolve-id: test-customize-puzzle
   exolve-title: Test-Customize-Puzzle
@@ -116,14 +115,9 @@ exolve-begin
     2 TODO (5)
     3 TODO (5)
 exolve-end
+
 ======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
-
+`);
 </script>
-
-</head>
-
-<body onload="createPuzzle()">
 </body>
-
 </html>

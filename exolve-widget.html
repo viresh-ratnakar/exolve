@@ -14,22 +14,18 @@ follow the instructions at:
   https://github.com/viresh-ratnakar/exolve#exolve-widget
 
 -->
-
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.83"/>
-<script src="exolve-m.js?v0.83"></script>
-
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
+<script src="exolve-m.js?v0.84"></script>
 <script>
   let puzzleText = '';
   function receivePuzzle(event) {
     if (event.data.indexOf('exolve-begin') < 0) {
       return;
     }
-    puzzleText = event.data;
-    createPuzzle(true);
+    createExolve(event.data, true);
     window.removeEventListener("message", receivePuzzle);
   }
   function prepareToReceivePuzzle() {
@@ -43,8 +39,6 @@ follow the instructions at:
 <title>Exolve Crossword Widget</title>
 
 </head>
-
 <body onload="prepareToReceivePuzzle()">
 </body>
-
 </html>

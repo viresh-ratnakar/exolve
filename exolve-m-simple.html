@@ -3,13 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
   This is a copy of exolve-m.html that can be used without hosting the
   exolve-m.js and exolve-m.css files, as this links to their latest
-  copies on the https://viresh-ratnakar.github.io/ website.
+  copies at https://viresh-ratnakar.github.io/.
 -->
-
 <!--
 MIT License
 
@@ -36,16 +34,17 @@ SOFTWARE.
 The latest code and documentation for exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 -->
-
-<link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css?v0.83"/>
-<script src="https://viresh-ratnakar.github.io/exolve-m.js?v0.83"></script>
+<link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css?v0.84"/>
+<script src="https://viresh-ratnakar.github.io/exolve-m.js?v0.84"></script>
 
 <title>Exolve (replace with puzzle title)</title>
 
+</head>
+<body>
 <script>
-
-const puzzleText = `
+createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
+
 exolve-begin
   exolve-id: some-unique-identifier
   exolve-title: Quick 3x3 (replace with puzzle title)
@@ -64,14 +63,9 @@ exolve-begin
     1 Retreating thief forgot to hide bananas (3)
     2 One suffering for a long time (3)
 exolve-end
+
 ======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
-
+`);
 </script>
-
-</head>
-
-<body onload="createPuzzle()">
 </body>
-
 </html>

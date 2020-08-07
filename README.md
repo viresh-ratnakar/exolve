@@ -2,29 +2,32 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.83 August 3 2020
+### Version: Exolve v0.84 August 7 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
-ones as well as those that are jumbles or are diagramless or are 3-d, etc.)
-in any language.
+ones with blocks and/or bars as well as those that are jumbles or are
+diagramless or are 3-d, etc.) in any language.
 
-The file [exolve.html](exolve.html) contains *all* the code you need: just make a copy and
-then replace the part that contains the example grid with your own puzzle
-specification, starting at the "exolve-begin" line and ending at the
-"exolve-end" line.
+The file [exolve.html](exolve.html) contains *all* the code you need: just
+make a copy and then replace the part that contains the example grid with your
+own puzzle specification, starting at the `exolve-begin` line and ending at the
+`exolve-end` line.
 
-The files exolve-m.html, exolve-m.css, exolve-m.js have the same  content as
-exolve.html, except that it is split into separate parts: HTML (including the
-puzzle specification), CSS, and JavaScript. This allows the JavaScript and CSS
-to be reused across multiple puzzles.
+The files [exolve-m.html](exolve-m.html), [exolve-m.css](exolve-m.css),
+[exolve-m.js](exolve-m.js) have the same  content as
+[exolve.html](exolve.html), except that it is split into separate parts: HTML
+(including the puzzle specification), CSS, and JavaScript. This allows the
+JavaScript and CSS to be reused across multiple puzzles.
 
-Another simple option is to just use the exolve-m-simple.html file: this is
-essentially a copy of exolve-m.html, but it does not require you to host the
-exolve-m.css and exolve-m.js files, as it links to their latest copies on my
-website.
+Another simple option is to just use the
+[exolve-m-simple.html](exolve-m-simple.html) file: this is essentially a copy
+of [exolve-m.html](exolve-m.html), but it does not require you to host the
+[exolve-m.css](exolve-m.css) and [exolve-m.js](exolve-m.js) files, as it
+links to their latest copies on a website that I maintain, hosted on GitHub.
 
-Yet another option is to embed the Exolve puzzle in a widget. See the details
-in the [Exolve widget](#exolve-widget) section.
+Yet another option is to embed the Exolve puzzle within arbitrary web pages
+(like blog posts) in a "widget". See the details in the
+[Exolve widget](#exolve-widget) section.
 
 Here is a minimal example of the puzzle specification:
 
@@ -54,15 +57,17 @@ exolve-end
 The format is very simple and uses plain text (but the parsing code is
 also simplistic and not very forgiving, so please go through the format
 documentation). The setter has the option to provide solutions (as in the
-example above), or just use 0 to indicate a square that needs to be filled
+example above), or to just use 0 to indicate a square that needs to be filled
 (i.e., is a part of a "light," in crossword terms).
 
 A few example puzzles are also included in this directory, each in a file with
 the ".exolve" extension. These showcase some of the available features, such as
 ninas, additional clues or questions, submission, barred puzzles, diagramless
-puzzles, etc. To try one of these, create a copy of exolve.html and edit it as
-described above, splicing in the whole .exolve file from exolve-begin to
-exolve-end.
+puzzles, etc. To try one of these, create a copy of [exolve.html](exolve.html)
+and edit it as described above, splicing in the whole .exolve file from
+`exolve-begin` to `exolve-end`. A whole suite of test-\*.html files is also
+available in this directory. I use them to test new releases, but you can use
+them to see examples of usage of most Exolve features.
 
 ## Controls
 The basic control is to click on a square and enter a letter in it. If a square
@@ -103,45 +108,18 @@ solutions are not provided, the "Reveal this" button will still get shown if
 there are any clues for which annotations are present (these annotations may be
 full solutions or just hints, possibly).
 
-If an anno is provided, the software appends the solution inferred from
-the grid and the enum to the beginning of the anno (creating an anno
-automatically if it's not provided). This would have meant that if in an older
-grid the the solution was explicitly included in the anno, it would have got
-duplicated. So, the code does check to see if the solution string
-(punctuation/markup notwithstanding) is present at the head of the anno, and
-avoids duplicating it if so. If the solver wants to present the solution in some
-other way, they can suppress the automatic addition of the solution to the anno
-by adding this line to the puzzle specs:
-    exolve-option: no-auto-solution-in-anno
-This option only suprresses the solution getting added to the anno appearing
-after the clue. The solution does still get added to the placeholder blank
-slot of an orphan clue, upon "Reveal this," even with this option.
-
-If the leading part of the anno needs to be something in square brackets, such
-as "... (6) [t]WITTER ...," then setters should include the solution before
-that (even if it can be inferred from the grid), to avoid misinterpreting the
-leading part as the solution, like "... (6) [WITTER] [t]WITTER ..."
-
 If the setter has provided the location of one or more ninas (through
-[exolve-nina](#exolve-nina) sections), then an additional button control,
+[`exolve-nina`](#exolve-nina) sections), then an additional button control,
 *Show ninas*, gets shown, for the solver to see where the ninas are. The button
 can be clicked again to hide the nina locations. Ninas also get shown on
 clicking "Reveal all".
 
 If the setter has asked additional questions in the puzzle (through
-[exolve-question](#exolve-question) sections), then input fields for these get
+[`exolve-question`](#exolve-question) sections), then input fields for these get
 shown too. "Reveal/Clear all" controls buttons also include revealing/clearing
 answers to these questions apart from showing/hiding annos/explanations/ninas.
 
-If there are placeholder entries (for orphan clues—i.e., for clues without
-known cells), they do NOT get cleared with 'clear this/all' (they can simply
-by erased manually though). For clearing all such placeholder entries forcibly,
-click on the 'Clear all' button when there are no entries in the grid (eg, by
-clicking it a _second_ time). This option is only there in puzzles that have
-such placeholder entries, and in such puzzles, a tooltip is shown over the
-'Clear all' button to let the user know.
-
-If the setter has set up a submit URL (with an [exolve-submit](#exolve-submit)
+If the setter has set up a submit URL (with an [`exolve-submit`](#exolve-submit)
 section—the URL can be set up using a Google Form, for instance), then there is
 a *Submit* buttion.
 
@@ -166,78 +144,82 @@ You can click on the black background or on the puzzle title to unhighlight
 the current clue (for printing or screenshotting, for example).
 
 ## Format
-The puzzle can contain the following "sections" between the exolve-begin line
-and the exolve-end line:
+The puzzle can contain the following "sections" between the `exolve-begin` line
+and the `exolve-end` line:
 
-* exolve-id
-* exolve-title
-* exolve-setter
-* exolve-copyright
-* exolve-credits
-* **exolve-width**
-* **exolve-height**
-* exolve-preamble / exolve-prelude
-* exolve-postscript
-* **exolve-grid**
-* exolve-across
-* exolve-down
-* exolve-nodir
-* exolve-explanations
-* exolve-nina
-* exolve-colour / exolve-color
-* exolve-question
-* exolve-submit
-* exolve-option
-* exolve-language
-* exolve-relabel
+* **`exolve-id`**
+* `exolve-title`
+* `exolve-setter`
+* `exolve-copyright`
+* `exolve-credits`
+* **`exolve-width`**
+* **`exolve-height`**
+* `exolve-preamble` / `exolve-prelude`
+* `exolve-postscript`
+* **`exolve-grid`**
+* `exolve-across`
+* `exolve-down`
+* `exolve-nodir`
+* `exolve-explanations`
+* `exolve-nina`
+* `exolve-colour` / `exolve-color`
+* `exolve-question`
+* `exolve-submit`
+* `exolve-option`
+* `exolve-language`
+* `exolve-relabel`
 
-Each section has the section name (exolve-something), followed by a colon.
-Other than the exolve-preamble/exolve-prelude, exolve-grid, exolve-across,
-exolve-down, exolve-nodir, exolve-explanations, and exolve-postscript sections,
-all other sections occupy a single line (some can be repeated though). For such
-single-line sections, the "value" of the section is the text following the
-colon on the same line.
+Each section has the section name (`exolve-something`), followed by a colon.
+Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
+`exolve-across`, `exolve-down`, `exolve-nodir`, `exolve-explanations`, and
+`exolve-postscript` sections, all other sections occupy a single line (some can
+be repeated though). For such single-line sections, the "value" of the section
+is the text following the colon on the same line.
 
-The bolded sections, namely, exolve-width, exolve-height, and exolve-grid
-are required. The other sections are optional, but exolve-across, exolve-down,
-exolve-id, exolve-title, exolve-setter should probably be present in most
-puzzles.
+The bolded sections, namely, `exolve-id`, `exolve-width`, `exolve-height`, and
+`exolve-grid` are required. The other sections are optional, but
+`exolve-across`, `exolve-down`, `exolve-title`, `exolve-setter` should probably
+be present in most puzzles.
 
 Any line (or trailing part of a line) that begins with a "# " is treated
 as a comment and is ignored. A "#" with an end-of-line after it is also treated
 as a comment. Note that a "#" with a non-space character after it is NOT treated
 as a somment (this is so because we may have HTML colour names such as #FF00FF
-in exolve-colour sections, and we may have clues in which their grid-location
+in `exolve-colour` sections, and we may have clues in which their grid-location
 is indicated in the #xN
 notation—[see this section](#extended-chessboard-notation)). I did not use
 "//" as the comment marker as it is used in URLs.
 
-## exolve-id
-Provide a unique id. Use only alphanumeric characters and dashes (-). This
-id is used as the key for saving/restoring state. You can create an unsolved
-version of a puzzle (to run a contest, for example) and, later, a version of
-the same puzzle that has the solutions, giving them both the same exolve-id.
-Then, when solvers visit the version with solutions, they can see their own
-entries and see which mistakes they made, if any. Example:
+Any text appearing before `exolve-begin` or after `exolve-end` is ingored.
+
+## `exolve-id`
+Provide a unique id for this crossword puzzle. Use only alphanumeric characters
+and dashes (-), and start with a letter. This id is used as the key for
+saving/restoring state and also to distinguish between multiple puzzles on a
+single page. You can create an unsolved version of a puzzle (to run a contest,
+for example) and, later, a version of the same puzzle that has the solutions,
+giving them both the same `exolve-id`. Then, when solvers visit the version
+with solutions, they can see their own entries and see which mistakes they
+made, if any. Example:
 ```
   exolve-id: tiny-42
 ```
 
-## exolve-title, exolve-setter
+## `exolve-title`, `exolve-setter`
 The title of the puzzle and the name/pseudonym of the crossword setter. Example:
 ```
   exolve-title: My Lovely Crossword
   exolve-setter: Narsi Sus
 ```
 
-## exolve-copyright
+## `exolve-copyright`
 If your provide this, it will be displayed with the copyright symbol, under
 the rendered puzzle grid. Example:
 ```
   exolve-copyright: 2019 Viresh Ratnakar
 ```
 
-## exolve-credits
+## `exolve-credits`
 If your provide this, it will be displayed under the copyright. You can provide
 multiple instance of this.
 Example:
@@ -246,7 +228,7 @@ Example:
   exolve-credits: Custom code: H. A. C. Ker
 ```
 
-## exolve-width, exolve-height
+## `exolve-width`, `exolve-height`
 The width and height of the puzzle—i.e., how many squares across and how many
 squares down is the crossword grid. Example:
 ```
@@ -254,12 +236,12 @@ squares down is the crossword grid. Example:
   exolve-height: 15
 ```
 
-## exolve-preamble, exolve-prelude
+## `exolve-preamble`, `exolve-prelude`
 Crossword puzzles often come with a preamble that contains special instructions
 and/or hints. The preamble text occupies multiple lines—starting from the
-line *after* the exolve-preamble: (or exolve-prelude:) line, and going all the
-way down to the line preceding the next exolve-foo section. The preamble may
-include HTML tags. The preamble is rendered just above the grid, in the
+line *after* the `exolve-preamble` (or `exolve-prelude`) line, and going all the
+way down to the line preceding the next `exolve-something` section. The preamble
+may include HTML tags. The preamble is rendered just above the grid, in the
 rendered puzzle. Example:
 ```
   exolve-preamble:
@@ -268,9 +250,9 @@ rendered puzzle. Example:
     animal.
 ```
 
-## exolve-postscript
+## `exolve-postscript`
 If this section is provided, it gets rendered under the whole puzzle. Like
-exolve-preamble, this is also a multiline section and can include arbitrary
+`exolve-preamble`, this is also a multiline section and can include arbitrary
 HTML. Example:
 ```
   exolve-postscript:
@@ -281,11 +263,11 @@ HTML. Example:
    </ul>
 ```
 
-## exolve-grid
-The grid specification starts from the line *after* the exolve-grid line and
-goes all the way to the next exolve- section. There should be exactly as many
-lines in this section as the height of the grid. On each line, the squares in
-that row of the grid are specified.
+## `exolve-grid`
+The grid specification starts from the line *after* the `exolve-grid` line and
+goes all the way to the next `exolve-something` section. There should be exactly
+as many lines in this section as the height of the grid. On each line, the
+squares in that row of the grid are specified.
 
 There are two kinds of puzzles: with solutions provided and without solutions.
 Here are simple examples of both:
@@ -350,7 +332,7 @@ end of the clue (unless the no-auto-solution-in-anno option is set).
 
 If you use a language/Script that uses compound letters made up of multiple
 Unicode characters (for example, Devanagari—see the
-[exolve-language](#exolve-language) section), then your _must_ separate grid
+[`exolve-language`](#exolve-language) section), then your _must_ separate grid
 letters (when specifying a grid with solutions) with a space (unless they are
 already separated by decorator). For example, this will *not* work:
 ```
@@ -420,14 +402,13 @@ grid square any clue starts on. However, sometimes, even in a puzzle with
 diagramless squares, the setter does want to provide the clue start locations
 for *some* clues. Exolve provides a way to do this: the setter can optionally
 include the location of the square where a clue starts for any clue, using the
-extended chessboard notation. Details are provided in the exolve-across/down
-section below.
+extended chessboard notation. Details are provided in the next section.
 
-## exolve-across, exolve-down, exolve-nodir
-The exolve-across and exolve-down sections should be used to specify the across
-and down clues, respectively (exolve-nodir is for the special/rare case of
-clues that do not have a specified direction; we will describe it at the end of
-this section). There should be one clue per line, and there should not be any
+## `exolve-across`, `exolve-down`, `exolve-nodir`
+The `exolve-across` and `exolve-down` sections should be used to specify the
+across and down clues, respectively (`exolve-nodir` is for the special/rare case
+of clues that do not have a specified direction; we will describe it at the end
+of this section). There should be one clue per line, and there should not be any
 blank lines. The clues should start with the clue number, and end with the
 enum (the enum is not strictly required). Example:
 ```
@@ -459,9 +440,32 @@ that clue is the current clue. Example:
     28	Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
 ```
 
-If a clue "covers" other "children clues," this can be indicated by appending
-a comma-separated list of children clue numbers to the parent clue number.
-Example:
+If a clue does not provide its anno, the software still creates a minimal anno
+consisting of just the solution text (that it infers from the grid and the
+enum). Even if the anno is provided, the software prefixes it with the inferred
+solution text. This might have meant that if in an older grid the the solution
+was explicitly included in the anno, it would have got duplicated. So, the code
+does check to see if the solution string (punctuation/markup notwithstanding)
+is present at the head of the anno, and avoids duplicating it if so. If the
+setter wants to present the solution in some other way, they can suppress the
+automatic addition of the solution to the anno by adding this line to the puzzle
+specs:
+```
+    exolve-option: no-auto-solution-in-anno
+```
+This option only suprresses the solution getting added to the anno appearing
+after the clue. The solution does still get added to the [placeholder blank
+slot of an orphan clue](#jigsaw-puzzle-clues), upon "Reveal this," even with
+this option.
+
+If the leading part of the anno needs to be something in square brackets, such
+as "... (6) [t]WITTER ...," then setters should include the solution before
+that (even if it can be inferred from the grid), to avoid misinterpreting the
+leading part as the solution, like "... (6) [WITTER] [t]WITTER ..."
+
+If a linked clue includes other "children clues," this can be indicated by
+appending a comma-separated list of children clue numbers to the parent clue
+number. Example:
 ```
   exolve-across:
     1, 5, 2d In spite of adverse circumstances (7,3,4)
@@ -483,9 +487,10 @@ unset) its "has-been-solved" state manually.
 
 As mentioned in the previous section, in a grid that has diagramless squares
 and that does not provide solutions, if the setter wants to display some clue
-numbers in squares, they can do so by prepending the clue (in the exolve-across
-or exolve-down section) with "#&lt;L&gt;", where &lt;L&gt; is the location of
-the square in the [extended chessboard notation](#extended-chessboard-notation).
+numbers in squares, they can do so by prepending the clue (in the
+`exolve-across` or exolve-down section) with "#&lt;L&gt;", where &lt;L&gt; is
+the location of the square in the
+[extended chessboard notation](#extended-chessboard-notation).
 Examples:
 ```
   exolve-across:
@@ -497,11 +502,12 @@ column and the 9th row from the bottom, and 31 will get displayed in the 17th
 column and 31st row.
 
 ### Filler lines between clues
-Any line in a clues section (i.e., in exolve-across/exolve-down/exolve-nodir)
-that cannot be parsed as a clue is treated as a filler line. It is simply
-displayed in that position in the list of clues. It is an error to place
-a filler line after the last clue in a clues section. Filler lines can
-be used to demarcate sections within clues, if needed. Example:
+Any line in a clues section (i.e., in
+`exolve-across`/`exolve-down`/`exolve-nodir`) that cannot be parsed as a clue
+is treated as a filler line. It is simply displayed in that position in the
+list of clues. It is an error to place a filler line after the last clue in a
+clues section. Filler lines can be used to demarcate sections within clues, if
+needed. Example:
 ```
   exolve-across:
     1 Communication device (5)
@@ -546,8 +552,8 @@ example get ignored. If you have consecutive periods, they do not get ignored
 
 ### Clues without a specified direction
 If you want to create a section of clues without a specified across/down
-direction, you can use an exolve-nodir section, which has the same structure
-as exolve-across and exolve-down, but the direction of each clue in this
+direction, you can use an `exolve-nodir` section, which has the same structure
+as `exolve-across` and `exolve-down`, but the direction of each clue in this
 section is considered unspecified. Setters would probably want to use this
 section with non-numeric clue labels. Example:
 ```
@@ -563,7 +569,7 @@ as described above.
 
 If the setter is using  nun-numeric clue labels or clues without a specified
 direction, then they should probably also use the option "hide-inferred-numbers"
-in an [exolve-option](#exolve-option) section.
+in an [`exolve-option`](#exolve-option) section.
 
 ### Nodir clues with cells explicitly specified
 In a nodir clue, you can specify not just the starting cell, but _all the cells_
@@ -587,6 +593,13 @@ by simply clicking the "copy-placeholder" button (that looks like [⇲]) next to
 the placeholder area, whenever they have some squares highlighted for entry in
 the grid.
 
+The placeholder entries do NOT get cleared with 'clear this/all' (they can
+simply by erased directly by clicking on them and deleting though). For clearing
+all placeholder entries forcibly, click on the 'Clear all' button when there are
+no entries in the grid (eg, by clicking on it a _second_ time). This option is
+only there in puzzles that have such placeholder entries, and in such puzzles, a
+tooltip is shown over the 'Clear all' button to let the user know.
+
 The same placeholder text and the copy-placeholder button ([⇲]) are also shown
 in the highlighted scrollable 'orphan' clues widget, whenever the currently
 highlighed squares do not have a known clue association.
@@ -595,7 +608,7 @@ The copy-placeholder button feature does not get activated if there are any
 diagramless cells (as only one diagramless cell is active at a time generally).
 
 The copy-placeholder buttons can be disabled (i.e., not shown at all) by
-specifying the exolve-option, hide-copy-placeholder-buttons. This is useful if
+specifying `exolve-option: hide-copy-placeholder-buttons`. This is useful if
 you find the buttons distracting in appearance, or if copying from the
 placeholder is not very useful for some other reason (for eg., lights are split
 into parts).
@@ -605,10 +618,10 @@ which cells in the grid belong to the clue, for use in "Reveal this" and "Check
 this." This is done by listing in square brackets a space-separated sequence of
 clue indices and/or cell locations. Clue indices can be like 12a or 12A or 13d
 or 13D (must include direction, just like the way these are specified in
-exolve-nina and exolve-colour). If any clue indices are used in the specified
-sequence, then those clues themselves must have some of their cell locations
-known. This listing should be present right after the enum part, if at all.
-Examples:
+`exolve-nina` and `exolve-colour`). If any clue indices are used in the
+specified sequence, then those clues themselves must have some of their cell
+locations known. This listing should be present right after the enum part, if at
+all.  Examples:
 ```
   exolve-nodir:
     [A] Some clue (5) [1a]
@@ -679,23 +692,23 @@ you have provided the locations of _all_ its cells (that is, you have provided
 the locations of at least two cells), _and_ these locations belong to an unclued
 light in the grid, then the software makes the label of that light be Q.
 
-## exolve-explanations
+## `exolve-explanations`
 In a grid that includes solutions, the setter may provide additional notes,
-explanations, commentary, etc., in an exolve-explanations section. Just like the
-[exolve-prelude](#exolve-prelude) section, this section also has multiple lines,
-and these lines can include HTML tags. The contents get revealed when the
-solver clicks on "Reveal all".
+explanations, commentary, etc., in an `exolve-explanations` section. Just like
+the [`exolve-preamble`](#exolve-preamble-exolve-prelude) section, this section
+also has multiple lines, and these lines can include HTML tags. The contents get
+revealed when the solver clicks on "Reveal all".
 ```
   exolve-explanations:
     This puzzle's hidden message was driven by occasional hiccups in
     some <i>noted</i> interactive solvers.
 ```
 
-## exolve-nina
+## `exolve-nina`
 If a setter has included ninas in the grid, and if they are putting up a version
 that has solutions included, they can also specify where the ninas are, and in
 that case, a "Show ninas" control button will get displayed. Each nina should
-use its own "exolve-nina:" line, and the ninas will get displayed in different
+use its own `exolve-nina` line, and the ninas will get displayed in different
 colours upon clicking "Show ninas" (as well as "Reveal all").
 
 The squares involved in a nina are specified in the
@@ -713,7 +726,7 @@ as all the cells in the A12 and D16 clues.
 You can also have ninas that involve arbitrary letters/words from within the
 text of the clues or the prelude. This involves a little bit of HTML.
 Just enclose the text that you want to highlight as a nina in a "span" tag,
-giving it a unique class name, and specify that class name in the exolve-nina
+giving it a unique class name, and specify that class name in the `exolve-nina`
 (the name should not be a letter followed by a number, so that it is not
 confused with the extended chessboard notation or clue indices). For example:
 ```
@@ -729,7 +742,7 @@ such as:
   exolve-nina: a4 c4 clue-nina
 ```
 
-## exolve-colour, exolve-color
+## `exolve-colour`, `exolve-color`
 Specific cells in the grid may be coloured using this feature. The squares
 involved are again specified in the
 [extended chessboard notation](#extended-chessboard-notation)
@@ -742,10 +755,10 @@ like 12a, 12A, 33d, or 33D.
 The colour itself can be any valid
 [HTML colour name](https://www.w3schools.com/colors/colors_names.asp).
 
-## exolve-question
+## `exolve-question`
 Often, the setter might have hidden additional information for the solver to
 discover (such as ninas), or may simply want to survey solvers about something
-(such as their favourite clues). The exolve-question section can be used to
+(such as their favourite clues). The `exolve-question` section can be used to
 do this. Example:
 ```
   exolve-question: What is the nina that begins with S?
@@ -755,16 +768,16 @@ do this. Example:
 In this example, there are three questions. An answer has also been provided for
 the second question. The part following the enum ("(3,4)"), if there is an
 enum, is treated as the answer (see the
-[exolve-across/exolve-down](#exolve-across-exolve-down-exolve-nodir) section for
-details on enums). The answer is not shown in the displayed question. When the
-solver clicks "Reveal all", answers to all questions for which answers have
+[`exolve-across`/`exolve-down`](#exolve-across-exolve-down-exolve-nodir) section
+for details on enums). The answer is not shown in the displayed question. When
+the solver clicks "Reveal all", answers to all questions for which answers have
 been provided do get revealed.
 
 Questions that specify an enum get displayed with placeholder question-marks
 formatted according to the enum: ??? for (3), ??? ?? for (3,2), and ??-??? for
 (2,3), when no entry has been made in the answer slot.
 
-If an enum in an exolve-question is immediately followed by an asterisk (like
+If an enum in an `exolve-question` is immediately followed by an asterisk (like
 "(30)\*" above—note that there is no space before the asterisk), then the enum
 is not displayed to the solver; it is only used to determine the size of the
 answer box to show. The placeholder questionmarks are also not shown.
@@ -777,10 +790,10 @@ example:
   exolve-question: A long comment from you, please (300)* [lowercase-ok]
 ```
 
-If the setter has created an exolve-submit section (see below), then answers to
-each exolve-question are also sent to the submit URL (see below for details).
+If the setter has created an `exolve-submit` section, then answers to each
+`exolve-question` are also sent to the submit URL (see below for details).
 
-## exolve-submit
+## `exolve-submit`
 Setters/publishers can use the exolve-submit section to receive submissions
 from solvers. The format is easily seen from this example:
 ```
@@ -800,8 +813,8 @@ When submitting, the solution letters will be sent as the string "ACER.REAR" for
 this example.
 
 Subsqeuent parameters (k1, k2) are the keys for any questions posed using
-exolve-question sections. So, for this example, if the answers entered for the
-exolve-questions are ANSWER1, ANSWER2, respectively, then the full URL for
+`exolve-question` sections. So, for this example, if the answers entered for the
+`exolve-questions` are ANSWER1, ANSWER2, respectively, then the full URL for
 submission will be:
 ```
   https://something&k=ACER.REAR&k1=ANSWER1&k2=ANSWER2
@@ -811,83 +824,99 @@ The submission is made using HTTP GET.
 
 One easy way to set up submissions is to create a Google Form with one Google
 Form question for the solution letters, and one Google Form question for each
-exolve-question (using "Short answer" as the question type in each case). Then
-the "Get prefilled link" option can be used to get a URL with all the needed
-keys.
+`exolve-question` (using "Long answer" or "Short answer" as the question type
+in each case). Then, click on the "Get prefilled link" menu option. Fill some
+dummy text in each of the form fields shown, and then click on "Get Link." This
+will copy a URL like this:
+```
+https://docs.google.com/forms/d/e/1FAIpQLSeezqRzI7N77Huk8_TYwAB40wp2E6HgQaOsNPMc1KgJp-7O8Q/viewform?usp=pp_url&entry.411104056=sol&entry.464339112=col&entry.861079418=lif&entry.1052922113=nam
+```
+Delete all the `=<value>` parts from this, and replace the `&` separators with
+spaces, to get something like this:
+```
+  exolve-submit: https://docs.google.com/forms/d/e/1FAIpQLSeezqRzI7N77Huk8_TYwAB40wp2E6HgQaOsNPMc1KgJp-7O8Q/viewform?usp=pp_url entry.411104056 entry.464339112 entry.861079418 entry.1052922113
+```
+When solvers submit, links of this sort will take them to a Google Forms page
+where they have to click again on a "Submit" button. Instead, you can
+modify the URL to make a direct submission link, like this:
+```
+  exolve-submit: https://docs.google.com/forms/d/e/1FAIpQLSeezqRzI7N77Huk8_TYwAB40wp2E6HgQaOsNPMc1KgJp-7O8Q/formResponse?submit=SUBMIT entry.411104056 entry.464339112 entry.861079418 entry.1052922113
+```
 
-## exolve-option
+
+## `exolve-option`
 In this single-line, repeatable section, the setter can specify certain options.
 Multiple, space-separated options may be provided on each exolve-option line.
 The list of currently supported options is as follows:
-- **hide-inferred-numbers** If this option is specified, then the software does
+- **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
-- **clues-panel-lines:&lt;N&gt;** Limit the across/down/nodir clues boxes to
+- **`clues-panel-lines:&lt;N&gt;`** Limit the across/down/nodir clues boxes to
   about N lines of text, adding scrollbars if needed.
-- **offset-top:&lt;N&gt;** Draw the grid with this much space above and under
+- **`offset-top:&lt;N&gt;`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   customizePuzzle(), for example.
-- **offset-left:&lt;N&gt;** Draw the grid with this much space to the left and
+- **`offset-left:&lt;N&gt;`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using customizePuzzle(), for example.
-- **grid-background:&lt;c&gt;** Set the colour of the black cells to &lt;c&gt;,
+- **`grid-background:&lt;c&gt;`** Set the colour of the black cells to &lt;c&gt;,
   which should be a valid HTML colour name/code. This option is deprecated.
   Please use color-background (see below).
-- **allow-digits** If this option is specified, then we allow solvers to enter
+- **`allow-digits`** If this option is specified, then we allow solvers to enter
   digits in cells.
-- **hide-copy-placeholder-buttons** This is an option that is only applicable
+- **`hide-copy-placeholder-buttons`** This is an option that is only applicable
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
   subsection below on "Jigsaw puzzle clues").
-  **no-auto-solution-in-anno** In a grid with solutions, we automatically
+  **`no-auto-solution-in-anno`** In a grid with solutions, we automatically
   show the solution next to the clue, when "Reveal all" or "Reveal this" is
   used. Set this option to disable that. Useful if you want to control
   how the solution appears in the anno. Also see the note on "anno" in the
   section on clues.
-- **colour-&lt;name&gt;:&lt;c&gt; or color-&lt;name&gt;:&lt;c&gt;** Set the
+- **`colour-&lt;name&gt;:&lt;c&gt;` or `color-&lt;name&gt;:&lt;c&gt;`** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
 
 ### Colour schemes
-Using a bunch of exolve-option:colour-&lt;name&gt;:&lt;c&gt; (or, of course,
-exolve-option:color-&lt;name&gt;:&lt;c&gt;) options, the colour scheme of
+Using a bunch of `exolve-option: colour-&lt;name&gt;:&lt;c&gt;` (or, of course,
+`exolve-option: color-&lt;name&gt;:&lt;c&gt;`) options, the colour scheme of
 a puzzle can be altered comprehensively. The following table lists all possible
-supported values for colour-&lt;name&gt;, their default values (that you would
+supported values for `colour-&lt;name&gt;`, their default values (that you would
 be overriding), and descriptions.
 
-| Option                   | Default value | What gets coloured                |
-|--------------------------|---------------|-----------------------------------|
-| colour-background        | black         | The background: blocked squares and bars.|
-| colour-cell              | white         | Light squares.                    |
-| colour-active            | mistyrose     | Squares for the light(s) currently active. The current clue(s) also get(s) this as background colour.|
-| colour-input             | #ffb6b4       | The light square where the solver is typing.|
-| colour-orphan            | linen         | The colour of the current clue(s) without known location(s) in the grid.|
-| colour-light-label       | black         | The number (or nun-numeric label) of a clue, in its first square. |
-| colour-light-label-input | black         | Same as above, in the square where the solver is typing.|
-| colour-light-text        | black         | The typed solution letters in lights.|
-| colour-light-text-input  | black         | Same as above, in the square where the solver is typing.|
-| colour-circle            | gray          | Any circles drawn with the @ decorator.|
-| colour-circle-input      | gray          | Same as above, in the square where the solver is typing.|
-| colour-caret             | gray          | The flashing cursor in the square where the solver is typing.|
-| colour-arrow             | mistyrose     | The right- or down-arrow in the square where the solver is typing.|
-| colour-prefill           | blue          | Any letters pre-filled with the ! decorator.|
-| colour-anno              | darkgreen     | The text of the annotation.       |
-| colour-solved            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
-| colour-separator         | blue          | The hyphens and dashes in multi-word lights. |
-| colour-imp-text          | darkgreen     | "Important" text: setter's name, answer entries, placeholder entries, grid-filling status.|
-| colour-button            | #4caf50       | Buttons (Check/Reveal etc).       |
-| colour-button-hover      | darkgreen     | Buttons with mouseover.           |
-| colour-button-text       | white         | The text in buttons.              |
-| colour-small-button      | inherit       | Small buttons in the current clue(s).|
-| colour-small-button-hover| lightpink     | Small buttons with mouseover.     |
-| colour-small-button-text | darkgreen     | The text in small buttons.        |
+| Option                     | Default value | What gets coloured                |
+|----------------------------|---------------|-----------------------------------|
+| `colour-background`        | black         | The background: blocked squares and bars.|
+| `colour-cell`              | white         | Light squares.                    |
+| `colour-active`            | mistyrose     | Squares for the light(s) currently active. The current clue(s) also get(s) this as background colour.|
+| `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
+| `colour-orphan`            | linen         | The colour of the current clue(s) without known location(s) in the grid.|
+| `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first square. |
+| `colour-light-label-input` | black         | Same as above, in the square where the solver is typing.|
+| `colour-light-text`        | black         | The typed solution letters in lights.|
+| `colour-light-text-input`  | black         | Same as above, in the square where the solver is typing.|
+| `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
+| `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
+| `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
+| `colour-arrow`             | mistyrose     | The right- or down-arrow in the square where the solver is typing.|
+| `colour-prefill`           | blue          | Any letters pre-filled with the ! decorator.|
+| `colour-anno`              | darkgreen     | The text of the annotation.       |
+| `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
+| `colour-separator`         | blue          | The hyphens and dashes in multi-word lights. |
+| `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, placeholder entries, grid-filling status.|
+| `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
+| `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
+| `colour-button-text`       | white         | The text in buttons.              |
+| `colour-small-button`      | inherit       | Small buttons in the current clue(s).|
+| `colour-small-button-hover`| lightpink     | Small buttons with mouseover.     |
+| `colour-small-button-text` | darkgreen     | The text in small buttons.        |
 
-Setting "colour-arrow" and "colour-caret" to the same colour as "colour-input"
+Setting `colour-arrow` and `colour-caret` to the same colour as `colour-input`
 will make them invisible (if so desired).
 
 For example, the following options will make the rendering look quite
-similar to the Guardian's colour scheme (in May 2020).
+similar to the Guardian's colour scheme (as of May 2020).
 ```
   exolve-option: colour-active:lightyellow
   exolve-option: colour-input:#bb3b80 color-arrow:lightyellow
@@ -896,7 +925,7 @@ similar to the Guardian's colour scheme (in May 2020).
   exolve-option: colour-button:#bb3b80 color-button-hover:purple
 ```
 
-## exolve-language
+## `exolve-language`
 
 You can create crosswords in pretty much any language apart from English,
 using Exolve. You need to specify a line that looks like:
@@ -917,7 +946,7 @@ Examples:
 ```
 
 On an exolve-language line, you can optionally specify a third parameter,
-"&lt;max-char-codes-per-letter&gt;". In some languages such as those using the
+`&lt;max-char-codes-per-letter&gt;`. In some languages such as those using the
 Devanagari script, multiple unicode characters are combined together to
 form a single compound letter (for example, स्सा in Devanagari is made up 
 of four characters). In these situations, you can specify
@@ -931,11 +960,11 @@ cell when they finish typing a letter.
 
 When you use a language other than English, you may also want to change the
 text displayed in various buttons etc. to that language. You can do that
-using an exolve-relabel section (see below). Further, you may want to let
+using an `exolve-relabel` section (see below). Further, you may want to let
 solvers know that they have to use a suitable input mechanism for the
 Script you have specified (Google Input Tools works well on Chrome).
 
-## exolve-relabel
+## `exolve-relabel`
 
 You can change the text of any button or label in the rendered grid. This is
 particularly useful if you want to set a crossword in a language other than
@@ -952,24 +981,28 @@ The section can contain multiple such relabelings, one per line. Example:
     down-label: <i>Sinking Down (नीचे)!</i>
 ```
 Here are some of the ids that you can relabel:
-| ID             | Current label (that you can replace) |
-|----------------|--------------------------------------|
-| clear          | Clear this                           |
-| clear-all      | Clear all!                           |
-| check          | Check this                           |
-| check-all      | Check all!                           |
-| reveal         | Reveal this                          |
-| reveal-all     | Reveal all!                          |
-| setter-by      | By                                   |
-| squares-filled | Squares filled                       |
-| submit         | Submit                               |
-| across-label   | Across                               |
-| down-label     | Down                                 |
+| ID               | Current label (that you can replace) |
+|------------------|--------------------------------------|
+| `clear`          | Clear this                           |
+| `clear-all`      | Clear all!                           |
+| `check`          | Check this                           |
+| `check-all `     | Check all!                           |
+| `reveal`         | Reveal this                          |
+| `reveal-all`     | Reveal all!                          |
+| `setter-by`      | By                                   |
+| `squares-filled` | Squares filled                       |
+| `submit`         | Submit                               |
+| `across-label`   | Across                               |
+| `down-label`     | Down                                 |
 
+Note that the actual HTML ids of the elements have an additional "xlv*K*-"
+prefix (so, "xlv1-clear" for the first puzzle on a page, "xlv2-clear" for
+the second, etc.).
 
 ## Saving state
+
 The software automatically saves state. It does so in the URL (after the #)
-and also in a cookie, using the id specified in the [exolve-id](#exolve-id)
+and also in a cookie, using the id specified in the [`exolve-id`](#exolve-id)
 section as the key. The cookie is retained for 90 days after the last change.
 
 Because of limits on cookie size and number of cookies, the state for some
@@ -978,94 +1011,55 @@ other grids from the same site, Such sites should encourage solvers to save
 or bookmark the URL (which also has the state) and/or implement server-side
 state saving.
 
-## Customizations
-Setters can customize their grids by directly making changes to the Exolve
-files outside of the puzzle specs area. However, this may get hard to maintain
-over time, as Exolve goes through new versions. A conservative option is to
-simply not update the HTML part of your puzzle: I do try to make sure that all
-Exolve JavaScript/CSS changes are backwards compatible (so, for example, I do
-not change element IDs in the HTML, and for newly introduced IDs, the
-JavaScript code checks first that such an element exists).
-
-The recommended way to customize is to load separate, additional JavaScript
-and/or CSS files. Exolve provides a JavaScript hook to do any custom
-initialization and/or to modify the HTML using JavaScript. If the setter has
-defined a function called `customizePuzzle()`, then it gets called after
-Exolve has finished with its own set-up. For example, the following code,
-if added within the &lt;script&gt; tag or loaded from a script file, will
-customize the HTML by inserting the italicized red text *New!* after the
-Tools link:
-```
-  function customizePuzzle() {
-    let toolsElement = document.getElementById('show-control-keys')
-    if (!toolsElement) {
-      return
-    }
-    toolsElement.insertAdjacentHTML(
-        'afterend', '<span style="color:red;font-style:italic">New!</span>')
-  }
-```
-
-It will be easier to keep your files synced up to the latest Exolve version
-with these recommendations for customizations.
-
-## Placing the puzzle in a specific HTML element
-By default, the puzzle content gets created as a new last element in the HTML
-Dom. But you can direct it to be placed at different spot by creating an empty
-element (typically a DIV) with id="exolve" anywhere in the HTML file. The
-puzzle content will then be added inside this element.
-
 ## Serving and sharing
 
 I want to maintain a released version in the simple state of a single,
 self-contained HTML file containing all the CSS and all the JavaScript it needs.
 Vanilla JavaScript, nothing to import, no scripts to run, absolutely zero
-dependencies. This is the exolve.html file. But whether you should use that file
-or whether you should use exolve-m.{html,css,js} files may depend on a several
-factors.
+dependencies. This is the [exolve.html](exolve.html) file.
 
 If you have just one or two puzzles that you want to render, and/or you do not
-have much experience with HTML, then make a copy of exolve.html (renaming it
-to whatever you want) and modify it between the exolve-begin and exolve-end
-lines. You can serve the resulting file from your website (no other files are
-needed as dependencies). You can also share the file as an email attachment.
-Recipients would need to download the file and open it in their browser. This
-file would continue to work even when the solver is offline.
+have much experience with HTML, then just make a copy of
+[exolve.html](exolve.html) (renaming it to whatever you want) and modify it
+between the `exolve-begin` and `exolve-end` lines. You can serve the resulting
+file from your website (no other files are needed as dependencies). You can
+also share the file as an email attachment. Recipients would need to download
+the file and open it in their browser. This file would continue to work even
+when the solver is offline.
 
 If you are serving multiple puzzles from your website, it may be better to
-use exolve-m.css and exolve-m.js, and create one copy of exolve-m.html for each
-puzzle (renaming it suitably and then editing it between the exolve-begin and
-exolve-end lines). This avoids duplication, and also allows you to update
-exolve-m.css and exolve-m.js to the latest Exolve version regularly, without
+use [exolve-m.css](exolve-m.css) and [exolve-m.js](exolve-m.js), and create one
+copy of [exolve-m.html](exolve-m.html) for each puzzle (renaming it suitably
+and then editing it between the exolve-begin and exolve-end lines). This avoids
+duplication, and also allows you to update [exolve-m.css](exolve-m.css) and
+[exolve-m.js](exolve-m.js) to the latest Exolve version regularly, without
 having to edit all the .html puzzle files.
 
-A variant of the above approach is to just use exolve-m-simple.html instead of
-exolve-m.html. In this case, you do not have to host exolve-m.js and
-exolve-m.css at all, as they are pulled in from the website that I maintain.
+A variant of the above approach is to just use
+[exolve-m-simple.html](exolve-m-simple.html) instead of
+[exolve-m.html](exolve-m.html). In this case, you do not have to host
+[exolve-m.js](exolve-m.js) and [exolve-m.css](exolve-m.css) at all, as they are
+pulled in from a GitHub-hosted website that I maintain.
 
-Finally, if you just use a blogging platform (such as Blogger), or even
-otherwise, you also have the widget option, detailed in the next subsection.
+Finally, if you just use a blogging platform (such as Blogger), or if you just
+want to add crossword puzzles to web pages (that may have other content and may
+be using other scripts/CSS), you also have the "widget" option, detailed in the
+next subsection.
 
 ### Exolve widget
 
 The simplest serving option might be to embed an "Exolve widget" in your
-blog or website. If you only need to place *one* puzzle on any single page/post
-(which would typically be the case), you can use the following HTML snippet
-anywhere within the HTML of your website/blog-post (replace the puzzle specs
-between exolve-begin and exolve-end with your own puzzle).
+blog or website. You can use the following HTML snippet anywhere within the
+HTML of your website/blog-post (replace the puzzle specs between exolve-begin
+and exolve-end with your own puzzle).
 
 ```
-  ...
-  Any introductory part that precedes the puzzle.
-  ...
-  <!--more-->
-
   <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css"/>
   <script src="https://viresh-ratnakar.github.io/exolve-m.js"></script>
 
   <div id="exolve"></div>
   <script>
-    const puzzleText = `
+    createExolve(`
     ======REPLACE WITH YOUR PUZZLE BELOW======
 
     exolve-begin
@@ -1088,76 +1082,134 @@ between exolve-begin and exolve-end with your own puzzle).
     exolve-end
 
     ======REPLACE WITH YOUR PUZZLE ABOVE======
-    `;
-    createPuzzle();
+    `);
   </script>
 ```
 
-Note that most blogging providers such as Blogger and WordPress create HTML
-home pages containing snippets from multiple posts, which may conflate multiple
-puzzles on such pages. But that can be avoided by making sure that the post
-snippet ends before the puzzle part starts (for Blogger, that can be done
-by adding &lt;!--more--&gt; before the puzzle, as shown in the above example).
-
-If you do want to include multiple puzzles within a single page (or if your
-website's HTML ids/classes conflict with those used in Exolve—mea culpa for not
-using distinctive ids: perhaps I'll fix that at some point), you can create
-Exolve iframe widgets like this (as always, just edit the puzzle specs between
-the exolve-begin and exolve-end lines):
-
-```
-  ...
-  Any introductory part that precedes the puzzle.
-  ...
-
-  <script
-    src="https://viresh-ratnakar.github.io/exolve-widget-creator.js">
-  </script>
-  <div id="exolve"></div>
-  <script>
-    exolveWidget = new ExolveWidgetCreator(
-    `
-    ======REPLACE WITH YOUR PUZZLE BELOW======
-
-    exolve-begin
-      exolve-id: some-unique-id-for-this-puzzle
-      exolve-title: Quick 3x3 (replace with puzzle title)
-      exolve-setter: Gussalufz (replace with setter's pseudonym)
-      exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
-      exolve-width: 3
-      exolve-height: 3
-      exolve-grid:
-        000
-        0.0
-        000
-      exolve-across:
-        1 Running with placement, essentially, for single (3)
-        3 Oddly fluent and entertaining (3)
-      exolve-down:
-        1 Retreating thief forgot to hide bananas (3)
-        2 One suffering for a long time (3)
-    exolve-end
-
-    ======REPLACE WITH YOUR PUZZLE ABOVE======
-    `,
-    "https://viresh-ratnakar.github.io/exolve-widget.html", 1000);
-  </script>
-```
-
-This solution does have a few shortcomings: (1) The state from an iframe widget
-is only saved in a cookie, not in the URL. (2) The current clue strip (shown
-above the grid) does not move up and down to remain visible near the active
-grid cell while scrolling. (3) You have to guess a height for the iframe (1000
-above, but that parameter can be omitted for a default of 1500).
+If you are embedding more than one puzzle widget in a page, you do not have to
+duplicate the first two lines (that just load the CSS and JavaScript).
 
 The widget options should work across devices and browsers (bug reports are
-welcome!).
+welcome!). Prior to v0.84, you could not have more than one Exolve puzzle
+within a single web page (now you can!) and I had created some code to
+get around that by embedding Exolve puzzles in iframes. This code still exists
+(see the files [exolve-widget-creator.js](exolve-widget-creator.js) and
+[exolve-widget.html](exolve-widget.html)), but there really is no reason to bury
+puzzles in iframes now (which has its drawbacks such as adding extra scroll
+bars).
 
-The additional files used in this iframe widget (exolve-widget-creator.js and
-exolve-widget.html) are also included in the repository. You do not have to use
-these files from the copies that I host on my website: you can host your own
-versions of these files on your site: exolve-m.js, exolve-m.css,
-exolve-widget-creator.js, and exolve-widget.html.
+## Customizations
+Beyond changing colours and button texts (which can be done through
+exolve-option and exolve-relabel), setters can customize their grids to add
+special effects, etc. by directly making changes to the Exolve code. However,
+this may get hard to maintain over time, as Exolve goes through new versions.
+
+The recommended way to customize is to load separate, additional JavaScript
+and/or CSS files. Exolve provides a JavaScript hook to do any custom
+initialization and/or to modify the HTML using JavaScript. If the setter has
+defined a function called `customizeExolve(p)`, then it gets called after
+Exolve has finished with its own set-up, with the puzzle object passed as p.
+For example, the following code, if added within the &lt;script&gt; tag or
+loaded from a script file, will customize the HTML by inserting the italicized
+red text *Whew!* after the puzzle.
+```
+  function customizeExolve(p) {
+    p.frame.insertAdjacentHTML(
+        'beforeend', '<span style="color:red;font-style:italic">Whew!</span>')
+  }
+```
+
+It will be easier to keep your files synced up to the latest Exolve version
+by using `customizeExolve()` for customizations, instead of editing the
+HTML or JavaScript directly. You can examine the JavaScript/CSS code to see all
+the members of the Exolve object (passed as the parameter p above) and all the
+HTML class names and IDs.
+
+I try to make sure that all Exolve JavaScript/CSS changes are backwards
+compatible (so, for example, I do not change element IDs in the HTML) so that
+any customizations you do will continue to work. With v0.84, there *were*
+backwards-incompatible changes made, for good reasons. With v0.84, the number
+of JavaScript globals was reduced to just a handful of distinctive ones, and
+all HTML IDs and class names were made distinctive by having them use the
+"xlv" prefix. I'm hopeful that these v0.84 changes will go a long way towards
+making future backwards-incompatible changes unnecessary.
+
+## Placing the puzzle in a specific HTML element
+
+By default, the puzzle content gets created as a new last element in the HTML
+Dom. But you can direct it to be placed at different spot by creating an empty
+element (typically a DIV) with id="exolve" anywhere in the HTML file. The
+puzzle content will then be added inside this element.
+
+## API
+
+The Exolve code creates only the following names at global scope:
+
+- `Exolve`
+- `exolvePuzzles`
+- `createExolve`
+- `createPuzzle` (deprecated).
+
+The most generic way to create a puzzle is with `new Exolve(...)`.
+
+- The `createExolve()` function is a covenient wrapper.
+- The `createExolve()` function looks for and calls the function
+  `customizeExolve()` if it exists (passing it the created puzzle).
+- The `createPuzzle()` function is similar to `createExolve()`, and
+  is deprecated (as the name may conflict with some other code).
+- All HTML ids/class names begin with `xlv`.
+
+```
+/**
+ * This is the global object in which *all* Exolve puzzles rendered on a single
+ * web page are stored as properties, with the puzzle IDs being the keys.
+ */
+var exolvePuzzles;
+
+/**
+ * Constructor to create an Exolve puzzle.
+ *
+ * puzzleText contains the puzzle specs.
+ * containerId is the optional HTML id of the container element in which you
+ *     want to create this puzzle. If empty, the puzzle is created inside
+ *     the element with id "exolve" if it exists (and its id is changed to
+ *     exolve<N> in that case, where <N> is the index of this puzzle among
+ *     all the pages on the page). If containerId is empty and there is no
+ *     element with id "exolve", the the puzzle is created at the end of the
+ *     web page.
+ * customized is an optional function that will get called after the puzzle
+ *     is set up. The Exolve object will be passed to the function.
+ * addStateToUrl should be set to false only if you do *not* want to save
+ *     the puzzle state in the URL (the puzzle state is also saved in a
+ *     cookie, but that does not work for local files). Unless you are
+ *     embedding the puzzle in an iframe for some reason, set this to true.
+ */
+function Exolve(puzzleText,
+                containerId="",
+                customizer=null,
+                addStateToUrl=true) {...}
+
+/**
+ * createExolve(puzzleText) is just a convenient wrapper that looks for
+ *     the customizeExolve() function.
+ * See documentation of parameters above the Exolve constructor definition.
+ */
+function createExolve(puzzleText, containerId="", addStateToUrl=true) {
+  const customizer = (typeof customizeExolve === 'function') ?
+      customizeExolve : null;
+  let p = new Exolve(puzzleText, containerId, customizer, addStateToUrl);
+}
+
+/*
+ * The global variable "puzzleText" should have been set to the puzzle specs.
+ * inIframe can be set to true if the puzzle is embedded in an iframe, which
+ *     will then set addStateToUrl to false.
+ * @deprecated use createExolve().
+ */
+function createPuzzle(inIframe=false) {
+  createExolve(puzzleText, "", !inIframe);
+}
+```
 
 ## Frequently Asked Questions
 

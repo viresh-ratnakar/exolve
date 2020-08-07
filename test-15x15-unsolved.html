@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
 MIT License
 
@@ -11,18 +10,19 @@ Copyright (c) 2020 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.83 August 3 2020
+Version: Exolve v0.84 August 7 2020
 -->
-
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.83"/>
-<script src="exolve-m.js?v0.83"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
+<script src="exolve-m.js?v0.84"></script>
 
 <title>Test-15x15</title>
 
+</head>
+<body>
 <script>
-
-const puzzleText = `
+createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
+
 exolve-begin
   exolve-id: test-15x15
   exolve-title: Test-15x15
@@ -30,6 +30,8 @@ exolve-begin
   exolve-copyright: 2020 Viresh Ratnakar
   exolve-width: 15
   exolve-height: 15
+  exolve-credits: Editing: Dewey Cheatham & Howe.
+  exolve-credits: Second line of credit.
   exolve-grid:
     000000000000000
     0.0.0.0.0.0.0.0
@@ -58,7 +60,7 @@ exolve-begin
     15 See 1A.
     16 See 12.
   exolve-down
-    1 Rbsf jhfskjdh dhfdsjh? (7)
+    1 Rbsf jhfskjdh dhfdsjh? (4-2,1)
     2 Gghjad ahdkj adh (15)
     3 Ukjhskf dfhdskj fskfjslk dlkfjdf slkdjf ajgfkjskk sdfkj (15)
     4 Kjkajd ajdk adhyg (15)
@@ -69,14 +71,9 @@ exolve-begin
    12 Qew ewewew wejwekj jojownbsnk sdnksdnknsdsd (7)
    13 Asjkqj wjqkjw qqwj qwkqwkq qpkqpw qkwp kpwqwpq qwkpqw kqwpqw wqkpq qkpwpqkw qkwpqkwpq wqkpqkwp kpqwlkpq qkwpq (7)
 exolve-end
+
 ======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
-
+`);
 </script>
-
-</head>
-
-<body onload="createPuzzle()">
 </body>
-
 </html>

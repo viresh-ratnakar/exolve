@@ -15,17 +15,20 @@ Version: Exolve v0.84 August 7 2020
 <link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
 <script src="exolve-m.js?v0.84"></script>
 
-<title>Test-Color-Scheme</title>
+<title>Test-Two-Puzzles</title>
 
 </head>
 <body>
+
+First puzzle:
+<div id="exolve"></div>
 <script>
 createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
 
 exolve-begin
   exolve-id: test-color-scheme
-  exolve-title: Test-Color-Scheme
+  exolve-title: Test-2P: Color-Scheme
   exolve-setter: Gussalufz
   exolve-copyright: 2020 Viresh Ratnakar
   exolve-width: 5
@@ -61,5 +64,41 @@ exolve-end
 ======REPLACE WITH YOUR PUZZLE ABOVE======
 `);
 </script>
+
+Second puzzle:
+<div id="exolve"></div>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-id: example-bb
+  exolve-title: Test 2P: Tiny Crossword With Bars And Blocks
+  exolve-setter: Exolve
+  exolve-width: 5
+  exolve-height: 5
+  exolve-grid:
+    H E|B O O
+    I_. . . L
+    W O R L D_
+    A . . . O
+    S U E|A N 
+  exolve-across:
+    1 The man (2)
+    2 Jeer (3)
+    4 Planet (5)
+    6 Take legal action against (3)
+    7 Article (2)
+  exolve-down:
+    1 Greeting (2)
+    3 Aged (3)
+    4 Used to be (3)
+    5 Working (2)
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+</script>
+
 </body>
 </html>

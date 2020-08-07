@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
 <!--
 MIT License
 
@@ -11,18 +10,33 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.83 August 3 2020
+Version: Exolve v0.84 August 7 2020
 -->
-
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.83"/>
-<script src="exolve-m.js?v0.83"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.84"/>
+<script src="exolve-m.js?v0.84"></script>
 
 <title>Test-Exolve-Div</title>
 
-<script>
+</head>
+<body>
 
-const puzzleText = `
+<table border=1>
+<tr>
+  <th>Heading 1</th>
+  <th>Puzzle heading</th>
+</tr>
+<tr>
+  <td>First column</td>
+  <td id="exolve"></td>
+</tr>
+</table>
+
+<p>Some paragraph</p>
+
+<script>
+createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
+
 exolve-begin
   exolve-id: test-exolve-div
   exolve-title: Test-Exolve-Div
@@ -43,32 +57,10 @@ exolve-begin
     3 eli (3) [E-L-I] Deliberate dashes.
     4 wed (3)
 exolve-end
-======REPLACE WITH YOUR PUZZLE ABOVE======
-`;
 
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
 </script>
 
-</head>
-
-<body onload="createPuzzle()">
-
-<table border=1>
-<tr>
-  <th>Heading 1</th>
-  <th>Puzzle heading</th>
-</tr>
-<tr>
-  <td>First column</td>
-  <td id="exolve"></td>
-</tr>
-</table>
-
-<p>Some paragraph</p>
-
-<div id="outermost-stack" style="background-color:red">
-THIS DIV SHOULD NOT APPEAR!
-</div>
-
 </body>
-
 </html>
