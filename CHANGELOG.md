@@ -1,5 +1,24 @@
 # Changelog
 
+### Version: Exolve v0.85 August 12 2020
+
+- Increase font size of clue numbers in grid cells by 1 point.
+- Don't use sonme random keycode to represent "shift-tab": pass a boolean to
+  indicate "shift"
+- Diagramless bug fix: active clues were not getting shown even in the
+  non-diagramless parts of the puzzle, even when their start cells were
+  specified.
+- Complain about invalid chars if found in grid spec.
+- Found and fixed another couple of Diagramless corner case bugs:
+  - extendsDiagramlessA/D() were incorrectly ignoring whether the previous cell
+    ended in a bar.
+  - Tab-navigation with non-diagramless adjoining diagramless was broken
+  - Simplified diagramless gnav: it now happens in units of consecutive cells
+    when possible, instead of single cells.
+- Found and fixed a bug in jigsaw "reveal this" from the clues list side that
+  had sneaked in probably with v0.84.
+- Shorten "Diagramless" to "Dgmless"
+
 ### Version: Exolve v0.84 August 7 2020
 
 - Major refactoring to address the following problems that were roadblocks
