@@ -7,7 +7,7 @@
 - After dialogs (etc.), set focus back to gridInput based upon whether
   gridInputWrapper.style.display is not 'none' (rather than from usingGnav: we
   could be !usingGnav but still have some active cells).
-- Add a CSS style rool for setting font family and font size (same as grid
+- Add a CSS style rule for setting font family and font size (same as grid
   letter) for the outermost .xlv-frame element, so that when embedding we do
   not inherit weird fonts unintentionally.
 
