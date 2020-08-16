@@ -1,6 +1,6 @@
 # Changelog
 
-### Version: Exolve v0.86 August 15
+### Version: Exolve v0.86 August 15 2020
 
 - When going to next/prev clue from small-button clicks on the current clue
   strip, don't jump focus to a placeholder input in the clues list.
