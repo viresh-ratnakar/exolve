@@ -125,10 +125,7 @@ a *Submit* buttion.
 
 When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
-different clue, when there are linked clues that "cover" multiple clues). In a
-diagramless square in a puzzle for which the solver has not provided all
-solutions, there is no such automatic move after entereing a letter (as the
-software itself has no way of knowing where the next square is).
+different clue, when there are linked clues that "cover" multiple clues).
 
 The solver can press Tab/Shift-Tab to navigate to the next/previous clue in the
 current direction. The solver can use the arrow keys to navigate to the
@@ -269,10 +266,10 @@ goes all the way to the next `exolve-something` section. There should be exactly
 as many lines in this section as the height of the grid. On each line, the
 squares in that row of the grid are specified.
 
-There are two kinds of puzzles: with solutions provided and without solutions.
-Here are simple examples of both:
+There are two kinds of puzzles: with solutions provided and without solutions
+provided. Here are simple examples of both:
 
-Grid with solutions:
+Grid with solutions provided:
 ```
   exolve-grid:
     ACE
@@ -284,7 +281,7 @@ indicate blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE,
 3 Down = ERR, and 3 Across = EAR. When solution letters are included like this,
 the control buttons for checking/revealing answers get shown. 
 
-Grid without solutions:
+Grid without solutions provided:
 ```
   exolve-grid:
     000
@@ -346,27 +343,27 @@ This will work:
 ```
 
 As a convenient reference, here again is the complete list of decorators:
-```
-| draw bar after
-_ draw bar under
-+ draw bar after and under
-@ draw circle
-* diagramless
-! prefilled
-```
+| Decorator | Meaning                            |
+|-----------|------------------------------------|
+| `\|`      | Has a bar after it, to the right.  |
+| `_`       | Has a bar under it. at the bottom. |
+| `+`       | Has bars both after and under.     |
+| `@`       | Has an inscribed circle.           |
+| `*`       | Is diagramless.                    |
+| `!`       | Is prefilled.                      |
 
 ## Some details about clue numbers
 Across and down clue numbers are automatically inferred from the grid, except
 in two cases. The first is when there are diagramless cells and solutions
-have not been provided. The second is when the setter opts to deliberately
-not provide associations between grid squares and clues, by using non-numeric
-clue labels without providing their grid locations. When the solver is entering
-a value in a light for which the clue association is not known, the highlighted
-"current clue" browsable interface runs through all the clues for which no
-grid cells are known.
+have not been provided. The second is in jigsaw-style puzzles, where the setter
+opts to deliberately not provide associations between grid squares and clues,
+by using non-numeric clue labels without providing their grid locations. When
+the solver is entering a value in a light for which the clue association is not
+known, the highlighted "current clue" browsable interface runs through all the
+clues for which all grid cells are not known.
 
 ## Extended chessboard notation
-In a few places (such as when specifying colouring or ninas or locations of
+In a few cases (such as when specifying colouring or ninas or locations of
 some clue numbers in diagramless puzzles), you will need to specify the location
 of a square in the grid. You can do that in one of the following ways:
 ```
@@ -396,13 +393,14 @@ If the setter wants to *not* provide solutions for a puzzle that has some
 diagramless squares, then the blocked square marker (".") should not be used
 in the blocked squares that are also diagramless (otherwise the solver can peak
 into the HTML source and see where the blocked squares are). Each diagramless
-square should be specified with a "0" followed by the diagramless decorator,
-i.e., "0\*". But then, even the exolve software has no way of knowing which
-grid square any clue starts on. However, sometimes, even in a puzzle with
-diagramless squares, the setter does want to provide the clue start locations
-for *some* clues. Exolve provides a way to do this: the setter can optionally
-include the location of the square where a clue starts for any clue, using the
-extended chessboard notation. Details are provided in the next section.
+square in such a puzzle should be specified with a "0" followed by the
+diagramless decorator, i.e., as "0\*". But then, even the Exolve software has no
+way of knowing which grid square any clue starts on. However, sometimes, even
+in a puzzle with diagramless squares, the setter may want to provide the clue
+start locations for *some* clues. Exolve provides a way to do this: the setter
+can optionally include the location of the square where a clue starts for any
+clue, using the extended chessboard notation. Details are provided in the next
+section.
 
 ## `exolve-across`, `exolve-down`, `exolve-nodir`
 The `exolve-across` and `exolve-down` sections should be used to specify the
@@ -423,11 +421,11 @@ enum (the enum is not strictly required). Example:
 If the enum indicates multiple words (for example, *(4,3)*), or if the enum
 indicates hyphenated words (for example, *(4-2)*), then the word boundary or
 the hyphen gets displayed in the grid, to help solvers. The software uses the
-following criteria to decide what constitites the enum part of a clue: a pair
+following criteria to decide what constitutes the enum part of a clue: a pair
 of opening and closing parentheses, containing only numbers, hyphens, commas,
-and apostrophes, starting with a number. The software also treats a pair of
-parentheses containing the text "word" or "letter" or "?" with anything before
-are after it as an enum (to allow the setter to specify the enum as
+apostrophes, and periods, starting with a number. The software also treats a
+pair of parentheses containing the text "word" or "letter" or "?" with anything
+before are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
 
 In a grid with solutions provided, the setter may include annotations for
