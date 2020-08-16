@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.85 August 12 2020
+Version: Exolve v0.86 August 15 2020
 */
 
 @media (max-width: 500px) {
@@ -86,6 +86,7 @@ Version: Exolve v0.85 August 12 2020
 }
 .xlv-anno-text {
   font-family: monospace;
+  font-size: 12px;
 }
 .xlv-flex-row {
   display: flex;
@@ -221,6 +222,7 @@ Version: Exolve v0.85 August 12 2020
   text-decoration: none;
   display: inline-block;
   font-family: monospace;
+  font-size: 13px;
   font-weight: bold;
 }
 .xlv-small-button:hover {
@@ -252,6 +254,7 @@ Version: Exolve v0.85 August 12 2020
 }
 .xlv-solution {
   font-family: monospace;
+  font-size: 12px;
   font-weight: bold;
 }
 .xlv-question {

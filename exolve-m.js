@@ -70,7 +70,7 @@ function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
                 addStateToUrl=true) {
-  this.VERSION = 'Exolve v0.85 August 12 2020'
+  this.VERSION = 'Exolve v0.86 August 15 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -2446,9 +2446,13 @@ Exolve.prototype.setUpGnav = function() {
   }
 }
 
-Exolve.prototype.applyColorScheme = function() {
+Exolve.prototype.applyStyles = function() {
   let customStyles = document.createElement('style')
   customStyles.innerHTML = `
+    .xlv-frame {
+      font-size: ${this.letterSize}px;
+      font-family: serif;
+    }
     #${this.prefix}-frame span.xlv-solved,
     #${this.prefix}-frame .xlv-solved td:first-child {
       color: ${this.colorScheme['solved']};
@@ -3231,10 +3235,8 @@ Exolve.prototype.cnavNext = function() {
       next = this.clues[next].next
     }
   }
-  this.cnavTo(next)
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.cnavTo(next, false)
+  this.refocus()
 }
 Exolve.prototype.cnavPrev = function() {
   if (!this.currClueIndex || !this.clues[this.currClueIndex] ||
@@ -3249,10 +3251,8 @@ Exolve.prototype.cnavPrev = function() {
       prev = this.clues[prev].prev
     }
   }
-  this.cnavTo(prev)
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.cnavTo(prev, false)
+  this.refocus()
 }
 
 // Select a clicked clue.
@@ -3293,7 +3293,9 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
     if (grabFocus && this.cluesPanelLines > 0 &&
         this.isVisible(theClue.clueTR.parentElement)) {
       theClue.clueTR.scrollIntoView()
-      this.gridInput.scrollIntoView()  // Else we may move away from the cell!
+      if (this.gridInputWrapper.style.display != 'none') {
+        this.gridInput.scrollIntoView()  // Else we may move away from the cell!
+      }
     }
     this.activeClues.push(theClue.clueTR)
   }
@@ -3352,9 +3354,9 @@ Exolve.prototype.gnavIsClueless = function() {
        !gridCell.nodirClues.includes(this.currDir))));
 }
 
-Exolve.prototype.cnavTo = function(activeClueIndex) {
+Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
   this.deactivateCurrClue();
-  let cellDir = this.cnavToInner(activeClueIndex, true)
+  let cellDir = this.cnavToInner(activeClueIndex, grabFocus)
   if (cellDir) {
     this.deactivateCurrCell();
     this.gnavToInner([cellDir[0], cellDir[1]], cellDir[2])
@@ -4402,9 +4404,7 @@ Exolve.prototype.clearCurr = function() {
     this.updateClueState(this.currClueIndex, false, 'unsolved')
   }
   this.updateAndSaveState()
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.refocus()
 }
 
 Exolve.prototype.clearAll = function() {
@@ -4422,9 +4422,7 @@ Exolve.prototype.clearAll = function() {
     }
   }
   if (!confirm(message)) {
-    if (this.usingGnav) {
-      this.gridInput.focus()
-    }
+    this.refocus()
     return
   }
   for (let row = 0; row < this.gridHeight; row++) {
@@ -4468,9 +4466,7 @@ Exolve.prototype.clearAll = function() {
     }
   }
   this.updateAndSaveState()
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.refocus()
 }
 
 Exolve.prototype.checkCurr = function() {
@@ -4536,16 +4532,12 @@ Exolve.prototype.checkCurr = function() {
     this.updateActiveCluesState()
     this.updateAndSaveState()
   }
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.refocus()
 }
 
 Exolve.prototype.checkAll = function() {
   if (!confirm('Are you sure you want to clear mistakes everywhere!?')) {
-    if (this.usingGnav) {
-      this.gridInput.focus()
-    }
+    this.refocus()
     return
   }
   let allCorrect = true
@@ -4574,9 +4566,7 @@ Exolve.prototype.checkAll = function() {
     }
     this.updateAndSaveState()
   }
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.refocus()
 }
 
 Exolve.prototype.revealClueAnno = function(ci) {
@@ -4676,16 +4666,12 @@ Exolve.prototype.revealCurr = function() {
     this.updateClueState(this.currClueIndex, false, 'solved')
   }
   this.updateAndSaveState()
-  if (this.usingGnav) {
-    this.gridInput.focus()
-  }
+  this.refocus()
 }
 
 Exolve.prototype.revealAll = function() {
   if (!confirm('Are you sure you want to reveal the whole solution!?')) {
-    if (this.usingGnav) {
-      this.gridInput.focus()
-    }
+    this.refocus()
     return
   }
   for (let row = 0; row < this.gridHeight; row++) {
@@ -4721,7 +4707,11 @@ Exolve.prototype.revealAll = function() {
     this.updateClueState(ci, false, 'solved')
   }
   this.updateAndSaveState()
-  if (this.usingGnav) {
+  this.refocus()
+}
+
+Exolve.prototype.refocus = function() {
+  if (this.gridInputWrapper.style.display != 'none') {
     this.gridInput.focus()
   }
 }
@@ -4845,7 +4835,7 @@ Exolve.prototype.createPuzzle = function() {
   this.setWordEndsAndHyphens();
   this.setUpGnav()
 
-  this.applyColorScheme()
+  this.applyStyles()
 
   this.displayQuestions()
   this.displayClues()

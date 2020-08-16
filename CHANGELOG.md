@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v0.86 August 15
+
+- When going to next/prev clue from small-button clicks on the current clue
+  strip, don't jump focus to a placeholder input in the clues list.
+- After dialogs (etc.), set focus back to gridInput based upon whether
+  gridInputWrapper.style.display is not 'none' (rather than from usingGnav: we
+  could be !usingGnav but still have some active cells).
+- Add a CSS style rool for setting font family and font size (same as grid
+  letter) for the outermost .xlv-frame element, so that when embedding we do
+  not inherit weird fonts unintentionally.
+
 ### Version: Exolve v0.85 August 12 2020
 
 - Increase font size of clue numbers in grid cells by 1 point.
