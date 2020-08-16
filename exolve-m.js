@@ -70,7 +70,7 @@ function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
                 addStateToUrl=true) {
-  this.VERSION = 'Exolve v0.86 August 15 2020'
+  this.VERSION = 'Exolve v0.87 August 16 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -109,6 +109,8 @@ function Exolve(puzzleText,
   // they belong to, for revealing.
   this.cellsToOrphan = {}
   this.szCellsToOrphan = 0
+
+  this.frameTop = 0
 
   this.MAX_GRID_SIZE = 100
   this.GRIDLINE = 1
@@ -2452,6 +2454,9 @@ Exolve.prototype.applyStyles = function() {
     .xlv-frame {
       font-size: ${this.letterSize}px;
       font-family: serif;
+      font-weight: 400;
+      line-height: normal;
+      box-sizing: border-box;
     }
     #${this.prefix}-frame span.xlv-solved,
     #${this.prefix}-frame .xlv-solved td:first-child {
@@ -2985,10 +2990,12 @@ Exolve.prototype.deactivateCurrClue = function() {
   this.revealButton.disabled = true
 }
 
+// this.frameTop is where the top of xlv-frame was at start-up. We do not
+// move the curr clue above that as it may be occluded by other content.
 Exolve.prototype.makeCurrClueVisible = function() {
   // Check if grid input is visible.
   const inputPos = this.gridInput.getBoundingClientRect();
-  if (inputPos.top < 0) {
+  if (inputPos.top < this.frameTop) {
     return
   }
   let windowH = this.getViewportHeight()
@@ -3015,18 +3022,17 @@ Exolve.prototype.makeCurrClueVisible = function() {
   // gridInput is visible
   const top = cluePos.top
   const parentTop = clueParentPos.top
-  // Reposition
-  let newTop = 0
-  if (parentTop >= 0) {
+  if (parentTop >= this.frameTop) {
     // Parent is below viewport top: use normal positioning.
     this.currClue.style.top = normalTop + 'px';
     return
   }
-  let adjustment = cluePos.height + clearance - inputPos.top;
+  // Reposition
+  let adjustment = cluePos.height + clearance - inputPos.top + this.frameTop
   if (adjustment < 0) {
     adjustment = 0;
   }
-  this.currClue.style.top = (0 - parentTop - adjustment) + 'px';
+  this.currClue.style.top = (this.frameTop - parentTop - adjustment) + 'px';
 }
 
 Exolve.prototype.gnavToInner = function(cell, dir) {
@@ -3982,6 +3988,8 @@ Exolve.prototype.createListeners = function() {
   // for barred grids where background is not visible).
   document.getElementById(this.prefix + '-title').addEventListener(
     'click', boundDeactivator);
+  
+  this.frameTop = Math.max(this.frame.getBoundingClientRect().top, 0)
   let boundClueVisiblizer = this.makeCurrClueVisible.bind(this)
   window.addEventListener('scroll', boundClueVisiblizer)
   window.addEventListener('resize', boundClueVisiblizer)

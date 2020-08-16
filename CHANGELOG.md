@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v0.87 August 16 2020
+
+- Some CSS protections for styles that get inherited when embedding. In
+  particular, box-sizing for the clue number column TD in clues lists
+  should not have 'box-sizing: border-box' as we want to exclude the
+  padding from its 2ch max-size.
+- When keeping the current clue visible while scrolling, use the initial
+  location of the xlv-frame element as the top, to account for the fact
+  there might be sticky nav elements above the puzzle that can occlude.
+
 ### Version: Exolve v0.86 August 15 2020
 
 - When going to next/prev clue from small-button clicks on the current clue

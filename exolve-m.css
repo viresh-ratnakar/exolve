@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.86 August 15 2020
+Version: Exolve v0.87 August 16 2020
 */
 
 @media (max-width: 500px) {
@@ -76,6 +76,7 @@ Version: Exolve v0.86 August 15 2020
 }
 .xlv-frame td:first-child:not(.xlv-filler) {
   max-width: 2ch;
+  box-sizing: content-box;
   white-space: nowrap;
   overflow: visible;
   font-weight: bold;
