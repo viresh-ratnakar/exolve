@@ -849,15 +849,15 @@ The list of currently supported options is as follows:
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
-- **`clues-panel-lines:&lt;N&gt;`** Limit the across/down/nodir clues boxes to
+- **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
   about N lines of text, adding scrollbars if needed.
-- **`offset-top:&lt;N&gt;`** Draw the grid with this much space above and under
+- **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   customizePuzzle(), for example.
-- **`offset-left:&lt;N&gt;`** Draw the grid with this much space to the left and
+- **`offset-left:<N>`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using customizePuzzle(), for example.
-- **`grid-background:&lt;c&gt;`** Set the colour of the black cells to &lt;c&gt;,
+- **`grid-background:<c>`** Set the colour of the black cells to &lt;c&gt;,
   which should be a valid HTML colour name/code. This option is deprecated.
   Please use color-background (see below).
 - **`allow-digits`** If this option is specified, then we allow solvers to enter
@@ -871,16 +871,16 @@ The list of currently supported options is as follows:
   used. Set this option to disable that. Useful if you want to control
   how the solution appears in the anno. Also see the note on "anno" in the
   section on clues.
-- **`colour-&lt;name&gt;:&lt;c&gt;` or `color-&lt;name&gt;:&lt;c&gt;`** Set the
+- **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
 
 ### Colour schemes
-Using a bunch of `exolve-option: colour-&lt;name&gt;:&lt;c&gt;` (or, of course,
-`exolve-option: color-&lt;name&gt;:&lt;c&gt;`) options, the colour scheme of
+Using a bunch of `exolve-option: colour-<name>:<c>` (or, of course,
+`exolve-option: color-<name>:<c>`) options, the colour scheme of
 a puzzle can be altered comprehensively. The following table lists all possible
-supported values for `colour-&lt;name&gt;`, their default values (that you would
+supported values for `colour-<name>`, their default values (that you would
 be overriding), and descriptions.
 
 | Option                     | Default value | What gets coloured                |
@@ -944,7 +944,7 @@ Examples:
 ```
 
 On an exolve-language line, you can optionally specify a third parameter,
-`&lt;max-char-codes-per-letter&gt;`. In some languages such as those using the
+`<max-char-codes-per-letter>`. In some languages such as those using the
 Devanagari script, multiple unicode characters are combined together to
 form a single compound letter (for example, स्सा in Devanagari is made up 
 of four characters). In these situations, you can specify
@@ -1085,7 +1085,10 @@ and exolve-end with your own puzzle).
 ```
 
 If you are embedding more than one puzzle widget in a page, you do not have to
-duplicate the first two lines (that just load the CSS and JavaScript).
+duplicate the first two lines (that just load the CSS and JavaScript). Please
+note that some blogging platforms (such as WordPress) do not let you use
+JavaScript in their basic, free plans. Exolve widgets like the above work fine
+in Blogger though.
 
 The widget options should work across devices and browsers (bug reports are
 welcome!). Prior to v0.84, you could not have more than one Exolve puzzle
