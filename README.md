@@ -435,7 +435,7 @@ solver clicks on the "Reveal all" button or on the "Reveal this" button when
 that clue is the current clue. Example:
 ```
   exolve-across:
-    28	Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
+    28 Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
 ```
 
 If a clue does not provide its anno, the software still creates a minimal anno
@@ -1181,21 +1181,26 @@ var exolvePuzzles;
  *     the puzzle state in the URL (the puzzle state is also saved in a
  *     cookie, but that does not work for local files). Unless you are
  *     embedding the puzzle in an iframe for some reason, set this to true.
+ * visTop should be set to the height of any sticky/fixed position elements
+ *     at the top of the page (normally just 0).
  */
 function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
-                addStateToUrl=true) {...}
+                addStateToUrl=true,
+                visTop=0) {...}
 
 /**
  * createExolve(puzzleText) is just a convenient wrapper that looks for
  *     the customizeExolve() function.
  * See documentation of parameters above the Exolve constructor definition.
  */
-function createExolve(puzzleText, containerId="", addStateToUrl=true) {
+function createExolve(puzzleText, containerId="",
+                      addStateToUrl=true, visTop=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
-  let p = new Exolve(puzzleText, containerId, customizer, addStateToUrl);
+  let p = new Exolve(puzzleText, containerId, customizer,
+                     addStateToUrl, visTop);
 }
 
 /*

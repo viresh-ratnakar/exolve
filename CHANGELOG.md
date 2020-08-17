@@ -6,12 +6,10 @@
   particular, box-sizing for the clue number column TD in clues lists
   should not have 'box-sizing: border-box' as we want to exclude the
   padding from its 2ch max-size.
-- When keeping the current clue visible while scrolling, use the initial
-  location of the xlv-frame element as the top, to account for the fact
-  there might be sticky nav elements above the puzzle that can occlude.
-- Added minor tweak post first check-in: use frame-top from the first
-  Exolve puzzle in case there are many. Also, call scrollIntoView() on
-  document.body first, to get frameTop from the unscrolled state.
+- When keeping the current clue visible while scrolling, allow for
+  fixed/sticky-positioned navbars at the top by adding a visTop param
+  to the constructor, that clients can optionally pass as the height of
+  any sticky nav bar at the top.
 
 ### Version: Exolve v0.86 August 15 2020
 
