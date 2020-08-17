@@ -9,6 +9,9 @@
 - When keeping the current clue visible while scrolling, use the initial
   location of the xlv-frame element as the top, to account for the fact
   there might be sticky nav elements above the puzzle that can occlude.
+- Added minor tweak post first check-in: use frame-top from the first
+  Exolve puzzle in case there are many. Also, call scrollIntoView() on
+  document.body first, to get frameTop from the unscrolled state.
 
 ### Version: Exolve v0.86 August 15 2020
 

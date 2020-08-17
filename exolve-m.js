@@ -3989,7 +3989,18 @@ Exolve.prototype.createListeners = function() {
   document.getElementById(this.prefix + '-title').addEventListener(
     'click', boundDeactivator);
   
-  this.frameTop = Math.max(this.frame.getBoundingClientRect().top, 0)
+  if (this.index == 1) {
+    document.body.scrollIntoView()
+    this.frameTop = Math.max(this.frame.getBoundingClientRect().top, 0)
+  } else {
+    for (let pid in exolvePuzzles) {
+      let p = exolvePuzzles[pid]
+      if (p.index == 1) {
+        this.frameTop = p.frameTop
+        break
+      }
+    }
+  }
   let boundClueVisiblizer = this.makeCurrClueVisible.bind(this)
   window.addEventListener('scroll', boundClueVisiblizer)
   window.addEventListener('resize', boundClueVisiblizer)
