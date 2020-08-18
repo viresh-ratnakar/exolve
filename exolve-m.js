@@ -2623,7 +2623,7 @@ Exolve.prototype.displayClues = function() {
     const emsStyle = '' + ems + 'em'
     this.acrossPanel.style.height = emsStyle
     this.downPanel.style.height = emsStyle
-    if (nodirPanel) {
+    if (this.nodirPanel) {
       this.nodirPanel.style.height = emsStyle
     }
   }

@@ -10,6 +10,7 @@
   fixed/sticky-positioned navbars at the top by adding a visTop param
   to the constructor, that clients can optionally pass as the height of
   any sticky nav bar at the top.
+- Fixed bug in option clues-panel-lines.
 
 ### Version: Exolve v0.86 August 15 2020
 
