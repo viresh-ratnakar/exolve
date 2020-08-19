@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.88"/>
+<script src="exolve-m.js?v0.88"></script>
+
+<title>Test-Skipped-Numbers</title>
+
+</head>
+<body>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-id: test-skipped-numbers
+  exolve-width: 7
+  exolve-height: 5
+  exolve-grid:
+    0~0 0 0 0~0 0
+    0 . 0 . 0 . 0
+    0~0 0 0 0 0 0
+    0 . 0 . 0 . 0
+    0 0 0 0 0 0 0
+  exolve-across:
+    3 Bottom row (7)
+    #a3 [X] Middle row (7)
+  exolve-down:
+    1 Third column (5)
+    2 Seventh column (5)
+  exolve-nodir:
+    #e5 #e4 #e3 #e2 #e1 [Q] This clue should get placed in the 5th column (5)
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+
+createExolve(`
+  exolve-id: test-skipped-numbers-2
+  exolve-width: 3
+  exolve-height: 3
+  exolve-grid:
+    0~0 0
+    0 . 0
+    0~0 0
+  exolve-across:
+    #a1 [B] Bottom row (3)
+  exolve-down:
+    1 Third column (3)
+  exolve-nodir:
+    #a3 #b3 #c3 [Q] Top row [3]
+exolve-end
+`);
+
+</script>
+</body>
+</html>

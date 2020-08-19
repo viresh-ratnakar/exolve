@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v0.88 August 19 2020
+
+- Make *all* messages/labels/hover-texts customizable through exolve-relabel.
+- Add decorator "~" that marks as cell as "skipped-number" cell. This should
+  be used to not assign the normal number to a cell that starts an across or
+  down clue (that number will get assigned to the next cell that starts a clue).
+  Can be used to to create specialty grids with unclued lights or lights
+  clued in special ways. This can also be used to create non-numerically-
+  labelled lights, as an alternative to hide-inferred-clue-numbers.
+- Better clue panel scrolling when clues-panel-lines is used: instead of
+  scrollIntoView(), we just scroll the clues panel by the needed amount.
+
 ### Version: Exolve v0.87 August 16 2020
 
 - Some CSS protections for styles that get inherited when embedding. In

@@ -3,17 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<!--
-MIT License
-
-Copyright (c) 2020 Viresh Ratnakar
-
-See the full license notice in exolve-m.js.
-
-Version: Exolve v0.87 August 16 2020
--->
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.87"/>
-<script src="exolve-m.js?v0.87"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.88"/>
+<script src="exolve-m.js?v0.88"></script>
 
 <title>Test-Hindi</title>
 
@@ -34,13 +25,24 @@ exolve-begin
   exolve-option: colour-arrow:gray color-small-button-hover:palegreen
   exolve-language: hi Devanagari
   exolve-relabel:
+    setter-by: रूचिकार:
     across-label: बांये से दांये
     down-label: ऊपर से नीचे
     clear: मिटाएं
+    clear.hover: Hindi me likha hai, Clear this!
     clear-all: सब मिटा दो!
     reveal: दिखा दो यार
     reveal-all: सब दिखा दो यार!
-    setter-by: पगला  सेटर:
+    reveal-all.hover: Hindi me likha hai, Reveal all!
+    across-letter: <span style="font-size:10px">आ</span>
+    down-letter: <span style="font-size:10px">नी</span>
+    curr-clue-prev: <--
+    curr-clue-prev.hover: Back to the future
+    curr-clue-next: -->
+    curr-clue-next.hover: Onwards!
+    placeholder.hover: Yahan likho
+    placeholder-copy.hover: Copy karo
+    confirm-mismatched-copy: Itno se itne tak?
   exolve-prelude:
    Please use a suitable mechanism for entering Devanagari letters,
    such as Google Input Tools.
@@ -54,6 +56,8 @@ exolve-begin
   exolve-down:
     1 Consumption (3)
     2 Ready (3)
+  exolve-nodir:
+    [Q] Kasa kai (5)?
 exolve-end
 
 ======REPLACE WITH YOUR PUZZLE ABOVE======
