@@ -11,6 +11,20 @@
 </head>
 <body>
 <script>
+function addBottomLeftTurn(puz, row, col) {
+  const turn = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  turn.setAttributeNS(null, 'x', puz.cellLeftPos(col, puz.NUMBER_START_X));
+  turn.setAttributeNS(null, 'y', puz.cellTopPos(row, puz.squareDim - 3));
+  turn.setAttributeNS(null, 'class', 'xlv-cell-num');
+  turn.style.fill = puz.colorScheme['light-label']
+  turn.style.fontSize = puz.numberSize + 'px'
+  const num = document.createTextNode('↳')
+  turn.appendChild(num);
+  puz.svg.appendChild(turn)
+}
+function customizeExolve(puz) {
+  addBottomLeftTurn(puz, 2, 0)
+}
 createExolve(`
 ======REPLACE WITH YOUR PUZZLE BELOW======
 
@@ -31,24 +45,28 @@ exolve-begin
     1 . 2|. 3 .|4 . 5
   exolve-nodir:
     <b>Hopping Across</b>
-    #a6 #d6 #g6 [1] Adg (3)
     #c6 #f6 #i6 [2] Cfi (3)
     #a4 #d4 #g4 [7] Jmp (3)
     ---
     <b>Hopping Down</b>
     #d6 #d4 #d2 [3] Dmd (3)
+    ---
+    <b>Turners</b>
+    #a6 #a5 #a4 #b4 #c4 [1] A1JKL (5)
+    #g6 #h6 #i6 #i5 #i4 [5] ghi5r (5)
+    #a4 #b4 #c4 #d4 #e4 #f4 #g4 #h4 #i4 #i3 #i2 #i1 [7] jklmnopqr0i5 (12)
   exolve-across:
     1 Abc (3)
     3 Def (3)
-    5 Ghi (3)
-    7 Jkl (3)
-    8 Mno (3)
-    9 Pqr (3)
+    5 *
+    7 *
+    8 *
+    9 *
     15 Abc (3)
     16 Def (3)
     17 Ghi (3)
   exolve-down:
-    1 A1J (3)
+    1*
     2 C2L (3)
     4 E3n (3)
     5 G4p (3)
@@ -57,7 +75,7 @@ exolve-begin
     11 7c2 (3)
     12 8e3 (3)
     13 9g4
-    14 0i5
+    14 *
 exolve-end
 
 ======REPLACE WITH YOUR PUZZLE ABOVE======

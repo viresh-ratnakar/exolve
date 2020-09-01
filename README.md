@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.88 August 19 2020
+### Version: Exolve v0.89 August 31 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -529,6 +529,16 @@ needed. Example:
 Any line in a clues section that starts with --- initiates the rendering of
 a new table of clues.
 
+### Order of rendered clue lists
+The order in which the exolve-across, exolve-down, and exolve-nodir sections
+appear in the puzzle specs is the order in which they will be displayed.
+Additionally, direction-toggling will also follow the same sequence. Thus,
+if you list nodir clues before across and down clues, and the solver clicks
+on a cell that does not have a light in the currently active direction (say
+Across), but does have both a nodir light and an across light going through
+it, the nodir light will become active (as nodir clues are listed before across
+clues in the specs).
+
 ### Non-numeric clue labels
 If you want to use non-numeric clue labels (such as A, B, C, etc.), you can
 do that by enclosing the non-numeric clue label in square brackets, like this:
@@ -727,6 +737,28 @@ you have provided the locations of _all_ its cells (that is, you have provided
 the locations of at least two cells), _and_ these locations belong to an unclued
 light in the grid, then the software makes the label of that light be Q.
 
+### Deleted clues
+Sometimes, when using nodir clues, you might subsume some across/down clues
+entirely within some nodir clues. In such cases, you might want to not specify
+any clue for the across/down subsumed clue, and you would not even want the
+across/down clue to get highlighted when navigating the grid/clues. You can
+mark an across/down clue "deleted" by simply setting it to \*. For example:
+```
+  exolve-grid:
+    TUB
+    A.O
+    CKY
+  exolve-across:
+    1 tub (3)
+    3 *
+  exolve-down:
+    1 *
+    2 boy (3)
+  exolve-nodir:
+    #a3 #a2 #a1 #b1 #c1 [1] tacky (5)
+  
+```
+
 ## `exolve-explanations`
 In a grid that includes solutions, the setter may provide additional notes,
 explanations, commentary, etc., in an `exolve-explanations` section. Just like
@@ -882,6 +914,8 @@ modify the URL to make a direct submission link, like this:
 ## `exolve-option`
 In this single-line, repeatable section, the setter can specify certain options.
 Multiple, space-separated options may be provided on each exolve-option line.
+For options that need a value (provided after a colon), there should not be
+any leading space after the colon.
 The list of currently supported options is as follows:
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using

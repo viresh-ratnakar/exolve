@@ -1,5 +1,23 @@
 # Changelog
 
+### Version: Exolve v0.89 August 31 2020
+
+- Add "conf" parameter defaulting to true, to revealAll(), checkAll(),
+  clearAll(). Useful for programmatically revealing/checking/clearing
+  all cells without creating a confirmation dialog.
+- Follow the order used in the puzzle specs among across/down/nodir clue lists
+  for rendering them. Also use that order for choosing the direction when
+  toggling.
+- Allow some across/down clues to be "deleted" in the sense that they will not
+  get highlighted as we go through the clues. The use-case is for omitting some
+  across/down clues that are completely subsumed by some nodir clues (See
+  exolve/issues/37). To mark a clue as deleted, specify it as * after its
+  clue number.
+- Add more indentation space for clue labels that are not
+  numbers/digits/letters.
+- Bug-fix: setting the "left" attr of curr-clue-parent was getting skipped
+  in a corner case.
+
 ### Version: Exolve v0.88 August 19 2020
 
 - Make *all* messages/labels/hover-texts customizable through exolve-relabel.
