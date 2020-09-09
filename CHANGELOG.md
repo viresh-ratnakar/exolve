@@ -1,5 +1,41 @@
 # Changelog
 
+### Version: Exolve v0.90 Septeber 8 2020
+
+- Add functionality to limit checking/revealing to just the current cell
+  rather than the whole current light. This is done when there is a long
+  click (500+ms) on "Check this" or "Reveal this." Caveat; this does
+  not work on phones and tablets (I only tested on Android) as they deal
+  with long-presses in some special way that I'll try to work with, at some
+  point.
+- Change the default background color of the current clue strip (shown above
+  the grid) to 'white' instead of 'mistyrose' (the active clues in the clues
+  lists still get the 'mistyrose'). This results in a more relaxed appearance
+  (I should have realized this and made this change earlier!). Of course
+  this can be customized too (`exolve-option: color-currclue:mistyrose` will
+  restore the current colour scheme). When the current clue is an orphan, its
+  background continues to be shown as 'linen' (which can be changed with
+  `exolve-option: color-orphan:white`, for example).
+- When there are multiple Exolve puzzles, use a running variable to set
+  the index of a new one, rather than using the # of existing puzzles,
+  as we might also need to destroy puzzles from a web page (for example,
+  to show a preview).
+- Allow under-construction grids to specify '?' as the letter in a cell.
+  This is treated just like '0', except that a '0' signifies that the
+  grid has cells where the solution has not been provided, but a '?'
+  does not.
+- Bug-fix: when the enum specified hyphenation in a child clue, and that
+  child clue did not exist in the clues lists, we were hitting an
+  uninitialized property.
+- Separately track the solution to display for a clue from the anno to
+  display. Wrao displayed anno in its own span. Wrap the text of the
+  clue in its own span.
+- Remove weird extra space between prev/next buttons in te current clue strip.
+- When typing in the grid, let space-bar advance to the next cell.
+- When typing in the grid, if an invalid character (such as punctuation) is
+  typed, we were deleting the current entry. Don't do that (delete only
+  with space or backspace or a new valid entry).
+
 ### Version: Exolve v0.89 August 31 2020
 
 - Add "conf" parameter defaulting to true, to revealAll(), checkAll(),

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.89 August 31 2020
+### Version: Exolve v0.90 September 8 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -86,6 +86,12 @@ The "Clear this" button at first only clears letters that do not cross other
 fully filled lights, if there are any. If there are none (i.e., if all remaining
 letters in the current light also cross other fully filled lights), only then
 will these remaining letters get cleared.
+
+A long click on either of "Check this" or "Reveal this" will toggle the text
+"this" to "cell," and the checking/revealing will then only happen on the
+current cell (as opposed to the whole light), for that particular activation
+of the button. Caveat: this does not seem to work on phones and tablets (only
+tested on Android devices though).
 
 Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve
@@ -280,6 +286,10 @@ This is a 3x3 grid with one blocked square in the center ("." is used to
 indicate blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE,
 3 Down = ERR, and 3 Across = EAR. When solution letters are included like this,
 the control buttons for checking/revealing answers get shown. 
+
+In a grid with solutions provided, setters may use the letter '?' as a
+placeholder in any light square for which they have not yet decided what
+letter to place.
 
 Grid without solutions provided:
 ```
@@ -958,9 +968,10 @@ be overriding), and descriptions.
 |----------------------------|---------------|-----------------------------------|
 | `colour-background`        | black         | The background: blocked squares and bars.|
 | `colour-cell`              | white         | Light squares.                    |
-| `colour-active`            | mistyrose     | Squares for the light(s) currently active. The current clue(s) also get(s) this as background colour.|
+| `colour-active`            | mistyrose     | Squares for the light(s) currently active. The current clue(s) in the clues list also get(s) this as background colour.|
+| `colour-currclue`          | white         | Background for the current clue above the grid.|
+| `colour-orphan`            | linen         | The background colour of the current clue(s) without known location(s) in the grid.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
-| `colour-orphan`            | linen         | The colour of the current clue(s) without known location(s) in the grid.|
 | `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first square. |
 | `colour-light-label-input` | black         | Same as above, in the square where the solver is typing.|
 | `colour-light-text`        | black         | The typed solution letters in lights.|
@@ -1059,11 +1070,13 @@ Here are all the names of pieces of text that you can relabel:
 | `clear-all`      | Clear all!                           |
 | `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares|
 | `check`          | Check this                           |
-| `check.hover`    | Erase mistakes in highlighted squares|
+| `checkcell`      | Check cell                           |
+| `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell|
 | `check-all`      | Check all!                           |
 | `check-all.hover` | Erase all mistakes. Reveal any available annos if no mistakes|
 | `reveal`         | Reveal this                          |
-| `reveal.hover`   | Reveal highlighted clue/squares      |
+| `revealcell`     | Reveal cell                           |
+| `reveal.hover`   | Reveal highlighted clue/squares. Long-click to reveal the just current cell|
 | `show-ninas`     | Show ninas                           |
 | `show-ninas.hover` | Show ninas hidden in the grid/clues |
 | `hide-ninas`     | Hide ninas                           |
