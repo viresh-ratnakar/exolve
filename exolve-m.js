@@ -67,13 +67,16 @@ var exolvePuzzles;
  *     embedding the puzzle in an iframe for some reason, set this to true.
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
+ * maxDim If non-zero, use this as the suggested max size of the container
+ *    in px.
  */
 function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
                 addStateToUrl=true,
-                visTop=0) {
-  this.VERSION = 'Exolve v0.90 September 8 2020'
+                visTop=0,
+                maxDim=0) {
+  this.VERSION = 'Exolve v0.91 September 13 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -114,6 +117,7 @@ function Exolve(puzzleText,
   this.szCellsToOrphan = 0
 
   this.visTop = visTop
+  this.maxDim = maxDim
 
   this.MAX_GRID_SIZE = 100
   this.GRIDLINE = 1
@@ -275,7 +279,7 @@ function Exolve(puzzleText,
 Exolve.prototype.init = function() {
   this.parseOverall()
   this.parseRelabel()
-  this.computeGridSize()
+  this.computeGridSize(this.maxDim)
 
   if (!this.id || !this.id.match(/^[a-zA-Z][a-zA-Z\d-]*$/)) {
     this.throwErr(
@@ -433,6 +437,7 @@ Exolve.prototype.init = function() {
     title.innerHTML = this.title
   } else {
     title.style.display = 'none'
+    this.title = ''
   }
   let setter = document.getElementById(this.prefix + '-setter')
   if (this.setter) {
@@ -440,10 +445,13 @@ Exolve.prototype.init = function() {
     setter.style.color = this.colorScheme['imp-text']
   } else {
     setter.style.display = 'none'
+    this.setter = ''
   }
   if (this.copyright) {
     document.getElementById(this.prefix + '-copyright').innerHTML =
           'Ⓒ ' + this.copyright
+  } else {
+    this.copyright = ''
   }
   let smallPrintBox = document.getElementById(this.prefix + '-small-print')
   for (credit of this.credits) {
@@ -525,7 +533,6 @@ Exolve.prototype.init = function() {
 
   this.scratchPad = document.getElementById(this.prefix + '-scratchpad')
   this.scratchPad.style.color = this.colorScheme['imp-text']
-  this.scratchPad.addEventListener('input', this.scratchPadInput.bind(this));
   document.getElementById(this.prefix + '-shuffle').addEventListener(
         'click', this.scratchPadShuffle.bind(this));
 
@@ -2804,8 +2811,11 @@ Exolve.prototype.displayClues = function() {
   }
 }
 
-Exolve.prototype.computeGridSize = function() {
-  const viewportDim = Math.min(this.getViewportWidth(), this.getViewportHeight())
+Exolve.prototype.computeGridSize = function(maxDim) {
+  let viewportDim = Math.min(this.getViewportWidth(), this.getViewportHeight())
+  if (maxDim > 0 && maxDim < viewportDim) {
+    viewportDim = maxDim
+  }
   this.squareDim = 31
   if (this.gridWidth <= 30 &&  // For jumbo grids, give up.
       (this.squareDim + this.GRIDLINE) * this.gridWidth + this.GRIDLINE > viewportDim - 8) {
@@ -4970,12 +4980,6 @@ Exolve.prototype.refocus = function() {
   }
 }
 
-Exolve.prototype.scratchPadInput = function() {
-  let cursor = this.scratchPad.selectionStart
-  this.scratchPad.value = this.scratchPad.value.toUpperCase()
-  this.scratchPad.selectionEnd = cursor
-}
-
 Exolve.prototype.scratchPadShuffle = function() {
   let text = this.scratchPad.value
   let start = this.scratchPad.selectionStart
@@ -4987,7 +4991,7 @@ Exolve.prototype.scratchPadShuffle = function() {
   let indices = []
   let toShuffle = []
   for (let i = start; i < end; i++) {
-    if (this.caseCheck(text[i])) {
+    if (this.caseCheck(text[i].toUpperCase())) {
       indices.push(i)
       toShuffle.push(text[i])
     }
@@ -5114,11 +5118,11 @@ Exolve.prototype.createPuzzle = function() {
  * See documentation of parameters above the Exolve constructor definition.
  */
 function createExolve(puzzleText, containerId="",
-                      addStateToUrl=true, visTop=0) {
+                      addStateToUrl=true, visTop=0, maxDim=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
   let p = new Exolve(puzzleText, containerId, customizer,
-                     addStateToUrl, visTop);
+                     addStateToUrl, visTop, maxDim);
 }
 
 /*

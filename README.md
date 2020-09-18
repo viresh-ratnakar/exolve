@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.90 September 8 2020
+### Version: Exolve v0.91 September 13 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1314,12 +1314,15 @@ var exolvePuzzles;
  *     embedding the puzzle in an iframe for some reason, set this to true.
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
+ * maxDim If non-zero, use this as the suggested max size of the container
+ *    in px.
  */
 function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
                 addStateToUrl=true,
-                visTop=0) {...}
+                visTop=0,
+                maxDim=0) {...}
 
 /**
  * createExolve(puzzleText) is just a convenient wrapper that looks for
@@ -1327,11 +1330,11 @@ function Exolve(puzzleText,
  * See documentation of parameters above the Exolve constructor definition.
  */
 function createExolve(puzzleText, containerId="",
-                      addStateToUrl=true, visTop=0) {
+                      addStateToUrl=true, visTop=0, maxDim=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
   let p = new Exolve(puzzleText, containerId, customizer,
-                     addStateToUrl, visTop);
+                     addStateToUrl, visTop, maxDim);
 }
 
 /*
