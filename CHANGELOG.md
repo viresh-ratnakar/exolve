@@ -1,6 +1,6 @@
 # Changelog
 
-### Version: Exolve v0.91 Septeber 13 2020
+### Version: Exolve v0.91 September 13 2020
 
 - Very minor changes, all needed for the first release of Exet.
 - Add an optional maxDim parameter to the Exolve constructor, to dictate
@@ -8,7 +8,7 @@
   even when the available space is larger.
 - Do not convert everything tyoed in the scratch pad to upper case.
 
-### Version: Exolve v0.90 Septeber 8 2020
+### Version: Exolve v0.90 September 8 2020
 
 - Add functionality to limit checking/revealing to just the current cell
   rather than the whole current light. This is done when there is a long
