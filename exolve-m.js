@@ -1157,6 +1157,7 @@ Exolve.prototype.parseGrid = function() {
   const DECORATORS = ' +|_@!*~'
   const reDecorators = new RegExp('[' + DECORATORS + ']')
   const reNextChar = new RegExp('[\.0' + DECORATORS + ']')
+  this.grid = new Array(this.gridHeight)
   for (let i = 0; i < this.gridHeight; i++) {
     this.grid[i] = new Array(this.gridWidth)
     let gridLine = this.specLines[i + this.gridFirstLine].trim().toUpperCase()
@@ -3333,7 +3334,7 @@ Exolve.prototype.activateCell = function(row, col) {
     this.deactivateCurrClue();
     this.cnavToInner(clue)
   }
-  this.updateAndSaveState()
+  this.updateDisplayAndGetState()
 }
 
 Exolve.prototype.cellActivator = function(row, col) {
@@ -3550,7 +3551,7 @@ Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
       this.deactivateCurrCell();
     }
   }
-  this.updateAndSaveState()
+  this.updateDisplayAndGetState()
 }
 
 Exolve.prototype.copyOrphanEntry = function(clueIndex) {
