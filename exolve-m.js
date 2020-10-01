@@ -3093,9 +3093,6 @@ Exolve.prototype.restoreState = function() {
       foundState = false
     }
   }
-  if (!foundState) {
-    this.log('No saved state available')
-  }
   if (this.index == 0 && this.savingURL) {
     location.hash = ''  // Clear, including any legacy-format state
   }
