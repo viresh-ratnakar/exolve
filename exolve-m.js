@@ -76,7 +76,7 @@ function Exolve(puzzleText,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.92 October 4 2020'
+  this.VERSION = 'Exolve v0.93 October 4 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -2711,7 +2711,7 @@ Exolve.prototype.renderClueSpan = function(clue, elt) {
         skip = close + 1 - idx
       }
     }
-    html = html + '<span>' + clueText.substring(idx + skip, endIdx) + '</span>'
+    html = html + '<span class="xlv-in-clue-anno">' + clueText.substring(idx + skip, endIdx) + '</span>'
     endIdx += 2
     idx = clueText.indexOf('~{', endIdx)
   }
@@ -2721,11 +2721,8 @@ Exolve.prototype.renderClueSpan = function(clue, elt) {
   if (clue.inClueAnnos.length == 0) {
     return
   }
-  let inClueAnnoSpans = elt.firstElementChild.getElementsByTagName('span')
-  if (inClueAnnoSpans.length != clue.inClueAnnos.length) {
-    console.log('Clue already has <span>s, ignoring in-clue-annos from ~{}~')
-    return
-  }
+  let inClueAnnoSpans = elt.firstElementChild.getElementsByClassName('xlv-in-clue-anno')
+  console.assert(inClueAnnoSpans.length == clue.inClueAnnos.length, inClueAnnoSpans, clue)
   for (let s = 0; s < inClueAnnoSpans.length; s++) {
     let c = clue.inClueAnnos[s]
     if (!clue.inClueAnnoReveals[c]) {
@@ -4915,10 +4912,10 @@ Exolve.prototype.checkCurr = function() {
   this.cellNotLight = false;
 }
 
-Exolve.prototype.checkAll = function(conf=true) {
+Exolve.prototype.checkAll = function(conf=true, erase=true) {
   if (conf && !confirm(this.textLabels['confirm-check-all'])) {
     this.refocus()
-    return
+    return false
   }
   let allCorrect = true
   for (let row = 0; row < this.gridHeight; row++) {
@@ -4931,6 +4928,7 @@ Exolve.prototype.checkAll = function(conf=true) {
         continue
       }
       allCorrect = false
+      if (!erase) continue
       gridCell.currLetter = '0'
       gridCell.textNode.nodeValue = ''
       if (this.atCurr(row, col)) {
@@ -4940,13 +4938,14 @@ Exolve.prototype.checkAll = function(conf=true) {
   }
   if (allCorrect) {
     this.revealAll(false)  // calls updateAndSaveState()
-  } else {
+  } else if (erase) {
     for (let ci of this.allClueIndices) {
       this.updateClueState(ci, false, null)
     }
     this.updateAndSaveState()
   }
   this.refocus()
+  return allCorrect
 }
 
 Exolve.prototype.revealClueAnno = function(ci) {

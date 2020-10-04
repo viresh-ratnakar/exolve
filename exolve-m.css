@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v0.92 October 4 2020
+Version: Exolve v0.93 October 4 2020
 */
 
 @media (max-width: 500px) {
@@ -299,7 +299,7 @@ Version: Exolve v0.92 October 4 2020
 }
 .xlv-definition {
   text-decoration: underline;
-  text-decoration-color: darkblue;
+  text-decoration-color: darkgreen;
 }
 .xlv-blue {
   color: blue;

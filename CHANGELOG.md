@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v0.93 October 4 2020
+
+- A couple of quick fixes/updates:
+- If there already are span tags in a clue, don't give up on in-clue-annos!
+- s/darkblue/darkgreen/
+- Add a do-not-erase param to checkAll()
+
 ### Version: Exolve v0.92 October 4 2020
 
 - All "in-clue annos": "28 Replace bottles containing ~{questionable medicine}~ (7)"
