@@ -8,6 +8,12 @@
 
 <script>
 function customizeExolve(p) {
+  let c = p.addCellText(0, 1, '@', 12, 10, true, false)
+  c = p.addCellText(0, 3, '①', 16, 14, true, true)
+  c.style.stroke = 'blue'
+  c = p.addCellText(1, 0, '*', 18, 10, false, true)
+  c = p.addCellText(1, 2, '%', 12, 8, false, false)
+
   p.background.setAttributeNS(null, 'fill', 'red')
   let expectedVars = [
     'p.currRow',

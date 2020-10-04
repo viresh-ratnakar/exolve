@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.91 September 13 2020
+### Version: Exolve v0.92 October 4 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -337,7 +337,7 @@ for that clue, the anno will be shown automatically at start-up. Even if no anno
 is given for a fully prefilled clue, the solution will be displayed at the
 end of the clue (unless the no-auto-solution-in-anno option is set).
 
-The decorator "~" can be used to mark a cell that starts an across/down clue
+The decorator "\~" can be used to mark a cell that starts an across/down clue
 as one in which normal clue numbering should be skipped. Such a cell gets
 no clue number. The clue number that it *would* have got will instead be
 used for the next cell that starts a clue. The light(s) that start at such
@@ -448,6 +448,7 @@ pair of parentheses containing the text "word" or "letter" or "?" with anything
 before are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
 
+### Annotations
 In a grid with solutions provided, the setter may include annotations for
 explaining how a clue works or for providing hints. Any text located after the
 enum in a clue is treated as annotation. The annotation is displayed when the
@@ -481,6 +482,29 @@ as "... (6) [t]WITTER ...," then setters should include the solution before
 that (even if it can be inferred from the grid), to avoid misinterpreting the
 leading part as the solution, like "... (6) [WITTER] [t]WITTER ..."
 
+#### In-clue annotations
+You can also decorate sub-phrases in the clue with underlines, different styles,
+colours, backgrounds, etc., by enclosing specific substrings with the special
+markers, `~{` and `}~`, like this:
+```
+    28 Replace bottles containing ~{questionable medicine}~ (7) Hidden word: (-re)PLACE BO(-ttles).
+```
+The default styling for such "in-clue annotations" is to underline the
+text with a "darkgreen" underline. This styling will get revealed when the
+solver clicks on "Reveal this" or "Reveal all" (and will get cleared with
+"Clear this/all").
+
+You can apply different in-clue annotation styles (instead of underlining),
+by providing an HTML element class name, like this:
+```
+    28 ~{{xlv-blue}Replace}~ bottles ~{{my-style}containing}~ ~{questionable medicine}~ (7) Hidden word: (-re)PLACE BO(-ttles).
+```
+Here, "xlv-blue" is a class name that Exolve has set up in its CSS (some others
+are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
+class names too (such as "my-style" above) and specify their stylings with your
+own custom CSS rules.
+
+### Linked clues
 If a linked clue includes other "children clues," this can be indicated by
 appending a comma-separated list of children clue numbers to the parent clue
 number. Example:
@@ -598,7 +622,7 @@ as described above.
 If the setter is using  nun-numeric clue labels or clues without a specified
 direction, then they should probably also use the option "hide-inferred-numbers"
 in an [`exolve-option`](#exolve-option) section. Alternatively, they can use
-the "~" decorator in the grid to skip numbering the cells using normal
+the "\~" decorator in the grid to skip numbering the cells using normal
 numbering.
 
 ### Nodir clues with cells explicitly specified
@@ -615,7 +639,7 @@ nodir section for the third dimension, explicitly specifying the cells for
 each clue along the third dimension.
 
 ### Skipped-number cells and clues with cells specified
-If an across/down clue's start cell has the decorator "~", its normal numbering
+If an across/down clue's start cell has the decorator "\~", its normal numbering
 gets skipped. If there is another clue that is either an across/down clue
 with a non-numeric label and with its start cell specified, or is a nodir
 clue with all its cells specified, and all the cells of the two clues are the
@@ -934,10 +958,10 @@ The list of currently supported options is as follows:
   about N lines of text, adding scrollbars if needed.
 - **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
-  customizePuzzle(), for example.
+  `customizeExolve()`, for example.
 - **`offset-left:<N>`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
-  using customizePuzzle(), for example.
+  using `customizeExolve()`, for example.
 - **`grid-background:<c>`** Set the colour of the black cells to &lt;c&gt;,
   which should be a valid HTML colour name/code. This option is deprecated.
   Please use color-background (see below).
@@ -1262,6 +1286,28 @@ of JavaScript globals was reduced to just a handful of distinctive ones, and
 all HTML IDs and class names were made distinctive by having them use the
 "xlv" prefix. I'm hopeful that these v0.84 changes will go a long way towards
 making future backwards-incompatible changes unnecessary.
+
+### Customized additional text within cells
+Exolve provides you with a JavaScript API that you can call from
+`customizeExolve()` that lets you add arbitrary text within any cell. The
+function to call is:
+```
+addCellText(row, col, text, h=16, w=10, atTop=true, toRight=false);
+```
+This will add `text` (which should be just raw text, not HTML) with font size
+`h px` in a box of size `w px` by `h px` in one of the corners of the cell at
+`row`, `col` (which should be a light cell or a diagramless cell). It will also
+return an SVG 'text' element that you can style further if needed.
+Examples:
+```
+function customizeExolve(p) {
+  p.addCellText(0, 1, '@', 12, 10, true, false)
+  let c = p.addCellText(0, 3, '①', 16, 14, true, true)
+  c.style.stroke = 'blue'
+  c = p.addCellText(1, 0, '*', 18, 10, false, true)
+  c = p.addCellText(1, 2, '%', 12, 8, false, false)
+}
+````
 
 ## Placing the puzzle in a specific HTML element
 

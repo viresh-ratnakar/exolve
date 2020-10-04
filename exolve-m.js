@@ -76,7 +76,7 @@ function Exolve(puzzleText,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.91 September 13 2020'
+  this.VERSION = 'Exolve v0.92 October 4 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -129,6 +129,7 @@ function Exolve(puzzleText,
 
   this.answersList = []
   this.revelationList = []
+  this.inClueAnnoReveals = {}
 
   // State of navigation
   this.currRow = -1
@@ -1602,6 +1603,34 @@ Exolve.prototype.maybeRelocateClue = function(clueIndex, dir, clue) {
   return clueIndex
 }
 
+Exolve.prototype.parseInClueAnnos = function(clue) {
+  clue.inClueAnnos = []
+  let idx = clue.clue.indexOf('~{')
+  let endIdx = 0
+  let clueText = clue.clue
+  while (idx >= 0) {
+    endIdx = clueText.indexOf('}~', idx + 1)
+    if (endIdx < 0) {
+      endIdx = idx
+      break
+    }
+    let cls = 'xlv-definition'
+    if (clueText.charAt(idx + 2) == '{') {
+      let close = clueText.indexOf('}', idx + 3)
+      if (close > idx + 3) {
+        let parsedCls = clueText.substring(idx + 3, close).trim()
+        if (parsedCls) {
+          cls = parsedCls
+        }
+      }
+    }
+    clue.inClueAnnos.push(cls)
+    this.hasReveals = true
+    endIdx += 2
+    idx = clueText.indexOf('~{', endIdx)
+  }
+}
+
 // Parse a single clue.
 // Return an Clue object with the following properties set:
 // index
@@ -1617,6 +1646,7 @@ Exolve.prototype.maybeRelocateClue = function(clueIndex, dir, clue) {
 // cells[] optionally filled, if all clue cells are specified in the clue
 // anno (the part after the enum, if present)
 // isFiller
+// inClueAnnos: array of class names for in-clue anno spans
 Exolve.prototype.parseClue = function(dir, clueLine) {
   clueLine = clueLine.trim()
   let numCellsGiven = 0
@@ -1715,6 +1745,8 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clue.anno = clueLine.substr(enumParse.afterEnum).trim()
 
   this.setClueCellsDgmless(clue);
+
+  this.parseInClueAnnos(clue)
 
   return clue
 }
@@ -1874,7 +1906,7 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
       break;
     }
     anno = anno.substr(indexOfBrac + 1).trim()
-    hasReveals = true
+    this.hasReveals = true
   }
   theClue.anno = anno;
 }
@@ -2660,17 +2692,65 @@ Exolve.prototype.stripLineBreaks = function(s) {
   return s.replace(/<\/br\s*>/gi, "")
 }
 
+Exolve.prototype.renderClueSpan = function(clue, elt) {
+  let clueText = clue.clue
+  let html = '<span>'
+  let idx = clueText.indexOf('~{')
+  let endIdx = 0
+  while (idx >= 0) {
+    html = html + clueText.substring(endIdx, idx)
+    endIdx = clueText.indexOf('}~', idx + 2)
+    if (endIdx < 0) {
+      endIdx = idx
+      break
+    }
+    let skip = 2
+    if (clueText.charAt(idx + skip) == '{') {
+      let close = clueText.indexOf('}', idx + skip + 1)
+      if (close >= idx + skip + 1) {
+        skip = close + 1 - idx
+      }
+    }
+    html = html + '<span>' + clueText.substring(idx + skip, endIdx) + '</span>'
+    endIdx += 2
+    idx = clueText.indexOf('~{', endIdx)
+  }
+  html = html + clueText.substr(endIdx) + '</span>'
+  elt.innerHTML = html
+  clue.inClueAnnoReveals = {}
+  if (clue.inClueAnnos.length == 0) {
+    return
+  }
+  let inClueAnnoSpans = elt.firstElementChild.getElementsByTagName('span')
+  if (inClueAnnoSpans.length != clue.inClueAnnos.length) {
+    console.log('Clue already has <span>s, ignoring in-clue-annos from ~{}~')
+    return
+  }
+  for (let s = 0; s < inClueAnnoSpans.length; s++) {
+    let c = clue.inClueAnnos[s]
+    if (!clue.inClueAnnoReveals[c]) {
+      clue.inClueAnnoReveals[c] = []
+    }
+    clue.inClueAnnoReveals[c].push(inClueAnnoSpans[s])
+    if (!this.inClueAnnoReveals[c]) {
+      this.inClueAnnoReveals[c] = []
+    }
+    this.inClueAnnoReveals[c].push(inClueAnnoSpans[s])
+  }
+}
+
 Exolve.prototype.displayClues = function() {
   // Populate clues tables. Check that we have all clues
   let table = null
   let dir = ''
   let extraPanels = []
   for (let clueIndex of this.allClueIndices) {
-    if (!this.clues[clueIndex].clue && !this.clues[clueIndex].parentClueIndex) {
+    let theClue = this.clues[clueIndex]
+    if (!theClue.clue && !theClue.parentClueIndex) {
       this.throwErr('Found no clue text nor a parent clue for ' + clueIndex)
     }
-    let clueDir = this.clues[clueIndex].clueTableDir ||
-                  this.clues[clueIndex].dir
+    let clueDir = theClue.clueTableDir ||
+                  theClue.dir
     if (dir != clueDir) {
       if (clueDir == 'A') {
         table = this.acrossClues
@@ -2687,7 +2767,7 @@ Exolve.prototype.displayClues = function() {
       }
       dir = clueDir
     }
-    if (this.clues[clueIndex].startNewTable) {
+    if (theClue.startNewTable) {
       let newPanel = document.createElement('div')
       newPanel.setAttributeNS(null, 'class',
                               'xlv-clues-box xlv-clues-extra-panel');
@@ -2701,20 +2781,20 @@ Exolve.prototype.displayClues = function() {
       tableParent.parentElement.insertBefore(newPanel, tableParent.nextSibling)
       table = newTable
     }
-    if (this.clues[clueIndex].filler) {
+    if (theClue.filler) {
       let tr = document.createElement('tr')
       let col = document.createElement('td')
       col.setAttributeNS(null, 'colspan', '2');
       col.setAttributeNS(null, 'class', 'xlv-filler');
-      col.innerHTML = this.clues[clueIndex].filler
+      col.innerHTML = theClue.filler
       tr.appendChild(col)
       table.appendChild(tr)
     }
     let tr = document.createElement('tr')
     let col1 = document.createElement('td')
-    col1.innerHTML = this.clues[clueIndex].displayLabel
+    col1.innerHTML = theClue.displayLabel
 
-    let col1Chars = this.clues[clueIndex].displayLabel.replace(/&[^;]*;/g, '#')
+    let col1Chars = theClue.displayLabel.replace(/&[^;]*;/g, '#')
     let col1NumChars = [...col1Chars].length
     if (col1Chars.substr(1, 1) == ',') {
       // Linked clue that begins with a single-letter/digit clue number. Indent!
@@ -2730,7 +2810,7 @@ Exolve.prototype.displayClues = function() {
                             this.clueStateToggler.bind(this, clueIndex));
     }
     let col2 = document.createElement('td')
-    col2.innerHTML = '<span>' + this.clues[clueIndex].clue + '</span>'
+    this.renderClueSpan(theClue, col2)
     if (col1NumChars > 2) {
       // More than two unicode chars in col1. Need to indent col2.
       col1Chars = col1Chars.substr(2)
@@ -2753,42 +2833,42 @@ Exolve.prototype.displayClues = function() {
       col2.style.textIndent = '' + indent + 'ch'
     }
 
-    if (this.isOrphan(clueIndex) && !this.clues[clueIndex].parentClueIndex) {
+    if (this.isOrphan(clueIndex) && !theClue.parentClueIndex) {
       let placeholder = ''
       let len = this.DEFAULT_ORPHAN_LEN
-      if (this.clues[clueIndex].placeholder) {
-        placeholder = this.clues[clueIndex].placeholder
+      if (theClue.placeholder) {
+        placeholder = theClue.placeholder
         len = placeholder.length
       }
       this.addOrphanUI(col2, false, len, placeholder, clueIndex)
-      this.clues[clueIndex].orphanPlaceholder =
+      theClue.orphanPlaceholder =
         col2.lastElementChild.firstElementChild;
       this.answersList.push({
-        input: this.clues[clueIndex].orphanPlaceholder,
+        input: theClue.orphanPlaceholder,
         isq: false,
       });
     }
     // If clue contains <br> tags, replace them with "/" for future renderings
     // in the "current clue" strip.
-    if (this.clues[clueIndex].clue.indexOf('<') >= 0) {
-      this.clues[clueIndex].clue =
-          this.stripLineBreaks(this.clues[clueIndex].clue)
+    if (theClue.clue.indexOf('<') >= 0) {
+      theClue.clue =
+          this.stripLineBreaks(theClue.clue)
     }
     let annoSpan = document.createElement('span')
     annoSpan.setAttributeNS(null, 'class', 'xlv-anno-text');
     annoSpan.style.color = this.colorScheme['anno']
     annoSpan.style.display = 'none'
-    if (this.clues[clueIndex].anno || this.clues[clueIndex].dispSol) {
-      annoSpan.innerHTML = ' ' + this.clues[clueIndex].dispSol +
-                           '<span>' + this.clues[clueIndex].anno + '</span>'
+    if (theClue.anno || theClue.dispSol) {
+      annoSpan.innerHTML = ' ' + theClue.dispSol +
+                           '<span>' + theClue.anno + '</span>'
       this.revelationList.push(annoSpan)
     }
     col2.appendChild(annoSpan)
-    this.clues[clueIndex].annoSpan = annoSpan
+    theClue.annoSpan = annoSpan
     tr.appendChild(col1)
     tr.appendChild(col2)
     tr.addEventListener('click', this.clueActivator.bind(this, clueIndex));
-    this.clues[clueIndex].clueTR = tr
+    theClue.clueTR = tr
     table.appendChild(tr)
   }
   if (this.cluesPanelLines > 0) {
@@ -2899,7 +2979,7 @@ Exolve.prototype.updateDisplayAndGetState = function() {
   this.checkButton.disabled = (this.activeCells.length == 0) && !revOrphan
   let theClue = this.clues[ci]
   let haveReveals = (this.activeCells.length > 0 && !this.hasUnsolvedCells) ||
-      (theClue && (theClue.anno || theClue.solution || revOrphan));
+      (theClue && (theClue.anno || theClue.solution || revOrphan || theClue.inClueAnnos.length > 0));
   if (!haveReveals && this.szCellsToOrphan > 0 && this.activeCells.length > 0) {
     let orphanClue = this.cellsToOrphan[JSON.stringify(this.activeCells)];
     if (orphanClue) {
@@ -4218,58 +4298,63 @@ Exolve.prototype.displayGrid = function() {
   for (let i = 0; i < this.gridHeight; i++) {
     for (let j = 0; j < this.gridWidth; j++) {
       let gridCell = this.grid[i][j]
+      if (!gridCell.isLight && !gridCell.isDgmless) {
+        continue
+      }
       const cellGroup =
           document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      if (gridCell.isLight || gridCell.isDgmless) {
-        this.numCellsToFill++
-        if (gridCell.prefill) {
-          this.numCellsPrefilled++
-        }
-        const cellRect =
-            document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        const cellLeft = this.cellLeftPos(j, this.GRIDLINE)
-        const cellTop = this.cellTopPos(i, this.GRIDLINE)
-        cellRect.setAttributeNS(null, 'x', cellLeft);
-        cellRect.setAttributeNS(null, 'y', cellTop);
-        cellRect.setAttributeNS(null, 'width', this.squareDim);
-        cellRect.setAttributeNS(null, 'height', this.squareDim);
-        cellRect.style.fill = this.colorScheme['cell']
-        cellGroup.appendChild(cellRect)
+      let activator = this.cellActivator.bind(this, i, j);
 
-        const cellText =
-            document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        cellText.setAttributeNS(
-            null, 'x', this.cellLeftPos(j, this.lightStartX));
-        cellText.setAttributeNS(
-            null, 'y', this.cellTopPos(i, this.lightStartY));
-        cellText.setAttributeNS(null, 'text-anchor', 'middle');
-        cellText.setAttributeNS(null, 'editable', 'simple');
-        let letter = '0'
-        let cellClass = 'xlv-cell-text'
-        if (gridCell.prefill) {
-          letter = gridCell.solution
-          cellText.style.fill = this.colorScheme['prefill']
-          cellClass = 'xlv-cell-text xlv-prefill'
-        } else {
-          cellText.style.fill = this.colorScheme['light-text']
-        }
-        cellText.style.fontSize = this.letterSize + 'px'
-        cellText.setAttributeNS(null, 'class', cellClass)
-
-        const text = document.createTextNode(letter);
-        cellText.appendChild(text);
-        cellGroup.appendChild(cellText)
-
-        gridCell.currLetter = letter;
-        gridCell.textNode = text;
-        gridCell.cellText = cellText;
-        gridCell.cellRect = cellRect;
-        gridCell.cellLeft = cellLeft;
-        gridCell.cellTop = cellTop;
-
-        cellText.addEventListener('click', this.cellActivator.bind(this, i, j));
-        cellRect.addEventListener('click', this.cellActivator.bind(this, i, j));
+      this.numCellsToFill++
+      if (gridCell.prefill) {
+        this.numCellsPrefilled++
       }
+      const cellRect =
+          document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const cellLeft = this.cellLeftPos(j, this.GRIDLINE)
+      const cellTop = this.cellTopPos(i, this.GRIDLINE)
+      cellRect.setAttributeNS(null, 'x', cellLeft);
+      cellRect.setAttributeNS(null, 'y', cellTop);
+      cellRect.setAttributeNS(null, 'width', this.squareDim);
+      cellRect.setAttributeNS(null, 'height', this.squareDim);
+      cellRect.style.fill = this.colorScheme['cell']
+      cellGroup.appendChild(cellRect)
+
+      const cellText =
+          document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      cellText.setAttributeNS(
+          null, 'x', this.cellLeftPos(j, this.lightStartX));
+      cellText.setAttributeNS(
+          null, 'y', this.cellTopPos(i, this.lightStartY));
+      cellText.setAttributeNS(null, 'text-anchor', 'middle');
+      cellText.setAttributeNS(null, 'editable', 'simple');
+      let letter = '0'
+      let cellClass = 'xlv-cell-text'
+      if (gridCell.prefill) {
+        letter = gridCell.solution
+        cellText.style.fill = this.colorScheme['prefill']
+        cellClass = 'xlv-cell-text xlv-prefill'
+      } else {
+        cellText.style.fill = this.colorScheme['light-text']
+      }
+      cellText.style.fontSize = this.letterSize + 'px'
+      cellText.setAttributeNS(null, 'class', cellClass)
+
+      const text = document.createTextNode(letter);
+      cellText.appendChild(text);
+      cellGroup.appendChild(cellText)
+
+      gridCell.currLetter = letter;
+      gridCell.textNode = text;
+      gridCell.cellText = cellText;
+      gridCell.cellRect = cellRect;
+      gridCell.cellLeft = cellLeft;
+      gridCell.cellTop = cellTop;
+      gridCell.cellGroup = cellGroup;
+
+      cellText.addEventListener('click', activator);
+      cellRect.addEventListener('click', activator);
+
       if (gridCell.hasCircle) {
         const cellCircle =
             document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -4281,7 +4366,7 @@ Exolve.prototype.displayGrid = function() {
         cellCircle.style.stroke = this.colorScheme['circle']
         cellCircle.setAttributeNS(null, 'r', this.circleR);
         cellGroup.appendChild(cellCircle)
-        cellCircle.addEventListener('click', this.cellActivator.bind(this, i, j));
+        cellCircle.addEventListener('click', activator)
         gridCell.cellCircle = cellCircle
       }
       if ((gridCell.startsClueLabel && !gridCell.isDgmless &&
@@ -4300,6 +4385,7 @@ Exolve.prototype.displayGrid = function() {
             gridCell.forcedClueLabel : gridCell.startsClueLabel;
         const num = document.createTextNode(numText)
         cellNum.appendChild(num);
+        cellNum.addEventListener('click', activator)
         cellGroup.appendChild(cellNum)
         gridCell.cellNum = cellNum
       }
@@ -4426,6 +4512,34 @@ Exolve.prototype.displayGrid = function() {
     }
   }
   this.statusNumTotal.innerHTML = this.numCellsToFill
+}
+
+// API for customization: add small text to cell
+Exolve.prototype.addCellText = function(row, col, text, h=16, w=10, atTop=true, toRight=false) {
+  if (row < 0 || row >= this.gridHeight ||
+      col < 0 || col >= this.gridWidth) {
+    return
+  }
+  let gridCell = this.grid[row][col]
+  if (!gridCell.isLight && !gridCell.isDgmless) {
+    return
+  }
+  const cellText =
+      document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  let xCol = toRight ? col + 1 : col
+  let xOff = toRight ? (0 - (w + this.NUMBER_START_X)) : this.NUMBER_START_X
+  cellText.setAttributeNS(null, 'x', this.cellLeftPos(xCol, xOff))
+  let yCol = atTop ? row : row + 1
+  let yOff = atTop ? h : -this.NUMBER_START_X
+  cellText.setAttributeNS(null, 'y', this.cellTopPos(yCol, yOff));
+  cellText.textLength = w + 'px'
+  cellText.style.fill = this.colorScheme['light-label']
+  cellText.style.fontSize = h + 'px'
+  const textNode = document.createTextNode(text)
+  cellText.appendChild(textNode);
+  cellText.addEventListener('click', this.cellActivator.bind(this, row, col));
+  gridCell.cellGroup.appendChild(cellText)
+  return cellText
 }
 
 Exolve.prototype.displayNinas = function() {
@@ -4585,8 +4699,16 @@ Exolve.prototype.clearCurr = function() {
     currClues[ci] = true
   }
   for (let clueIndex in currClues) {
-    if (this.clues[clueIndex].annoSpan) {
-      this.clues[clueIndex].annoSpan.style.display = 'none'
+    let theClue = this.clues[clueIndex]
+    if (theClue.annoSpan) {
+      theClue.annoSpan.style.display = 'none'
+    }
+    if (theClue.inClueAnnoReveals) {
+      for (let c in theClue.inClueAnnoReveals) {
+        for (let s of theClue.inClueAnnoReveals[c]) {
+          s.className = ''
+        }
+      }
     }
   }
   let fullCrossers = []
@@ -4675,6 +4797,11 @@ Exolve.prototype.clearAll = function(conf=true) {
   }
   for (let a of this.revelationList) {
     a.style.display = 'none'
+  }
+  for (let c in this.inClueAnnoReveals) {
+    for (let s of this.inClueAnnoReveals[c]) {
+      s.className = ''
+    }
   }
   this.hideNinas()
 
@@ -4837,6 +4964,13 @@ Exolve.prototype.revealClueAnno = function(ci) {
         }
       }
     }
+    if (theClue.inClueAnnoReveals) {
+      for (let c in theClue.inClueAnnoReveals) {
+        for (let s of theClue.inClueAnnoReveals[c]) {
+          s.className = c
+        }
+      }
+    }
   }
 }
 
@@ -4962,6 +5096,11 @@ Exolve.prototype.revealAll = function(conf=true) {
   }
   for (let a of this.revelationList) {
     a.style.display = ''
+  }
+  for (let c in this.inClueAnnoReveals) {
+    for (let s of this.inClueAnnoReveals[c]) {
+      s.className = c
+    }
   }
   this.showNinas()
   for (let ci of this.allClueIndices) {

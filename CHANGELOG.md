@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.92 October 4 2020
+
+- All "in-clue annos": "28 Replace bottles containing ~{questionable medicine}~ (7)"
+  will underline "questionable medicine" as the definition when the solver
+  clicks on "Reveal this/all".
+- You can provide a custom class name to toggle for the in-clue anno.
+- Create a javaScript API to add arbitrary text within a cell, `addCellText()`
+
 ### Version: Exolve v0.91 September 13 2020
 
 - Very minor changes, all needed for the first release of Exet.
