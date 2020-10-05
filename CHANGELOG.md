@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v0.94 October 4 2020
+
+- Bug fix: in-clue-annos were not getting rendered properly in the current clue
+  above the grid.
+
 ### Version: Exolve v0.93 October 4 2020
 
 - A couple of quick fixes/updates:

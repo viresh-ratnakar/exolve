@@ -76,7 +76,7 @@ function Exolve(puzzleText,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.93 October 4 2020'
+  this.VERSION = 'Exolve v0.94 October 4 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -2692,9 +2692,9 @@ Exolve.prototype.stripLineBreaks = function(s) {
   return s.replace(/<\/br\s*>/gi, "")
 }
 
-Exolve.prototype.renderClueSpan = function(clue, elt) {
-  let clueText = clue.clue
-  let html = '<span>'
+Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
+  let clueText = inCurrClue ? this.stripLineBreaks(clue.clue) : clue.clue
+  let html = ''
   let idx = clueText.indexOf('~{')
   let endIdx = 0
   while (idx >= 0) {
@@ -2715,13 +2715,16 @@ Exolve.prototype.renderClueSpan = function(clue, elt) {
     endIdx += 2
     idx = clueText.indexOf('~{', endIdx)
   }
-  html = html + clueText.substr(endIdx) + '</span>'
+  html = html + clueText.substr(endIdx)
   elt.innerHTML = html
+  if (inCurrClue) {
+    return
+  }
   clue.inClueAnnoReveals = {}
   if (clue.inClueAnnos.length == 0) {
     return
   }
-  let inClueAnnoSpans = elt.firstElementChild.getElementsByClassName('xlv-in-clue-anno')
+  let inClueAnnoSpans = elt.getElementsByClassName('xlv-in-clue-anno')
   console.assert(inClueAnnoSpans.length == clue.inClueAnnos.length, inClueAnnoSpans, clue)
   for (let s = 0; s < inClueAnnoSpans.length; s++) {
     let c = clue.inClueAnnos[s]
@@ -2807,7 +2810,10 @@ Exolve.prototype.displayClues = function() {
                             this.clueStateToggler.bind(this, clueIndex));
     }
     let col2 = document.createElement('td')
-    this.renderClueSpan(theClue, col2)
+    let clueSpan = document.createElement('span')
+    this.renderClueSpan(theClue, clueSpan)
+    col2.appendChild(clueSpan)
+    theClue.clueSpan = clueSpan
     if (col1NumChars > 2) {
       // More than two unicode chars in col1. Need to indent col2.
       col1Chars = col1Chars.substr(2)
@@ -2844,12 +2850,6 @@ Exolve.prototype.displayClues = function() {
         input: theClue.orphanPlaceholder,
         isq: false,
       });
-    }
-    // If clue contains <br> tags, replace them with "/" for future renderings
-    // in the "current clue" strip.
-    if (theClue.clue.indexOf('<') >= 0) {
-      theClue.clue =
-          this.stripLineBreaks(theClue.clue)
     }
     let annoSpan = document.createElement('span')
     annoSpan.setAttributeNS(null, 'class', 'xlv-anno-text');
@@ -3558,7 +3558,9 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
   this.currClueIndex = activeClueIndex
   this.currClue.innerHTML = this.getCurrClueButtons() +
     curr.fullDisplayLabel +
-    `<span id="${this.prefix}-curr-clue-text">${curr.clue}</span>`
+    `<span id="${this.prefix}-curr-clue-text"></span>`
+  let clueSpan = document.getElementById(`${this.prefix}-curr-clue-text`)
+  this.renderClueSpan(curr, clueSpan, true)
 
   document.getElementById(this.prefix + '-curr-clue-prev').addEventListener(
       'click', this.cnavPrev.bind(this))
