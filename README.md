@@ -496,9 +496,11 @@ solver clicks on "Reveal this" or "Reveal all" (and will get cleared with
 
 You can apply different in-clue annotation styles (instead of underlining),
 by providing an HTML element class name, like this:
+<!-- {% raw %} -->
 ```
     28 ~{{xlv-blue}Replace}~ bottles ~{{my-style}containing}~ ~{questionable medicine}~ (7) Hidden word: (-re)PLACE BO(-ttles).
 ```
+<!-- {% endraw %} -->
 Here, "xlv-blue" is a class name that Exolve has set up in its CSS (some others
 are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
