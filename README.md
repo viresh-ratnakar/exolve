@@ -171,6 +171,10 @@ and the `exolve-end` line:
 * `exolve-option`
 * `exolve-language`
 * `exolve-relabel`
+* `exolve-force-hyphen-right`
+* `exolve-force-hyphen-below`
+* `exolve-force-bar-right`
+* `exolve-force-bar-below`
 
 Each section has the section name (`exolve-something`), followed by a colon.
 Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
@@ -1150,6 +1154,28 @@ Here are all the names of pieces of text that you can relabel:
 
 The `.hover`-suffixed names are for tooltips. These relabelings for these
 should not include HTML markup.
+
+The `confirm-` prefixed messages are all for dialogs seeking confirmation. They
+all have one special feature: if you set them to be emoty strings, then the
+confirmation step is skipped and the action is directly taken. For example:
+```
+  exolve-relabel:
+    confirm-check-all:
+```
+The above will skip the confirmation step when the solver clicks on "Check all."
+
+## `exolve-force-hyphen-right`, `exolve-force-hyphen-below`, `exolve-force-bar-right`, `exolve-force-bar-below`
+
+Each of these sections is a single-line section that contains a list of cells.
+This allows you to force the creation of separator hyphens/bars even if not
+indicated by the enums. This might be useful in diagramless puzzles (Exolve
+does not try to infer hyphen/bar locations from clues in diagramless puzzles),
+or if, for example, you do not want to give away the full enum for some clues,
+but just want to provide some/all of the separators. Example:
+```
+  exolve-force-hyphen-right: a5 c4
+  exolve-force-bar-below: a5 c4 d8
+```
 
 ## Saving state
 

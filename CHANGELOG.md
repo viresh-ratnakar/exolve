@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v0.95 October 10 2020
+
+- Skip the confirmation step if the confirmation message has been set to an
+  empty string via exolve-relabel.
+- Add sections exolve-force-hyphen-right`, exolve-force-hyphen-below,
+  exolve-force-bar-right`, and exolve-force-bar-below. Each such section is a
+  single-line section that contains a list of cells. This allows you to force
+  the creation of separator hyphens/bars even if not indicated by the enums.
+
 ### Version: Exolve v0.94 October 4 2020
 
 - Bug fix: in-clue-annos were not getting rendered properly in the current clue

@@ -76,7 +76,7 @@ function Exolve(puzzleText,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.94 October 4 2020'
+  this.VERSION = 'Exolve v0.95 October 10 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -95,6 +95,12 @@ function Exolve(puzzleText,
   // For span-class-specified ninas, ninaClassElements[] stores the elements
   // along with the colours to apply to them when showing the ninas.
   this.ninaClassElements = []
+  this.forcedSeps = {
+    'force-hyphen-right': [],
+    'force-hyphen-below': [],
+    'force-bar-right': [],
+    'force-bar-below': [],
+  }
 
   this.grid = []
   this.clues = {}
@@ -616,6 +622,14 @@ Exolve.prototype.parseOverall = function() {
     } else if (parsedSec.section == 'colour' ||
                parsedSec.section == 'color') {
       this.parseColour(parsedSec.value)
+    } else if (parsedSec.section == 'force-hyphen-right') {
+      this.parseForcedSep(parsedSec.value, parsedSec.section)
+    } else if (parsedSec.section == 'force-hyphen-below') {
+      this.parseForcedSep(parsedSec.value, parsedSec.section)
+    } else if (parsedSec.section == 'force-bar-right') {
+      this.parseForcedSep(parsedSec.value, parsedSec.section)
+    } else if (parsedSec.section == 'force-bar-below') {
+      this.parseForcedSep(parsedSec.value, parsedSec.section)
     } else if (parsedSec.section == 'question') {
       this.questionTexts.push(parsedSec.value)
     } else if (parsedSec.section == 'submit') {
@@ -720,6 +734,20 @@ Exolve.prototype.parseColour = function(s) {
     } else {
       this.cellColours.push(cellLocation.concat(colour))
     }
+  }
+}
+
+Exolve.prototype.parseForcedSep = function(s, section) {
+  let parsedCells = s.split(' ')
+  for (let c of parsedCells) {
+    if (!c) {
+      continue
+    }
+    let cellLocation = this.parseCellLocation(c)
+    if (!cellLocation) {
+      continue
+    }
+    this.forcedSeps[section].push(cellLocation)
   }
 }
 
@@ -2366,11 +2394,35 @@ Exolve.prototype.finalClueTweaks = function() {
   }
 }
 
-// Using hyphenAfter[] and wordEndAfter[] in clues, set
-// {hyphen,wordEnd}{ToRight,Below} in grid[i][j]s.
+// Using hyphenAfter[] and wordEndAfter[] in clues as well as from
+// exolve-force-*, set {hyphen,wordEnd}{ToRight,Below} in grid[i][j]s.
 Exolve.prototype.setWordEndsAndHyphens = function() {
+  for (c of this.forcedSeps['force-hyphen-right']) {
+    if (c[0] >= 0 && c[0] < this.gridHeight &&
+        c[1] >= 0 && c[1] < this.gridWidth) {
+      this.grid[c[0]][c[1]].hyphenToRight = true
+    }
+  }
+  for (c of this.forcedSeps['force-hyphen-below']) {
+    if (c[0] >= 0 && c[0] < this.gridHeight &&
+        c[1] >= 0 && c[1] < this.gridWidth) {
+      this.grid[c[0]][c[1]].hyphenBelow = true
+    }
+  }
+  for (c of this.forcedSeps['force-bar-right']) {
+    if (c[0] >= 0 && c[0] < this.gridHeight &&
+        c[1] >= 0 && c[1] < this.gridWidth) {
+      this.grid[c[0]][c[1]].wordEndToRight = true
+    }
+  }
+  for (c of this.forcedSeps['force-bar-below']) {
+    if (c[0] >= 0 && c[0] < this.gridHeight &&
+        c[1] >= 0 && c[1] < this.gridWidth) {
+      this.grid[c[0]][c[1]].wordEndBelow = true
+    }
+  }
   if (this.hasDgmlessCells) {
-    // Give up on this
+    // Give up on setting from clues.
     return
   }
   // Going across
@@ -3235,6 +3287,10 @@ Exolve.prototype.clueOrParentIndex = function(ci) {
   }
   return ci
 }
+Exolve.prototype.maybeConfirm = function(msg) {
+  if (!msg) return true;
+  return confirm(msg);
+}
 // ------------------------
 
 Exolve.prototype.deactivateCurrClue = function() {
@@ -3654,8 +3710,10 @@ Exolve.prototype.copyOrphanEntry = function(clueIndex) {
     return
   }
   if (letters.length != this.activeCells.length) {
-    if (!confirm(this.textLabels['confirm-mismatched-copy'] + ' ' +
-                 letters.length + ':' + this.activeCells.length)) {
+    let msg = this.textLabels['confirm-mismatched-copy']
+    if (msg &&
+        !this.maybeConfirm(msg + ' ' + letters.length +
+                           ':' + this.activeCells.length)) {
       return
     }
   }
@@ -4623,7 +4681,7 @@ Exolve.prototype.toggleNinas = function() {
   if (this.showingNinas) {
     this.hideNinas()
   } else {
-    if (!confirm(this.textLabels['confirm-show-ninas'])) {
+    if (!this.maybeConfirm(this.textLabels['confirm-show-ninas'])) {
       return
     }
     this.showNinas()
@@ -4767,7 +4825,7 @@ Exolve.prototype.clearAll = function(conf=true) {
       message = this.textLabels['confirm-clear-all-orphans1']
     }
   }
-  if (conf && !confirm(message)) {
+  if (conf && !this.maybeConfirm(message)) {
     this.refocus()
     return
   }
@@ -4915,7 +4973,7 @@ Exolve.prototype.checkCurr = function() {
 }
 
 Exolve.prototype.checkAll = function(conf=true, erase=true) {
-  if (conf && !confirm(this.textLabels['confirm-check-all'])) {
+  if (conf && !this.maybeConfirm(this.textLabels['confirm-check-all'])) {
     this.refocus()
     return false
   }
@@ -5067,7 +5125,7 @@ Exolve.prototype.revealCurr = function() {
 }
 
 Exolve.prototype.revealAll = function(conf=true) {
-  if (conf && !confirm(this.textLabels['confirm-reveal-all'])) {
+  if (conf && !this.maybeConfirm(this.textLabels['confirm-reveal-all'])) {
     this.refocus()
     return
   }
@@ -5158,7 +5216,7 @@ Exolve.prototype.submitSolution = function() {
   if (this.numCellsFilled != this.numCellsToFill) {
     message = this.textLabels['confirm-incomplete-submit']
   }
-  if (!confirm(message)) {
+  if (!this.maybeConfirm(message)) {
     return
   }
   let fullSubmitURL = this.submitURL + '&' + this.submitKeys[0] + '=' +
