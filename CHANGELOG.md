@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.96 October 18 2020
+
+- Minor changes: do not append a script element to the whole document for
+  every Exolve puzzle. Instead append/modify to the frame element for
+  that puzzle.
+- Return status boolean from ClearAll() to know whether the user went ahead
+  (for use in Exet).
+
 ### Version: Exolve v0.95 October 10 2020
 
 - Skip the confirmation step if the confirmation message has been set to an

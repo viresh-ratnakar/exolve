@@ -76,7 +76,7 @@ function Exolve(puzzleText,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.95 October 10 2020'
+  this.VERSION = 'Exolve v0.96 October 18 2020'
 
   this.puzzleText = puzzleText
   this.containerId = containerId
@@ -422,11 +422,11 @@ Exolve.prototype.init = function() {
   `
 
   if (document.getElementById(this.prefix + '-frame')) {
-      this.throwErr('Element with id ' + this.prefix + 'frame already exists')
+    this.throwErr('Element with id ' + this.prefix + 'frame already exists')
   }
 
   if (!this.containerId) {
-      this.containerId = 'exolve'
+    this.containerId = 'exolve'
   }
   const exolveHolder = document.getElementById(this.containerId)
   if (exolveHolder) {
@@ -2702,9 +2702,15 @@ Exolve.prototype.setUpGnav = function() {
 }
 
 Exolve.prototype.applyStyles = function() {
-  let customStyles = document.createElement('style')
+  let id = `${this.prefix}-added-style`
+  let customStyles = document.getElementById(id)
+  if (!customStyles) {
+    customStyles = document.createElement('style')
+    customStyles.id = id
+    this.frame.appendChild(customStyles);
+  }
   customStyles.innerHTML = `
-    .xlv-frame {
+    #${this.prefix}-frame {
       font-size: ${this.letterSize}px;
       font-family: serif;
       font-weight: 400;
@@ -2736,7 +2742,6 @@ Exolve.prototype.applyStyles = function() {
       background-color: ${this.colorScheme['small-button-hover']};
     }
   `;
-  document.body.appendChild(customStyles);
 }
 
 Exolve.prototype.stripLineBreaks = function(s) {
@@ -4827,7 +4832,7 @@ Exolve.prototype.clearAll = function(conf=true) {
   }
   if (conf && !this.maybeConfirm(message)) {
     this.refocus()
-    return
+    return false
   }
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
@@ -4876,6 +4881,7 @@ Exolve.prototype.clearAll = function(conf=true) {
   }
   this.updateAndSaveState()
   this.refocus()
+  return true
 }
 
 Exolve.prototype.cellLightTogglerDone = function(button, text) {
