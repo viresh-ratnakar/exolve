@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.97 December 10 2020
+
+- Make all lines <= 80 chars long (a step towards linting!).
+- Allow exolve puzzle ids be arbitrary strings.
+- Add support for reading the ipuz format.
+
 ### Version: Exolve v0.96 October 18 2020
 
 - Minor changes: do not append a script element to the whole document for

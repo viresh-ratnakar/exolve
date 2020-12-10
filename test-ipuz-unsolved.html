@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.97"/>
+<script src="exolve-m.js?v0.97"></script>
+<script src="exolve-from-ipuz.js?v0.97"></script>
+
+<title>Test-Ipuz-Solved</title>
+
+</head>
+<body>
+<script>
+let ipuz = {
+    "title": "ipuz test (solved)",
+    "intro": "ipuz preamble<br>with a second line",
+    "explanation": "This is a simple<br>ipuz test",
+    "notes": "With some notes",
+    "author": "isetter",
+    "copyright": "mine alone!",
+    "version": "http://ipuz.org/v2",
+    "kind": [ "http://ipuz.org/crossword#1" ],
+    "dimensions": { "width": 3, "height": 6 },
+    "puzzle": [ [ { "cell": 1, "style": { "shapebg": "circle" } }, 2, "#" ],
+                [ 3, { "style": { "shapebg": "circle" } }, 4 ],
+                [ null, 5, { "style": { "shapebg": "circle" } } ],
+                [ 0, 0, { "style": { "barred": "B" } } ],
+                [ 0, { "style": { "barred": "TR" } }, 0 ],
+      [ 0, {"style": {"barred":"L"}}, { "style": { "shapebg": "circle" } } ] ],
+    "clues": { "Across": [ [ 1, "OR neighbor" ],
+      { number: 3, clue: "Droid", enumeration: 3 },
+      { number: 5, clue: "Behold!" } ],
+               "Down": [ [ 1, "Trucker's radio" ],
+                            [ 2, "MSN competitor" ],
+                            [ 4, "A preposition" ] ] }
+}
+createExolve(exolveFromIpuz(ipuz))
+</script>
+</body>
+</html>

@@ -51,7 +51,8 @@ var exolvePuzzles;
 /**
  * Constructor to create an Exolve puzzle.
  *
- * puzzleText contains the puzzle specs.
+ * puzzleSpec is a string that contains the puzzle specs in the Exolve plain
+ *     text format.
  * containerId is the optional HTML id of the container element in which you
  *     want to create this puzzle. If empty, the puzzle is created inside
  *     the element with id "exolve" if it exists (and its id is changed to
@@ -70,15 +71,15 @@ var exolvePuzzles;
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
  */
-function Exolve(puzzleText,
-                containerId="",
+function Exolve(puzzleSpec,
+                containerId='',
                 customizer=null,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.96 October 18 2020'
+  this.VERSION = 'Exolve v0.97 December 10 2020'
 
-  this.puzzleText = puzzleText
+  this.puzzleText = puzzleSpec
   this.containerId = containerId
   this.customizer = customizer
   this.addStateToUrl = addStateToUrl
@@ -288,19 +289,20 @@ Exolve.prototype.init = function() {
   this.parseRelabel()
   this.computeGridSize(this.maxDim)
 
-  if (!this.id || !this.id.match(/^[a-zA-Z][a-zA-Z\d-]*$/)) {
-    this.throwErr(
-      'Puzzle id should be non-empty, should start with a letter, ' +
-      'and should only have alphanumeric characters or -: ' + this.id)
+  const SPECIAL_ID = '42xlvIndex42'
+
+  if (!this.id || this.id == SPECIAL_ID) {
+    this.throwErr('Puzzle id should be non-empty: ' + this.id)
   }
   if (!exolvePuzzles) {
-    exolvePuzzles = {'42xlvIndex42': 1}
+    exolvePuzzles = {}
+    exolvePuzzles[SPECIAL_ID] = 1
   }
   if (exolvePuzzles[this.id]) {
     this.throwErr('Puzzle id ' + this.id + ' is already in use')
   }
   exolvePuzzles[this.id] = this
-  this.index = exolvePuzzles['42xlvIndex42']++
+  this.index = exolvePuzzles[SPECIAL_ID]++
   this.prefix = 'xlv' + this.index
 
   const basicHTML = `
@@ -338,20 +340,21 @@ Exolve.prototype.init = function() {
                 <button id="${this.prefix}-check" class="xlv-button"
                     style="display:none">${this.textLabels['check']}</button>
                 <button id="${this.prefix}-check-all" class="xlv-button"
-                    style="display:none">${this.textLabels['check-all']}</button>
+                  style="display:none">${this.textLabels['check-all']}</button>
               </div> <!-- xlv-button-row-1 -->
               <div id="${this.prefix}-button-row-2" class="xlv-controls-row">
                 <button id="${this.prefix}-reveal" class="xlv-button"
                     style="display:none">${this.textLabels['reveal']}</button>
                 <button id="${this.prefix}-ninas" class="xlv-button"
-                    style="display:none">${this.textLabels['show-ninas']}</button>
+                  style="display:none">${this.textLabels['show-ninas']}</button>
                 <button id="${this.prefix}-reveal-all" class="xlv-button"
-                    style="display:none">${this.textLabels['reveal-all']}</button>
+                  style="display:none">${this.textLabels['reveal-all']}</button>
               </div> <!-- xlv-button-row-2 -->
             </div> <!-- xlv-controls -->
             <div id="${this.prefix}-errors" class="xlv-errors"></div>
             <div id="${this.prefix}-status" class="xlv-status">
-              <span id="${this.prefix}-squares-filled">${this.textLabels['squares-filled']}</span>:
+              <span id="${this.prefix}-squares-filled"
+                  >${this.textLabels['squares-filled']}</span>:
               <span id="${this.prefix}-status-num-filled">0</span>/<span
                     id="${this.prefix}-status-num-total"></span>
             </div> <!-- xlv-status -->
@@ -360,7 +363,8 @@ Exolve.prototype.init = function() {
               ${this.textLabels['saving-msg']}
               </span>
             </div> <!-- xlv-saving -->
-            <div id="${this.prefix}-small-print" class="xlv-wide-box xlv-small-print">
+            <div id="${this.prefix}-small-print"
+                class="xlv-wide-box xlv-small-print">
               <div id="${this.prefix}-tools" style="display:none">
                 <div id="${this.prefix}-tools-msg">
                   ${this.textLabels['tools-msg']}
@@ -378,15 +382,18 @@ Exolve.prototype.init = function() {
                   title="${this.textLabels['tools-link.hover']}"
                   >${this.textLabels['tools-link']}</a>
               <a id="${this.prefix}-report-bug"
-              href="https://github.com/viresh-ratnakar/exolve/issues/new">${this.textLabels['report-bug']}</a>
+                href="https://github.com/viresh-ratnakar/exolve/issues/new"
+                    >${this.textLabels['report-bug']}</a>
               <a id="${this.prefix}-exolve-link"
-                href="https://github.com/viresh-ratnakar/exolve">${this.textLabels['exolve-link']}</a>
+                href="https://github.com/viresh-ratnakar/exolve"
+                    >${this.textLabels['exolve-link']}</a>
               <span id="${this.prefix}-copyright"></span>
             </div> <!-- xlv-small-print -->
             <div id="${this.prefix}-questions" class="xlv-wide-box"></div>
             <div id="${this.prefix}-submit-parent">
               <button id="${this.prefix}-submit"
-                  class="xlv-button" style="display:none">${this.textLabels['submit']}</button>
+                  class="xlv-button" style="display:none"
+                      >${this.textLabels['submit']}</button>
             </div> <!-- submit-parent -->
             <div id="${this.prefix}-explanations" class="xlv-wide-box
                 xlv-explanations" style="display:none"></div>
@@ -398,7 +405,8 @@ Exolve.prototype.init = function() {
               style="display:none">
             <hr/>
             <span id="${this.prefix}-across-label"
-                style="font-weight:bold">${this.textLabels['across-label']}</span>
+                style="font-weight:bold"
+                   >${this.textLabels['across-label']}</span>
             <table id="${this.prefix}-across"></table>
             <br/>
           </div>
@@ -448,7 +456,8 @@ Exolve.prototype.init = function() {
   }
   let setter = document.getElementById(this.prefix + '-setter')
   if (this.setter) {
-    setter.innerHTML = `<span id="${this.prefix}-setter-by">${this.textLabels['setter-by']}</span> ${this.setter}`
+    setter.innerHTML = `<span id="${this.prefix}-setter-by"
+      >${this.textLabels['setter-by']}</span> ${this.setter}`
     setter.style.color = this.colorScheme['imp-text']
   } else {
     setter.style.display = 'none'
@@ -467,15 +476,20 @@ Exolve.prototype.init = function() {
 
   this.gridPanel = document.getElementById(this.prefix + '-grid-panel');
   this.svg = document.getElementById(this.prefix + '-grid');
-  this.gridInputWrapper = document.getElementById(this.prefix + '-grid-input-wrapper');
+  this.gridInputWrapper = document.getElementById(
+      this.prefix + '-grid-input-wrapper');
   this.gridInputWrapper.style.width = '' + this.squareDim + 'px'
   this.gridInputWrapper.style.height = '' + (this.squareDim - 2) + 'px'
   this.gridInputWrapper.insertAdjacentHTML('beforeend',
-    `<div id="${this.prefix}-grid-input-rarr" class="xlv-grid-input-rarr">&rtrif;</div>`)
+    `<div id="${this.prefix}-grid-input-rarr"
+        class="xlv-grid-input-rarr">&rtrif;</div>`)
   this.gridInputWrapper.insertAdjacentHTML('beforeend',
-    `<div id="${this.prefix}-grid-input-darr" class="xlv-grid-input-darr">&dtrif;</div>`)
-  this.gridInputRarr = document.getElementById(this.prefix + '-grid-input-rarr');
-  this.gridInputDarr = document.getElementById(this.prefix + '-grid-input-darr');
+    `<div id="${this.prefix}-grid-input-darr"
+        class="xlv-grid-input-darr">&dtrif;</div>`)
+  this.gridInputRarr = document.getElementById(
+      this.prefix + '-grid-input-rarr');
+  this.gridInputDarr = document.getElementById(
+      this.prefix + '-grid-input-darr');
   this.gridInputRarr.style.color = this.colorScheme['arrow']
   this.gridInputDarr.style.color = this.colorScheme['arrow']
   this.gridInputRarr.style.fontSize = this.arrowSize + 'px'
@@ -486,7 +500,8 @@ Exolve.prototype.init = function() {
 
   this.questions = document.getElementById(this.prefix + '-questions');
 
-  this.acrossPanel = document.getElementById(this.prefix + '-across-clues-panel')
+  this.acrossPanel = document.getElementById(
+      this.prefix + '-across-clues-panel')
   this.downPanel = document.getElementById(this.prefix + '-down-clues-panel')
   this.nodirPanel = document.getElementById(this.prefix + '-nodir-clues-panel')
   this.acrossClues = document.getElementById(this.prefix + '-across')
@@ -494,14 +509,18 @@ Exolve.prototype.init = function() {
   this.nodirClues = document.getElementById(this.prefix + '-nodir')
 
   this.currClue = document.getElementById(this.prefix + '-curr-clue')
-  this.currClueParent = document.getElementById(this.prefix + '-curr-clue-parent')
+  this.currClueParent = document.getElementById(
+      this.prefix + '-curr-clue-parent')
   this.ninaGroup = document.getElementById(this.prefix + '-nina-group')
 
-  this.statusNumFilled = document.getElementById(this.prefix + '-status-num-filled')
-  this.statusNumTotal = document.getElementById(this.prefix + '-status-num-total')
+  this.statusNumFilled = document.getElementById(
+      this.prefix + '-status-num-filled')
+  this.statusNumTotal = document.getElementById(
+      this.prefix + '-status-num-total')
   if (this.addStateToUrl) {
-    document.getElementById(this.prefix + '-saving').insertAdjacentHTML('beforeend',
-       `<span id="${this.prefix}-saving-bookmark">
+    document.getElementById(this.prefix + '-saving').insertAdjacentHTML(
+        'beforeend',
+        `<span id="${this.prefix}-saving-bookmark">
            ${this.textLabels['saving-bookmark']} </span>
         <a id="${this.prefix}-saving-url" href="">URL</a>`);
     this.savingURL = document.getElementById(this.prefix + '-saving-url')
@@ -840,12 +859,14 @@ Exolve.prototype.displayQuestions = function() {
     if (rows == 1) {
       answer.setAttributeNS(null, 'type', 'text');
     }
-    answer.setAttributeNS(null, 'maxlength', '' + inputLen * this.langMaxCharCodes);
+    answer.setAttributeNS(null, 'maxlength',
+                          '' + inputLen * this.langMaxCharCodes);
     answer.setAttributeNS(null, 'autocomplete', 'off');
     answer.setAttributeNS(null, 'spellcheck', 'false');
     question.appendChild(answer)
     this.questions.appendChild(question)
-    answer.addEventListener('input', this.answerListener.bind(this, answer, forceUpper));
+    answer.addEventListener(
+        'input', this.answerListener.bind(this, answer, forceUpper));
   }
 }
 
@@ -888,7 +909,8 @@ Exolve.prototype.parseOption = function(s) {
     if (kv[0] == 'clues-panel-lines') {
       this.cluesPanelLines = parseInt(kv[1])
       if (isNaN(this.cluesPanelLines)) {
-        this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' + kv[1])
+        this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' +
+                      kv[1])
       }
       continue
     }
@@ -955,7 +977,8 @@ Exolve.prototype.parseLanguage = function(s) {
 // Extracts the prelude from its previously identified lines and sets up
 // its display.
 Exolve.prototype.parseAndDisplayPrelude = function() {
-  if (this.preludeFirstLine >= 0 && this.preludeFirstLine <= this.preludeLastLine) {
+  if (this.preludeFirstLine >= 0 &&
+      this.preludeFirstLine <= this.preludeLastLine) {
     let preludeText = this.specLines[this.preludeFirstLine]
     let l = this.preludeFirstLine + 1
     while (l <= this.preludeLastLine) {
@@ -974,7 +997,8 @@ Exolve.prototype.parseAndDisplayPS = function() {
       psText = psText + '\n' + this.specLines[l]
       l++;
     }
-    psHTML = `<div id='${this.prefix}-postscript' class='xlv-postscript'><hr> ${psText} </div>`;
+    psHTML = `<div id='${this.prefix}-postscript'
+      class='xlv-postscript'><hr> ${psText} </div>`;
     this.frame.insertAdjacentHTML('beforeend', psHTML);
   }
 }
@@ -2127,7 +2151,8 @@ Exolve.prototype.allCellsKnown = function(clueIndex) {
     }
     if (this.clues[ci].cells.length > 0) {
       numCells += this.clues[ci].cells.length
-    } else if (this.clues[ci].cellsOfOrphan && this.clues[ci].cellsOfOrphan.length > 0) {
+    } else if (this.clues[ci].cellsOfOrphan &&
+               this.clues[ci].cellsOfOrphan.length > 0) {
       numCells += this.clues[ci].cellsOfOrphan.length
     } else {
       return false
@@ -2347,7 +2372,8 @@ Exolve.prototype.processClueChildren = function() {
 
 Exolve.prototype.roughlyStartsWith = function(s, prefix) {
   const punct = /[\s'.,-]*/gi
-  let normS = s.trim().replace(/<[^>]*>/gi, '').replace(punct, '').trim().toUpperCase();
+  let normS = s.trim().replace(/<[^>]*>/gi, '').replace(
+                  punct, '').trim().toUpperCase();
   let normP = prefix.trim().replace(punct, '').trim().toUpperCase();
   return normS.startsWith(normP);
 }
@@ -2385,11 +2411,12 @@ Exolve.prototype.finalClueTweaks = function() {
       label = label + ' '
     }
     if (!this.allCellsKnown(clueIndex)) {
-      theClue.fullDisplayLabel = `<span class="xlv-clickable"><span id="${this.prefix}-curr-clue-label" class="xlv-curr-clue-label"
+      theClue.fullDisplayLabel = `<span class="xlv-clickable"><span
+        id="${this.prefix}-curr-clue-label" class="xlv-curr-clue-label"
         title="${this.textLabels['mark-clue.hover']}">${label}</span></span>`
     } else {
-      theClue.fullDisplayLabel = `<span id="${this.prefix}-curr-clue-label" class="xlv-curr-clue-label">
-          ${label}</span>`;
+      theClue.fullDisplayLabel = `<span id="${this.prefix}-curr-clue-label"
+        class="xlv-curr-clue-label">${label}</span>`;
     }
   }
 }
@@ -2768,7 +2795,8 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
         skip = close + 1 - idx
       }
     }
-    html = html + '<span class="xlv-in-clue-anno">' + clueText.substring(idx + skip, endIdx) + '</span>'
+    html = html + '<span class="xlv-in-clue-anno">' +
+           clueText.substring(idx + skip, endIdx) + '</span>'
     endIdx += 2
     idx = clueText.indexOf('~{', endIdx)
   }
@@ -2782,7 +2810,8 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
     return
   }
   let inClueAnnoSpans = elt.getElementsByClassName('xlv-in-clue-anno')
-  console.assert(inClueAnnoSpans.length == clue.inClueAnnos.length, inClueAnnoSpans, clue)
+  console.assert(inClueAnnoSpans.length ==
+                 clue.inClueAnnos.length, inClueAnnoSpans, clue)
   for (let s = 0; s < inClueAnnoSpans.length; s++) {
     let c = clue.inClueAnnos[s]
     if (!clue.inClueAnnoReveals[c]) {
@@ -2953,9 +2982,11 @@ Exolve.prototype.computeGridSize = function(maxDim) {
   }
   this.squareDim = 31
   if (this.gridWidth <= 30 &&  // For jumbo grids, give up.
-      (this.squareDim + this.GRIDLINE) * this.gridWidth + this.GRIDLINE > viewportDim - 8) {
+      (this.squareDim + this.GRIDLINE) * this.gridWidth + this.GRIDLINE >
+      viewportDim - 8) {
     this.squareDim = Math.max(20,
-      Math.floor((viewportDim - 8 - this.GRIDLINE) / this.gridWidth) - this.GRIDLINE)
+      Math.floor((viewportDim - 8 - this.GRIDLINE) /
+                 this.gridWidth) - this.GRIDLINE)
   }
   this.squareDimBy2 = Math.floor((this.squareDim + 1) / 2)
   this.numberStartY = Math.floor(this.squareDim / 3)
@@ -3033,7 +3064,8 @@ Exolve.prototype.updateDisplayAndGetState = function() {
   this.checkButton.disabled = (this.activeCells.length == 0) && !revOrphan
   let theClue = this.clues[ci]
   let haveReveals = (this.activeCells.length > 0 && !this.hasUnsolvedCells) ||
-      (theClue && (theClue.anno || theClue.solution || revOrphan || theClue.inClueAnnos.length > 0));
+      (theClue && (theClue.anno || theClue.solution ||
+                   revOrphan || theClue.inClueAnnos.length > 0));
   if (!haveReveals && this.szCellsToOrphan > 0 && this.activeCells.length > 0) {
     let orphanClue = this.cellsToOrphan[JSON.stringify(this.activeCells)];
     if (orphanClue) {
@@ -3043,7 +3075,8 @@ Exolve.prototype.updateDisplayAndGetState = function() {
     }
   }
   this.revealButton.disabled = !haveReveals;
-  this.clearButton.disabled = this.revealButton.disabled && this.activeCells.length == 0;
+  this.clearButton.disabled = this.revealButton.disabled &&
+                              this.activeCells.length == 0;
   return state
 }
 
@@ -3074,12 +3107,13 @@ Exolve.prototype.updateAndSaveState = function() {
   let d = new Date();
   d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
   let expires = 'expires=' + d.toUTCString();
-  document.cookie = this.id + '=' + state +
+  document.cookie = encodeURIComponent(this.id) + '=' +
+                    encodeURIComponent(state) +
                     '; samesite=none; secure; ' + expires + ';path=/';
 
   if (this.savingURL) {
     // Also save the state in location.hash.
-    let lh = location.hash || '#'
+    let lh = decodeURIComponent((location.hash || '#').substr(1))
     let myPart = this.myStatePart(lh)
     if (myPart[0] < 0) {
       lh = lh + this.STATES_SEP + this.id + state
@@ -3088,7 +3122,7 @@ Exolve.prototype.updateAndSaveState = function() {
            this.STATES_SEP + this.id + state +
            lh.substring(myPart[1])
     }
-    location.hash = lh
+    location.hash = encodeURIComponent(lh)
     // Update savingURL.href for *all* puzzles
     for (let pid in exolvePuzzles) {
       let p = exolvePuzzles[pid]
@@ -3185,7 +3219,8 @@ Exolve.prototype.parseState = function(state) {
 
   // Also try to recover answers to questions and orphan-fills.
   if (state.substr(index, this.STATE_SEP.length) == this.STATE_SEP) {
-    let parts = state.substr(index + this.STATE_SEP.length).split(this.STATE_SEP)
+    let parts = state.substr(index + this.STATE_SEP.length).split(
+        this.STATE_SEP)
     if (parts.length == this.answersList.length) {
       for (let i = 0; i < parts.length; i++) {
         this.answersList[i].input.value = parts[i]
@@ -3538,9 +3573,11 @@ Exolve.prototype.getLinkedClues = function(clueIndex) {
 Exolve.prototype.getCurrClueButtons = function() {
   return `<span>
       <button id="${this.prefix}-curr-clue-prev" class="xlv-small-button"
-      title="${this.textLabels['curr-clue-prev.hover']}">${this.textLabels['curr-clue-prev']}</button>
+      title="${this.textLabels['curr-clue-prev.hover']}"
+          >${this.textLabels['curr-clue-prev']}</button>
       <button id="${this.prefix}-curr-clue-next" class="xlv-small-button"
-      title="${this.textLabels['curr-clue-next.hover']}">${this.textLabels['curr-clue-next']}</button></span>`;
+      title="${this.textLabels['curr-clue-next.hover']}"
+          >${this.textLabels['curr-clue-next']}</button></span>`;
 }
 
 Exolve.prototype.cnavNext = function() {
@@ -4577,7 +4614,9 @@ Exolve.prototype.displayGrid = function() {
 }
 
 // API for customization: add small text to cell
-Exolve.prototype.addCellText = function(row, col, text, h=16, w=10, atTop=true, toRight=false) {
+Exolve.prototype.addCellText = function(row, col, text,
+                                        h=16, w=10,
+                                        atTop=true, toRight=false) {
   if (row < 0 || row >= this.gridHeight ||
       col < 0 || col >= this.gridWidth) {
     return

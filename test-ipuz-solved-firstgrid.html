@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.97"/>
+<script src="exolve-m.js?v0.97"></script>
+<script src="exolve-from-ipuz.js?v0.97"></script>
+
+<title>Test-Ipuz-Solved First Crossword</title>
+
+</head>
+<body>
+<script>
+let ipuz = {
+"origin": "ipuz example puzzle (thanks to Ross Beresford for the conversion)",
+"version": "http://ipuz.org/v1",
+"kind": ["http://ipuz.org/crossword#1"],
+"author": "Arthur Wynne",
+"title": "FUN's Word-Cross Puzzle",
+"intro": "Fill in the small squares with words which agree with the following definitions.",
+"date": "12/21/1913",
+"notes": "This is considered to be the world's first crossword puzzle.",
+"dimensions": { "width": 13, "height": 13 },
+"puzzle": [
+    [ null, null, null, null, null, null, 1, null, null, null, null, null, null ],
+    [ null, null, null, null, null, { "cell": 0, "value": "F" }, { "cell": 0, "value": "U"},
+      { "cell": 0, "value": "N" }, null, null, null, null, null ],
+    [ null, null, null, null, 2, 0, 0, 0, { "cell": 0, "style": { "mark": { "TR": "3" } } },
+      null, null, null, null ],
+    [ null, null, null, 4, 0, 0, { "cell": 0, "style": { "mark": { "BR": "32" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "5" } } }, null, null, null ],
+    [ null, null, 6, 0, 0, { "cell": 0, "style": { "mark": { "BR": "7"} } }, null,
+      { "cell": 0, "style": { "mark": { "BL": "8" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "9" } } }, null, null ],
+    [ null, 10, 0, 0, { "cell": 0, "style": { "mark": { "BR": "11" } } }, null, null, null,
+      { "cell": 0, "style": { "mark": { "BL": "12" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "13" } } }, null ],
+    [ 14, 0, 0, { "cell": 0, "style": { "mark": { "BR": "15" } } }, null, null, null, null, null,
+      { "cell": 0, "style": { "mark": { "BL": "16" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "17" } } } ],
+    [ null, { "cell": 0, "style": { "mark": { "BL": "18" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "19" } } }, null, null, null, 20, 0, 0,
+      { "cell": 0, "style": { "mark": { "BR": "21" } } }, null ],
+    [ null, null, { "cell": 0, "style": { "mark": { "BL": "22" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "23" } } }, null, 24, 0, 0,
+      { "cell": 0, "style": { "mark": { "BR": "25" } } }, null, null ],
+    [ null, null, null, { "cell": 0, "style": { "mark": { "BL": "26" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "TR": "33" } } }, 0, 0,
+      { "cell": 0, "style": { "mark": { "BR": "27" } } }, null, null, null ],
+    [ null, null, null, null, { "cell": 0, "style": { "mark": { "BL": "28" } } }, 0, 0, 0,
+      { "cell": 0, "style": { "mark": { "BR": "29" } } }, null, null, null, null ],
+    [ null, null, null, null, null, { "cell": 0, "style": { "mark": { "BL": "30" } } }, 0,
+      { "cell": 0, "style": { "mark": { "BR": "31" } } }, null, null, null, null, null ],
+    [ null, null, null, null, null, null, { "cell": 0, "style": { "mark": { "BL": "34" } } },
+      null, null, null, null, null, null ]
+],
+"solution": [
+    [ null, null, null, null, null, null, "R",  null, null, null, null, null, null ],
+    [ null, null, null, null, null, "F",  "U",  "N",  null, null, null, null, null ],
+    [ null, null, null, null, "S",  "A",  "L",  "E",  "S",  null, null, null, null ],
+    [ null, null, null, "R",  "E",  "C",  "E",  "I",  "P",  "T",  null, null, null ],
+    [ null, null, "M",  "E",  "R",  "E",  null, "F",  "A",  "R",  "M",  null, null ],
+    [ null, "D",  "O",  "V",  "E",  null, null, null, "R",  "A",  "I",  "L",  null ],
+    [ "M",  "O",  "R",  "E",  null, null, null, null, null, "D",  "R",  "A",  "W" ],
+    [ null, "H",  "A",  "R",  "D",  null, null, null, "T",  "I",  "E",  "D",  null ],
+    [ null, null, "L",  "I",  "O",  "N",  null, "S",  "A",  "N",  "D",  null, null ],
+    [ null, null, null, "E",  "V",  "E",  "N",  "I",  "N",  "G",  null, null, null ],
+    [ null, null, null, null, "E",  "V",  "A",  "D",  "E",  null, null, null, null ],
+    [ null, null, null, null, null, "A",  "R",  "E",  null, null, null, null, null ],
+    [ null, null, null, null, null, null, "D",  null, null, null, null, null, null ]
+],
+"clues": {
+"Across": [
+    [ "2-3", "What bargain hunters enjoy",
+      {"cells": [ [ 4, 2 ], [ 5, 2 ], [ 6, 2 ], [ 7, 2 ], [ 8, 2 ] ]} ],
+    [ "4-5", "A written acknowledgment",
+      {"cells": [ [ 3, 3 ], [ 4, 3 ], [ 5, 3 ], [ 6, 3 ], [ 7, 3 ], [ 8, 3 ], [ 9, 3 ] ]} ],
+    [ "6-7", "Such and nothing more",
+      {"cells": [ [ 2, 4 ], [ 3, 4 ], [ 4, 4 ], [ 5, 4 ] ]} ],
+    [ "8-9", "To cultivate",
+      {"cells": [ [ 7, 4 ], [ 8, 4 ], [ 9, 4 ], [ 10, 4 ] ]} ],
+  [ "10-11", "A bird}",
+    {"cells": [ [ 1, 5 ], [ 2, 5 ], [ 3, 5 ], [ 4, 5 ] ]} ],
+    [ "12-13", "A bar of wood or iron",
+      {"cells": [ [ 8, 5 ], [ 9, 5 ], [ 10, 5 ], [ 11, 5 ] ]} ],
+    [ "14-15", "Opposed to less",
+      {"cells": [ [ 0, 6 ], [ 1, 6 ], [ 2, 6 ], [ 3, 6 ] ]} ],
+    [ "16-17", "What artists learn to do",
+      {"cells": [ [ 9, 6 ], [ 10, 6 ], [ 11, 6 ], [ 12, 6 ] ]} ],
+    [ "18-19", "What this puzzle is",
+      {"cells": [ [ 1, 7 ], [ 2, 7 ], [ 3, 7 ], [ 4, 7 ] ]} ],
+    [ "20-21", "Fastened",
+      {"cells": [ [ 8, 7 ], [ 9, 7 ], [ 10, 7 ], [ 11, 7 ] ]} ],
+    [ "22-23", "An animal of prey",
+      {"cells": [ [ 2, 8 ], [ 3, 8 ], [ 4, 8 ], [ 5, 8 ] ]} ],
+    [ "24-25", "Found on the seashore",
+      {"cells": [ [ 7, 8 ], [ 8, 8 ], [ 9, 8 ], [ 10, 8 ] ]} ],
+    [ "26-27", "The close of a day",
+      {"cells": [ [ 3, 9 ], [ 4, 9 ], [ 5, 9 ], [ 6, 9 ], [ 7, 9 ], [ 8, 9 ], [ 9, 9 ] ]} ],
+    [ "28-29", "To elude",
+      {"cells": [ [ 4, 10 ], [ 5, 10 ], [ 6, 10 ], [ 7, 10 ], [ 8, 10 ] ]} ],
+    [ "30-31", "The plural of is",
+      {"cells": [ [ 5, 11 ], [ 6, 11 ], [ 7, 11 ] ]} ],
+],
+"Down": [
+    [ "1-32", "To govern",
+      {"cells": [ [ 6, 0 ], [ 6, 1 ], [ 6, 2 ], [ 6, 3 ] ]} ],
+    [ "F-7", "Part of your head",
+      {"cells": [ [ 5, 1 ], [ 5, 2 ], [ 5, 3 ], [ 5, 4 ] ]} ],
+    [ "N-8", "A fist",
+      {"cells": [ [ 7, 1 ], [ 7, 2 ], [ 7, 3 ], [ 7, 4 ] ]} ],
+    [ "2-11", "A talon",
+      {"cells": [ [ 4, 2 ], [ 4, 3 ], [ 4, 4 ], [ 4, 5 ] ]} ],
+    [ "3-12", "Part of a ship",
+      {"cells": [ [ 8, 2 ], [ 8, 3 ], [ 8, 4 ], [ 8, 5 ] ]} ],
+    [ "4-26", "A day dream",
+      {"cells": [ [ 3, 3 ], [ 3, 4 ], [ 3, 5 ], [ 3, 6 ], [ 3, 7 ], [ 3, 8 ], [ 3, 9 ] ]} ],
+    [ "5-27", "Exchanging",
+      {"cells": [ [ 9, 3 ], [ 9, 4 ], [ 9, 5 ], [ 9, 6 ], [ 9, 7 ], [ 9, 8 ], [ 9, 9 ] ]} ],
+    [ "6-22", "What we all should be",
+      {"cells": [ [ 2, 4 ], [ 2, 5 ], [ 2, 6 ], [ 2, 7 ], [ 2, 8 ] ]} ],
+    [ "9-25", "To sink in mud",
+      {"cells": [ [ 10, 4 ], [ 10, 5 ], [ 10, 6 ], [ 10, 7 ], [ 10, 8 ] ]} ],
+    [ "10-18", "The fibre of the gomuti palm",
+      {"cells": [ [ 1, 5 ], [ 1, 6 ], [ 1, 7 ] ]} ],
+    [ "13-21", "A boy",
+      {"cells": [ [ 11, 5 ], [ 11, 6 ], [ 11, 7 ] ]} ],
+    [ "19-28", "A pigeon",
+      {"cells": [ [ 4, 7 ], [ 4, 8 ], [ 4, 9 ], [ 4, 10 ] ]} ],
+    [ "20-29", "One",
+      {"cells": [ [ 8, 7 ], [ 8, 8 ], [ 8, 9 ], [ 8, 10 ] ]} ],
+    [ "23-30", "A river in Russia",
+      {"cells": [ [ 5, 8 ], [ 5, 9 ], [ 5, 10 ], [ 5, 11 ] ]} ],
+    [ "24-31", "To agree with",
+      {"cells": [ [ 7, 8 ], [ 7, 9 ], [ 7, 10 ], [ 7, 11 ] ]} ],
+    [ "33-34", "An aromatic plant",
+      {"cells": [ [ 6, 9 ], [ 6, 10 ], [ 6, 11 ], [ 6, 12 ] ]} ]
+]}
+}
+createExolve(exolveFromIpuz(ipuz))
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.96 October 18 2020
+### Version: Exolve v0.97 December 10 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -200,8 +200,7 @@ notation—[see this section](#extended-chessboard-notation)). I did not use
 Any text appearing before `exolve-begin` or after `exolve-end` is ingored.
 
 ## `exolve-id`
-Provide a unique id for this crossword puzzle. Use only alphanumeric characters
-and dashes (-), and start with a letter. This id is used as the key for
+Provide a unique id for this crossword puzzle. This id is used as the key for
 saving/restoring state and also to distinguish between multiple puzzles on a
 single page. You can create an unsolved version of a puzzle (to run a contest,
 for example) and, later, a version of the same puzzle that has the solutions,
@@ -1344,6 +1343,20 @@ Dom. But you can direct it to be placed at different spot by creating an empty
 element (typically a DIV) with id="exolve" anywhere in the HTML file. The
 puzzle content will then be added inside this element.
 
+## Reading other formats
+
+### ipuz
+You can load the additional script file, `exolve-from-ipuz.js` and call
+`exolveFromIpuz(ipuz)` on an object in the
+[ipuz format](http://www.ipuz.org/crossword). See the example in
+`test-ipuz-solved.html` for an example.
+
+### puz
+Coming soon.
+
+### A generic web app for loading any file (exolve/ipuz/puz)
+Coming soon.
+
 ## API
 
 The Exolve code creates only the following names at global scope:
@@ -1372,7 +1385,8 @@ var exolvePuzzles;
 /**
  * Constructor to create an Exolve puzzle.
  *
- * puzzleText contains the puzzle specs.
+ * puzzleSpec is a string that contains the puzzle specs in the Exolve plain
+ *     text format.
  * containerId is the optional HTML id of the container element in which you
  *     want to create this puzzle. If empty, the puzzle is created inside
  *     the element with id "exolve" if it exists (and its id is changed to
