@@ -30,18 +30,31 @@ Version: Exolve v0.97 December 10 2020
 /**
  * exolveFromIpuz() converts the ipuz object, which should be in the ipuz
  * crossword format (http://ipuz.org/crossword) to a string in the Exolve
- * format and returns it.
+ * format and returns it. Upon any error, this returns the empty string.
  * 
  * The following ipuz features are currently unsupported:
  * - Clue directions other than Across and Down.
- *   Omitted cells (they get rendered as black cells).
+ * - Omitted cells (they get rendered as black cells).
  */
 exolveFromIpuz = function(ipuz) {
-  if (!ipuz['dimensions']) this.throwErr('ipuz: missing "dimensions"')
-  if (!ipuz['puzzle']) this.throwErr('ipuz: missing "puzzle"')
-  let w = ipuz['dimensions']['width'] || this.throwErr('ipuz: missing "width"')
-  let h = ipuz['dimensions']['height'] ||
-          this.throwErr('ipuz: missing "height"')
+  if (!ipuz['dimensions']) {
+    console.log('ipuz: missing "dimensions"')
+    return '';
+  }
+  if (!ipuz['puzzle']) {
+    console.log('ipuz: missing "puzzle"')
+    return '';
+  }
+  let w = ipuz['dimensions']['width']
+  if (!w) {
+    console.log('ipuz: missing "width"')
+    return '';
+  }
+  let h = ipuz['dimensions']['height']
+  if (!h) {
+    console.log('ipuz: missing "height"')
+    return '';
+  }
   let id = ipuz['uniqueid'] ||
            `ipuz--${Math.random().toString(36).substring(2, 8)}`
 
@@ -81,7 +94,10 @@ exolveFromIpuz = function(ipuz) {
       exolve-grid:`
   const block = ipuz['block'] || '#'
   const empty = ipuz['empty'] || '0'
-  if (ipuz['puzzle'].length != h) this.throwErr('ipuz: mismatched height')
+  if (ipuz['puzzle'].length != h) {
+    console.log('ipuz: mismatched height')
+    return '';
+  }
   let grid = new Array(h)
   for (let i = 0; i < h; i++) {
     grid[i] = new Array(w)
@@ -91,7 +107,10 @@ exolveFromIpuz = function(ipuz) {
   }
   for (let i = 0; i < h; i++) {
     let ipuzRow = ipuz['puzzle'][i]
-    if (ipuzRow.length != w) this.throwErr('ipuz: mismatched width')
+    if (ipuzRow.length != w) {
+      console.log('ipuz: mismatched width')
+      return '';
+    }
     for (let j = 0; j < w; j++) {
       let gridCell = grid[i][j]
       let ipuzCell = ipuzRow[j]
@@ -131,11 +150,15 @@ exolveFromIpuz = function(ipuz) {
   }
   let ipuzSol = ipuz['solution']
   if (ipuzSol) {
-    if (ipuzSol.length != h) this.throwErr('ipuz: solution: mismatched height')
+    if (ipuzSol.length != h) {
+      console.log('ipuz: solution: mismatched height')
+      return '';
+    }
     for (let i = 0; i < h; i++) {
       let ipuzSolRow = ipuzSol[i]
       if (ipuzSolRow.length != w) {
-        this.throwErr('ipuz: solution: mismatched width')
+        console.log('ipuz: solution: mismatched width')
+        return '';
       }
       for (let j = 0; j < w; j++) {
         let gridCell = grid[i][j]
@@ -176,7 +199,8 @@ exolveFromIpuz = function(ipuz) {
     } else if (ldir == 'down') {
       dir = 'D'
     } else {
-      this.throwErr('ipuz: unsupported direction: ' + idir)
+      console.log('ipuz: unsupported direction: ' + idir)
+      return '';
     }
     exolve += `
       exolve-${ldir}:`
