@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.98"/>
+<script src="exolve-m.js?v0.98"></script>
+<script src="exolve-from-ipuz.js?v0.98"></script>
+<script src="exolve-from-puz.js?v0.98"></script>
+
+<style>
+#exolve-player {
+  border: 1px solid black;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 10%;
+  font-size: 16px;
+  font-family: monospace;
+  background-image: linear-gradient(45deg, #F0F0F0 25%, transparent 25%), linear-gradient(-45deg, #F0F0F0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #F0F0F0 75%), linear-gradient(-45deg, transparent 75%, #F0F0F0 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+}
+</style>
+
+<title>Exolve Player</title>
+
+</head>
+<body>
+
+<div id="exolve-frame">
+</div>
+
+<div id="exolve-player" ondrop="xlvpDrop(event);" ondragover="xlvpDrag(event);">
+  <center>
+    <b>
+      Exolve Player
+      <br><br>
+      Interactively solve a crossword
+      <br><br>
+      Drag and drop a crossword file that uses any of these formats: Exolve, ipuz, puz.
+    </b>
+  </center>
+</div>
+
+<script>
+function xlvpShowExolve(specs) {
+  let start = specs.indexOf('exolve-begin')
+  let end = specs.indexOf('exolve-end')
+  if (start < 0 || end < 0 || start >= end) {
+    return false;
+  }
+  const exolve = specs.substring(start, end) + 'exolve-end';
+
+  document.getElementById('exolve-frame').innerHTML = '';
+  createExolve(exolve, 'exolve-frame')
+  return true;
+}
+function xlvpShowIpuz(specs) {
+  let start = specs.indexOf('{')
+  let end = specs.lastIndexOf('}')
+  if (start < 0 || end < 0 || start >= end) {
+    return false;
+  }
+  const ipuzJSON = specs.substring(start, end) + '}';
+  try {
+    const ipuz = JSON.parse(ipuzJSON);
+    const exolve = exolveFromIpuz(ipuz);
+    if (!exolve) {
+      return false;
+    }
+    return xlvpShowExolve(exolve);
+  } catch (err) {
+    console.log(err);
+  }
+  return false;
+}
+function xlvpShowPuz(buffer) {
+  const exolve = exolveFromPuz(buffer);
+  if (!exolve) {
+    return false;
+  }
+  return xlvpShowExolve(exolve);
+}
+function xlvpShow(buffer) {
+  let utf8decoder = new TextDecoder();
+  specs = utf8decoder.decode(buffer);
+  if (xlvpShowExolve(specs)) {
+    return;
+  }
+  if (xlvpShowIpuz(specs)) {
+    return;
+  }
+  if (xlvpShowPuz(buffer)) {
+    return;
+  }
+  alert('Could not read the crossword file');
+}
+function xlvpDrop(ev) {
+  ev.preventDefault();
+
+  let f = null;
+  if (ev.dataTransfer.items && ev.dataTransfer.items.length > 0) {
+    f = ev.dataTransfer.items[0].getAsFile();
+  } else if (ev.dataTransfer.files.length > 0) {
+    f = ev.dataTransfer.files[0];
+  }
+  if (!f) {
+    return;
+  }
+  let fr = new FileReader(); 
+  fr.onload = function(){ 
+    xlvpShow(fr.result);
+  }
+  fr.readAsArrayBuffer(f)
+}
+function xlvpDrag(ev) {
+  ev.preventDefault();
+}
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.97 December 10 2020
+### Version: Exolve v0.98 December 15 2020
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -450,6 +450,13 @@ apostrophes, and periods, starting with a number. The software also treats a
 pair of parentheses containing the text "word" or "letter" or "?" with anything
 before are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
+
+If the enum is immediately followed by a `*`, then it is not displayed to the
+user. Examples:
+```
+  1 Satellite (4)* MOON
+  2 Star (?)*
+```
 
 ### Annotations
 In a grid with solutions provided, the setter may include annotations for
@@ -1351,11 +1358,21 @@ You can load the additional script file, `exolve-from-ipuz.js` and call
 [ipuz format](http://www.ipuz.org/crossword). See the example in
 `test-ipuz-solved.html` for an example.
 
-### puz
-Coming soon.
+### .puz
+You can load the additional script file, `exolve-from-puz.js` and call
+`exolveFromPuz(puz)` on the contents of a .puz file (which are in the
+[puz format](https://code.google.com/archive/p/puz/wikis/FileFormat.wiki)).
 
-### A generic web app for loading any file (exolve/ipuz/puz)
-Coming soon.
+### exolve-player.html
+This is a generic web app for loading any crossword file (Exolve/ipuz/puz)
+to allow interactive solving. In case of Exolve, of course, if you have
+an HTML file already, you do not really need to use `exolve-player.html`.
+But, for ipuz/puz files, this might be a convenient player to use. Once I
+find a good OCR solution, I'll also enable opening pictures of crosswords.
+
+You can use your own copy of the player, or you can use [the one that I
+have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).
+
 
 ## API
 

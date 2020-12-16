@@ -1,0 +1,193 @@
+/*
+MIT License
+
+Copyright (c) 2020 Viresh Ratnakar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+The latest code and documentation for Exolve can be found at:
+https://github.com/viresh-ratnakar/exolve
+
+Version: Exolve v0.98 December 15 2020
+*/
+
+function exolveFromPuzNextNull(buffer, offset) {
+  if (offset <= 0) {
+    return buffer.length;
+  }
+  while (offset < buffer.length && buffer[offset] != 0) {
+    offset++;
+  }
+  return offset;
+}
+
+function exolveFromPuz(buffer) {
+  const dotPuzShort = function(buffer, offset) {
+    return (buffer[offset + 1] << 8) + buffer[offset];
+  }
+  buffer = new Uint8Array(buffer);
+  let offset = 0;
+
+  const encoder = new TextEncoder("utf-8")
+  const decoder = new TextDecoder("utf-8")
+
+  offset = 0x02
+  let fileMagic = encoder.encode("ACROSS&DOWN")
+  for (let x of fileMagic) {
+    if (buffer[offset++] != x) {
+      return '';
+    }
+  }
+  offset++;
+
+  offset = 0x18
+  let ver = encoder.encode("1.3")
+  for (let x of ver) {
+    if (buffer[offset++] != x) {
+      return '';
+    }
+  }
+
+  offset = 0x2c
+  const width = buffer[offset++];
+  const height = buffer[offset++];
+
+  const numClues = dotPuzShort(buffer, 0x2E);
+
+  const numCells = width * height;
+
+  let exolveGrid = '';
+  offset = 0x34;
+  for (let i = 0; i < height; i++) {
+    exolveGrid += '    ';
+    for (let j = 0; j < width; j++) {
+      let solution = decoder.decode(buffer.slice(offset, offset + 1));
+      offset++;
+      exolveGrid += solution
+    }
+    exolveGrid += '\n';
+  }
+  const dummyContainer = document.createElement('div');
+  dummyContainer.style.display = 'none';
+  const id = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
+  dummyContainer.id = id;
+  document.body.appendChild(dummyContainer);
+
+  // We use the Exolve code to figure out clut numbering:
+  const exolvePuz = new Exolve(`
+  exolve-begin
+  exolve-id: ${id}
+  exolve-width: ${width}
+  exolve-height: ${height}
+  exolve-grid:
+${exolveGrid}
+  exolve-end
+  `, id, null, false);
+
+  dummyContainer.remove();
+  delete exolvePuzzles[id];
+
+  offset += numCells;
+  nextNull = exolveFromPuzNextNull(buffer, offset);
+  const title = decoder.decode(buffer.slice(offset, nextNull));
+  offset = nextNull + 1;
+
+  nextNull = exolveFromPuzNextNull(buffer, offset);
+  const setter = decoder.decode(buffer.slice(offset, nextNull));
+  offset = nextNull + 1;
+
+  nextNull = exolveFromPuzNextNull(buffer, offset);
+  const copyright = decoder.decode(buffer.slice(offset, nextNull));
+  offset = nextNull + 1;
+
+  let orderedClueIndices = []
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      let gridCell = exolvePuz.grid[i][j]
+      if (!gridCell.isLight) {
+        continue;
+      }
+      if (gridCell.startsAcrossClue) {
+        orderedClueIndices.push('A' + gridCell.startsClueLabel)
+      }
+      if (gridCell.startsDownClue) {
+        orderedClueIndices.push('D' + gridCell.startsClueLabel)
+      }
+    }
+  }
+
+  let acrossClues = '';
+  let downClues = '';
+  for (let ci of orderedClueIndices) {
+    let theClue = exolvePuz.clues[ci]
+    nextNull = exolveFromPuzNextNull(buffer, offset);
+    if (theClue.dir == 'A') {
+      acrossClues += '    ' + theClue.label + ' ' +
+        decoder.decode(buffer.slice(offset, nextNull)) + '\n';
+    } else {
+      downClues += '    ' + theClue.label + ' ' +
+        decoder.decode(buffer.slice(offset, nextNull)) + '\n';
+    }
+    offset = nextNull + 1;
+  }
+
+  offset++;
+  const gext = 'GEXT';
+  while (offset + 8 + numCells <= buffer.length) {
+    if (buffer[offset] == gext.charCodeAt(0) &&
+        buffer[offset + 1] == gext.charCodeAt(1) &&
+        buffer[offset + 2] == gext.charCodeAt(2) &&
+        buffer[offset + 3] == gext.charCodeAt(3)) {
+      offset += 8;
+      exolveGrid = '';
+      for (let i = 0; i < height; i++) {
+        exolveGrid += '    ';
+        for (let j = 0; j < width; j++) {
+          exolveGrid += exolvePuz.grid[i][j].solution;
+          if (buffer[offset++] & 0x80) {
+            exolveGrid += '@';
+          } else {
+            exolveGrid += ' ';
+          }
+        }
+        exolveGrid += '\n';
+      }
+      break;
+    } else {
+      offset++;
+    }
+  }
+
+  return `  exolve-begin
+  exolve-id: ${id}
+  exolve-width: ${width}
+  exolve-height: ${height}
+  exolve-title: ${title}
+  exolve-setter: ${setter}
+  exolve-copyright: ${copyright}
+  exolve-grid:
+${exolveGrid}
+  exolve-across:
+${acrossClues}
+  exolve-down:
+${downClues}
+  exolve-end
+  `;
+}
+

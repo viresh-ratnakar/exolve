@@ -77,7 +77,7 @@ function Exolve(puzzleSpec,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.97 December 10 2020'
+  this.VERSION = 'Exolve v0.98 December 15 2020'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -793,20 +793,9 @@ Exolve.prototype.displayQuestions = function() {
     let inputLen = enumParse.placeholder.length
 
     let afterEnum = enumParse.afterEnum
-    let rawQ = s.substr(0, afterEnum)
+    let rawQ = s.substr(0, enumParse.afterClue)
 
-    let hideEnum = false
-    if (inputLen > 0) {
-      if (s.substr(afterEnum, 1) == '*') {
-        let beforeEnum = s.lastIndexOf('(', afterEnum - 1)
-        if (beforeEnum < 0) {
-          this.throwErr('Could not find open-paren in question')
-        }
-        rawQ = s.substr(0, beforeEnum)
-        afterEnum++
-        hideEnum = true
-      }
-    }
+    let hideEnum = (inputLen > 0 && enumParse.dontShow);
     s = s.substr(afterEnum).trim();
 
     let forceUpper = true;
@@ -1407,7 +1396,7 @@ Exolve.prototype.markClueStartsUsingGrid = function() {
   }
 }
 
-  // If there are any html closing tags, move past them.
+// If there are any html closing tags, move past them.
 Exolve.prototype.adjustAfterEnum = function(clueLine, afterEnum) {
   let lineAfter = clueLine.substr(afterEnum)
   while (lineAfter.trim().substr(0, 2) == '</') {
@@ -1458,14 +1447,18 @@ Exolve.prototype.parseCellLocation = function(s) {
 // enumLen
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
+// afterClue index after clue
 // afterEnum index after enum
+// dontShow if enum is followed immediately by *
 // placeholder (something like ???? ???-?'?)
 Exolve.prototype.parseEnum = function(clueLine) {
   let parse = {
     enumLen: 0,
     wordEndAfter: [],
     hyphenAfter: [],
+    afterClue: clueLine.length,
     afterEnum: clueLine.length,
+    dontShow: false,
     placeholder: '',
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\.'’\s]*\)/)
@@ -1478,7 +1471,14 @@ Exolve.prototype.parseEnum = function(clueLine) {
       if (enumEndLocation <= enumLocation) {
         return parse
       }
-      parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1)
+      if (clueLine.charAt(enumEndLocation + 1) == '*') {
+        parse.afterEnum = enumEndLocation + 2;
+        parse.afterClue = enumLocation;
+        parse.dontShow = true;
+      } else {
+        parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1)
+        parse.afterClue = parse.afterEnum;
+      }
     }
     return parse
   }
@@ -1487,7 +1487,14 @@ Exolve.prototype.parseEnum = function(clueLine) {
   if (enumEndLocation <= enumLocation) {
     return parse
   }
-  parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1)
+  if (clueLine.charAt(enumEndLocation + 1) == '*') {
+    parse.afterEnum = enumEndLocation + 2;
+    parse.afterClue = enumLocation;
+    parse.dontShow = true;
+  } else {
+    parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1)
+    parse.afterClue = parse.afterEnum;
+  }
   let enumLeft = clueLine.substring(enumLocation + 1, enumEndLocation)
   let nextPart
   while (enumLeft && (nextPart = parseInt(enumLeft)) && !isNaN(nextPart) &&
@@ -1793,8 +1800,8 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clue.hyphenAfter = enumParse.hyphenAfter
   clue.wordEndAfter = enumParse.wordEndAfter
   clue.placeholder = enumParse.placeholder
-  clue.clue = clueLine.substr(0, enumParse.afterEnum).trim()
-  clue.anno = clueLine.substr(enumParse.afterEnum).trim()
+  clue.clue = clueLine.substr(0, enumParse.afterClue).trim()
+  clue.anno = clueLine.substr(enumParse.afterEnum).trim();
 
   this.setClueCellsDgmless(clue);
 

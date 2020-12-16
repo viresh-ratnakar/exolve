@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v0.98 December 15 2020
+
+- New file: exolve-from-puz.js: support for reading .puz
+- New file: exolve-player.html: drag and drop any exolve/ipuz/puz file
+- Put a * immediately after an enum to hide it.
+
 ### Version: Exolve v0.97 December 10 2020
 
 - Make all lines <= 80 chars long (a step towards linting!).
