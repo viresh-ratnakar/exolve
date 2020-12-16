@@ -52,6 +52,11 @@ function xlvpShowExolve(specs) {
   const exolve = specs.substring(start, end) + 'exolve-end';
 
   document.getElementById('exolve-frame').innerHTML = '';
+  for (id in exolvePuzzles) {
+    if (isNaN(exolvePuzzles[id])) {
+      delete exolvePuzzles[id];
+    }
+  }
   createExolve(exolve, 'exolve-frame')
   return true;
 }
