@@ -20,6 +20,18 @@
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
 }
+summary {
+  text-align: center;
+  background: lightgreen;
+  padding: 4px;
+  border: 1px solid gray;
+  cursor: pointer;
+}
+pre {
+  border: 1px solid gray;
+  background: white;
+  padding: 4px;
+}
 </style>
 
 <title>Exolve Player</title>
@@ -38,8 +50,19 @@
       Interactively solve a crossword
       <br><br>
       Drag and drop a crossword file that uses any of these formats: Exolve, ipuz, puz.
+      <br><br>
+      Or: <input id="xlvp-file" onchange="xlvpOnOpenFile();" type="file"></input>
     </b>
   </center>
+  <br><br>
+  <div>
+    <details>
+      <summary>View Exolve-formatted specs for the current crossword</summary>
+      <pre id="xlvp-src">
+      There isn't a current crossword. Perhaps open one?
+      </pre>
+    </details>
+  </div>
 </div>
 
 <script>
@@ -49,8 +72,12 @@ function xlvpShowExolve(specs) {
   if (start < 0 || end < 0 || start >= end) {
     return false;
   }
+  while (start > 0 && specs.charAt(start - 1) == ' ') {
+    start--;
+  }
   const exolve = specs.substring(start, end) + 'exolve-end';
 
+  document.getElementById('xlvp-src').innerText = exolve;
   document.getElementById('exolve-frame').innerHTML = '';
   for (id in exolvePuzzles) {
     if (isNaN(exolvePuzzles[id])) {
@@ -100,6 +127,17 @@ function xlvpShow(buffer) {
   }
   alert('Could not read the crossword file');
 }
+function xlvpOpenFile(f) {
+  let fr = new FileReader(); 
+  fr.onload = function(){ 
+    xlvpShow(fr.result);
+  }
+  fr.readAsArrayBuffer(f)
+}
+function xlvpOnOpenFile(ev) {
+  let f = document.getElementById('xlvp-file').files[0];
+  xlvpOpenFile(f);
+}
 function xlvpDrop(ev) {
   ev.preventDefault();
 
@@ -112,11 +150,7 @@ function xlvpDrop(ev) {
   if (!f) {
     return;
   }
-  let fr = new FileReader(); 
-  fr.onload = function(){ 
-    xlvpShow(fr.result);
-  }
-  fr.readAsArrayBuffer(f)
+  xlvpOpenFile(f);
 }
 function xlvpDrag(ev) {
   ev.preventDefault();
