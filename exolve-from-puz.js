@@ -54,15 +54,6 @@ function exolveFromPuz(buffer) {
       return '';
     }
   }
-  offset++;
-
-  offset = 0x18
-  let ver = encoder.encode("1.3")
-  for (let x of ver) {
-    if (buffer[offset++] != x) {
-      return '';
-    }
-  }
 
   offset = 0x2c
   const width = buffer[offset++];
