@@ -45,7 +45,7 @@ function exolveFromPuz(buffer) {
   let offset = 0;
 
   const encoder = new TextEncoder("utf-8")
-  const decoder = new TextDecoder("utf-8")
+  const decoder = new TextDecoder("iso-8859-1")
 
   offset = 0x02
   let fileMagic = encoder.encode("ACROSS&DOWN")
@@ -80,7 +80,7 @@ function exolveFromPuz(buffer) {
   dummyContainer.id = id;
   document.body.appendChild(dummyContainer);
 
-  // We use the Exolve code to figure out clut numbering:
+  // We use the Exolve code to figure out clue numbering:
   const exolvePuz = new Exolve(`
   exolve-begin
   exolve-id: ${id}
@@ -96,15 +96,22 @@ ${exolveGrid}
 
   offset += numCells;
   nextNull = exolveFromPuzNextNull(buffer, offset);
-  const title = decoder.decode(buffer.slice(offset, nextNull));
+  const title = decoder.decode(buffer.slice(offset, nextNull)).trim();
   offset = nextNull + 1;
 
   nextNull = exolveFromPuzNextNull(buffer, offset);
-  const setter = decoder.decode(buffer.slice(offset, nextNull));
+  let setter = decoder.decode(buffer.slice(offset, nextNull)).trim();
+  if (setter.toLowerCase().substr(0, 3) == 'by ') {
+    setter = setter.substr(3).trim();
+  }
   offset = nextNull + 1;
 
   nextNull = exolveFromPuzNextNull(buffer, offset);
-  const copyright = decoder.decode(buffer.slice(offset, nextNull));
+  let copyright = decoder.decode(buffer.slice(offset, nextNull)).trim();
+  let c0 = copyright.charAt(0);
+  if (c0 == 'Ⓒ' || c0 == '©') {
+    copyright = copyright.substr(1).trim();
+  }
   offset = nextNull + 1;
 
   let orderedClueIndices = []
