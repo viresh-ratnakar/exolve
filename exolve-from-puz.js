@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v0.98 December 15 2020
+Version: Exolve v0.99 January 2 2021
 */
 
 function exolveFromPuzNextNull(buffer, offset) {
@@ -37,7 +37,7 @@ function exolveFromPuzNextNull(buffer, offset) {
   return offset;
 }
 
-function exolveFromPuz(buffer) {
+function exolveFromPuz(buffer, id=null) {
   const dotPuzShort = function(buffer, offset) {
     return (buffer[offset + 1] << 8) + buffer[offset];
   }
@@ -76,23 +76,23 @@ function exolveFromPuz(buffer) {
   }
   const dummyContainer = document.createElement('div');
   dummyContainer.style.display = 'none';
-  const id = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
-  dummyContainer.id = id;
+  let dummyId = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
+  dummyContainer.id = dummyId;
   document.body.appendChild(dummyContainer);
 
   // We use the Exolve code to figure out clue numbering:
   const exolvePuz = new Exolve(`
   exolve-begin
-  exolve-id: ${id}
+  exolve-id: ${dummyId}
   exolve-width: ${width}
   exolve-height: ${height}
   exolve-grid:
 ${exolveGrid}
   exolve-end
-  `, id, null, false);
+  `, dummyId, null, false);
 
   dummyContainer.remove();
-  delete exolvePuzzles[id];
+  delete exolvePuzzles[dummyId];
 
   offset += numCells;
   nextNull = exolveFromPuzNextNull(buffer, offset);
@@ -172,6 +172,9 @@ ${exolveGrid}
     }
   }
 
+  if (!id) {
+    id = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
+  }
   return `  exolve-begin
   exolve-id: ${id}
   exolve-width: ${width}

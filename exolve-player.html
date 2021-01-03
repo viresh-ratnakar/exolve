@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.98"/>
-<script src="exolve-m.js?v0.98"></script>
-<script src="exolve-from-ipuz.js?v0.98"></script>
-<script src="exolve-from-puz.js?v0.98"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v0.99"/>
+<script src="exolve-m.js?v0.99"></script>
+<script src="exolve-from-ipuz.js?v0.99"></script>
+<script src="exolve-from-puz.js?v0.99"></script>
 
 <style>
 #exolve-player {
@@ -93,10 +93,10 @@ function xlvpShowExolve(specs) {
       delete exolvePuzzles[id];
     }
   }
-  createExolve(exolve, 'exolve-frame')
+  createExolve(exolve, 'exolve-frame', false)
   return true;
 }
-function xlvpShowIpuz(specs) {
+function xlvpShowIpuz(specs, id) {
   let start = specs.indexOf('{')
   let end = specs.lastIndexOf('}')
   if (start < 0 || end < 0 || start >= end) {
@@ -105,7 +105,7 @@ function xlvpShowIpuz(specs) {
   const ipuzJSON = specs.substring(start, end) + '}';
   try {
     const ipuz = JSON.parse(ipuzJSON);
-    const exolve = exolveFromIpuz(ipuz);
+    const exolve = exolveFromIpuz(ipuz, id);
     if (!exolve) {
       return false;
     }
@@ -115,12 +115,22 @@ function xlvpShowIpuz(specs) {
   }
   return false;
 }
-function xlvpShowPuz(buffer) {
-  const exolve = exolveFromPuz(buffer);
+function xlvpShowPuz(buffer, id) {
+  const exolve = exolveFromPuz(buffer, id);
   if (!exolve) {
     return false;
   }
   return xlvpShowExolve(exolve);
+}
+function xlvpId(buffer) {
+  const dv = new DataView(buffer);
+  let hash = 0;
+  for (let i = 0; i < dv.byteLength; i++) {
+    let c = dv.getUint8(i);
+    hash = ((hash << 5) - hash) + c;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return `xlvp-${hash.toString(36)}`
 }
 function xlvpShow(buffer) {
   let utf8decoder = new TextDecoder();
@@ -128,10 +138,11 @@ function xlvpShow(buffer) {
   if (xlvpShowExolve(specs)) {
     return;
   }
-  if (xlvpShowIpuz(specs)) {
+  let id = xlvpId(buffer);
+  if (xlvpShowIpuz(specs, id)) {
     return;
   }
-  if (xlvpShowPuz(buffer)) {
+  if (xlvpShowPuz(buffer, id)) {
     return;
   }
   alert('Could not read the crossword file');

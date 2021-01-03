@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.98 December 15 2020
+### Version: Exolve v0.99 January 2 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1134,7 +1134,7 @@ Here are all the names of pieces of text that you can relabel:
 | `tools-msg`      | &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|                    |
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Report bug                           |
-| `saving-msg`     | Your entries are auto-saved in cookies, for puzzles accessed over HTTPS and not from local files.|
+| `saving-msg`     | Your entries are auto-saved in the the browser's local storage and in cookies, when possible.|
 | `saving-bookmark`| You can bookmark/save this link as additional back-up:|
 | `saving-url`     | URL                                  |
 | `shuffle`        | Scratch pad: (click here to shuffle) |
@@ -1185,15 +1185,15 @@ but just want to provide some/all of the separators. Example:
 
 ## Saving state
 
-The software automatically saves state. It does so in the URL (after the #)
-and also in a cookie, using the id specified in the [`exolve-id`](#exolve-id)
-section as the key. The cookie is retained for 90 days after the last change.
+The software automatically saves state. It does so in the browser's local
+storage, as well as in a cookie, and in the URL after the # (unless URL-saving
+is overridden in the constructor). In local storage and in cookies, the state
+uses the puzzle id specified in the [`exolve-id`](#exolve-id) section as the
+key. The cookie is retained for 90 days after the last change.
 
-Because of limits on cookie size and number of cookies, the state for some
-grid that was saved in a cookie may disappear if the solver opens lots of
-other grids from the same site, Such sites should encourage solvers to save
-or bookmark the URL (which also has the state) and/or implement server-side
-state saving.
+Please note that a variety of factors control access to and size limits of
+local storage and cookies. Especially when embedding Exolve puzzles in
+cross-site iframes, state saving may not work.
 
 ## Serving and sharing
 
@@ -1414,9 +1414,8 @@ var exolvePuzzles;
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
  * addStateToUrl should be set to false only if you do *not* want to save
- *     the puzzle state in the URL (the puzzle state is also saved in a
- *     cookie, but that does not work for local files). Unless you are
- *     embedding the puzzle in an iframe for some reason, set this to true.
+ *     the puzzle state in the URL (the puzzle state is also saved in local
+ *     storage and a cookie).
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container

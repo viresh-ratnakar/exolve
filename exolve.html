@@ -26,7 +26,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-The latest code and documentation for exolve can be found at:
+The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 -->
 
@@ -96,9 +96,8 @@ var exolvePuzzles;
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
  * addStateToUrl should be set to false only if you do *not* want to save
- *     the puzzle state in the URL (the puzzle state is also saved in a
- *     cookie, but that does not work for local files). Unless you are
- *     embedding the puzzle in an iframe for some reason, set this to true.
+ *     the puzzle state in the URL (the puzzle state is also saved in local
+ *     storage and a cookie). 
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
@@ -110,7 +109,7 @@ function Exolve(puzzleSpec,
                 addStateToUrl=true,
                 visTop=0,
                 maxDim=0) {
-  this.VERSION = 'Exolve v0.98 December 15 2020'
+  this.VERSION = 'Exolve v0.99 January 2 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -274,7 +273,7 @@ function Exolve(puzzleSpec,
        </ul>`,
     'exolve-link': 'Exolve on GitHub',
     'report-bug': 'Report bug',
-    'saving-msg': 'Your entries are auto-saved in cookies, for puzzles accessed over HTTPS and not from local files.',
+    'saving-msg': 'Your entries are auto-saved in the the browser\'s local storage and in cookies, when possible.',
     'saving-bookmark': 'You can bookmark/save this link as additional back-up:',
     'saving-url': 'URL',
     'shuffle': 'Scratch pad: (click here to shuffle)',
@@ -3134,11 +3133,21 @@ Exolve.prototype.myStatePart = function(s) {
   return [start, end]
 }
 
-// Call updateDisplayAndGetState() and save state in cookie and location.hash.
+// Call updateDisplayAndGetState() and save state in local storage, cookie, and
+// location.hash.
 Exolve.prototype.updateAndSaveState = function() {
   let state = this.updateDisplayAndGetState()
   for (let a of this.answersList) {
     state = state + this.STATE_SEP + a.input.value
+  }
+
+  try {
+    let lsVal = JSON.stringify({
+      timestamp: Date.now(),
+      state: state
+    });
+    window.localStorage.setItem(this.stateKey(), lsVal);
+  } catch (err) {
   }
 
   // Keep cookie for these many days
@@ -3270,21 +3279,39 @@ Exolve.prototype.parseState = function(state) {
   return true
 }
 
-// Restore state from cookie (or location.hash).
+Exolve.prototype.stateKey = function() {
+  return 'xlvstate:' + this.id;
+}
+
+// Restore state from local storage or cookie (or location.hash).
 Exolve.prototype.restoreState = function() {
   this.resetState();
   let foundState = false
 
-  let name = this.id + '=';
-  let ca = decodeURIComponent(document.cookie).split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.indexOf(name) == 0) {
-      foundState = this.parseState(c.substring(name.length, c.length));
+  let lsVal = window.localStorage.getItem(this.stateKey());
+  if (lsVal) {
+    try {
+      let decoded = JSON.parse(lsVal)
+      foundState = this.parseState(decoded.state);
       if (foundState) {
-        this.log('Found saved state in cookie')
+        this.log("Found saved state in browser's local storage")
       }
-      break
+    } catch (err) {
+      foundState = false;
+    }
+  }
+  if (!foundState) {
+    let name = this.id + '=';
+    let ca = decodeURIComponent(document.cookie).split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i].trim();
+      if (c.indexOf(name) == 0) {
+        foundState = this.parseState(c.substring(name.length, c.length));
+        if (foundState) {
+          this.log('Found saved state in cookie')
+        }
+        break
+      }
     }
   }
   if (!foundState) {

@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v0.99 January 2 2021
+
+- Save puzzle state in the browser's local storage (in addition to cookies).
+- Make exolve-player create the puzzle id from a hash of puz/ipuz file contents
+  for these formats. This + the above change means that we now save and
+  recover state for these formats, when loading in exolve-player.
+- Turn off URL-saving in exolve-player as it does not make sense.
+
 ### Version: Exolve v0.98 December 15 2020
 
 - New file: exolve-from-puz.js: support for reading .puz
