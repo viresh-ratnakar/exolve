@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v0.99 January 2 2021
+### Version: Exolve v1.00 January 20 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1130,12 +1130,16 @@ Here are all the names of pieces of text that you can relabel:
 | `across-label`   | Across                               |
 | `down-label`     | Down                                 |
 | `tools-link`     | Tools                                |
-| `tools-link.hover` | Show/hide tools: list of control keys and scratch pad|
-| `tools-msg`      | &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|                    |
+| `tools-link.hover` | Show/hide tools: manage storage, see list of control keys and scratch pad|
+| `tools-msg`      | Control keys: &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|
+| `manage-storage` | Manage local storage                 |
+| `manage-storage-hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed|
+| `manage-storage-close` | Close (manage storage)         |
+| `manage-storage-close-hover` | Close the local storage management panel|
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Report bug                           |
-| `saving-msg`     | Your entries are auto-saved in the the browser's local storage and in cookies, when possible.|
-| `saving-bookmark`| You can bookmark/save this link as additional back-up:|
+| `saving-msg`     | Your entries are auto-saved in the the browser's local storage.|
+| `saving-bookmark`| You can save/share the current state using this link:|
 | `saving-url`     | URL                                  |
 | `shuffle`        | Scratch pad: (click here to shuffle) |
 | `shuffle.hover`  | Shuffle selected text (or all text, if none selected)|
@@ -1186,14 +1190,24 @@ but just want to provide some/all of the separators. Example:
 ## Saving state
 
 The software automatically saves state. It does so in the browser's local
-storage, as well as in a cookie, and in the URL after the # (unless URL-saving
-is overridden in the constructor). In local storage and in cookies, the state
-uses the puzzle id specified in the [`exolve-id`](#exolve-id) section as the
-key. The cookie is retained for 90 days after the last change.
+storage. Users can also copy and share a URL that saves the state after the #
+(if requested through provideStateUrl=true in the constructor). The state uses
+the puzzle id specified in the [`exolve-id`](#exolve-id) section as the key.
 
 Please note that a variety of factors control access to and size limits of
-local storage and cookies. Especially when embedding Exolve puzzles in
-cross-site iframes, state saving may not work.
+local storage. Especially when embedding Exolve puzzles in cross-site iframes,
+state saving may not work.
+
+Older versions of Exolve used to save state in a cookie. When loading a puzzle,
+the state is restored in the following preferential order, if possible:
+(1) from local storage, (2) from cookie, (3) from URL.
+
+Clicking on the "Tools" menu under the crossword grid makes a "Manage local
+storage" button visible. If you have saved a *lot* of puzzle states, then
+it's possible that you may fill up the local storage in the browser (you'll get
+a warning thereafter when state-saving fails for the first time after opening a
+puzzle). You can then choose to free up local storage by deleting the states of
+old puzzles, after clicking on this button.
 
 ## Serving and sharing
 
@@ -1413,9 +1427,9 @@ var exolvePuzzles;
  *     web page.
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
- * addStateToUrl should be set to false only if you do *not* want to save
- *     the puzzle state in the URL (the puzzle state is also saved in local
- *     storage and a cookie).
+ * provideStateUrl should be set to true if you also want to provide a URL
+ *     that includes the current state and can be bookmarked or shared. Note
+ *     that the puzzle state is always attempted to be saved in local storage.
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
@@ -1424,7 +1438,7 @@ var exolvePuzzles;
 function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
-                addStateToUrl=true,
+                provideStateUrl=true,
                 visTop=0,
                 maxDim=0) {...}
 
@@ -1434,17 +1448,17 @@ function Exolve(puzzleText,
  * See documentation of parameters above the Exolve constructor definition.
  */
 function createExolve(puzzleText, containerId="",
-                      addStateToUrl=true, visTop=0, maxDim=0) {
+                      provideStateUrl=true, visTop=0, maxDim=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
   let p = new Exolve(puzzleText, containerId, customizer,
-                     addStateToUrl, visTop, maxDim);
+                     provideStateUrl, visTop, maxDim);
 }
 
 /*
  * The global variable "puzzleText" should have been set to the puzzle specs.
  * inIframe can be set to true if the puzzle is embedded in an iframe, which
- *     will then set addStateToUrl to false.
+ *     will then set provideStateUrl to false.
  * @deprecated use createExolve().
  */
 function createPuzzle(inIframe=false) {

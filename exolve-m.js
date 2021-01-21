@@ -62,26 +62,30 @@ var exolvePuzzles;
  *     web page.
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
- * addStateToUrl should be set to false only if you do *not* want to save
- *     the puzzle state in the URL (the puzzle state is also saved in local
- *     storage and a cookie). 
+ * provideStateUrl should be set to true if you also want to provide a URL
+ *     that includes the current state and can be bookmarked or shared. Note
+ *     that the puzzle state is always attempted to be saved in local storage.
  * visTop should be set to the height of any sticky/fixed position elements
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
+ * saveState If false, state is not saved in local storage. Useful for
+ *    creating temporary/preview puzzles.
  */
 function Exolve(puzzleSpec,
                 containerId='',
                 customizer=null,
-                addStateToUrl=true,
+                provideStateUrl=true,
                 visTop=0,
-                maxDim=0) {
-  this.VERSION = 'Exolve v0.99 January 2 2021'
+                maxDim=0,
+                saveState=true) {
+  this.VERSION = 'Exolve v1.00 January 20 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
   this.customizer = customizer
-  this.addStateToUrl = addStateToUrl
+  this.provideStateUrl = provideStateUrl
+  this.saveState = saveState
 
   this.gridWidth = 0
   this.gridHeight = 0
@@ -230,18 +234,23 @@ function Exolve(puzzleSpec,
     'across-label': 'Across',
     'down-label': 'Down',
     'tools-link': 'Tools',
-    'tools-link.hover': 'Show/hide tools: list of control keys and scratch pad',
+    'tools-link.hover': 'Show/hide tools: manage storage, see list of control keys and scratch pad',
     'tools-msg': `
+       Control keys:
        <ul>
          <li><b>Tab/Shift-Tab:</b> Jump to the next/previous clue in the current direction</li>
          <li><b>Enter, Click/Tap:</b> Toggle current direction</li>
          <li><b>Arrow keys:</b> Move to the nearest light square in that direction</li>
          <li><b>Spacebar:</b> Place/clear block in the current square if it's diagramless</li>
        </ul>`,
+    'manage-storage': 'Manage local storage',
+    'manage-storage.hover': 'View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed',
+    'manage-storage-close': 'Close (local storage)',
+    'manage-storage-close.hover': 'Close the local storage management panel',
     'exolve-link': 'Exolve on GitHub',
     'report-bug': 'Report bug',
-    'saving-msg': 'Your entries are auto-saved in the the browser\'s local storage and in cookies, when possible.',
-    'saving-bookmark': 'You can bookmark/save this link as additional back-up:',
+    'saving-msg': 'Your entries are auto-saved in the the browser\'s local storage.',
+    'saving-bookmark': 'You can save/share the current state using this link:',
     'saving-url': 'URL',
     'shuffle': 'Scratch pad: (click here to shuffle)',
     'shuffle.hover': 'Shuffle selected text (or all text, if none selected)',
@@ -359,12 +368,23 @@ Exolve.prototype.init = function() {
             </div> <!-- xlv-status -->
             <div id="${this.prefix}-saving" class="xlv-wide-box xlv-saving">
               <span id="${this.prefix}-saving-msg">
-              ${this.textLabels['saving-msg']}
+              ${this.saveState ? this.textLabels['saving-msg'] : ''}
               </span>
             </div> <!-- xlv-saving -->
             <div id="${this.prefix}-small-print"
                 class="xlv-wide-box xlv-small-print">
               <div id="${this.prefix}-tools" style="display:none">
+                <div>
+                  <button id="${this.prefix}-manage-storage"
+                    class="xlv-small-button"
+                    title="${this.textLabels['manage-storage.hover']}">
+                    ${this.textLabels['manage-storage']}
+                  </button>
+                  <div id="${this.prefix}-storage-list"
+                    class="xlv-storage-list"
+                    style="display:none">
+                  </div>
+                </div>
                 <div id="${this.prefix}-tools-msg">
                   ${this.textLabels['tools-msg']}
                 </div>
@@ -516,7 +536,7 @@ Exolve.prototype.init = function() {
       this.prefix + '-status-num-filled')
   this.statusNumTotal = document.getElementById(
       this.prefix + '-status-num-total')
-  if (this.addStateToUrl) {
+  if (this.provideStateUrl) {
     document.getElementById(this.prefix + '-saving').insertAdjacentHTML(
         'beforeend',
         `<span id="${this.prefix}-saving-bookmark">
@@ -555,6 +575,9 @@ Exolve.prototype.init = function() {
 
   document.getElementById(this.prefix + '-tools-link').addEventListener(
         'click', this.toggleTools.bind(this));
+
+  document.getElementById(this.prefix + '-manage-storage').addEventListener(
+    'click', this.manageStorage.bind(this));
 
   this.scratchPad = document.getElementById(this.prefix + '-scratchpad')
   this.scratchPad.style.color = this.colorScheme['imp-text']
@@ -3100,52 +3123,35 @@ Exolve.prototype.myStatePart = function(s) {
   return [start, end]
 }
 
-// Call updateDisplayAndGetState() and save state in local storage, cookie, and
-// location.hash.
+// Call updateDisplayAndGetState() and save state in local storage.
 Exolve.prototype.updateAndSaveState = function() {
   let state = this.updateDisplayAndGetState()
   for (let a of this.answersList) {
     state = state + this.STATE_SEP + a.input.value
   }
 
-  try {
-    let lsVal = JSON.stringify({
-      timestamp: Date.now(),
-      state: state
-    });
-    window.localStorage.setItem(this.stateKey(), lsVal);
-  } catch (err) {
-  }
-
-  // Keep cookie for these many days
-  const KEEP_FOR_DAYS = 90
-
-  let d = new Date();
-  d.setTime(d.getTime() + (KEEP_FOR_DAYS * 24 * 60 * 60 * 1000));
-  let expires = 'expires=' + d.toUTCString();
-  document.cookie = encodeURIComponent(this.id) + '=' +
-                    encodeURIComponent(state) +
-                    '; samesite=none; secure; ' + expires + ';path=/';
-
-  if (this.savingURL) {
-    // Also save the state in location.hash.
-    let lh = decodeURIComponent((location.hash || '#').substr(1))
-    let myPart = this.myStatePart(lh)
-    if (myPart[0] < 0) {
-      lh = lh + this.STATES_SEP + this.id + state
-    } else {
-      lh = lh.substr(0, myPart[0]) +
-           this.STATES_SEP + this.id + state +
-           lh.substring(myPart[1])
-    }
-    location.hash = encodeURIComponent(lh)
-    // Update savingURL.href for *all* puzzles
-    for (let pid in exolvePuzzles) {
-      let p = exolvePuzzles[pid]
-      if (p.savingURL) {
-        p.savingURL.href = location.href
+  if (this.saveState) {
+    try {
+      let lsVal = JSON.stringify({
+        timestamp: Date.now(),
+        state: state
+      });
+      window.localStorage.setItem(this.stateKey(), lsVal);
+    } catch (err) {
+      if (!this.warnedAboutLocalStorage) {
+        alert('Could not save state in local storage! Click on ' +
+              'Tools > Manage local storage to delete state from ' +
+              'old crosswords, perhaps.');
+        this.warnedAboutLocalStorage = true;
       }
     }
+  }
+
+  if (this.savingURL) {
+    // Also provide a URL that saves the state in location.hash.
+    const url = new URL(location.href);
+    url.hash = '#' + this.STATES_SEP + this.id + state;
+    this.savingURL.href = url.href;
   }
 }
 
@@ -5351,6 +5357,106 @@ Exolve.prototype.toggleTools = function(e) {
   e.preventDefault()
 }
 
+Exolve.prototype.deleteStorage = function(id, timestamp) {
+  if (id) {
+    if (!confirm('Delete puzzle state for puzzle id ' + id + '?')) {
+      return
+    }
+  } else {
+    if (!confirm('Delete all puzzle states saved before ' +
+                 (new Date(timestamp)).toLocaleString() + '?')) {
+      return
+    }
+  }
+  document.getElementById(this.prefix + '-storage-list').style.display = 'none';
+  if (id) {
+    window.localStorage.removeItem('xlvstate:' + id);
+  } else {
+    for (let idx = 0; idx < window.localStorage.length; idx++) {
+      let key = window.localStorage.key(idx)
+      if (!key.startsWith('xlvstate:')) {
+        continue;
+      }
+      let lsVal;
+      try {
+        lsVal = JSON.parse(window.localStorage.getItem(key));
+      } catch (err) {
+        continue;
+      }
+      if (lsVal.timestamp < timestamp) {
+        window.localStorage.removeItem(key);
+      }
+    }
+  }
+  this.manageStorage(null);
+}
+
+Exolve.prototype.manageStorage = function(e) {
+  let b = document.getElementById(this.prefix + '-manage-storage')
+  let slist = document.getElementById(this.prefix + '-storage-list')
+  if (slist.style.display == 'none') {
+    b.title = this.textLabels['manage-storage-close.hover']
+    let saved = [];
+    let bytes = 0;
+    for (let idx = 0; idx < window.localStorage.length; idx++) {
+      let key = window.localStorage.key(idx)
+      if (!key.startsWith('xlvstate:')) {
+        continue;
+      }
+      bytes += key.length;
+      let lsVal;
+      try {
+        lsVal = window.localStorage.getItem(key);
+        bytes += lsVal.length;
+        lsVal = JSON.parse(lsVal);
+      } catch (err) {
+        continue;
+      }
+      saved.push({
+        timestamp: lsVal.timestamp,
+        id: key.substr(9)
+      });
+    }
+    b.innerText = this.textLabels['manage-storage-close'] +
+                  ' ' + (bytes/1024).toFixed(1) + ' KB';
+    saved.sort(function(a, b) {return b.timestamp - a.timestamp;});
+    let html = '<table>'
+    let x = 0
+    for (let s of saved) {
+      html += `
+      <tr>
+        <td>${s.id}</td>
+        <td><button class="xlv-small-button"
+               title="Delete this puzzle's saved state"
+               id="${this.prefix}-delstor-${x}">
+                 &times; this</button></td>
+        <td><button class="xlv-small-button"
+               title="Delete saved states for ALL puzzles older than this"
+               id="${this.prefix}-delprev-${x}">
+                 &times older</button></td>
+        <td>${(new Date(s.timestamp)).toLocaleString()}</td>
+      </tr>
+      `;
+      x += 1;
+    }
+    html += '<table>'
+    slist.innerHTML = html
+    x = 0
+    for (let s of saved) {
+      document.getElementById(`${this.prefix}-delstor-${x}`).
+        addEventListener('click', this.deleteStorage.bind(this, `${s.id}`, 0));
+      document.getElementById(`${this.prefix}-delprev-${x}`).
+        addEventListener('click', this.deleteStorage.bind(this, '', s.timestamp));
+      x += 1;
+    }
+    slist.style.display = ''
+  } else {
+    slist.style.display = 'none'
+    b.innerText = this.textLabels['manage-storage']
+    b.title = this.textLabels['manage-storage.hover']
+  }
+}
+
 Exolve.prototype.createPuzzle = function() {
   this.init()
 
@@ -5393,19 +5499,17 @@ Exolve.prototype.createPuzzle = function() {
  * See documentation of parameters above the Exolve constructor definition.
  */
 function createExolve(puzzleText, containerId="",
-                      addStateToUrl=true, visTop=0, maxDim=0) {
+                      provideStateUrl=true, visTop=0, maxDim=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
   let p = new Exolve(puzzleText, containerId, customizer,
-                     addStateToUrl, visTop, maxDim);
+                     provideStateUrl, visTop, maxDim);
 }
 
 /*
  * The global variable "puzzleText" should have been set to the puzzle specs.
- * inIframe can be set to true if the puzzle is embedded in an iframe, which
- *     will then set addStateToUrl to false.
- * @deprecated use createExolve().
+ * @deprecated use createExolve() or the Exolve() constructor.
  */
-function createPuzzle(inIframe=false) {
-  createExolve(puzzleText, "", !inIframe);
+function createPuzzle() {
+  createExolve(puzzleText, "");
 }

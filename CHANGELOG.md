@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v1.00 January 20 2021
+
+- Stop saving state in cookies. Stop including state in URL (but still provide
+  URL for saving.sharing). Change the name of the addStateToUrl constructor
+  param to the now-more-apt provideStateUrl.
+- Create a saveState constructor param, defaulting to true. Can be set to
+  false for creating throwaway grids such as previews.
+- Provide an interface to see all the local-storage-saved states and delete
+  some of them if needed. The interface also shows the amount of local
+  storage used up in saved Exolve states.
+
 ### Version: Exolve v0.99 January 2 2021
 
 - Save puzzle state in the browser's local storage (in addition to cookies).
