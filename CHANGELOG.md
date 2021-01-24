@@ -1,5 +1,18 @@
 # Changelog
 
+### Version: Exolve v1.01 January 24 2021
+
+- Extend the responsive rendering to smaller displays by allowing even
+  smaller grid square dimensions (and with some CSS tweaks).
+- Keep clues table headings in a separate div. This is especially
+  useful when using the `clues-panel-lines option`, as now the heading
+  will not scroll away with the clues.
+- Allow "nodir" clues table as well as extra clue tables created using
+  `---` to have their own headings. The heading is specified right
+  after `exolve-nodir:` or `---`.
+- When there is saved state in the URL as well as in the local storage,
+  prompt the user to ask if they want to override the local storage state.
+
 ### Version: Exolve v1.00 January 20 2021
 
 - Stop saving state in cookies. Stop including state in URL (but still provide

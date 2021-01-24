@@ -573,7 +573,8 @@ needed. Example:
 
 ### Splitting long clue lists
 Any line in a clues section that starts with --- initiates the rendering of
-a new table of clues.
+a new table of clues. If any text follows --- then it gets shown as the
+heading of the new table.
 
 ### Order of rendered clue lists
 The order in which the exolve-across, exolve-down, and exolve-nodir sections
@@ -636,6 +637,15 @@ direction, then they should probably also use the option "hide-inferred-numbers"
 in an [`exolve-option`](#exolve-option) section. Alternatively, they can use
 the "\~" decorator in the grid to skip numbering the cells using normal
 numbering.
+
+You can provide a heading for nodir section by placing it after
+`exolve-nodir:`, like this:
+```
+  exolve-nodir: Alphabetic clues
+    [P] Direct (5)
+    [Q] Server spilling one's drink (5)
+    ...
+```
 
 ### Nodir clues with cells explicitly specified
 In a nodir clue, you can specify not just the starting cell, but _all the cells_
@@ -1139,7 +1149,7 @@ Here are all the names of pieces of text that you can relabel:
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Report bug                           |
 | `saving-msg`     | Your entries are auto-saved in the the browser's local storage.|
-| `saving-bookmark`| You can save/share the current state using this link:|
+| `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
 | `shuffle`        | Scratch pad: (click here to shuffle) |
 | `shuffle.hover`  | Shuffle selected text (or all text, if none selected)|
@@ -1161,6 +1171,9 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-reveal-all` | Are you sure you want to reveal the whole solution!? |
 | `confirm-submit` | Are you sure you are ready to submit!? |
 | `confirm-incomplete-submit` | Are you sure you want to submit an INCOMPLETE solution!? |
+| `confirm-delete-id` | Delete puzzle state for puzzle id |
+| `confirm-delete-older` | Delete all puzzle states saved before |
+| `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
 
 The `.hover`-suffixed names are for tooltips. These relabelings for these
 should not include HTML markup.
@@ -1200,7 +1213,9 @@ state saving may not work.
 
 Older versions of Exolve used to save state in a cookie. When loading a puzzle,
 the state is restored in the following preferential order, if possible:
-(1) from local storage, (2) from cookie, (3) from URL.
+(1) from local storage, (2) from cookie, (3) from URL. If there is state in the
+URL as well as in the local storage, then the user is prompted to ask whether
+they want to override the local storage set with the state in the URL.
 
 Clicking on the "Tools" menu under the crossword grid makes a "Manage local
 storage" button visible. If you have saved a *lot* of puzzle states, then
