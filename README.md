@@ -1377,7 +1377,12 @@ function customizeExolve(p) {
 By default, the puzzle content gets created as a new last element in the HTML
 Dom. But you can direct it to be placed at different spot by creating an empty
 element (typically a DIV) with id="exolve" anywhere in the HTML file. The
-puzzle content will then be added inside this element.
+puzzle content will then be added inside this element. If you want to place
+the puzzle inside a specific element with a different HTML id, you can pass the
+id as an argument when creating the puzzle, as in
+`createExolve(specs, 'my-elt-id')`. Note that it's possible to have multiple
+puzzles on the same web page, created and place in HTML elements with different
+ids.
 
 ## Reading other formats
 
