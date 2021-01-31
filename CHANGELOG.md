@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v1.02 January 30 2021
+
+- Make all clue list boxes (class "xlv-clues-box") have the same width
+  (set to the max width among them). This looks nicer and makes sure there
+  is vertical alignment when one of the clue list boxes (say Down) has
+  shorter clues than the other (say Across).
+- Add CSS so that we also show clues panels one under the other to the
+  right of the grid if there is space (previously the clue panels would
+  appeaar under the grid even if there was space for a single-column layout
+  to the right of the grid).
+
 ### Version: Exolve v1.01 January 24 2021
 
 - Extend the responsive rendering to smaller displays by allowing even

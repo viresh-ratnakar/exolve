@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.01 January 24 2021'
+  this.VERSION = 'Exolve v1.02 January 30 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -423,7 +423,7 @@ Exolve.prototype.init = function() {
           <br/>
         </div> <!-- xlv-grid-panel -->
         <div id="${this.prefix}-clues" class="xlv-flex-row xlv-clues">
-          <div style="display:none">
+          <div class="xlv-clues-panel" style="display:none">
             <div id="${this.prefix}-across-label"
                 class="xlv-clues-box xlv-clues-label">
               <hr/>
@@ -434,7 +434,7 @@ Exolve.prototype.init = function() {
               <br/>
             </div>
           </div>
-          <div style="display:none">
+          <div class="xlv-clues-panel" style="display:none">
             <div id="${this.prefix}-down-label"
                 class="xlv-clues-box xlv-clues-label">
               <hr/>
@@ -445,7 +445,7 @@ Exolve.prototype.init = function() {
               <br/>
             </div>
           </div>
-          <div style="display:none">
+          <div class="xlv-clues-panel" style="display:none">
             <div id="${this.prefix}-nodir-label"
                 class="xlv-clues-box xlv-clues-label">
               <hr/>
@@ -2910,6 +2910,7 @@ Exolve.prototype.displayClues = function() {
       extraPanels.push(newPanel)
 
       const newPanelInDiv = document.createElement('div')
+      newPanelInDiv.setAttributeNS(null, 'class', 'xlv-clues-panel');
       newPanelInDiv.insertAdjacentHTML(
         'afterbegin',
         `<div class="xlv-clues-box xlv-clues-label">
@@ -3031,6 +3032,20 @@ Exolve.prototype.displayClues = function() {
     if (this.nodirHeading) {
       document.getElementById(this.prefix + '-nodir-label').
         insertAdjacentHTML('beforeend', this.nodirHeading);
+    }
+  }
+  // Make all xlv-clues-box divs have the same width.
+  const cbs = document.getElementsByClassName('xlv-clues-box')
+  let maxw = 0;
+  for (let x = 0; x < cbs.length; x++) {
+    const e = cbs[x]
+    if (e.offsetWidth > maxw) {
+      maxw = e.offsetWidth;
+    }
+  }
+  if (maxw > 0) {
+    for (let x = 0; x < cbs.length; x++) {
+      cbs[x].style.width = maxw + 'px'
     }
   }
 }
