@@ -6,7 +6,7 @@
   Tools/Report Bug/... line) smaller. The goal was to avoid the
   appearance of a vertical scrollbar for a basic 15x15 puzzle without
   a preamble, in a normal (i.e., mine!) laptop screen with width > about
-  500px and height > about 975px.
+  1900px and height > about 975px.
 - Printing (using the browser's "Print" command or ctrl-P) now lays
   out the puzzle in a newspaper-like 2-column layout. The across clues
   panel starts out in the left panel itself, under the grid, and the two
