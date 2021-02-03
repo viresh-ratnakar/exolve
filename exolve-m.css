@@ -140,6 +140,9 @@ Version: Exolve v1.03 February 3 2021
   border-collapse: collapse;
   border-spacing: 0;
 }
+.xlv-frame .xlv-clues tr {
+  break-inside: avoid;
+}
 .xlv-frame .xlv-clues td {
   padding: 4px 6px 0 0;
   vertical-align: top;
