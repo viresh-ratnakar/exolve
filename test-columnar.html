@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.03"/>
+<script src="exolve-m.js?v1.03"></script>
+
+<title>Test-Columnar</title>
+
+<script>
+
+const puzzleText = `
+======REPLACE WITH YOUR PUZZLE BELOW======
+  exolve-begin
+    exolve-width: 15
+    exolve-height: 15
+
+  exolve-id: test-columnar
+  exolve-title: Test-Columnar
+  exolve-setter: Test-Columnar-Setter
+  exolve-option: columnar-layout
+  exolve-copyright: Copyright message
+  exolve-grid: 
+    L   A   S   E   R   .   I   N   S   E   R   T   I   N   G   
+    A   .   T   .   E   .   N   .   E   .   E   .   N   .   O   
+    T   R   U   M   P   E   T   E   R   .   S   I   T   O   N   
+    E   .   D   .   A   .   E   .   U   .   E   .   O   .   E   
+    R   A   I   N   I   E   R   .   M   A   N   T   U   A   .   
+    .   .   E   .   R   .   I   .   .   .   T   .   C   .   G   
+    R   O   S   E   .   R   O   W   S   .   E   T   H   E   R   
+    A   .   .   .   D   .   R   .   U   .   D   .   .   .   A   
+    M   O   R   S   E   .   S   A   S   H   .   S   T   A   Y   
+    S   .   E   .   C   .   .   .   T   .   P   .   E   .   .   
+    .   M   A   J   O   R   S   .   A   L   L   E   L   E   S   
+    D   .   D   .   R   .   I   .   I   .   E   .   L   .   E   
+    A   R   E   N   A   .   T   E   N   T   A   T   I   V   E   
+    Y   .   R   .   T   .   E   .   E   .   S   .   N   .   M   
+    S   U   S   P   E   N   D   E   D   .   E   D   G   E   S   
+  exolve-across: 
+  1 Clue clue clue ajh a dihf ewfewoi ewoirhewr ewoirh  clue clue clue clue (5) Anno anno anno
+  4 Clue clue 1212 kjdsnf ddskjfhdsf ds dshds foidsjfsd fclue clue clue clue clue (9) anononon nnnno
+  9 Clue clue  sdkjh skjh clue clue clue clue clue (9) [TRUMPETER] anno long annooooooo ndidsa a ifjwfiwrjf sdjf
+  10 Clue clue sdfhs dijf clue clue clue clue clue (3,2) [SIT ON] anno () {}
+  11 Clue clue clue clue clue clue clue (7) [RAINIER] fa dfoidf doifjd 
+  12 ~{Clue clue}~ clue clue clue clue clue (6) [MANTUA] ldsjf dsfoidsju 
+  14 Clue clue clue clue clue clue clue (4) Anno nnocjs sfij
+  15 Clue clue s fsdf dsoif dsfjsdoi fclue clue clue clue clue (4) Annorows
+  17 Clue clue kns clue clue clue clue clue (5) knd d{dsf dsd]f} cslkf dsf dsofjds f
+  19 Clue clue lkds ffoirw clue clue (5) [MORSE] lksd dsoif 
+  21 Clue clue  lkdshf sdoifjdsfoiw weoifjwr clue clue clue clue clue (4) [SASH] lksd dsoif 
+  22 Clue clue ifew ewoijw rclue clue clue clue clue (4) [STAY] adif 
+  25 Clue clue 42clue clue clue clue clue (6) [MAJORS] oidsjf 
+  27 Clue clue slkd hfwof rwoirwoirw ewoiruclue clue clue clue clue (7) skjd fwf weoiew
+  30 Clue clue long clie clioyud eoih wroih ewhwe werew rrioewroiewrewoir ewrweioruewoir nerpoiu clue clue clue clue clue (5) [ARENA] Anno
+  31 Clue clue clueeeeee clue clue clue clue clue (9) [TENTATIVE] Anno
+  32 Clue clue adasdclue clue clue clue clue (9) Annotation
+  33 Clue clue asdsad clue clue clue clue clue (5) anno. anno. anno...
+  exolve-down: 
+  1 Clue clue (5) [LATER] Later later
+  2 Clue clue clue clue (7) [STUDIES] Anno studies
+  3 Clue clue asidh adaiojd saoidsa dclue clue clue clue clue (6) Anno
+  4 Clue clue alsh oidhdf kjsclue clue clue clue clue (9) More anno
+  5 Clue clue asdsad adsadsd afadafdff clue clue clue clue clue (5) This is the solution hint
+  6 Clue clue asdsad adsadsd afadafdff clue clue clue clue clue (8) [RESENTED] rrrrererese
+  7 Clue clue asasasa sasas asas asasa asclue clue clue clue clue (2,5) [IN TOUCH] in touch
+  8 Clue clue clue clue clue (4) [GONE] ....{} sdfdf
+  13 Clue clue clue clue clue (4) [GRAY] soihf d
+  14 Clue clue clue clue clue clue clue (4) akjd dsoifh f
+  16 Clue clueclue clue clue clue clue (9) [SUSTAINED] alkdjfe 
+  18 Clue clueue clue clue clue clue (8) [DECORATE] aifjw f
+  20 Clue clue asas asashj sasaoisha soia soahsoi w qoiwqw qow qoiuwqw clue clue clue clue clue (7) [READERS] asjdsa dh
+  23 Clue clue scsd dsoich clue clue clue clue clue (7) [TELLING] asdsh d
+  24 Clue clue aslk as oij clue clue clue clue clue (6) [PLEASE] asdsdaasd
+  26 Clue clue asas asas asas clue clue clue clue clue (5) Anno asadsa {} ada {{}}.
+  28 Clue clue clue clue clue clue clue (5) More anno.
+  29 Clue clue asas asas asa asasclue clue clue clue clue (4) [DAYS] Done.
+  exolve-end
+  
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`;
+
+</script>
+
+</head>
+
+<body onload="createExolve(puzzleText)">
+</body>
+
+</html>

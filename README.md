@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.00 January 20 2021
+### Version: Exolve v1.03 February 3 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -973,11 +973,18 @@ Multiple, space-separated options may be provided on each exolve-option line.
 For options that need a value (provided after a colon), there should not be
 any leading space after the colon.
 The list of currently supported options is as follows:
+- **`columnar-layout`** If this option is specified, then puzzle is rendered
+  in a newspaper-like columnar layout, using CSS "column"s. The number
+  of columns is determined by the current width of the viewport (we
+  assume that all of it is available to the crossword) and is adjusted
+  if the window is resized. The number of columns can only be one of
+  the following: 1 (which is the same as what we get without the
+  columnar-layout option, when the available width is too small), 2, or 3.
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
-  about N lines of text, adding scrollbars if needed.
+  a maximum of about N lines of text, adding scrollbars if needed.
 - **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   `customizeExolve()`, for example.
@@ -1407,6 +1414,20 @@ find a good OCR solution, I'll also enable opening pictures of crosswords.
 You can use your own copy of the player, or you can use [the one that I
 have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).
 
+## Printing
+
+You can print the current state of the grid by using the browser's "Print"
+command (ctrl-P or cmd-P). The printed puzzle id laid out in a newspaper-like
+2-column layout (similar to what you get with the `columnar-layout` option,
+but using exactly 2 columns always (you can get upto 3 columns in the on-screen
+columnar-layout option).
+
+For most puzzles, this layout should fit in Portrait mode for standard paper
+size (or PDF). You can reduce the printing scale manually if it just goes
+over a single page by a few lines.
+
+Note that you can unhighlight the current clue before printing by clicking on
+any black square or clicking on the puzzle title.
 
 ## API
 

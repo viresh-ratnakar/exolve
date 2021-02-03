@@ -1,5 +1,26 @@
 # Changelog
 
+### Version: Exolve v1.03 February 3 2021
+
+- Reduce a bit of vertical spacing. Make some fonts (such as in the
+  Tools/Report Bug/... line) smaller. The goal was to avoid the
+  appearance of a vertical scrollbar for a basic 15x15 puzzle without
+  a preamble, in a normal (i.e., mine!) laptop screen with width > about
+  500px and height > about 975px.
+- Printing (using the browser's "Print" command or ctrl-P) now lays
+  out the puzzle in a newspaper-like 2-column layout. The across clues
+  panel starts out in the left panel itself, under the grid, and the two
+  columns are of roughly equal height. This is done using CSS "column" layout.
+- Add a new option, `columnar-layout`. When this option is specified,
+  we render the puzzle in a newspaper-like columnar layout, using CSS
+  "column"s (like in the printing layout described above). The number
+  of columns is determined by the current width of the viewport (we
+  assume that all of it is available to the crossword) and is adjusted
+  if the window is resized. The number of columns can only be one of
+  the following: 1 (which is the same as what we get without the
+  columnar-layout option, when the available width is too small), 2, or 3.
+- In the clues-panel-lines option, set style.maxHeight, not style.height.
+
 ### Version: Exolve v1.02 January 30 2021
 
 - Make all clue list boxes (class "xlv-clues-box") have the same width
@@ -8,7 +29,7 @@
   shorter clues than the other (say Across).
 - Add CSS so that we also show clues panels one under the other to the
   right of the grid if there is space (previously the clue panels would
-  appeaar under the grid even if there was space for a single-column layout
+  appear under the grid even if there was space for a single-column layout
   to the right of the grid).
 
 ### Version: Exolve v1.01 January 24 2021

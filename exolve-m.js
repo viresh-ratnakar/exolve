@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.02 January 30 2021'
+  this.VERSION = 'Exolve v1.03 February 3 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -128,6 +128,7 @@ function Exolve(puzzleSpec,
 
   this.visTop = visTop
   this.maxDim = maxDim
+  this.cluesBoxWidth = 0
 
   this.MAX_GRID_SIZE = 100
   this.GRIDLINE = 1
@@ -289,6 +290,7 @@ function Exolve(puzzleSpec,
   this.language = ''
   this.languageScript = ''
   this.langMaxCharCodes = 1
+  this.columnarLayout = false
 
   this.createPuzzle()
 }
@@ -324,7 +326,7 @@ Exolve.prototype.init = function() {
       <div id="${this.prefix}-curr-clue-parent" class="xlv-curr-clue-parent">
         <div id="${this.prefix}-curr-clue" class="xlv-curr-clue"></div>
       </div>
-      <div class="xlv-flex-row">
+      <div id="${this.prefix}-grid-and-clues" class="xlv-grid-and-clues-flex">
         <div id="${this.prefix}-grid-panel" class="xlv-grid-panel">
           <div id="${this.prefix}-grid-parent-centerer"
               class="xlv-grid-parent-centerer">
@@ -411,8 +413,8 @@ Exolve.prototype.init = function() {
                     >${this.textLabels['exolve-link']}</a>
               <span id="${this.prefix}-copyright"></span>
             </div> <!-- xlv-small-print -->
-            <div id="${this.prefix}-questions" class="xlv-wide-box"></div>
-            <div id="${this.prefix}-submit-parent">
+            <div id="${this.prefix}-questions" class="xlv-wide-box xlv-questions"></div>
+            <div id="${this.prefix}-submit-parent" class="xlv-submit">
               <button id="${this.prefix}-submit"
                   class="xlv-button" style="display:none"
                       >${this.textLabels['submit']}</button>
@@ -420,9 +422,8 @@ Exolve.prototype.init = function() {
             <div id="${this.prefix}-explanations" class="xlv-wide-box
                 xlv-explanations" style="display:none"></div>
           </div> <!-- xlv-controls-etc -->
-          <br/>
         </div> <!-- xlv-grid-panel -->
-        <div id="${this.prefix}-clues" class="xlv-flex-row xlv-clues">
+        <div id="${this.prefix}-clues" class="xlv-clues xlv-clues-flex">
           <div class="xlv-clues-panel" style="display:none">
             <div id="${this.prefix}-across-label"
                 class="xlv-clues-box xlv-clues-label">
@@ -431,7 +432,6 @@ Exolve.prototype.init = function() {
             </div>
             <div id="${this.prefix}-across-clues-panel" class="xlv-clues-box">
               <table id="${this.prefix}-across"></table>
-              <br/>
             </div>
           </div>
           <div class="xlv-clues-panel" style="display:none">
@@ -442,7 +442,6 @@ Exolve.prototype.init = function() {
             </div>
             <div id="${this.prefix}-down-clues-panel" class="xlv-clues-box">
               <table id="${this.prefix}-down"></table>
-              <br/>
             </div>
           </div>
           <div class="xlv-clues-panel" style="display:none">
@@ -453,7 +452,6 @@ Exolve.prototype.init = function() {
             <div id="${this.prefix}-nodir-clues-panel"
                 class="xlv-clues-box">
               <table id="${this.prefix}-nodir"></table>
-              <br/>
             </div>
           </div>
         </div> <!-- xlv-clues -->
@@ -503,7 +501,7 @@ Exolve.prototype.init = function() {
   }
   let smallPrintBox = document.getElementById(this.prefix + '-small-print')
   for (credit of this.credits) {
-    smallPrintBox.insertAdjacentHTML('beforeend', '<div>' + credit + '</div>')
+    smallPrintBox.insertAdjacentHTML('beforeend', '<div class="xlv-credit">' + credit + '</div>')
   }
 
   this.gridPanel = document.getElementById(this.prefix + '-grid-panel');
@@ -539,6 +537,9 @@ Exolve.prototype.init = function() {
   this.acrossClues = document.getElementById(this.prefix + '-across')
   this.downClues = document.getElementById(this.prefix + '-down')
   this.nodirClues = document.getElementById(this.prefix + '-nodir')
+
+  this.gridcluesContainer = document.getElementById(this.prefix + '-grid-and-clues')
+  this.cluesContainer = document.getElementById(this.prefix + '-clues')
 
   this.currClue = document.getElementById(this.prefix + '-curr-clue')
   this.currClueParent = document.getElementById(
@@ -925,6 +926,10 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "no-auto-solution-in-anno") {
       this.addSolutionToAnno = false
+      continue
+    }
+    if (spart == "columnar-layout") {
+      this.columnarLayout = true
       continue
     }
     let kv = spart.split(':')
@@ -2906,7 +2911,6 @@ Exolve.prototype.displayClues = function() {
                               'xlv-clues-box xlv-clues-extra-panel');
       let newTable = document.createElement('table')
       newPanel.appendChild(newTable)
-      newPanel.appendChild(document.createElement('br'))
       extraPanels.push(newPanel)
 
       const newPanelInDiv = document.createElement('div')
@@ -3014,11 +3018,11 @@ Exolve.prototype.displayClues = function() {
   if (this.cluesPanelLines > 0) {
     const ems = 1.40 * this.cluesPanelLines
     const emsStyle = '' + ems + 'em'
-    this.acrossPanel.style.height = emsStyle
-    this.downPanel.style.height = emsStyle
-    this.nodirPanel.style.height = emsStyle
+    this.acrossPanel.style.maxHeight = emsStyle
+    this.downPanel.style.maxHeight = emsStyle
+    this.nodirPanel.style.maxHeight = emsStyle
     for (let p of extraPanels) {
-      p.style.height = emsStyle
+      p.style.maxHeight = emsStyle
     }
   }
   if (this.hasAcrossClues) {
@@ -3036,16 +3040,16 @@ Exolve.prototype.displayClues = function() {
   }
   // Make all xlv-clues-box divs have the same width.
   const cbs = document.getElementsByClassName('xlv-clues-box')
-  let maxw = 0;
+  this.cluesBoxWidth = 0;
   for (let x = 0; x < cbs.length; x++) {
     const e = cbs[x]
-    if (e.offsetWidth > maxw) {
-      maxw = e.offsetWidth;
+    if (e.offsetWidth > this.cluesBoxWidth) {
+      this.cluesBoxWidth = e.offsetWidth;
     }
   }
-  if (maxw > 0) {
+  if (this.cluesBoxWidth > 0) {
     for (let x = 0; x < cbs.length; x++) {
-      cbs[x].style.width = maxw + 'px'
+      cbs[x].style.width = this.cluesBoxWidth + 'px'
     }
   }
 }
@@ -3079,6 +3083,29 @@ Exolve.prototype.computeGridSize = function(maxDim) {
   this.letterSize = Math.max(8, this.squareDimBy2)
   this.numberSize = 1 + Math.max(5, Math.floor(this.squareDim / 3) - 1)
   this.arrowSize = Math.max(6, Math.floor(13 * this.squareDim / 31))
+}
+
+Exolve.prototype.tryColumnarLayout = function() {
+  if (!this.columnarLayout) {
+    return;
+  }
+  const numColumns = Math.floor(this.getViewportWidth() /
+    (15 + Math.max(this.cluesBoxWidth, this.gridPanel.offsetWidth)));
+  if (numColumns == 2) {
+    this.cluesContainer.className = 'xlv-clues xlv-clues-columnar'
+    this.gridcluesContainer.className = 'xlv-grid-and-clues-2-columnar'
+  } else if (numColumns > 2) {
+    this.cluesContainer.className = 'xlv-clues xlv-clues-columnar'
+    this.gridcluesContainer.className = 'xlv-grid-and-clues-3-columnar'
+  } else {
+    this.cluesContainer.className = 'xlv-clues xlv-clues-flex'
+    this.gridcluesContainer.className = 'xlv-grid-and-clues-flex'
+  }
+}
+
+Exolve.prototype.handleResize = function() {
+  this.tryColumnarLayout();
+  this.makeCurrClueVisible();
 }
 
 Exolve.prototype.displayGridBackground = function() {
@@ -4474,9 +4501,8 @@ Exolve.prototype.createListeners = function() {
   document.getElementById(this.prefix + '-title').addEventListener(
     'click', boundDeactivator);
   
-  let boundClueVisiblizer = this.makeCurrClueVisible.bind(this)
-  window.addEventListener('scroll', boundClueVisiblizer)
-  window.addEventListener('resize', boundClueVisiblizer)
+  window.addEventListener('scroll', this.makeCurrClueVisible.bind(this));
+  window.addEventListener('resize', this.handleResize.bind(this));
 }
 
 Exolve.prototype.displayGrid = function() {
@@ -5533,6 +5559,7 @@ Exolve.prototype.createPuzzle = function() {
   this.displayButtons()
 
   this.parseAndDisplayPS()
+  this.tryColumnarLayout()
 
   this.restoreState()
 
