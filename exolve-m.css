@@ -291,6 +291,7 @@ Version: Exolve v1.03 February 3 2021
   font-weight: bold;
   padding: 0 0 4px 0;
   break-inside: avoid;
+  break-after: avoid;
 }
 .xlv-explanations {
   margin: 10px 0 0 0;
@@ -440,5 +441,9 @@ Version: Exolve v1.03 February 3 2021
   .xlv-grid-and-clues-flex {
     display: block;
     column-count: 2;
+  }
+  .xlv-nina {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }
