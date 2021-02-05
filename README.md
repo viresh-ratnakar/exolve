@@ -980,6 +980,8 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
+  As of February 2021, columnar layout is quirky: Chrome supports it best,
+  but all browsers seem to have some peculiarities.
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
