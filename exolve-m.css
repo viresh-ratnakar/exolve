@@ -115,16 +115,7 @@ Version: Exolve v1.03 February 3 2021
 }
 
 .xlv-clues {
-  max-width: 492px;
-}
-@media (min-width: 1500px) {
-  .xlv-clues {
-    max-width: 984px;
-  }
-}
-
-.xlv-cell {
-  cursor: pointer;
+  max-width: 984px;
 }
 .xlv-cell-num {
   font-family: sans-serif;
@@ -339,7 +330,6 @@ Version: Exolve v1.03 February 3 2021
   border: none;
   border-width: 0;
   outline: none;
-  cursor: pointer;
 }
 .xlv-status {
   margin: 2px 0;
