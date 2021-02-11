@@ -1452,7 +1452,7 @@ layout may vary a bit if you have oversized grids, or more clues panels
 (such as `exolve-nodir` clues).
 
 If the `columnar-layout` option is used, then the clues are rendered in
-a newspaper-like manner, possibly starting under the grid, and spilliing
+a newspaper-like manner, possibly starting under the grid, and spilling
 over into all available columns, while trying to keep the heights of
 all columns equal. If you choose this option, and you have clues with
 annotations/solutions available, please note that as the annotations
