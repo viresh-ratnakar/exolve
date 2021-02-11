@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v1.04 February 11 2021
+
+- In two-column layout, render clues panels to the right if
+  `clues-panel-lines` option has been used.
+- Also add an option (`clues-at-right-in-two-columns`) to force
+  this behaviour.
+- Add a "Layout" section in the README file.
+
 ### Version: Exolve v1.03 February 3 2021
 
 - Reduce a bit of vertical spacing. Make some fonts (such as in the

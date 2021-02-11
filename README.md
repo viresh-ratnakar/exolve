@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.03 February 3 2021
+### Version: Exolve v1.04 February 11 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -982,11 +982,20 @@ The list of currently supported options is as follows:
   columnar-layout option, when the available width is too small), 2, or 3.
   As of February 2021, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
+- **`clues-at-right-in-two-columns`** If this option is specified, it affects
+  the column layout when the available width is wide enough for exactly two
+  columns (but not three or more). Normally, the clues panels get rendered
+  under the grid in two-column mode (the rationale is that a balanced look is
+  better). If this option in set, then in two-column mode, the clues panels
+  are rendered to the right of the grid. This option is automatically
+  turned on when you use the `clues-panel-lines` option (see below). This option
+  has no effect if the `columnar-layout` option is used.
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
-  a maximum of about N lines of text, adding scrollbars if needed.
+  a maximum of about N lines of text, adding scrollbars if needed. Also
+  implicitly turns on the `clues-at-right-in-two-columns` option.
 - **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   `customizeExolve()`, for example.
@@ -1430,6 +1439,42 @@ over a single page by a few lines.
 
 Note that you can unhighlight the current clue before printing by clicking on
 any black square or clicking on the puzzle title.
+
+## Layout
+
+This is a quick summary of layout-related notes (already covered in various
+sections above). This summary only applies to on-display layout (see above
+for print layout).
+
+The layout of the crossword depends on the available width. This
+description assumes a standard 15x15 grid with Across and Down clues—the
+layout may vary a bit if you have oversized grids, or more clues panels
+(such as `exolve-nodir` clues).
+
+If the `columnar-layout` option is used, then the clues are rendered in
+a newspaper-like manner, possibly starting under the grid, and spilliing
+over into all available columns, while trying to keep the heights of
+all columns equal. If you choose this option, and you have clues with
+annotations/solutions available, please note that as the annotations
+get revealed progressively, the clues panel layout may shift around a bit.
+
+Without the `columnar-layout` option, if the width is enough for three
+columns, then the layout has the two clues panels laid out horizontally to
+the right of the grid. If the width is wide enough for only one column, then
+the layout has the clues panels laid out vertically under the grid.
+
+If the width is wide enough for exactly two columns, then the two clues
+panels get rendered side-by-side, under the grid. This is the choice
+I made, as laying them out to the right of the grid (under one another)
+would typically make a very long second column (especially long if
+all annotations are revealed), compared to the height of the first
+column (that contains the grid).
+
+However, if the `clues-panel-lines` option is used, it's likely that
+the clues panels will not get unduly tall, so in that case, even in
+two-column rendering, we lay out the clues panels to the right of the grid.
+You can also use the `clues-at-right-in-two-columns` option to force
+this kind of rendering in two-column mode.
 
 ## API
 

@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.03 February 3 2021'
+  this.VERSION = 'Exolve v1.04 February 11 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -291,6 +291,7 @@ function Exolve(puzzleSpec,
   this.languageScript = ''
   this.langMaxCharCodes = 1
   this.columnarLayout = false
+  this.cluesToRight = false
 
   this.createPuzzle()
 }
@@ -932,6 +933,10 @@ Exolve.prototype.parseOption = function(s) {
       this.columnarLayout = true
       continue
     }
+    if (spart == "clues-at-right-in-two-columns") {
+      this.cluesToRight = true
+      continue
+    }
     let kv = spart.split(':')
     if (kv.length != 2) {
       this.throwErr('Expected exolve-option: key:value, got: ' + spart)
@@ -942,6 +947,7 @@ Exolve.prototype.parseOption = function(s) {
         this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' +
                       kv[1])
       }
+      this.cluesToRight = true
       continue
     }
     if (kv[0] == 'offset-left') {
@@ -3085,8 +3091,11 @@ Exolve.prototype.computeGridSize = function(maxDim) {
   this.arrowSize = Math.max(6, Math.floor(13 * this.squareDim / 31))
 }
 
-Exolve.prototype.tryColumnarLayout = function() {
+Exolve.prototype.setColumnLayout = function() {
   if (!this.columnarLayout) {
+    if (this.cluesToRight) {
+      this.cluesContainer.className = 'xlv-clues xlv-clues-flex xlv-clues-to-right'
+    }
     return;
   }
   const numColumns = Math.floor(this.getViewportWidth() /
@@ -3104,7 +3113,7 @@ Exolve.prototype.tryColumnarLayout = function() {
 }
 
 Exolve.prototype.handleResize = function() {
-  this.tryColumnarLayout();
+  this.setColumnLayout();
   this.makeCurrClueVisible();
 }
 
@@ -5559,7 +5568,7 @@ Exolve.prototype.createPuzzle = function() {
   this.displayButtons()
 
   this.parseAndDisplayPS()
-  this.tryColumnarLayout()
+  this.setColumnLayout()
 
   this.restoreState()
 
