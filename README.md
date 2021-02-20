@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.04 February 11 2021
+### Version: Exolve v1.05 February 19 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1439,6 +1439,10 @@ over a single page by a few lines.
 
 Note that you can unhighlight the current clue before printing by clicking on
 any black square or clicking on the puzzle title.
+
+If it does not make sense for some chunks of text or some HTML elements to be printed (for example,
+some instructions that only make sense in interactive mode), you can enclose them in an HTML element
+(such as a `DIV` or a `SPAN`) that has the class `xlv-dont-print`.
 
 ## Layout
 

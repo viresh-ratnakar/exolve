@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.04 February 11 2021'
+  this.VERSION = 'Exolve v1.05 February 19 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -5047,8 +5047,8 @@ Exolve.prototype.clearAll = function(conf=true) {
 }
 
 Exolve.prototype.cellLightTogglerDone = function(button, text) {
-  if (this.activeCells.length == 0 || !this.currCell() ||
-      !this.currCell().isLight ||
+  let cc = this.currCell()
+  if (this.activeCells.length == 0 || !cc || (!cc.isLight && !cc.isDgmless) ||
       this.gridInputWrapper.style.display == 'none') {
     return
   }

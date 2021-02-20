@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v1.05 February 19 2021
+
+- A couple of printing tweaks: do not print the current clue displayed
+  above the grid, add a bit more margin under the preamble, and add
+  a class called xlv-dont-print.
+- Bug-fix: allow check/reveal to go to single-cell mode with a long
+  click even when the cell is a diagramless blocked cell.
+
 ### Version: Exolve v1.04 February 11 2021
 
 - In two-column layout, render clues panels to the right if
