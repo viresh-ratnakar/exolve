@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.05 February 19 2021
+Version: Exolve v1.06 February 26 2021
 */
 
 @media (max-width: 500px) {
@@ -15,7 +15,6 @@ Version: Exolve v1.05 February 19 2021
 }
 
 .xlv-anno-text,
-.xlv-small-print,
 .xlv-status,
 .xlv-saving,
 .xlv-solution,
@@ -26,8 +25,10 @@ Version: Exolve v1.05 February 19 2021
   font-size: 12px;
   font-family: monospace;
 }
+.xlv-small-print,
+.xlv-metadata,
 .xlv-saving {
-  font-size: 10px;
+  font-size: x-small;
   font-family: monospace;
 }
 .xlv-grid-panel {
@@ -200,7 +201,6 @@ Version: Exolve v1.05 February 19 2021
 }
 .xlv-small-print {
   margin: 4px 0 6px 0;
-  font-size: x-small;
 }
 .xlv-small-print > * {
   padding: 2px 4px 0 0;
@@ -212,6 +212,9 @@ Version: Exolve v1.05 February 19 2021
 .xlv-explanations,
 .xlv-submit {
   margin: 4px 0 6px 0;
+}
+.xlv-metadata {
+  padding: 0 0 4px 0;
 }
 .xlv-errors {
   font-weight: bold;

@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v1.06 February 26 2021
+
+- Display the puzzle id and Exolve version after clicking the Tools link.
+- Add an `exolve-maker` multiline section in which construction
+  software (like Exet) can place some metadata. Such maker info, if found,
+  is also displayed under the Exolve version after clicking the Tools link.
+- Add exolve-maker sections when converting from ipuz/puz.
+- Save the parsed enum part from each clue within the clue object (in case
+  it is scrubbed with an asterisk, for Exet to grab it).
+- Show the Exolve version as a tooltip when hovering on the "Exolve on GitHub"
+  link.
+
 ### Version: Exolve v1.05 February 19 2021
 
 - A couple of printing tweaks: do not print the current clue displayed

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.05"/>
-<script src="exolve-m.js?v1.05"></script>
-<script src="exolve-from-ipuz.js?v1.05"></script>
-<script src="exolve-from-puz.js?v1.05"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.06"/>
+<script src="exolve-m.js?v1.06"></script>
+<script src="exolve-from-ipuz.js?v1.06"></script>
+<script src="exolve-from-puz.js?v1.06"></script>
 
 <style>
 #exolve-player {
@@ -76,6 +76,7 @@ pre {
 </div>
 
 <script>
+xlvpFileName = ''
 function xlvpShowExolve(specs) {
   let start = specs.indexOf('exolve-begin')
   let end = specs.indexOf('exolve-end')
@@ -97,7 +98,7 @@ function xlvpShowExolve(specs) {
   createExolve(exolve, 'exolve-frame', false)
   return true;
 }
-function xlvpShowIpuz(specs, id) {
+function xlvpShowIpuz(specs, id, fname) {
   let start = specs.indexOf('{')
   let end = specs.lastIndexOf('}')
   if (start < 0 || end < 0 || start >= end) {
@@ -106,7 +107,7 @@ function xlvpShowIpuz(specs, id) {
   const ipuzJSON = specs.substring(start, end) + '}';
   try {
     const ipuz = JSON.parse(ipuzJSON);
-    const exolve = exolveFromIpuz(ipuz, id);
+    const exolve = exolveFromIpuz(ipuz, id, fname);
     if (!exolve) {
       return false;
     }
@@ -116,8 +117,8 @@ function xlvpShowIpuz(specs, id) {
   }
   return false;
 }
-function xlvpShowPuz(buffer, id) {
-  const exolve = exolveFromPuz(buffer, id);
+function xlvpShowPuz(buffer, id, fname) {
+  const exolve = exolveFromPuz(buffer, id, fname);
   if (!exolve) {
     return false;
   }
@@ -133,17 +134,17 @@ function xlvpId(buffer) {
   }
   return `xlvp-${hash.toString(36)}`
 }
-function xlvpShow(buffer) {
+function xlvpShow(buffer, fname) {
   let utf8decoder = new TextDecoder();
   specs = utf8decoder.decode(buffer);
   if (xlvpShowExolve(specs)) {
     return;
   }
   let id = xlvpId(buffer);
-  if (xlvpShowIpuz(specs, id)) {
+  if (xlvpShowIpuz(specs, id, fname)) {
     return;
   }
-  if (xlvpShowPuz(buffer, id)) {
+  if (xlvpShowPuz(buffer, id, fname)) {
     return;
   }
   alert('Could not read the crossword file');
@@ -151,8 +152,9 @@ function xlvpShow(buffer) {
 function xlvpOpenFile(f) {
   let fr = new FileReader(); 
   fr.onload = function(){ 
-    xlvpShow(fr.result);
+    xlvpShow(fr.result, xlvpFileName);
   }
+  xlvpFileName = f.name
   fr.readAsArrayBuffer(f)
 }
 function xlvpOnOpenFile(ev) {

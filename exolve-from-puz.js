@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.05 February 19 2021
+Version: Exolve v1.06 February 26 2021
 */
 
 function exolveFromPuzNextNull(buffer, offset) {
@@ -37,7 +37,7 @@ function exolveFromPuzNextNull(buffer, offset) {
   return offset;
 }
 
-function exolveFromPuz(buffer, id=null) {
+function exolveFromPuz(buffer, id=null, fname='') {
   const dotPuzShort = function(buffer, offset) {
     return (buffer[offset + 1] << 8) + buffer[offset];
   }
@@ -172,6 +172,9 @@ ${exolveGrid}
     }
   }
 
+  if (!fname) {
+    fname = 'unknown'
+  }
   if (!id) {
     id = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
   }
@@ -182,6 +185,8 @@ ${exolveGrid}
   exolve-title: ${title}
   exolve-setter: ${setter}
   exolve-copyright: ${copyright}
+  exolve-maker:
+    Converted by exolve-from-puz.js from ${fname}
   exolve-grid:
 ${exolveGrid}
   exolve-across:

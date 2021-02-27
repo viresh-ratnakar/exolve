@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.05 February 19 2021'
+  this.VERSION = 'Exolve v1.06 February 26 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -244,6 +244,8 @@ function Exolve(puzzleSpec,
          <li><b>Arrow keys:</b> Move to the nearest light square in that direction</li>
          <li><b>Spacebar:</b> Place/clear block in the current square if it's diagramless</li>
        </ul>`,
+    'crossword-id': 'Crossword ID',
+    'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed',
     'manage-storage-close': 'Close (local storage)',
@@ -380,6 +382,12 @@ Exolve.prototype.init = function() {
             <div id="${this.prefix}-small-print"
                 class="xlv-wide-box xlv-small-print">
               <div id="${this.prefix}-tools" style="display:none">
+                <div id="${this.prefix}-id" class="xlv-metadata">
+                  <b>${this.textLabels['crossword-id']}: ${this.id}</b>
+                </div>
+                <div id="${this.prefix}-metadata" class="xlv-metadata">
+                  ${this.VERSION}
+                </div>
                 <div>
                   <button id="${this.prefix}-manage-storage"
                     class="xlv-small-button"
@@ -410,6 +418,7 @@ Exolve.prototype.init = function() {
                 href="https://github.com/viresh-ratnakar/exolve/issues/new"
                     >${this.textLabels['report-bug']}</a>
               <a id="${this.prefix}-exolve-link"
+                title="${this.VERSION}"
                 href="https://github.com/viresh-ratnakar/exolve"
                     >${this.textLabels['exolve-link']}</a>
               <span id="${this.prefix}-copyright"></span>
@@ -707,6 +716,9 @@ Exolve.prototype.parseOverall = function() {
     } else if (parsedSec.section == 'explanations') {
       this.explnFirstLine = firstLine
       this.explnLastLine = lastLine
+    } else if (parsedSec.section == 'maker') {
+      this.makerFirstLine = firstLine
+      this.makerLastLine = lastLine
     } else if (parsedSec.section == 'relabel') {
       this.relabelFirstLine = firstLine
       this.relabelLastLine = lastLine
@@ -1053,6 +1065,19 @@ Exolve.prototype.parseAndDisplayExplanations = function() {
     const expln = document.getElementById(this.prefix + '-explanations')
     expln.innerHTML = explnText
     this.revelationList.push(expln)
+  }
+}
+
+Exolve.prototype.parseAndDisplayMaker = function() {
+  if (this.makerFirstLine >= 0 &&
+      this.makerFirstLine <= this.makerLastLine) {
+    let maker = `<br>${this.textLabels['maker-info']}:<br>\n` +
+      '<div style="margin:0 0 0 4ex">\n' +
+      this.specLines.slice(
+        this.makerFirstLine, this.makerLastLine + 1).join('\n') +
+      '</div>';
+    const elt = document.getElementById(this.prefix + '-metadata')
+    elt.insertAdjacentHTML('beforeend', maker)
   }
 }
 
@@ -1498,6 +1523,7 @@ Exolve.prototype.parseCellLocation = function(s) {
 // afterEnum index after enum
 // dontShow if enum is followed immediately by *
 // placeholder (something like ???? ???-?'?)
+// enumStr the substring that is the enum, such as "(4-2,1)"
 Exolve.prototype.parseEnum = function(clueLine) {
   let parse = {
     enumLen: 0,
@@ -1507,6 +1533,7 @@ Exolve.prototype.parseEnum = function(clueLine) {
     afterEnum: clueLine.length,
     dontShow: false,
     placeholder: '',
+    enumStr: '',
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\.'’\s]*\)/)
   if (enumLocation < 0) {
@@ -1518,6 +1545,7 @@ Exolve.prototype.parseEnum = function(clueLine) {
       if (enumEndLocation <= enumLocation) {
         return parse
       }
+      parse.enumStr = clueLine.substring(enumLocation, enumEndLocation + 1)
       if (clueLine.charAt(enumEndLocation + 1) == '*') {
         parse.afterEnum = enumEndLocation + 2;
         parse.afterClue = enumLocation;
@@ -1534,6 +1562,7 @@ Exolve.prototype.parseEnum = function(clueLine) {
   if (enumEndLocation <= enumLocation) {
     return parse
   }
+  parse.enumStr = clueLine.substring(enumLocation, enumEndLocation + 1)
   if (clueLine.charAt(enumEndLocation + 1) == '*') {
     parse.afterEnum = enumEndLocation + 2;
     parse.afterClue = enumLocation;
@@ -1847,6 +1876,7 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clue.hyphenAfter = enumParse.hyphenAfter
   clue.wordEndAfter = enumParse.wordEndAfter
   clue.placeholder = enumParse.placeholder
+  clue.enumStr = enumParse.enumStr
   clue.clue = clueLine.substr(0, enumParse.afterClue).trim()
   clue.anno = clueLine.substr(enumParse.afterEnum).trim();
 
@@ -5546,6 +5576,7 @@ Exolve.prototype.createPuzzle = function() {
 
   this.parseAndDisplayPrelude()
   this.parseAndDisplayExplanations()
+  this.parseAndDisplayMaker()
 
   this.parseGrid()
   this.markClueStartsUsingGrid()

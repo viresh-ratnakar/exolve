@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.05 February 19 2021
+### Version: Exolve v1.06 February 26 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -171,6 +171,7 @@ and the `exolve-end` line:
 * `exolve-option`
 * `exolve-language`
 * `exolve-relabel`
+* `exolve-maker`
 * `exolve-force-hyphen-right`
 * `exolve-force-hyphen-below`
 * `exolve-force-bar-right`
@@ -1160,6 +1161,8 @@ Here are all the names of pieces of text that you can relabel:
 | `tools-link`     | Tools                                |
 | `tools-link.hover` | Show/hide tools: manage storage, see list of control keys and scratch pad|
 | `tools-msg`      | Control keys: &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|
+| `crossword-id`   | Crossword ID                         |
+| `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage-hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed|
 | `manage-storage-close` | Close (manage storage)         |
@@ -1193,8 +1196,8 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
 
-The `.hover`-suffixed names are for tooltips. These relabelings for these
-should not include HTML markup.
+The `.hover`-suffixed names are for tooltips. The relabelings for these should
+not include any HTML markup.
 
 The `confirm-` prefixed messages are all for dialogs seeking confirmation. They
 all have one special feature: if you set them to be emoty strings, then the
@@ -1204,6 +1207,13 @@ confirmation step is skipped and the action is directly taken. For example:
     confirm-check-all:
 ```
 The above will skip the confirmation step when the solver clicks on "Check all."
+
+## `exolve-maker`
+
+In this multiline section, you can include arbitrary metadata about the
+puzzle's construction. The Exet crossword construction web app uses this section
+to record some info such as its version and the lexicon it used. The metadata
+can be seen after clicking the Tools button.
 
 ## `exolve-force-hyphen-right`, `exolve-force-hyphen-below`, `exolve-force-bar-right`, `exolve-force-bar-below`
 

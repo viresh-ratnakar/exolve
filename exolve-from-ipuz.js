@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.05 February 19 2021
+Version: Exolve v1.06 February 26 2021
 */
 
 /**
@@ -39,7 +39,7 @@ Version: Exolve v1.05 February 19 2021
  * - Clue directions other than Across and Down.
  * - Omitted cells (they get rendered as black cells).
  */
-exolveFromIpuz = function(ipuz, id=null) {
+exolveFromIpuz = function(ipuz, id=null, fname='') {
   if (!ipuz['dimensions']) {
     console.log('ipuz: missing "dimensions"')
     return '';
@@ -66,6 +66,12 @@ exolveFromIpuz = function(ipuz, id=null) {
       exolve-id: ${id}
       exolve-width: ${w}
       exolve-height: ${h}`
+  if (!fname) {
+    fname = 'unknown'
+  }
+  exolve += `
+    exolve-maker:
+      Converted by exolve-from-ipuz.js from ${fname}`
   if (ipuz['title']) {
     exolve += `
       exolve-title: ${ipuz['title']}`
