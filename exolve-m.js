@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.06 February 26 2021'
+  this.VERSION = 'Exolve v1.07 February 27 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -2825,13 +2825,6 @@ Exolve.prototype.applyStyles = function() {
     this.frame.appendChild(customStyles);
   }
   customStyles.innerHTML = `
-    #${this.prefix}-frame {
-      font-size: ${this.letterSize}px;
-      font-family: serif;
-      font-weight: 400;
-      line-height: normal;
-      box-sizing: border-box;
-    }
     #${this.prefix}-frame span.xlv-solved,
     #${this.prefix}-frame .xlv-solved td:first-child {
       color: ${this.colorScheme['solved']};

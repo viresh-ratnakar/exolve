@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v1.07 February 27 2021
+
+- When scaling for available width, do not change the font size of the
+  main body of text. Use the computed letterSize _only_ within the grid.
+  This should make clues/preambles look better in mobile devices.
+
 ### Version: Exolve v1.06 February 26 2021
 
 - Display the puzzle id and Exolve version after clicking the Tools link.
