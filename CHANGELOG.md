@@ -1,5 +1,7 @@
 # Changelog
 
+- Fix "the the" typos.
+
 ### Version: Exolve v1.07 February 27 2021
 
 - When scaling for available width, do not change the font size of the

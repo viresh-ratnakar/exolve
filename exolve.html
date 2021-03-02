@@ -91,7 +91,7 @@ var exolvePuzzles;
  *     the element with id "exolve" if it exists (and its id is changed to
  *     exolve<N> in that case, where <N> is the index of this puzzle among
  *     all the pages on the page). If containerId is empty and there is no
- *     element with id "exolve", the the puzzle is created at the end of the
+ *     element with id "exolve", the puzzle is created at the end of the
  *     web page.
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
@@ -285,7 +285,7 @@ function Exolve(puzzleSpec,
     'manage-storage-close.hover': 'Close the local storage management panel',
     'exolve-link': 'Exolve on GitHub',
     'report-bug': 'Report bug',
-    'saving-msg': 'Your entries are auto-saved in the the browser\'s local storage.',
+    'saving-msg': 'Your entries are auto-saved in the browser\'s local storage.',
     'saving-bookmark': 'You can share the state using this link:',
     'saving-url': 'URL',
     'shuffle': 'Scratch pad: (click here to shuffle)',
@@ -1570,7 +1570,7 @@ Exolve.prototype.parseEnum = function(clueLine) {
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\.'’\s]*\)/)
   if (enumLocation < 0) {
-    // Look for the the string 'word'/'letter'/? in parens.
+    // Look for the string 'word'/'letter'/? in parens.
     enumLocation = clueLine.search(/\([^)]*(word|letter|\?)[^)]*\)/i)
     if (enumLocation >= 0) {
       let enumEndLocation =
