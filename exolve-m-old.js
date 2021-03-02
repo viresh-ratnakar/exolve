@@ -1255,7 +1255,7 @@ function parseEnum(clueLine) {
   };
   let enumLocation = clueLine.search(/\([1-9]+[0-9\-,\.'’\s]*\)/)
   if (enumLocation < 0) {
-    // Look for the the string 'word'/'letter'/? in parens.
+    // Look for the string 'word'/'letter'/? in parens.
     enumLocation = clueLine.search(/\([^)]*(word|letter|\?)[^)]*\)/i)
     if (enumLocation >= 0) {
       let enumEndLocation =

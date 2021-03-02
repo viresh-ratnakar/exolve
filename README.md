@@ -473,7 +473,7 @@ that clue is the current clue. Example:
 If a clue does not provide its anno, the software still creates a minimal anno
 consisting of just the solution text (that it infers from the grid and the
 enum). Even if the anno is provided, the software prefixes it with the inferred
-solution text. This might have meant that if in an older grid the the solution
+solution text. This might have meant that if in an older grid the solution
 was explicitly included in the anno, it would have got duplicated. So, the code
 does check to see if the solution string (punctuation/markup notwithstanding)
 is present at the head of the anno, and avoids duplicating it if so. If the
@@ -1169,7 +1169,7 @@ Here are all the names of pieces of text that you can relabel:
 | `manage-storage-close-hover` | Close the local storage management panel|
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Report bug                           |
-| `saving-msg`     | Your entries are auto-saved in the the browser's local storage.|
+| `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
 | `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
 | `shuffle`        | Scratch pad: (click here to shuffle) |
@@ -1525,7 +1525,7 @@ var exolvePuzzles;
  *     the element with id "exolve" if it exists (and its id is changed to
  *     exolve<N> in that case, where <N> is the index of this puzzle among
  *     all the pages on the page). If containerId is empty and there is no
- *     element with id "exolve", the the puzzle is created at the end of the
+ *     element with id "exolve", the puzzle is created at the end of the
  *     web page.
  * customized is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
