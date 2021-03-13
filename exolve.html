@@ -112,7 +112,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.07 February 27 2021'
+  this.VERSION = 'Exolve v1.08 March 12 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -197,11 +197,20 @@ function Exolve(puzzleSpec,
   this.DEFAULT_ORPHAN_LEN = 15
 
   this.BLOCK_CHAR = '⬛';
-  // We have special meanings for 0 (unfilled) and 1 (block in diagramless cell)
-  // in solution states. For crosswords with digits, we use these to stand for
-  // 0 and 1 respectively, in solution states.
-  this.DIGIT0 = '-'
-  this.DIGIT1 = '~'
+  // If someone wants to use 0/1/./? using allow-chars, we cannot use them in
+  // the state char space as they have special meanings there. Use unprintable
+  // characters:
+  this.SPECIAL_STATE_CHARS = {
+    '0': String.fromCharCode(1),
+    '1': String.fromCharCode(2),
+    '.': String.fromCharCode(3),
+    '?': String.fromCharCode(4)
+  };
+  this.SPECIAL_DISPLAY_CHARS = {}
+  for (let x in this.SPECIAL_STATE_CHARS) {
+    this.SPECIAL_DISPLAY_CHARS[this.SPECIAL_STATE_CHARS[x]] = x;
+  };
+
   this.scriptRE = null
   this.scriptLowerCaseRE = null
 
@@ -240,23 +249,29 @@ function Exolve(puzzleSpec,
 
   this.textLabels = {
     'clear': 'Clear this',
-    'clear.hover': 'Clear highlighted clues and squares. Clear crossers from full clues with a second click',
+    'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
+        'from full clues with a second click',
     'clear-all': 'Clear all!',
-    'clear-all.hover': 'Clear everything! A second click clears all placeholder entries in clues without known squares',
+    'clear-all.hover': 'Clear everything! A second click clears all ' +
+        'placeholder entries in clues without known squares',
     'check': 'Check this',
     'checkcell': 'Check cell',
-    'check.hover': 'Erase mistakes in highlighted squares. Long-click to check just the current cell',
+    'check.hover': 'Erase mistakes in highlighted squares. Long-click to ' +
+        'check just the current cell',
     'check-all': 'Check all',
-    'check-all.hover': 'Erase all mistakes. Reveal any available annos if no mistakes',
+    'check-all.hover': 'Erase all mistakes. Reveal any available annos if ' +
+        'no mistakes',
     'reveal': 'Reveal this',
     'revealcell': 'Reveal cell',
-    'reveal.hover': 'Reveal highlighted clue/squares. Long-click to reveal just the current cell',
+    'reveal.hover': 'Reveal highlighted clue/squares. Long-click to reveal ' +
+        'just the current cell',
     'show-ninas': 'Show ninas',
     'show-ninas.hover': 'Show ninas hidden in the grid/clues',
     'hide-ninas': 'Hide ninas',
     'hide-ninas.hover': 'Hide ninas shown in the grid/clues',
     'reveal-all': 'Reveal all!',
-    'reveal-all.hover': 'Reveal all solutions, available annos, answers, notes!',
+    'reveal-all.hover': 'Reveal all solutions, available annos, answers, ' +
+        'notes!',
     'submit': 'Submit',
     'submit.hover': 'Submit the solution!',
     'setter-by': 'By',
@@ -268,24 +283,30 @@ function Exolve(puzzleSpec,
     'across-label': 'Across',
     'down-label': 'Down',
     'tools-link': 'Tools',
-    'tools-link.hover': 'Show/hide tools: manage storage, see list of control keys and scratch pad',
+    'tools-link.hover': 'Show/hide tools: manage storage, see list of ' +
+        'control keys and scratch pad',
     'tools-msg': `
        Control keys:
        <ul>
-         <li><b>Tab/Shift-Tab:</b> Jump to the next/previous clue in the current direction</li>
+         <li><b>Tab/Shift-Tab:</b>
+             Jump to the next/previous clue in the current direction</li>
          <li><b>Enter, Click/Tap:</b> Toggle current direction</li>
-         <li><b>Arrow keys:</b> Move to the nearest light square in that direction</li>
-         <li><b>Spacebar:</b> Place/clear block in the current square if it's diagramless</li>
+         <li><b>Arrow keys:</b>
+             Move to the nearest light square in that direction</li>
+         <li><b>Spacebar:</b>
+             Place/clear block in the current square if it's diagramless</li>
        </ul>`,
     'crossword-id': 'Crossword ID',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
-    'manage-storage.hover': 'View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed',
+    'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
+        'Delete old saved states to free up local storage space if needed',
     'manage-storage-close': 'Close (local storage)',
     'manage-storage-close.hover': 'Close the local storage management panel',
     'exolve-link': 'Exolve on GitHub',
     'report-bug': 'Report bug',
-    'saving-msg': 'Your entries are auto-saved in the browser\'s local storage.',
+    'saving-msg': 'Your entries are auto-saved in the browser\'s local ' +
+        'storage.',
     'saving-bookmark': 'You can share the state using this link:',
     'saving-url': 'URL',
     'shuffle': 'Scratch pad: (click here to shuffle)',
@@ -297,27 +318,35 @@ function Exolve(puzzleSpec,
     'curr-clue-prev.hover': 'Previous clue',
     'curr-clue-next': '&rsaquo;',
     'curr-clue-next.hover': 'Next clue',
-    'placeholder.hover': 'You can record your solution here before copying to squares',
+    'placeholder.hover': 'You can record your solution here before copying ' +
+        'to squares',
     'placeholder-copy': '&#8690;',
     'placeholder-copy.hover': 'Copy into currently highlighted squares',
     'confirm-clear-all': 'Are you sure you want to clear every entry!?',
-    'confirm-clear-all-orphans1': 'Are you sure you want to clear every entry!?  (The placeholder entries will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.)',
-    'confirm-clear-all-orphans2': 'Are you sure you want to clear every entry including all the placeholder entries!?',
+    'confirm-clear-all-orphans1': 'Are you sure you want to clear every ' +
+        'entry!?  (The placeholder entries will not be cleared. To clear ' +
+        'the placeholders, click on clear-all again after clearing the grid.)',
+    'confirm-clear-all-orphans2': 'Are you sure you want to clear every ' +
+        'entry including all the placeholder entries!?',
     'confirm-check-all': 'Are you sure you want to clear mistakes everywhere!?',
-    'confirm-mismatched-copy': 'Are you sure you want to do this mismatched copy (#letters-from : #squares-to)? ',
+    'confirm-mismatched-copy': 'Are you sure you want to do this mismatched ' +
+        'copy (#letters-from : #squares-to)? ',
     'confirm-show-ninas': 'Are you sure you want to reveal the nina(s)!?',
-    'confirm-reveal-all': 'Are you sure you want to reveal the whole solution!?',
+    'confirm-reveal-all': 'Are you sure you want to reveal the whole ' +
+        'solution!?',
     'confirm-submit': 'Are you sure you are ready to submit!?',
-    'confirm-incomplete-submit': 'Are you sure you want to submit an INCOMPLETE solution!?',
+    'confirm-incomplete-submit': 'Are you sure you want to submit an ' +
+        'INCOMPLETE solution!?',
     'confirm-delete-id': 'Delete puzzle state for puzzle id',
     'confirm-delete-older': 'Delete all puzzle states saved before',
-    'confirm-state-override': 'Do you want to override the state saved in this device with the state found in the URL?',
+    'confirm-state-override': 'Do you want to override the state saved in ' +
+        'this device with the state found in the URL?',
   }
 
   // Variables set by exolve-option
   this.hideInferredNumbers = false
   this.cluesPanelLines = -1
-  this.allowDigits = false
+  this.allowChars = null
   this.hideCopyPlaceholders = false
   this.addSolutionToAnno = true
   this.offsetLeft = 0
@@ -456,7 +485,8 @@ Exolve.prototype.init = function() {
                     >${this.textLabels['exolve-link']}</a>
               <span id="${this.prefix}-copyright"></span>
             </div> <!-- xlv-small-print -->
-            <div id="${this.prefix}-questions" class="xlv-wide-box xlv-questions"></div>
+            <div id="${this.prefix}-questions"
+                class="xlv-wide-box xlv-questions"></div>
             <div id="${this.prefix}-submit-parent" class="xlv-submit">
               <button id="${this.prefix}-submit"
                   class="xlv-button" style="display:none"
@@ -544,7 +574,8 @@ Exolve.prototype.init = function() {
   }
   let smallPrintBox = document.getElementById(this.prefix + '-small-print')
   for (credit of this.credits) {
-    smallPrintBox.insertAdjacentHTML('beforeend', '<div class="xlv-credit">' + credit + '</div>')
+    smallPrintBox.insertAdjacentHTML('beforeend',
+        '<div class="xlv-credit">' + credit + '</div>')
   }
 
   this.gridPanel = document.getElementById(this.prefix + '-grid-panel');
@@ -554,11 +585,11 @@ Exolve.prototype.init = function() {
   this.gridInputWrapper.style.width = '' + this.squareDim + 'px'
   this.gridInputWrapper.style.height = '' + (this.squareDim - 2) + 'px'
   this.gridInputWrapper.insertAdjacentHTML('beforeend',
-    `<div id="${this.prefix}-grid-input-rarr"
-        class="xlv-grid-input-rarr">&rtrif;</div>`)
+      `<div id="${this.prefix}-grid-input-rarr"
+          class="xlv-grid-input-rarr">&rtrif;</div>`)
   this.gridInputWrapper.insertAdjacentHTML('beforeend',
-    `<div id="${this.prefix}-grid-input-darr"
-        class="xlv-grid-input-darr">&dtrif;</div>`)
+      `<div id="${this.prefix}-grid-input-darr"
+          class="xlv-grid-input-darr">&dtrif;</div>`)
   this.gridInputRarr = document.getElementById(
       this.prefix + '-grid-input-rarr');
   this.gridInputDarr = document.getElementById(
@@ -581,7 +612,8 @@ Exolve.prototype.init = function() {
   this.downClues = document.getElementById(this.prefix + '-down')
   this.nodirClues = document.getElementById(this.prefix + '-nodir')
 
-  this.gridcluesContainer = document.getElementById(this.prefix + '-grid-and-clues')
+  this.gridcluesContainer = document.getElementById(this.prefix +
+      '-grid-and-clues')
   this.cluesContainer = document.getElementById(this.prefix + '-clues')
 
   this.currClue = document.getElementById(this.prefix + '-curr-clue')
@@ -641,10 +673,11 @@ Exolve.prototype.init = function() {
   document.getElementById(this.prefix + '-shuffle').addEventListener(
         'click', this.scratchPadShuffle.bind(this));
 
-  let info = 'Version: ' + this.VERSION + ', User Agent: ' + navigator.userAgent
+  let info = 'Version: ' + this.VERSION + ', User Agent: ' +
+      navigator.userAgent
   document.getElementById(this.prefix + '-report-bug').href =
-        'https://github.com/viresh-ratnakar/exolve/issues/new?body=' +
-        encodeURIComponent(info);
+      'https://github.com/viresh-ratnakar/exolve/issues/new?body=' +
+      encodeURIComponent(info);
 
   this.CURR_ORPHAN_ID = this.prefix + '-curr-orphan'
 
@@ -962,10 +995,6 @@ Exolve.prototype.parseOption = function(s) {
       this.hideInferredNumbers = true
       continue
     }
-    if (spart == "allow-digits") {
-      this.allowDigits = true
-      continue
-    }
     if (spart == "hide-copy-placeholder-buttons") {
       this.hideCopyPlaceholders = true
       continue
@@ -982,10 +1011,15 @@ Exolve.prototype.parseOption = function(s) {
       this.cluesToRight = true
       continue
     }
-    let kv = spart.split(':')
-    if (kv.length != 2) {
+    if (spart == "allow-digits") {
+      spart = 'allow-chars:0123456789'
+      // Fall through to the allow-chars code.
+    }
+    const colon = spart.indexOf(':')
+    if (colon < 0) {
       this.throwErr('Expected exolve-option: key:value, got: ' + spart)
     }
+    const kv = [spart.substr(0, colon).trim(), spart.substr(colon + 1).trim()]
     if (kv[0] == 'clues-panel-lines') {
       this.cluesPanelLines = parseInt(kv[1])
       if (isNaN(this.cluesPanelLines)) {
@@ -1019,6 +1053,17 @@ Exolve.prototype.parseOption = function(s) {
         this.throwErr('Unsupported coloring option: ' + kv[0])
       }
       this.colorScheme[key] = kv[1]
+      continue
+    }
+    if (kv[0] == 'allow-chars') {
+      if (!this.allowChars) this.allowChars = {};
+      for (c of kv[1]) {
+        if (/\s/.test(c)) continue;
+        this.allowChars[c] = true
+        if (this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
+          this.allowChars[this.SPECIAL_STATE_CHARS[c]] = true
+        }
+      }
       continue
     }
     this.throwErr('Unexpected exolve-option: ' + spart)
@@ -1189,12 +1234,13 @@ Exolve.prototype.caseCheck = function(c) {
 }
 
 // In this description, "alphabets" means A-Z or language-specific letters.
-// display chars: alphabets, ⬛, 0-9
-// state chars: alphabets, '-' (DIGIT0), '~' (DIGIT1), 2-9, '0' (blank),
-//   '1' (block in diagramless cell), '.'
+// display chars: alphabets, ⬛, 0-9, chars allowed with allow-chars.
+// state chars: alphabets, '.', '0' and '?' (blanks), 1 (block in dgmless),
+//   chars allowed with allow-chars/allow-digits.
 // grid[i][j].solution and grid[i][j].currLetter are in "state char" space.
 // grid specified originally, consumed by parseGrid() either uses just '0'
-// and '.' or uses '.' and alphabets and '?' (and 0-9 if allow-digits).
+// and '.' or uses '.' and alphabets and '?' (and 0-9 if allow-digits and
+// any special characters from allow-chars).
 
 Exolve.prototype.isValidDisplayChar = function(c) {
   if (this.caseCheck(c)) {
@@ -1203,7 +1249,7 @@ Exolve.prototype.isValidDisplayChar = function(c) {
   if (c == this.BLOCK_CHAR) {
     return true
   }
-  if (this.allowDigits && c >= '0' && c <= '9') {
+  if (this.allowChars && this.allowChars[c]) {
     return true
   }
   return false
@@ -1212,8 +1258,8 @@ Exolve.prototype.isValidStateChar = function(c) {
   if (this.caseCheck(c)) {
     return true
   }
-  if (this.allowDigits &&
-      ((c >= '2' && c <= '9') || c == this.DIGIT0 || c == this.DIGIT1)) {
+  if (this.allowChars && this.allowChars[c] &&
+      !this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
     return true
   }
   if (c == '0') {
@@ -1235,11 +1281,8 @@ Exolve.prototype.stateToDisplayChar = function(c) {
   if (c == '1') {
     return this.BLOCK_CHAR
   }
-  if (c == this.DIGIT0) {
-    return '0'
-  }
-  if (c == this.DIGIT1) {
-    return '1'
+  if (this.SPECIAL_DISPLAY_CHARS.hasOwnProperty(c)) {
+    return this.SPECIAL_DISPLAY_CHARS[c];
   }
   return c
 }
@@ -1248,11 +1291,8 @@ Exolve.prototype.displayToStateChar = function(c) {
   if (c == this.BLOCK_CHAR) {
     return '1'
   }
-  if (c == '0') {
-    return this.DIGIT0
-  }
-  if (c == '1') {
-    return this.DIGIT1
+  if (this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
+    return this.SPECIAL_STATE_CHARS[c];
   }
   if (!this.isValidDisplayChar(c)) {
     return '0'
@@ -1260,16 +1300,22 @@ Exolve.prototype.displayToStateChar = function(c) {
   return c
 }
 
-Exolve.prototype.newGridCell = function(row, col, letter) {
+Exolve.prototype.newGridCell = function(row, col, letter, escaped=false) {
   let cell = {}
   cell.row = row
   cell.col = col
   cell.currLetter = '?'
-  cell.solution = letter.toUpperCase()
+  let is_special = false
+  if (!escaped &&
+      (letter == '?' || letter == '.' || letter == '0')) {
+    cell.solution = letter
+    is_special = true
+  } else {
+    cell.solution = this.displayToStateChar(letter.toUpperCase())
+  }
   cell.isLight = false
   if (cell.solution != '.') {
-    if (cell.solution != '0' && cell.solution != '?' &&
-        !this.isValidDisplayChar(cell.solution)) {
+    if (!is_special && !this.isValidStateChar(cell.solution)) {
       this.throwErr('Bad grid entry at ' + row + ',' + col + ':' + letter);
     }
     cell.isLight = true
@@ -1303,7 +1349,7 @@ Exolve.prototype.parseGrid = function() {
   let allEntriesAre0s = true
   const DECORATORS = ' +|_@!*~'
   const reDecorators = new RegExp('[' + DECORATORS + ']')
-  const reNextChar = new RegExp('[\.0' + DECORATORS + ']')
+  const reNextChar = new RegExp('[\.0&' + DECORATORS + ']')
   this.grid = new Array(this.gridHeight)
   for (let i = 0; i < this.gridHeight; i++) {
     this.grid[i] = new Array(this.gridWidth)
@@ -1316,7 +1362,7 @@ Exolve.prototype.parseGrid = function() {
     let gridLineIndex = 0
     for (let j = 0; j < this.gridWidth; j++) {
       if (gridLineIndex >= gridLine.length) {
-        let errmsg = 'Too few letters in the grid at 0-based row: ' + i
+        let errmsg = 'Too few letters in the grid at row,col: ' + i + ',' + j
         if (this.langMaxCharCodes > 1) {
           errmsg = errmsg + '. Note that grid letters must be separated by ' +
             'spaces or decorators for languages that have compound characters';
@@ -1324,6 +1370,11 @@ Exolve.prototype.parseGrid = function() {
         this.throwErr(errmsg)
       }
       let letter = gridLine.charAt(gridLineIndex++)
+      let escaped = false
+      if (letter == '&') {
+        letter = gridLine.charAt(gridLineIndex++)
+        escaped = true
+      }
       if (this.langMaxCharCodes > 1 && letter != '.' && letter != '0') {
         let next = gridLineIndex
         while (next < gridLine.length &&
@@ -1333,7 +1384,7 @@ Exolve.prototype.parseGrid = function() {
         letter = letter + gridLine.substring(gridLineIndex, next).trim()
         gridLineIndex = next
       }
-      this.grid[i][j] = this.newGridCell(i, j, letter)
+      this.grid[i][j] = this.newGridCell(i, j, letter, escaped)
       let gridCell = this.grid[i][j]
       // Deal with . and 0 and 1 in second pass
       let thisChar = ''
@@ -1376,10 +1427,8 @@ Exolve.prototype.parseGrid = function() {
           if (allEntriesAre0s && !gridCell.prefill) {
             this.hasUnsolvedCells = true
           } else {
-            gridCell.solution = this.DIGIT0;
+            gridCell.solution = this.SPECIAL_STATE_CHARS['0']
           }
-        } else if (gridCell.solution == '1') {
-          gridCell.solution = this.DIGIT1;
         }
         if (!this.isValidGridChar(gridCell.solution)) {
           this.throwErr('Invalid grid entry[' + i + '][' + j + ']: ' + saved)
@@ -1411,7 +1460,8 @@ Exolve.prototype.startsAcrossClue = function(i, j) {
   if (!this.grid[i][j].isLight) {
     return false;
   }
-  if (j > 0 && this.grid[i][j - 1].isLight && !this.grid[i][j - 1].hasBarAfter) {
+  if (j > 0 && this.grid[i][j - 1].isLight &&
+      !this.grid[i][j - 1].hasBarAfter) {
     return false;
   }
   if (this.grid[i][j].hasBarAfter) {
@@ -1430,7 +1480,8 @@ Exolve.prototype.startsDownClue = function(i, j) {
   if (!this.grid[i][j].isLight) {
     return false;
   }
-  if (i > 0 && this.grid[i - 1][j].isLight && !this.grid[i - 1][j].hasBarUnder) {
+  if (i > 0 && this.grid[i - 1][j].isLight &&
+      !this.grid[i - 1][j].hasBarUnder) {
     return false;
   }
   if (this.grid[i][j].hasBarUnder) {
@@ -1932,7 +1983,7 @@ Exolve.prototype.setClueCellsDgmless = function(clue) {
   if (clue.dir == 'A') {
     gridCell.startsAcrossClue = true
     let max = clue.enumLen > 0 ? Math.min(col + clue.enumLen, this.gridWidth) :
-                               this.gridWidth
+        this.gridWidth
     for (let x = col; x < max; x++) {
       gridCell = this.grid[row][x]
       if (gridCell.isLight && !gridCell.isDgmless) {
@@ -1948,7 +1999,7 @@ Exolve.prototype.setClueCellsDgmless = function(clue) {
   } else if (clue.dir == 'D') {
     gridCell.startsDownClue = true
     let max = clue.enumLen > 0 ? Math.min(row + clue.enumLen, this.gridHeight) :
-                               this.gridHeight
+        this.gridHeight
     for (let x = row; x < max; x++) {
       gridCell = this.grid[x][col]
       if (gridCell.isLight && !gridCell.isDgmless) {
@@ -2070,6 +2121,7 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
         this.szCellsToOrphan++
       }
     } else if (inBrac && !theClue.solution) {
+      theClue.explicitSol = true
       theClue.solution = inBrac;
     } else {
       break;
@@ -2509,7 +2561,8 @@ Exolve.prototype.finalClueTweaks = function() {
     theClue.dispSol = ''
     if (this.addSolutionToAnno && theClue.solution &&
         !this.isOrphan(clueIndex) &&
-        !this.roughlyStartsWith(theClue.anno, theClue.solution)) {
+        (theClue.explicitSol ||
+         !this.roughlyStartsWith(theClue.anno, theClue.solution))) {
       // For orphans, we reveal in their placeholder blanks.
       theClue.dispSol = '<span class="xlv-solution">' + theClue.solution +
                         '. </span>';
@@ -3150,7 +3203,8 @@ Exolve.prototype.computeGridSize = function(maxDim) {
 Exolve.prototype.setColumnLayout = function() {
   if (!this.columnarLayout) {
     if (this.cluesToRight) {
-      this.cluesContainer.className = 'xlv-clues xlv-clues-flex xlv-clues-to-right'
+      this.cluesContainer.className =
+          'xlv-clues xlv-clues-flex xlv-clues-to-right'
     }
     return;
   }
@@ -3429,18 +3483,19 @@ Exolve.prototype.restoreState = function() {
     let lh = decodeURIComponent(location.hash.substr(1))
     let myPart = this.myStatePart(lh)
     if (myPart[0] >= 0) {
-      if (!foundState || this.maybeConfirm(this.textLabels['confirm-state-override'])) {
+      if (!foundState || this.maybeConfirm(
+              this.textLabels['confirm-state-override'])) {
         foundState = this.parseState(lh.substring(
             myPart[0] + this.STATES_SEP.length + this.id.length, myPart[1]))
         if (foundState) {
           this.log('Found saved state in url')
         }
       }
+      // Strip out the parsed state from the location hash
+      lh = lh.substr(0, myPart[0]) + lh.substr(myPart[1])
+      location.hash = lh
     }
   } catch (e) {
-  }
-  if (this.index == 0 && this.savingURL) {
-    location.hash = ''  // Clear, including any legacy-format state
   }
   for (let ci of this.allClueIndices) {
     // When restoring state, we reveal annos for fully prefilled entries.
@@ -3919,7 +3974,7 @@ Exolve.prototype.copyOrphanEntry = function(clueIndex) {
   for (let i = 0; i < entry.length; i++) {
     let letter = entry[i]
     if (!this.caseCheck(letter)) {
-      if (!this.allowDigits || letter < '0' || letter > '9') {
+      if (!this.allowChars || !this.allowChars[letter]) {
         continue;
       }
     }
@@ -5854,6 +5909,7 @@ function createPuzzle() {
 .xlv-preamble {
   margin: 8px 0;
   padding: 0;
+  max-width: 1440px;
 }
 .xlv-small-print {
   margin: 4px 0 6px 0;

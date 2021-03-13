@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.07"/>
-<script src="exolve-m.js?v1.07"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.08"/>
+<script src="exolve-m.js?v1.08"></script>
 
-<title>Test-Numeric</title>
+<title>Test-Numeric-Etc</title>
 
 </head>
 <body>
@@ -22,12 +22,15 @@ exolve-begin
   exolve-width: 5
   exolve-height: 5
   exolve-option: allow-digits
+  exolve-option: allow-chars::#-%^@?&.!~_|+*
+  exolve-preamble:
+    This grid supports numbers as well as these special chars: :#-%^@?&.!~_|+
   exolve-grid:
-    01234
-    A.B.C
-    12340
-    X.Y.Z
-    PQ098
+    0!1!23 &?!
+    &|.B.-!
+    && &1 ?&?!0
+    &@!.#. &@!
+    &*!&+09&~!
   exolve-across:
     1 Blah (5)
     4 Blah (5)

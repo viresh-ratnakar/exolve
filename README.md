@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.07 February 27 2021
+### Version: Exolve v1.08 March 12 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -365,7 +365,7 @@ If you use a language/Script that uses compound letters made up of multiple
 Unicode characters (for example, Devanagari—see the
 [`exolve-language`](#exolve-language) section), then your _must_ separate grid
 letters (when specifying a grid with solutions) with a space (unless they are
-already separated by decorator). For example, this will *not* work:
+already separated by a decorator). For example, this will *not* work:
 ```
   exolve-grid:
      सेहत
@@ -375,6 +375,28 @@ This will work:
   exolve-grid:
      से ह त
 ```
+
+### Digits and special characters
+
+Normally, only the letters of the alphabet (A-Z, or script-specific) can be
+used in solution letters. However using [`exolve-option`](#exolve-option)
+`allow-digits` or `allow-chars:<chars>`, you may allow some non-alphabetic
+characters. If any of these characters is also a decorator or has a special
+meaning in grid specifications (i.e., is one of `|_+@!~*.?`), then it should
+be prefixed with `&` in the grid specifications. If `&` itself needs to be used
+in the grid, then it too should be prefixed with an `&`. For example:
+```
+  exolve-option: allow-chars:@.&
+  exolve-grid:
+    A &@ B &. C O M
+    && . . .  . . .
+```    
+
+Even though `0` has a special meaning in grid specifications, you do not
+have to escape `0` using an `&` prefix if `0` has been allowed in the grid via
+`allow-digits` or `allow-chars`. A technical caveat (for the sake of
+completeness) is that you cannot create a degenerate grid that has all entries
+made up entirely of `0s`.
 
 ## Some details about clue numbers
 Across and down clue numbers are automatically inferred from the grid, except
@@ -1008,6 +1030,13 @@ The list of currently supported options is as follows:
   Please use color-background (see below).
 - **`allow-digits`** If this option is specified, then we allow solvers to enter
   digits in cells.
+- **`allow-chars:<chars>`** If this option is specified, then we allow solvers
+  to enter any of the characters (which would typically be special characters
+  or digits)  listed in `<chars>`. For example, `allow-chars:#!7` will allow the
+  characters `#`, `!`, and `7` to be used in the grid and will allow users to
+  type them. If any of these special characters is also a decorator or is a
+  character with a special meaning in grid specifications (i.e., one of
+  `|_+@!~*.?`), then to specify it in the grid, you have to prefix it with `&`.
 - **`hide-copy-placeholder-buttons`** This is an option that is only applicable
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the

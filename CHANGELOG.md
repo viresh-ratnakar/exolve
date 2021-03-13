@@ -1,5 +1,27 @@
 # Changelog
 
+### Version: Exolve v1.08 March 12 2021
+
+- Add `exolve-option: allow-chars:<chars>` to allow special chars.
+- Change the allow-digits option implementation to use the same mechanism
+  as for allow-chars. In particular, get rid of the old use of -/~ as
+  state-chars for 0/1. We not use unprintable chars as state chars for
+  0/1/./?
+- Use `&` as an escape char in grid specs, to allow entry of decorators and
+  . and ? as entries, if added through allow-chars.
+- If state is found in the URL hash, clear it from there (whether or not it
+  is used) for a tidier appearance as well as to avoid generating an
+  unnecessary second confirm-dialog if you then copy the URL from the browser
+  and open in another window/tab.
+- If an expllcit solution is provided in square brackets in the clue, turn
+  off the "smart" checking that looks to see if the anno part following it
+  begins with the solution (the smart code is there to avoid duplication).
+- Tweak: limit the max width of the preamble (so that it doesn't protrude
+  beyond the grid/clues in the common case of a wide screen and a 15x15 grid).
+- Clean-up: back to max 80 columns code!
+
+### Merge pull request #61 from eigenfoo-forks/the-the
+
 - Fix "the the" typos.
 
 ### Version: Exolve v1.07 February 27 2021
@@ -355,7 +377,7 @@
   the solution gets placed inside the placeholder blank slot instead of
   the head of the anno.
 
-- This would have meant that if in an older grid the the solution was explicitly
+- This would have meant that if in an older grid the solution was explicitly
   included in the anno, it would have got duplicated. So, the code does check
   to see if the solution string (punctuation/markup notwithstanding) is present
   at the head of the anno, and avoids duplicating it if so. If the solver wants
