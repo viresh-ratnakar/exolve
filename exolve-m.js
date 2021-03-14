@@ -3718,18 +3718,19 @@ Exolve.prototype.clueActivator = function(ci) {
 }
 
 Exolve.prototype.getViewportHeight = function() {
-  return window.innerHeight && document.documentElement.clientHeight ?
-      Math.min(window.innerHeight, document.documentElement.clientHeight) :
-      window.innerHeight ||
-      document.documentElement.clientHeight ||
+  // From an iframe do not rely on document.documentElement.clientHeight
+  const ch = (window.location != window.parent.location) ? 0 :
+      document.documentElement.clientHeight;
+  return window.innerHeight && ch ? Math.min(window.innerHeight, ch) :
+      window.innerHeight || ch ||
       document.getElementsByTagName('body')[0].clientHeight;
 }
 
 Exolve.prototype.getViewportWidth = function() {
-  return window.innerWidth && document.documentElement.clientWidth ?
-      Math.min(window.innerWidth, document.documentElement.clientWidth) :
-      window.innerWidth ||
-      document.documentElement.clientWidth ||
+  const cw = (window.location != window.parent.location) ? 0 :
+      document.documentElement.clientWidth;
+  return window.innerWidth && cw ? Math.min(window.innerWidth, cw) :
+      window.innerWidth || cw ||
       document.getElementsByTagName('body')[0].clientWidth;
 }
 
