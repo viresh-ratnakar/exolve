@@ -2408,6 +2408,8 @@ Exolve.prototype.processClueChildren = function() {
         }
         if (child.dir) {
           childIndex = child.dir + child.label
+        } else {
+          child.dir = childIndex.charAt(0)
         }
       } else {
         if (!this.offNumClueIndices[child.label] ||
