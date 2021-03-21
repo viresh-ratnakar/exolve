@@ -112,7 +112,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.08 March 12 2021'
+  this.VERSION = 'Exolve v1.09 March 21 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -3586,8 +3586,11 @@ Exolve.prototype.makeCurrClueVisible = function() {
   const gpPos = this.gridPanel.getBoundingClientRect();
   this.currClue.style.left = (gpPos.left - bPos.left) + 'px';
 
-  // Check if grid input is visible.
-  const inputPos = this.gridInput.getBoundingClientRect();
+  let inputPos = this.gridInput.getBoundingClientRect();
+  if (inputPos.top < gpPos.top) {
+    inputPos = gpPos
+  }
+  // Check if grid/grid-input is visible.
   if (inputPos.top < this.visTop) {
     return
   }
@@ -3601,7 +3604,10 @@ Exolve.prototype.makeCurrClueVisible = function() {
 
   let normalTop = 0;
   const clearance = 4;
+  const maxClueHeight = Math.max(
+      50, (gpPos.top -bPos.top) - clearance - this.visTop)
   const parentTop = clueParentPos.top
+  this.currClue.style.maxHeight = maxClueHeight + 'px';
   if (gpPos.top - parentTop < cluePos.height + clearance) {
     normalTop = (gpPos.top - parentTop) - (cluePos.height + clearance);
   }
@@ -4619,9 +4625,12 @@ Exolve.prototype.createListeners = function() {
       this.toggleCurrDirAndActivate.bind(this));
   let boundDeactivator = this.deactivator.bind(this)
   this.background.addEventListener('click', boundDeactivator);
-  // Clicking on the title will also unselect current clue (useful
-  // for barred grids where background is not visible).
+  // Clicking on the title/setter/preamble will also unselect the current clue.
   document.getElementById(this.prefix + '-title').addEventListener(
+    'click', boundDeactivator);
+  document.getElementById(this.prefix + '-setter').addEventListener(
+    'click', boundDeactivator);
+  document.getElementById(this.prefix + '-preamble').addEventListener(
     'click', boundDeactivator);
   
   window.addEventListener('scroll', this.makeCurrClueVisible.bind(this));
@@ -5784,6 +5793,9 @@ function createPuzzle() {
   .xlv-saving {
     font-size: 6px;
   }
+  .xlv-preamble {
+    margin: 8px 0 0;
+  }
 }
 
 @media (min-width: 326px) and (max-width: 500px) {
@@ -5803,6 +5815,9 @@ function createPuzzle() {
     font-size: 11px;
     padding: 5px;
     border-radius: 8px;
+  }
+  .xlv-preamble {
+    margin: 8px 0 0;
   }
 }
 
@@ -5826,6 +5841,9 @@ function createPuzzle() {
   }
   .xlv-clues-panel {
     margin: 0 12px 8px 0;
+  }
+  .xlv-preamble {
+    margin: 8px 20px 0;
   }
 }
 
@@ -5897,7 +5915,6 @@ function createPuzzle() {
 .xlv-flex-col {
   display: flex;
   flex-flow: column wrap;
-  align-items: center;
 }
 .xlv-title {
   text-align: center;
@@ -5910,9 +5927,7 @@ function createPuzzle() {
   margin: 0 0 8px 0;
 }
 .xlv-preamble {
-  margin: 8px 0;
   padding: 0;
-  max-width: 1440px;
 }
 .xlv-small-print {
   margin: 4px 0 6px 0;
@@ -5951,6 +5966,7 @@ function createPuzzle() {
   font-weight: bold;
   margin: 0;
   padding: 2px;
+  overflow-y: auto;
 }
 .xlv-curr-orphan,
 .xlv-curr-clue-label {
@@ -6116,6 +6132,7 @@ function createPuzzle() {
 .xlv-definition {
   text-decoration: underline;
   text-decoration-color: darkgreen;
+  text-decoration-thickness: 1.5px;
 }
 .xlv-blue {
   color: blue;

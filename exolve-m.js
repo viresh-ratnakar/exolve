@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.08 March 12 2021'
+  this.VERSION = 'Exolve v1.09 March 21 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -3553,8 +3553,11 @@ Exolve.prototype.makeCurrClueVisible = function() {
   const gpPos = this.gridPanel.getBoundingClientRect();
   this.currClue.style.left = (gpPos.left - bPos.left) + 'px';
 
-  // Check if grid input is visible.
-  const inputPos = this.gridInput.getBoundingClientRect();
+  let inputPos = this.gridInput.getBoundingClientRect();
+  if (inputPos.top < gpPos.top) {
+    inputPos = gpPos
+  }
+  // Check if grid/grid-input is visible.
   if (inputPos.top < this.visTop) {
     return
   }
@@ -3568,7 +3571,10 @@ Exolve.prototype.makeCurrClueVisible = function() {
 
   let normalTop = 0;
   const clearance = 4;
+  const maxClueHeight = Math.max(
+      50, (gpPos.top -bPos.top) - clearance - this.visTop)
   const parentTop = clueParentPos.top
+  this.currClue.style.maxHeight = maxClueHeight + 'px';
   if (gpPos.top - parentTop < cluePos.height + clearance) {
     normalTop = (gpPos.top - parentTop) - (cluePos.height + clearance);
   }
@@ -4586,9 +4592,12 @@ Exolve.prototype.createListeners = function() {
       this.toggleCurrDirAndActivate.bind(this));
   let boundDeactivator = this.deactivator.bind(this)
   this.background.addEventListener('click', boundDeactivator);
-  // Clicking on the title will also unselect current clue (useful
-  // for barred grids where background is not visible).
+  // Clicking on the title/setter/preamble will also unselect the current clue.
   document.getElementById(this.prefix + '-title').addEventListener(
+    'click', boundDeactivator);
+  document.getElementById(this.prefix + '-setter').addEventListener(
+    'click', boundDeactivator);
+  document.getElementById(this.prefix + '-preamble').addEventListener(
     'click', boundDeactivator);
   
   window.addEventListener('scroll', this.makeCurrClueVisible.bind(this));

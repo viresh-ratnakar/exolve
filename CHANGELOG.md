@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v1.09 March 21 2021
+
+- Make the current-clue div above the grid have a max-height and an
+  "overflow-y: auto". For outrageously long clues (or in Exet with clue + long
+  anno), this avoids clipping the clue, presenting it in a scrolling box.
+- Clicking on the setter/preamble too removes the highlighting of the
+  current clue now (like the title does).
+- Remove 'align-items:center' flex CSS setting for the top-level div. This
+  has virtually no impact (as the title/setter are already centered, and
+  the main grid/clues are governed by their wrapping div's flex settings)
+  except that it helps some corner cases in Exet with narrow layouts.
+
 ### Version: Exolve v1.08 March 12 2021
 
 - Add `exolve-option: allow-chars:<chars>` to allow special chars.
