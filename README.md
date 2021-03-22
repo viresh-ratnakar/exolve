@@ -144,7 +144,7 @@ as the square with the cursor is visible.
 button solicit additional confirmation from the solver.
 
 You can click on the black background or on the puzzle title, setter, or
-preamble (of present) to unhighlight the current clue (for printing or
+preamble (if present) to unhighlight the current clue (for printing or
 screenshotting, for example).
 
 ## Format
