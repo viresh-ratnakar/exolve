@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.10 March 28 2021
+
+- Make the underline colour in a revealed definition and the solution text
+  colour be the same as the "solved clue number" color, dodgerblue.
+- Make these colours be configurable via colour-... exolve-options
+  ('def-underline" and "solution").
+- Use the solution colour in "incluefill" too (the placeholder blank
+  used for orphan clues).
+
 ### Version: Exolve v1.09 March 21 2021
 
 - Make the current-clue div above the grid have a max-height and an

@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.09 March 21 2021'
+  this.VERSION = 'Exolve v1.10 March 28 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -199,6 +199,8 @@ function Exolve(puzzleSpec,
     'prefill': 'blue',
     'anno': 'darkgreen',
     'solved': 'dodgerblue',
+    'solution': 'dodgerblue',
+    'def-underline': 'dodgerblue',
     'separator': 'blue',
     'imp-text': 'darkgreen',
     'button': '#4caf50',
@@ -2884,6 +2886,12 @@ Exolve.prototype.applyStyles = function() {
     #${this.prefix}-frame .xlv-solved td:first-child {
       color: ${this.colorScheme['solved']};
     }
+    #${this.prefix}-frame .xlv-definition {
+      text-decoration-color: ${this.colorScheme['def-underline']};
+    }
+    #${this.prefix}-frame .xlv-solution {
+      color: ${this.colorScheme['solution']};
+    }
     #${this.prefix}-status {
       color: ${this.colorScheme['imp-text']};
     }
@@ -4092,7 +4100,7 @@ Exolve.prototype.addOrphanUI =
   html = html + '</span>'
   elt.insertAdjacentHTML('beforeend', html)
   let incluefill = elt.lastElementChild.firstElementChild
-  incluefill.style.color = this.colorScheme['imp-text']
+  incluefill.style.color = this.colorScheme['solution']
   incluefill.addEventListener(
       'input', this.updateOrphanEntry.bind(this, clueIndex, inCurr))
   if (!this.hideCopyPlaceholders) {

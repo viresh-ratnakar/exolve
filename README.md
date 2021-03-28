@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.09 March 21 2021
+### Version: Exolve v1.10 March 28 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1078,8 +1078,10 @@ be overriding), and descriptions.
 | `colour-prefill`           | blue          | Any letters pre-filled with the ! decorator.|
 | `colour-anno`              | darkgreen     | The text of the annotation.       |
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
+| `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
+| `colour-def-underline`     | dodgerblue    | The underline in a revealed definition within a clue.|
 | `colour-separator`         | blue          | The hyphens and dashes in multi-word lights. |
-| `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, placeholder entries, grid-filling status.|
+| `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
 | `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
 | `colour-button-text`       | white         | The text in buttons.              |
