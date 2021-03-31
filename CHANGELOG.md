@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Unnumbered minor tweak to v1.10
+
+- Make the def underline thicker, move it down a bit, and make it very
+  slightly lighter by default than the solved/solution colour.
+
 ### Version: Exolve v1.10 March 28 2021
 
 - Make the underline colour in a revealed definition and the solution text

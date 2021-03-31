@@ -1079,7 +1079,7 @@ be overriding), and descriptions.
 | `colour-anno`              | darkgreen     | The text of the annotation.       |
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
-| `colour-def-underline`     | dodgerblue    | The underline in a revealed definition within a clue.|
+| `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
 | `colour-separator`         | blue          | The hyphens and dashes in multi-word lights. |
 | `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |

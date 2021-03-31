@@ -415,6 +415,8 @@ Version: Exolve v1.10 March 28 2021
 .xlv-definition {
   text-decoration: underline;
   text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-skip-ink: none;
 }
 .xlv-blue {
   color: blue;
