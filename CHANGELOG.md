@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.11 April 7 2021
+
+- Make throwErr() show the error as an alert if the DOM element is not
+  available to show it.
+- Add an isColor() function. Use it for checking the validity of
+  colours in exolve-nina, exolve-colour, exolve-option:colour-...
+- Allow a specific colour to be optionally specified in exolve-nina.
+- Allow the specified colour to appear anywhere in the list in
+  exolve-colour, and also now in exolve-colour.
+
 ### Version: Unnumbered minor tweak to v1.10
 
 - Make the def underline thicker, move it down a bit, and make it very
