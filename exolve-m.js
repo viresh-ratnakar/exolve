@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.11 April 7 2021'
+  this.VERSION = 'Exolve v1.12 April 8 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -375,6 +375,8 @@ Exolve.prototype.init = function() {
                       class="xlv-grid-input xlv-cell-text"/></div>
               <div id="${this.prefix}-nina-group"
                   style="display:none;left:0;top:0"></div>
+              <div id="${this.prefix}-colour-group"
+                  style="display:none;left:0;top:0"></div>
             </div> <!-- xlv-grid-parent -->
           </div> <!-- xlv-grid-parent-centerer -->
           <div id="${this.prefix}-controls-etc" class="xlv-controls-etc">
@@ -589,6 +591,7 @@ Exolve.prototype.init = function() {
   this.currClueParent = document.getElementById(
       this.prefix + '-curr-clue-parent')
   this.ninaGroup = document.getElementById(this.prefix + '-nina-group')
+  this.colourGroup = document.getElementById(this.prefix + '-colour-group')
 
   this.statusNumFilled = document.getElementById(
       this.prefix + '-status-num-filled')
@@ -903,7 +906,8 @@ Exolve.prototype.answerListener = function(answer, forceUpper) {
 // Parse a questionTexts and create the question elements for (which include
 // an input box for the answer). The solution answer may be provided after the
 // last ')'.
-Exolve.prototype.displayQuestions = function() {
+Exolve.prototype.redisplayQuestions = function() {
+  this.questions.innerHTML = '';
   for (let s of this.questionTexts) {
     let enumParse = this.parseEnum(s)
     let inputLen = enumParse.placeholder.length
@@ -3522,11 +3526,7 @@ Exolve.prototype.deactivateCurrCell = function() {
   for (let x of this.activeCells) {
     let gridCell = this.grid[x[0]][x[1]]
     let cellRect = gridCell.cellRect
-    if (gridCell.colour) {
-      cellRect.style.fill = gridCell.colour
-    } else {
-      cellRect.style.fill = this.colorScheme['cell']
-    }
+    cellRect.style.fill = this.colorScheme['cell']
     if (!gridCell.prefill) {
       gridCell.cellText.style.fill = this.colorScheme['light-text']
     }
@@ -4648,6 +4648,31 @@ Exolve.prototype.createListeners = function() {
   window.addEventListener('resize', this.handleResize.bind(this));
 }
 
+Exolve.prototype.recolourCells = function() {
+  // Set colours specified through exolve-colour.
+  this.colourGroup.innerHTML = '';
+  for (let cellColour of this.cellColours) {
+    if (cellColour.length == 2) {
+      const ci = cellColour[0]
+      if (!this.clues[ci]) {
+        continue
+      }
+      let colour = cellColour[1]
+      for (let cell of this.clues[ci].cells) {
+        const row = cell[0]
+        const col = cell[1]
+        this.colourGroup.appendChild(this.makeColouredRect(row, col, colour));
+      }
+    } else {
+      const row = cellColour[0]
+      const col = cellColour[1]
+      const colour = cellColour[2]
+      this.colourGroup.appendChild(this.makeColouredRect(row, col, colour));
+    }
+  }
+  this.colourGroup.style.display = (this.cellColours.length > 0) ? '' : 'none';
+}
+
 Exolve.prototype.displayGrid = function() {
   this.numCellsToFill = 0
   this.numCellsPrefilled = 0
@@ -4749,29 +4774,7 @@ Exolve.prototype.displayGrid = function() {
     }
   }
 
-  // Set colours specified through exolve-colour.
-  for (let cellColour of this.cellColours) {
-    if (cellColour.length == 2) {
-      let ci = cellColour[0]
-      if (!this.clues[ci]) {
-        continue
-      }
-      let colour = cellColour[1]
-      for (let cell of this.clues[ci].cells) {
-        this.grid[cell[0]][cell[1]].colour = colour
-        this.grid[cell[0]][cell[1]].cellRect.style.fill = colour
-      }
-    } else {
-      let row = cellColour[0]
-      let col = cellColour[1]
-      if (!this.grid[row][col].cellRect) {
-        continue
-      }
-      let colour = cellColour[2]
-      this.grid[row][col].colour = colour
-      this.grid[row][col].cellRect.style.fill = colour
-    }
-  }
+  this.recolourCells();
 
   // Bars/word-ends to the right and under; hyphens.
   for (let i = 0; i < this.gridHeight; i++) {
@@ -4900,20 +4903,37 @@ Exolve.prototype.addCellText = function(row, col, text,
   return cellText
 }
 
-Exolve.prototype.displayNinas = function() {
+Exolve.prototype.makeColouredRect = function(row, col, colour) {
+  const rect = document.createElement('div');
+  const gridCell = this.grid[row][col]
+  rect.style.left =  '' +  gridCell.cellLeft + 'px';
+  rect.style.top = '' + gridCell.cellTop + 'px';
+  rect.style.width = '' + this.squareDim + 'px';
+  rect.style.height = '' + this.squareDim + 'px';
+  rect.style.backgroundColor = colour;
+  rect.style.opacity = "0.2";
+  rect.setAttributeNS(null, 'class', 'xlv-coloured-cell');
+  rect.addEventListener(
+      'click', this.cellActivator.bind(this, row, col));
+  return rect;
+}
+
+Exolve.prototype.redisplayNinas = function() {
   const NINA_COLORS = [
-    'rgba(0,0,255,0.2)',
-    'rgba(0,255,0,0.2)',
-    'rgba(0,255,255,0.2)',
-    'rgba(255,0,255,0.2)',
-    'rgba(255,255,0,0.2)',
-    'rgba(255,50,50,0.2)',
-    'rgba(50,255,50,0.2)',
-    'rgba(50,50,255,0.2)',
-    'rgba(50,200,200,0.2)',
-    'rgba(200,50,200,0.2)',
-    'rgba(200,200,50,0.2)',
+    'rgb(0,0,255)',
+    'rgb(0,255,0)',
+    'rgb(0,255,255)',
+    'rgb(255,0,255)',
+    'rgb(255,255,0)',
+    'rgb(255,50,50)',
+    'rgb(50,255,50)',
+    'rgb(50,50,255)',
+    'rgb(50,200,200)',
+    'rgb(200,50,200)',
+    'rgb(200,200,50)',
   ];
+  this.ninaGroup.innerHTML = '';
+  this.ninaClassElements = [];
   let ninaColorIndex = 0;
   for (let nina of this.ninas) {
     // First resolve clue indices to cells.
@@ -4948,16 +4968,7 @@ Exolve.prototype.displayNinas = function() {
       }
       const row = cellOrClass[0]
       const col = cellOrClass[1]
-      const ninaRect = document.createElement('div');
-      ninaRect.style.left =  '' +  this.grid[row][col].cellLeft + 'px';
-      ninaRect.style.top = '' + this.grid[row][col].cellTop + 'px';
-      ninaRect.style.width = '' + this.squareDim + 'px';
-      ninaRect.style.height = '' + this.squareDim + 'px';
-      ninaRect.style.backgroundColor = colour;
-      ninaRect.setAttributeNS(null, 'class', 'xlv-nina');
-      ninaRect.addEventListener(
-          'click', this.cellActivator.bind(this, row, col));
-      this.ninaGroup.appendChild(ninaRect);
+      this.ninaGroup.appendChild(this.makeColouredRect(row, col, colour));
     }
   }
 }
@@ -5698,12 +5709,12 @@ Exolve.prototype.createPuzzle = function() {
 
   this.applyStyles()
 
-  this.displayQuestions()
+  this.redisplayQuestions()
   this.displayClues()
   this.displayGridBackground()
   this.createListeners()
   this.displayGrid()
-  this.displayNinas()
+  this.redisplayNinas()
   this.displayButtons()
 
   this.parseAndDisplayPS()

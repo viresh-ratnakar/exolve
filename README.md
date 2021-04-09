@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.11 April 7 2021
+### Version: Exolve v1.12 April 8 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -878,6 +878,9 @@ by including it in the list (anywhere). You can use a valid
   exolve-nina: dodgerblue j5 j7 j9 c10r11 j13
   exolve-nina: a7 b7 c7 d7 e7 A12 16d #ff00a1
 ```
+Note that the colour that you specify will get shown transparently overlaid over
+the normal cell colour (white, unless changed with `exolve-option:colour-cell`)
+as well as over the active cell colour.
 
 You can also have ninas that involve arbitrary letters/words from within the
 text of the clues or the prelude. This involves a little bit of HTML.
@@ -912,6 +915,10 @@ The colour is specified anywhere in the space-separated list and
 can be any valid
 [HTML colour name](https://www.w3schools.com/colors/colors_names.asp) or code
 (but without spaces).
+
+Note that the colour that you specify will get shown transparently overlaid over
+the normal cell colour (white, unless changed with `exolve-option:colour-cell`)
+as well as over the active cell colour.
 
 ## `exolve-question`
 Often, the setter might have hidden additional information for the solver to

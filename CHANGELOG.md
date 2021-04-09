@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.12 April 8 2021
+
+- Implement exolve-colour the same way as exolve-nina: using a transparent
+  div overlay.
+- Bug-fix: for revealed ninas, it was the case that clicking a nina cell
+  wasn't toggling direction. Fixed by making the grid-wrapper div have a
+  higher z-index.
+- Expose recolourCells(), redisplayNinas(), redisplayQuestions() as
+  functions (for Exet).
+
 ### Version: Exolve v1.11 April 7 2021
 
 - Make throwErr() show the error as an alert if the DOM element is not
