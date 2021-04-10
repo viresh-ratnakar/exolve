@@ -4911,7 +4911,6 @@ Exolve.prototype.makeColouredRect = function(row, col, colour) {
   rect.style.width = '' + this.squareDim + 'px';
   rect.style.height = '' + this.squareDim + 'px';
   rect.style.backgroundColor = colour;
-  rect.style.opacity = "0.2";
   rect.setAttributeNS(null, 'class', 'xlv-coloured-cell');
   rect.addEventListener(
       'click', this.cellActivator.bind(this, row, col));
@@ -4920,14 +4919,14 @@ Exolve.prototype.makeColouredRect = function(row, col, colour) {
 
 Exolve.prototype.redisplayNinas = function() {
   const NINA_COLORS = [
-    'rgb(0,0,255)',
-    'rgb(0,255,0)',
-    'rgb(0,255,255)',
-    'rgb(255,0,255)',
-    'rgb(255,255,0)',
-    'rgb(255,50,50)',
-    'rgb(50,255,50)',
-    'rgb(50,50,255)',
+    'rgb(0,0,220)',
+    'rgb(0,220,0)',
+    'rgb(0,220,220)',
+    'rgb(220,0,220)',
+    'rgb(220,220,0)',
+    'rgb(220,50,50)',
+    'rgb(50,220,50)',
+    'rgb(50,50,220)',
     'rgb(50,200,200)',
     'rgb(200,50,200)',
     'rgb(200,200,50)',

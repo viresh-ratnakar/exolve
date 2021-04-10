@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Unnumbered minor tweak
+
+- Use CSS for setting xlv-coloured-cell opacity. Change it to 0.25 from 0.2.
+- Darken nina colors slightly to compensate.
+- Had missed applying js changes in 1.12 to exolve.html, fix that.
+
 ### Version: Exolve v1.12 April 8 2021
 
 - Implement exolve-colour the same way as exolve-nina: using a transparent

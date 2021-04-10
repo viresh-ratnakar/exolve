@@ -351,6 +351,7 @@ Version: Exolve v1.12 April 8 2021
   border: none;
   border-width: 0;
   outline: none;
+  opacity: 0.25;
 }
 .xlv-status {
   margin: 2px 0;
