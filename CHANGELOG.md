@@ -1,10 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.13 April 10 2021
+
+- Another minor update for Exet. Make NINA_COLORS a class member, and change
+  the colours to be more common names.
+- Minor bugfix in the recently updated redisplayQuestions().
+
 ### Version: Unnumbered minor tweak
 
 - Use CSS for setting xlv-coloured-cell opacity. Change it to 0.25 from 0.2.
 - Darken nina colors slightly to compensate.
-- Had missed applying js changes in 1.12 to exolve.html, fix that.
 
 ### Version: Exolve v1.12 April 8 2021
 

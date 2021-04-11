@@ -112,7 +112,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.12 April 8 2021'
+  this.VERSION = 'Exolve v1.13 April 10 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -126,6 +126,20 @@ function Exolve(puzzleSpec,
   this.credits = []
   this.questionTexts = []
 
+  this.NINA_COLORS = [
+    'blue',
+    'green',
+    'aqua',
+    'fuchsia',
+    'yellow',
+    'crimson',
+    'limegreen',
+    'royalblue',
+    'mediumturquoise',
+    'mediumorchid',
+    'goldenrod',
+    'red',
+  ];
   // Each nina will be object with props: colour and list (an array containing
   // location [i,j] pairs and/or span class names).
   this.ninas = []
@@ -941,6 +955,8 @@ Exolve.prototype.answerListener = function(answer, forceUpper) {
 // last ')'.
 Exolve.prototype.redisplayQuestions = function() {
   this.questions.innerHTML = '';
+  const savedAnsList = this.answersList.slice();
+  this.answersList = [];
   for (let s of this.questionTexts) {
     let enumParse = this.parseEnum(s)
     let inputLen = enumParse.placeholder.length
@@ -1009,6 +1025,9 @@ Exolve.prototype.redisplayQuestions = function() {
     this.questions.appendChild(question)
     answer.addEventListener(
         'input', this.answerListener.bind(this, answer, forceUpper));
+  }
+  for (const a of savedAnsList) {
+    if (!a.isq) this.answersList.push(a);
   }
 }
 
@@ -4951,19 +4970,6 @@ Exolve.prototype.makeColouredRect = function(row, col, colour) {
 }
 
 Exolve.prototype.redisplayNinas = function() {
-  const NINA_COLORS = [
-    'rgb(0,0,220)',
-    'rgb(0,220,0)',
-    'rgb(0,220,220)',
-    'rgb(220,0,220)',
-    'rgb(220,220,0)',
-    'rgb(220,50,50)',
-    'rgb(50,220,50)',
-    'rgb(50,50,220)',
-    'rgb(50,200,200)',
-    'rgb(200,50,200)',
-    'rgb(200,200,50)',
-  ];
   this.ninaGroup.innerHTML = '';
   this.ninaClassElements = [];
   let ninaColorIndex = 0;
@@ -4979,8 +4985,8 @@ Exolve.prototype.redisplayNinas = function() {
     }
     let colour = nina.colour;
     if (!colour) {
-      colour = NINA_COLORS[ninaColorIndex];
-      ninaColorIndex = (ninaColorIndex + 1) % NINA_COLORS.length
+      colour = this.NINA_COLORS[ninaColorIndex];
+      ninaColorIndex = (ninaColorIndex + 1) % this.NINA_COLORS.length
     }
     for (let cellOrClass of nina2) {
       if (!Array.isArray(cellOrClass)) {
