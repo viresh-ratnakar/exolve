@@ -1258,7 +1258,7 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-id` | Delete puzzle state for puzzle id |
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
-| `warnings-label` | Please fix the issues listed in these warnings, or use exolve-option(s) ignore-unclued and/or ignore-enum-mismatch:|
+| `warnings-label` | Please fix the issues listed in these warnings, or use exolve-option(s) "ignore-unclued" and/or "ignore-enum-mismatch":|
 | `warnings.hover` | Issues detected: click &times; to dismiss|
 
 

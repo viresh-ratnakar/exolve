@@ -326,7 +326,7 @@ function Exolve(puzzleSpec,
     'confirm-state-override': 'Do you want to override the state saved in ' +
         'this device with the state found in the URL?',
     'warnings-label': 'Please fix the issues listed in these warnings, or ' +
-        'use exolve-option(s) ignore-unclued and/or ignore-enum-mismatch:',
+        'use exolve-option(s) "ignore-unclued" and/or "ignore-enum-mismatch":',
     'warnings.hover': 'Issues detected: click on [&times;] to dismiss',
   }
 
@@ -1249,6 +1249,7 @@ Exolve.prototype.showWarning = function(warning) {
     const e = document.getElementById(this.prefix + '-errors')
     e.insertAdjacentHTML('beforeend', `
       <div id="${this.prefix}-warnings-panel"
+          class="xlv-wide-box"
           title="${this.textLabels['warnings.hover']}">
         <div class="xlv-warnings-label">
           <button class="xlv-small-button"
