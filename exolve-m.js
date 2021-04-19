@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.13 April 10 2021'
+  this.VERSION = 'Exolve v1.14 April 19 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -233,10 +233,10 @@ function Exolve(puzzleSpec,
   this.textLabels = {
     'clear': 'Clear this',
     'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
-        'from full clues with a second click',
+        'from full clues with a second click. Shortcut: Ctrl-q',
     'clear-all': 'Clear all!',
     'clear-all.hover': 'Clear everything! A second click clears all ' +
-        'placeholder entries in clues without known squares',
+        'placeholder entries in clues without known squares. Shortcut: Ctrl-Q',
     'check': 'Check this',
     'checkcell': 'Check cell',
     'check.hover': 'Erase mistakes in highlighted squares. Long-click to ' +
@@ -276,6 +276,7 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction</li>
+         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless</li>
        </ul>`,
@@ -324,6 +325,9 @@ function Exolve(puzzleSpec,
     'confirm-delete-older': 'Delete all puzzle states saved before',
     'confirm-state-override': 'Do you want to override the state saved in ' +
         'this device with the state found in the URL?',
+    'warnings-label': 'Please fix the issues listed in these warnings, or ' +
+        'use exolve-option(s) ignore-unclued and/or ignore-enum-mismatch:',
+    'warnings.hover': 'Issues detected: click on [&times;] to dismiss',
   }
 
   // Variables set by exolve-option
@@ -339,6 +343,8 @@ function Exolve(puzzleSpec,
   this.langMaxCharCodes = 1
   this.columnarLayout = false
   this.cluesToRight = false
+  this.ignoreUnclued = false
+  this.ignoreEnumMismatch = false
 
   this.createPuzzle()
 }
@@ -1034,6 +1040,14 @@ Exolve.prototype.parseOption = function(s) {
       this.cluesToRight = true
       continue
     }
+    if (spart == "ignore-unclued") {
+      this.ignoreUnclued = true
+      continue
+    }
+    if (spart == "ignore-enum-mismatch") {
+      this.ignoreEnumMismatch = true
+      continue
+    }
     if (spart == "allow-digits") {
       spart = 'allow-chars:0123456789'
       // Fall through to the allow-chars code.
@@ -1222,6 +1236,38 @@ Exolve.prototype.throwErr = function(error) {
   throw error;
 }
 
+Exolve.prototype.dismissWarnings = function() {
+  const w = document.getElementById(this.prefix + '-warnings-panel')
+  if (w) {
+    w.style.display = 'none';
+  }
+}
+
+Exolve.prototype.showWarning = function(warning) {
+  let w = document.getElementById(this.prefix + '-warnings')
+  if (!w) {
+    const e = document.getElementById(this.prefix + '-errors')
+    e.insertAdjacentHTML('beforeend', `
+      <div id="${this.prefix}-warnings-panel"
+          title="${this.textLabels['warnings.hover']}">
+        <div class="xlv-warnings-label">
+          <button class="xlv-small-button"
+              id="${this.prefix}-dismiss-warnings">
+            &times;
+          </button>
+          ${this.textLabels["warnings-label"]}
+        </div>
+        <ul id="${this.prefix}-warnings" class="xlv-warnings">
+        </ul>
+      </div>`);
+    w = document.getElementById(this.prefix + '-warnings')
+    const wd = document.getElementById(this.prefix + '-dismiss-warnings')
+    wd.addEventListener('click', this.dismissWarnings.bind(this));
+  }
+  w.insertAdjacentHTML('beforeend', `
+      <li>${warning}</li>`);
+}
+
 // Run some checks for serious problems with grid dimensions, etc. If found,
 // abort with error.
 Exolve.prototype.checkConsistency = function() {
@@ -1245,6 +1291,27 @@ Exolve.prototype.checkConsistency = function() {
       this.throwErr('Have ' + this.submitKeys.length +
                     ' submit parameter keys, need ' + numKeys);
     }
+  }
+  let noClueList = ''
+  for (let ci of Object.keys(this.clues)) {
+    const clue = this.clues[ci];
+    const cname = clue.label + clue.dir.toLowerCase();
+    if (clue.parentClueIndex) {
+      continue
+    }
+    if (!clue.clue) {
+      if (noClueList) noClueList += ', '
+      noClueList += cname
+    }
+    const lightLen = this.getAllCells(ci).length;
+    if (!this.ignoreEnumMismatch && !this.hasDgmlessCells &&
+        clue.enumLen > 0 && lightLen > 0 && clue.enumLen != lightLen) {
+      this.showWarning(cname + ": enum asks for " + clue.enumLen +
+          " cells, but the grid shows " + lightLen + " cells");
+    }
+  }
+  if (!this.hasNodirClues && !this.ignoreUnclued && noClueList) {
+    this.showWarning("No clue(s) provided for: " + noClueList);
   }
 }
 
@@ -2073,13 +2140,13 @@ Exolve.prototype.parseCellsOfOrphan = function(s) {
   return cells.length == 0 ? null : {cells: cells, segments: segments}
 }
 
-Exolve.prototype.setClueSolution = function(ci) {
+Exolve.prototype.getAllCells = function(ci) {
   let theClue = this.clues[ci]
   if (!theClue) {
-    return;
+    return [];
   }
-  if (theClue.solution || theClue.parentClueIndex) {
-    return;
+  if (theClue.parentClueIndex) {
+    return [];
   }
   let clueIndices = this.getLinkedClues(ci)
   let cells = []
@@ -2095,6 +2162,15 @@ Exolve.prototype.setClueSolution = function(ci) {
       }
     }
   }
+  return cells;
+}
+
+Exolve.prototype.setClueSolution = function(ci) {
+  let theClue = this.clues[ci]
+  if (!theClue || theClue.solution) {
+    return;
+  }
+  let cells = this.getAllCells(ci);
   if (cells.length == 0) {
     return;
   }
@@ -2331,11 +2407,7 @@ Exolve.prototype.isOrphanWithReveals = function(clueIndex) {
 }
 
 Exolve.prototype.allCellsKnown = function(clueIndex) {
-  let cis = this.getLinkedClues(clueIndex)
-  if (!cis || cis.length == 0) {
-    return false
-  }
-  clueIndex = cis[0]
+  clueIndex = this.clueOrParentIndex(clueIndex);
   let clue = this.clues[clueIndex]
   if (!clue) {
     return false
@@ -2343,23 +2415,8 @@ Exolve.prototype.allCellsKnown = function(clueIndex) {
   if (!clue.enumLen) {
     return false
   }
-  let allKnown = false
-  let numCells = 0
-  let numPrefilled = 0
-  for (let ci of cis) {
-    if (!this.clues[ci]) {
-      return false
-    }
-    if (this.clues[ci].cells.length > 0) {
-      numCells += this.clues[ci].cells.length
-    } else if (this.clues[ci].cellsOfOrphan &&
-               this.clues[ci].cellsOfOrphan.length > 0) {
-      numCells += this.clues[ci].cellsOfOrphan.length
-    } else {
-      return false
-    }
-  }
-  return numCells == clue.enumLen
+  const cells = this.getAllCells(clueIndex);
+  return cells.length == clue.enumLen
 }
 
 // For each cell grid[i][j], set {across,down}ClueLabels using previously
@@ -4356,13 +4413,21 @@ Exolve.prototype.handleKeyUp = function(e) {
   this.handleKeyUpInner(key)
 }
 
-  // For tab/shift-tab, we intercept KeyDown
-Exolve.prototype.handleTabKeyDown = function(e) {
+// For tab/shift-tab, ctrl-q, ctrl-Q
+Exolve.prototype.handleKeyDown = function(e) {
   let key = e.which || e.keyCode
   if (key == 9) {
     if (this.handleKeyUpInner(key, e.shiftKey)) {
       // Tab input got used already.
       e.preventDefault()
+    }
+  } else if (e.ctrlKey && (e.key == 'q' || e.key == 'Q')) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (e.key == 'Q') {
+      this.clearAll();
+    } else {
+      this.clearCurr();
     }
   }
 }
@@ -4648,8 +4713,8 @@ Exolve.prototype.deactivator = function() {
 
 Exolve.prototype.createListeners = function() {
   this.gridInput.addEventListener('keyup', this.handleKeyUp.bind(this));
-  // Listen for tab/shift tab everywhere in the puzzle area.
-  this.frame.addEventListener('keydown', this.handleTabKeyDown.bind(this));
+  // Listen for tab/shift-tab, ctrl-q/Q everywhere in the puzzle area.
+  this.frame.addEventListener('keydown', this.handleKeyDown.bind(this));
   this.gridInput.addEventListener('input', this.handleGridInput.bind(this));
   this.gridInputWrapper.addEventListener('click',
       this.toggleCurrDirAndActivate.bind(this));
@@ -4924,9 +4989,10 @@ Exolve.prototype.addCellText = function(row, col, text,
 
 Exolve.prototype.makeColouredRect = function(row, col, colour) {
   const rect = document.createElement('div');
-  const gridCell = this.grid[row][col]
-  rect.style.left =  '' +  gridCell.cellLeft + 'px';
-  rect.style.top = '' + gridCell.cellTop + 'px';
+  const cellLeft = this.cellLeftPos(col, this.GRIDLINE)
+  const cellTop = this.cellTopPos(row, this.GRIDLINE)
+  rect.style.left =  '' +  cellLeft + 'px';
+  rect.style.top = '' + cellTop + 'px';
   rect.style.width = '' + this.squareDim + 'px';
   rect.style.height = '' + this.squareDim + 'px';
   rect.style.backgroundColor = colour;

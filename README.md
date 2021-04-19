@@ -482,6 +482,15 @@ user. Examples:
   2 Star (?)*
 ```
 
+If there is a missing clue, or if the provided enum for a clue does not
+match the number of cells in the clue as per the grid (including any linked
+children clues), then a warning message gets shown. If the anomaly is
+deliberate rather than an oversight, the warning generation can be suppressed
+using `exolve-option: ignore-unclued` and/or
+`exolve-option: ignore-enum-mismatch`. Checking for missing clues is not
+done if there are any nodir clues, and checking for mismatched enums is
+not done if there are any diagramless cells.
+
 ### Annotations
 In a grid with solutions provided, the setter may include annotations for
 explaining how a clue works or for providing hints. Any text located after the
@@ -1035,6 +1044,10 @@ The list of currently supported options is as follows:
 - **`hide-inferred-numbers`** If this option is specified, then the software does
   not display any clue numbers that were automatically inferred. Setters using
   non-numeric clue labels may want to specify this option.
+- **`ignore-unclued`** If this option is specified, then any generated warnings
+  about missing clues are suppressed.
+- **`ignore-enum-mismatch`** If this option is specified, then any generated warnings
+  about enum-mismatches are suppressed.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
   a maximum of about N lines of text, adding scrollbars if needed. Also
   implicitly turns on the `clues-at-right-in-two-columns` option.
@@ -1181,9 +1194,9 @@ Here are all the names of pieces of text that you can relabel:
 | Name             | Default text                         |
 |------------------|--------------------------------------|
 | `clear`          | Clear this                           |
-| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click|
+| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl-q|
 | `clear-all`      | Clear all!                           |
-| `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares|
+| `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares. Shortcut: Ctrl-Q|
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
 | `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell|
@@ -1245,6 +1258,9 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-id` | Delete puzzle state for puzzle id |
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
+| `warnings-label` | Please fix the issues listed in these warnings, or use exolve-option(s) ignore-unclued and/or ignore-enum-mismatch:|
+| `warnings.hover` | Issues detected: click &times; to dismiss|
+
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.

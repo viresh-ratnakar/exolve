@@ -233,6 +233,15 @@ Version: Exolve v1.13 April 10 2021
   font-weight: bold;
   color: red;
 }
+.xlv-warnings-label {
+  font-weight: normal;
+  font-style: italic;
+  color: blue;
+  margin: 16px 0 0 0;
+}
+.xlv-warnings {
+  margin: 10px 0;
+}
 .xlv-curr-clue-parent {
   width: 100%;
   height: 40px;

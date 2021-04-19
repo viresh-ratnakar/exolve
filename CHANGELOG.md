@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.14 April 19 2021
+
+- Add keyboard shortcuts Ctrl-q and Ctrl-Q for "Clear this" and "Clear all!"
+- Detect and show warnings for unclued lights and enum-mismatches.
+  - Add exolve-options to suppress: suppress unclued warnings if
+    exolve-option "ignore-unclued" is set, and suppress enum-mismatch warnings
+    if exolve-option "ignore-enum-mismatch" is set.
+  - Do not generate missing clues warnings if there are nodir clues.
+  - Do not generate enum-mismatch warnings if there are diagramless cells.
+
 ### Version: Exolve v1.13 April 10 2021
 
 - Another minor update for Exet. Make NINA_COLORS a class member, and change
