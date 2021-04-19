@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Quick unnumbered bug-fix
+
+- checkConsistency() should be called before the customizer function. Messes
+  up Exet otherwise.
+
 ### Version: Exolve v1.14 April 19 2021
 
 - Add keyboard shortcuts Ctrl-q and Ctrl-Q for "Clear this" and "Clear all!"

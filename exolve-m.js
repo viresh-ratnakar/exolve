@@ -5793,11 +5793,11 @@ Exolve.prototype.createPuzzle = function() {
   this.setColumnLayout()
 
   this.restoreState()
+  this.checkConsistency()
 
   if (this.customizer) {
     this.customizer(this)
   }
-  this.checkConsistency()
 }
 
 /**
