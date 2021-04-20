@@ -325,8 +325,9 @@ function Exolve(puzzleSpec,
     'confirm-delete-older': 'Delete all puzzle states saved before',
     'confirm-state-override': 'Do you want to override the state saved in ' +
         'this device with the state found in the URL?',
-    'warnings-label': 'Please fix the issues listed in these warnings, or ' +
-        'use exolve-option(s) "ignore-unclued" and/or "ignore-enum-mismatch":',
+    'warnings-label': 'Please fix or use "ignore-unclued" / ' +
+        '"ignore-enum-mismatch" <a href="https://github.com/viresh-ratnakar/' +
+        'exolve/blob/master/README.md#exolve-option">options</a>:',
     'warnings.hover': 'Issues detected: click on [&times;] to dismiss',
   }
 

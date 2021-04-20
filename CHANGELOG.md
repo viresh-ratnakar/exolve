@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Quick unnumbered tweak
+
+- Shorter warnings label
+
 ### Version: Quick unnumbered bug-fix
 
 - checkConsistency() should be called before the customizer function. Messes
