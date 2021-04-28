@@ -475,12 +475,30 @@ pair of parentheses containing the text "word" or "letter" or "?" with anything
 before are after it as an enum (to allow the setter to specify the enum as
 "(two words)" or "(?)", for example).
 
+### Suppressing enums or separators
+
 If the enum is immediately followed by a `*`, then it is not displayed to the
 user. Examples:
 ```
   1 Satellite (4)* MOON
   2 Star (?)*
 ```
+
+There might be puzzles where, even though the enum indicates multiple or
+hyphenated words, you do _not_ want a word-separator bar or a hyphen to be
+drawn in the grid. An example would be a grid where the special instructions
+ask for a letter to be removed before entering a solution into the grid. You
+can achieve this effect using the following bit of trickery:
+```
+  1 Clue with enum that implies hyphens and dashes, but they are suppressed
+    using trickery (<span>3,2-2,5-3</span>) (15)* Anno here...
+```
+Note that the enum numbers are wrapped in a &lt;span&gt; tag, which tricks
+Exolve into not parsing them. The length of the entry is specified after that,
+using the enum spec (15)\* that does not get displayed (but serves as a way
+to let Exolve know that what follows is the anno).
+
+### Missing clues and mismatched enums
 
 If there is a missing clue, or if the provided enum for a clue does not
 match the number of cells in the clue as per the grid (including any linked
@@ -1293,6 +1311,10 @@ but just want to provide some/all of the separators. Example:
   exolve-force-hyphen-right: a5 c4
   exolve-force-bar-below: a5 c4 d8
 ```
+
+Note that if you want to do the opposite of this—that is, if you want to
+suppress hyphens/bars implied by an enum, then use the trick [described
+earlier](#suppressing-enums-or-separators).
 
 ## Saving state
 
