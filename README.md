@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.13 April 10 2021
+### Version: Exolve v1.15 May 20 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -75,10 +75,10 @@ is a part of both an across clue and a down clue, then clicking on that square
 while it is the current square (or pressing the Enter key) will toggle the
 active direction.
 
-The control buttons (*Clear this*, *Clear all*, *Check this*, *Check all*,
-*Reveal this*, and *Reveal all*) work as suggested by their names ("this" refers
-to the currently selected clue(s)). You can click on a clue to jump to its
-squares. If the setter has not provided all solutions, then only the
+The control buttons (*Clear this*, *Clear all!*, *Check this*, *Check all!*,
+*Reveal this*, and *Reveal all!*) work as suggested by their names ("this"
+refers to the currently selected light(s)). You can click on a clue to jump to
+its squares. If the setter has not provided all solutions, then only the
 "Clear this/all" control buttons are shown, the "Check/Reveal" buttons do not
 get shown.
 
@@ -93,6 +93,10 @@ current cell (as opposed to the whole light), for that particular activation
 of the button. Caveat: this does not seem to work on phones and tablets (only
 tested on Android devices though).
 
+Setters can use [`exolve-option`](#exolve-option) `show-cell-level-buttons`
+to additionally show an extra row of buttons containing these two cell-level
+buttons: "Check cell" and "Reveal cell."
+
 Exolve supports diagramless puzzles, where the blocked squares are not
 identified and the solver has to figure out their locations. In fact, exolve
 supports *partially* diagramless puzzless, where only some squares or some
@@ -106,10 +110,10 @@ symmetric counterpart of the current square.
 
 If the setter has provided annotations by appending annotations at the end of
 some clues, then these annotations get shown when the solver clicks
-"Reveal all". Clue-specific annotations get revealed/hidden with
+"Reveal all!". Clue-specific annotations get revealed/hidden with
 "Reveal/Clear this" buttons (unless the clue only has diagramless cells).
-Additionally, "Check this" and "Check all" behave like "Reveal this" and
-"Reveal all" respectively, if they find no mistakes. In a puzzle in which
+Additionally, "Check this" and "Check all!" behave like "Reveal this" and
+"Reveal all!" respectively, if they find no mistakes. In a puzzle in which
 solutions are not provided, the "Reveal this" button will still get shown if
 there are any clues for which annotations are present (these annotations may be
 full solutions or just hints, possibly).
@@ -745,7 +749,7 @@ areas by simply clicking the "copy-placeholder" button (that looks like [⇲])
 next to the placeholder area, whenever they have some squares highlighted for
 entry in the grid.
 
-The placeholder entries do NOT get cleared with 'clear this/all' (they can
+The placeholder entries do NOT get cleared with 'Clear this/all' (they can
 simply by erased directly by clicking on them and deleting though). For clearing
 all placeholder entries forcibly, click on the 'Clear all' button when there are
 no entries in the grid (eg, by clicking on it a _second_ time). This option is
@@ -797,7 +801,7 @@ in this manner. In the above example, say a light in the grid (such as 1a) that
 belongs to some orphan clue (A in this case) is highlighted by clicking on one
 of its cells. The current clue shown in the clues list will be last orphan clue
 that the solver looked at, say B (different from A). If the solver clicks
-"Reveal this" then 1a will be revealed in the grid, and A till get highlighted
+"Reveal this" then 1a will be revealed in the grid, and A will get highlighted
 in the clues list.
 
 If, after clicking on 1a in the grid, say the solver clicks on clue C in the
@@ -1042,6 +1046,9 @@ Multiple, space-separated options may be provided on each exolve-option line.
 For options that need a value (provided after a colon), there should not be
 any leading space after the colon.
 The list of currently supported options is as follows:
+- **`show-cell-level-buttons`** If this option is specified, then "Check cell"
+  and "Reveal cell" buttons are also shown, in an extra row of buttons, for
+  crosswords with solutions provided.
 - **`columnar-layout`** If this option is specified, then puzzle is rendered
   in a newspaper-like columnar layout, using CSS "column"s. The number
   of columns is determined by the current width of the viewport (we
@@ -1059,13 +1066,13 @@ The list of currently supported options is as follows:
   are rendered to the right of the grid. This option is automatically
   turned on when you use the `clues-panel-lines` option (see below). This option
   has no effect if the `columnar-layout` option is used.
-- **`hide-inferred-numbers`** If this option is specified, then the software does
-  not display any clue numbers that were automatically inferred. Setters using
-  non-numeric clue labels may want to specify this option.
+- **`hide-inferred-numbers`** If this option is specified, then the software
+  does not display any clue numbers that were automatically inferred. Setters
+  using non-numeric clue labels may want to specify this option.
 - **`ignore-unclued`** If this option is specified, then any generated warnings
   about missing clues are suppressed.
-- **`ignore-enum-mismatch`** If this option is specified, then any generated warnings
-  about enum-mismatches are suppressed.
+- **`ignore-enum-mismatch`** If this option is specified, then any generated
+  warnings about enum-mismatches are suppressed.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
   a maximum of about N lines of text, adding scrollbars if needed. Also
   implicitly turns on the `clues-at-right-in-two-columns` option.
@@ -1092,7 +1099,7 @@ The list of currently supported options is as follows:
   the display of buttons to copy placeholder texts in those cases (see the
   subsection below on "Jigsaw puzzle clues").
   **`no-auto-solution-in-anno`** In a grid with solutions, we automatically
-  show the solution next to the clue, when "Reveal all" or "Reveal this" is
+  show the solution next to the clue, when "Reveal all!" or "Reveal this" is
   used. Set this option to disable that. Useful if you want to control
   how the solution appears in the anno. Also see the note on "anno" in the
   section on clues.
@@ -1218,11 +1225,13 @@ Here are all the names of pieces of text that you can relabel:
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
 | `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell|
+| `checkcell.hover`| Erase the current cell if it's incorrect |
 | `check-all`      | Check all!                           |
 | `check-all.hover` | Erase all mistakes. Reveal any available annos if no mistakes|
 | `reveal`         | Reveal this                          |
 | `revealcell`     | Reveal cell                           |
 | `reveal.hover`   | Reveal highlighted clue/squares. Long-click to reveal the just current cell|
+| `revealcell.hover`| Reveal the solution letter in the current cell |
 | `show-ninas`     | Show ninas                           |
 | `show-ninas.hover` | Show ninas hidden in the grid/clues |
 | `hide-ninas`     | Hide ninas                           |
@@ -1290,7 +1299,7 @@ confirmation step is skipped and the action is directly taken. For example:
   exolve-relabel:
     confirm-check-all:
 ```
-The above will skip the confirmation step when the solver clicks on "Check all."
+The above will skip the confirmation step when the solver clicks on "Check all!"
 
 ## `exolve-maker`
 
@@ -1422,13 +1431,7 @@ JavaScript in their basic, free plans. Exolve widgets like the above work fine
 in Blogger though.
 
 The widget options should work across devices and browsers (bug reports are
-welcome!). Prior to v0.84, you could not have more than one Exolve puzzle
-within a single web page (now you can!) and I had created some code to
-get around that by embedding Exolve puzzles in iframes. This code still exists
-(see the files [exolve-widget-creator.js](exolve-widget-creator.js) and
-[exolve-widget.html](exolve-widget.html)), but there really is no reason to bury
-puzzles in iframes now (which has its drawbacks such as adding extra scroll
-bars).
+welcome!).
 
 ## Customizations
 Beyond changing colours and button texts (which can be done through

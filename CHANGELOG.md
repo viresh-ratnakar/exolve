@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v1.15 May 20 2021
+
+- Add exolve-option: show-cell-level-buttons that creates an extra row of
+  buttons with these two buttons: "Check cell" and "Reveal cell"
+- Delete obsolete exolve-widget\* code and documentation.
+
 ### Version: Quick unnumbered tweak
 
 - Shorter warnings label

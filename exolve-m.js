@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.14 April 19 2021'
+  this.VERSION = 'Exolve v1.15 May 20 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -236,18 +236,20 @@ function Exolve(puzzleSpec,
         'from full clues with a second click. Shortcut: Ctrl-q',
     'clear-all': 'Clear all!',
     'clear-all.hover': 'Clear everything! A second click clears all ' +
-        'placeholder entries in clues without known squares. Shortcut: Ctrl-Q',
+        'placeholder entries in clues without known cells. Shortcut: Ctrl-Q',
     'check': 'Check this',
-    'checkcell': 'Check cell',
-    'check.hover': 'Erase mistakes in highlighted squares. Long-click to ' +
+    'check.hover': 'Erase mistakes in highlighted cells. Long-click to ' +
         'check just the current cell',
-    'check-all': 'Check all',
+    'checkcell': 'Check cell',
+    'checkcell.hover': 'Erase the current cell if it\'s incorrect',
+    'check-all': 'Check all!',
     'check-all.hover': 'Erase all mistakes. Reveal any available annos if ' +
         'no mistakes',
     'reveal': 'Reveal this',
-    'revealcell': 'Reveal cell',
-    'reveal.hover': 'Reveal highlighted clue/squares. Long-click to reveal ' +
+    'reveal.hover': 'Reveal highlighted clue/cells. Long-click to reveal ' +
         'just the current cell',
+    'revealcell': 'Reveal cell',
+    'revealcell.hover': 'Reveal the solution letter in the current cell',
     'show-ninas': 'Show ninas',
     'show-ninas.hover': 'Show ninas hidden in the grid/clues',
     'hide-ninas': 'Hide ninas',
@@ -346,6 +348,7 @@ function Exolve(puzzleSpec,
   this.cluesToRight = false
   this.ignoreUnclued = false
   this.ignoreEnumMismatch = false
+  this.showCellLevelButtons = false
 
   this.createPuzzle()
 }
@@ -412,6 +415,13 @@ Exolve.prototype.init = function() {
                 <button id="${this.prefix}-check-all" class="xlv-button"
                   style="display:none">${this.textLabels['check-all']}</button>
               </div> <!-- xlv-button-row-1 -->
+              <div id="${this.prefix}-buttons-extra-row" class="xlv-controls-row"
+                    style="display:none">
+                <button id="${this.prefix}-checkcell" class="xlv-button"
+                    style="display:none">${this.textLabels['checkcell']}</button>
+                <button id="${this.prefix}-revealcell" class="xlv-button"
+                    style="display:none">${this.textLabels['revealcell']}</button>
+              </div>
               <div id="${this.prefix}-button-row-2" class="xlv-controls-row">
                 <button id="${this.prefix}-reveal" class="xlv-button"
                     style="display:none">${this.textLabels['reveal']}</button>
@@ -637,6 +647,8 @@ Exolve.prototype.init = function() {
   this.checkButton.addEventListener('mousedown', this.cellLightToggler.bind(
     this, this.checkButton, this.textLabels['checkcell']));
   this.checkButton.addEventListener('mouseup', this.checkCurr.bind(this));
+  this.checkcellButton = document.getElementById(this.prefix + '-checkcell')
+  this.checkcellButton.addEventListener('click', this.checkCell.bind(this));
 
   this.checkAllButton = document.getElementById(this.prefix + '-check-all')
   this.checkAllButton.addEventListener('click', this.checkAll.bind(this));
@@ -648,6 +660,8 @@ Exolve.prototype.init = function() {
   this.revealButton.addEventListener('mousedown', this.cellLightToggler.bind(
     this, this.revealButton, this.textLabels['revealcell']));
   this.revealButton.addEventListener('mouseup', this.revealCurr.bind(this));
+  this.revealcellButton = document.getElementById(this.prefix + '-revealcell')
+  this.revealcellButton.addEventListener('click', this.revealCell.bind(this));
 
   this.revealAllButton = document.getElementById(this.prefix + '-reveal-all')
   this.revealAllButton.addEventListener('click', this.revealAll.bind(this));
@@ -1021,6 +1035,10 @@ Exolve.prototype.parseOption = function(s) {
   let sparts = s.split(' ')
   for (let spart of sparts) {
     spart = spart.trim().toLowerCase()
+    if (spart == "show-cell-level-buttons") {
+      this.showCellLevelButtons = true
+      continue
+    }
     if (spart == "hide-inferred-numbers") {
       this.hideInferredNumbers = true
       continue
@@ -3378,6 +3396,7 @@ Exolve.prototype.updateDisplayAndGetState = function() {
   let ci = this.clueOrParentIndex(this.currClueIndex)
   let revOrphan = this.isOrphanWithReveals(ci)
   this.checkButton.disabled = (this.activeCells.length == 0) && !revOrphan
+  this.checkcellButton.disabled = this.checkButton.disabled
   let theClue = this.clues[ci]
   let haveReveals = (this.activeCells.length > 0 && !this.hasUnsolvedCells) ||
       (theClue && (theClue.anno || theClue.solution ||
@@ -3391,6 +3410,7 @@ Exolve.prototype.updateDisplayAndGetState = function() {
     }
   }
   this.revealButton.disabled = !haveReveals;
+  this.revealcellButton.disabled = this.revealButton.disabled
   this.clearButton.disabled = this.revealButton.disabled &&
                               this.activeCells.length == 0;
   return state
@@ -5287,6 +5307,11 @@ Exolve.prototype.cellLightToggler = function(button, text) {
       this.cellLightTogglerDone.bind(this, button, text), 500);
 }
 
+Exolve.prototype.checkCell = function() {
+  this.cellNotLight = true;
+  this.checkCurr();
+}
+
 Exolve.prototype.checkCurr = function() {
   if (this.cellLightToggleTimer) {
     clearTimeout(this.cellLightToggleTimer)
@@ -5421,6 +5446,11 @@ Exolve.prototype.revealClueAnno = function(ci) {
       }
     }
   }
+}
+
+Exolve.prototype.revealCell = function() {
+  this.cellNotLight = true;
+  this.revealCurr();
 }
 
 Exolve.prototype.revealCurr = function() {
@@ -5629,12 +5659,21 @@ Exolve.prototype.displayButtons = function() {
   if (!this.hasUnsolvedCells) {
     this.checkButton.style.display = ''
     this.checkButton.title = this.textLabels['check.hover']
+    this.checkButton.disabled = true
     this.checkAllButton.style.display = ''
     this.checkAllButton.title = this.textLabels['check-all.hover']
     this.revealAllButton.style.display = ''
     this.revealAllButton.title = this.textLabels['reveal-all.hover']
-
-    this.checkButton.disabled = true
+    if (this.showCellLevelButtons) {
+      document.getElementById(
+          this.prefix + '-buttons-extra-row').style.display = '';
+      this.checkcellButton.style.display = ''
+      this.checkcellButton.title = this.textLabels['checkcell.hover']
+      this.checkcellButton.disabled = true
+      this.revealcellButton.style.display = ''
+      this.revealcellButton.title = this.textLabels['revealcell.hover']
+      this.revealcellButton.disabled = true
+    }
   }
   if (!this.hasUnsolvedCells || this.hasReveals) {
     this.revealButton.style.display = ''

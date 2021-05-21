@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.14"/>
-<script src="exolve-m.js?v1.14"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.15"/>
+<script src="exolve-m.js?v1.15"></script>
 
 <script>
 function customizeExolve(p) {
@@ -13,6 +13,7 @@ function customizeExolve(p) {
   c.style.stroke = 'blue'
   c = p.addCellText(1, 0, '*', 18, 10, false, true)
   c = p.addCellText(1, 2, '%', 12, 8, false, false)
+  p.activateCell(0,0)
 
   p.background.setAttributeNS(null, 'fill', 'red')
   let expectedVars = [
@@ -33,6 +34,10 @@ function customizeExolve(p) {
   ]
   for (let v of expectedVars) {
     eval('console.log("' + v + ' = " + ' + v + ')')
+    if (eval(v) == null) {
+      console.log('Could not find variable: ' + v)
+      return
+    }
   }
   let expectedFunctions = [
     'p.deactivateCurrCell',
@@ -42,15 +47,19 @@ function customizeExolve(p) {
     'p.updateDisplayAndGetState',
     'p.showNinas',
     'p.hideNinas',
-    'p.checkCurrent',
+    'p.checkCurr',
     'p.checkAll',
-    'p.revealCurrent',
+    'p.revealCurr',
     'p.revealAll',
-    'p.clearCurrent',
+    'p.clearCurr',
     'p.clearAll',
   ]
   for (let f of expectedFunctions) {
     eval('console.log("func ' + f + ' = " + (' + f + '!= null))')
+    if (eval(f) == null) {
+      console.log('Could not find function: ' + f)
+      return
+    }
   }
   let expectedIds = [
     'xlv1-clear',
