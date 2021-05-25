@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Quick unnumbered tweak
+
+- Gnav-light ordering for nodir clues had a small bug: it was always sorting on
+  clue labels lexicographically. When cells are known, gnav-sorting should use
+  cells.
+
 ### Version: Exolve v1.16 May 24 2021
 
 - Create a separate 'colour-active-clue' (for the background colour of the
