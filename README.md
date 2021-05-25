@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.15 May 20 2021
+### Version: Exolve v1.16 May 24 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1119,7 +1119,8 @@ be overriding), and descriptions.
 |----------------------------|---------------|-----------------------------------|
 | `colour-background`        | black         | The background: blocked squares and bars.|
 | `colour-cell`              | white         | Light squares.                    |
-| `colour-active`            | mistyrose     | Squares for the light(s) currently active. The current clue(s) in the clues list also get(s) this as background colour.|
+| `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
+| `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
 | `colour-orphan`            | linen         | The background colour of the current clue(s) without known location(s) in the grid.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|

@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v1.16 May 24 2021
+
+- Create a separate 'colour-active-clue' (for the background colour of the
+  currently active clue, in the clues list) instead of reusing 'colour-active',
+  as the clue table may have a different colour scheme than the grid.
+
 ### Version: Exolve v1.15 May 20 2021
 
 - Add exolve-option: show-cell-level-buttons that creates an extra row of

@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.15 May 20 2021'
+  this.VERSION = 'Exolve v1.16 May 24 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -199,6 +199,7 @@ function Exolve(puzzleSpec,
     'background': 'black',
     'cell': 'white',
     'active': 'mistyrose',
+    'active-clue': 'mistyrose',
     'currclue': 'white',
     'orphan': 'linen',
     'input': '#ffb6b4',
@@ -3988,7 +3989,8 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
   if (orphan) {
     this.lastOrphan = parentIndex
   }
-  let colour = orphan ? this.colorScheme['orphan'] : this.colorScheme['active'];
+  let colour = orphan ? this.colorScheme['orphan'] :
+      this.colorScheme['active-clue'];
   for (let clueIndex of clueIndices) {
     let theClue = this.clues[clueIndex]
     if (theClue.anno || theClue.solution || (orphan && theClue.cellsOfOrphan)) {
