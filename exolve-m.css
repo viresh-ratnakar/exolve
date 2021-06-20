@@ -344,7 +344,7 @@ Version: Exolve v1.16 May 24 2021
   border: 1px solid gray;
   outline: none;
   padding: 0 4px 2px 4px;
-  margin: 0 0 4px 0;
+  margin: 0;
   text-align: center;
   text-decoration: none;
   display: inline-block;

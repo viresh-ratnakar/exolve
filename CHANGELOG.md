@@ -2,6 +2,11 @@
 
 ### Version: Quick unnumbered tweak
 
+- Remove bottom margin from xlv-small-button, making multiline clues (on top)
+  evenly spaced.
+
+### Version: Quick unnumbered tweak
+
 - Gnav-light ordering for nodir clues had a small bug: it was always sorting on
   clue labels lexicographically. When cells are known, gnav-sorting should use
   cells.
