@@ -2,6 +2,11 @@
 
 ### Version: Quick unnumbered tweak
 
+- Continued attempts to make multiline top clues evenly spaced: reduce font-size
+  of xlv-small-button when in xlv-curr-clue.
+
+### Version: Quick unnumbered tweak
+
 - Remove bottom margin from xlv-small-button, making multiline clues (on top)
   evenly spaced.
 

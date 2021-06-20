@@ -355,6 +355,9 @@ Version: Exolve v1.16 May 24 2021
 .xlv-small-button:hover {
   cursor: pointer;
 }
+.xlv-curr-clue .xlv-small-button {
+  font-size: 10px;
+}
 .xlv-coloured-cell {
   position: absolute;
   border: none;
