@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.16 May 24 2021'
+  this.VERSION = 'Exolve v1.17 August 21 2021'
 
   this.puzzleText = puzzleSpec
   this.containerId = containerId
@@ -2465,7 +2465,7 @@ Exolve.prototype.setClueMemberships = function() {
         continue
       }
       gridCell.acrossClueLabel = clueLabel
-      let clueIndex = 'A' + clueLabel
+      let clueIndex = this.getDirClueIndex('A', clueLabel)
       if (!this.clues[clueIndex]) {
         this.throwErr('Somehow did not find clues table entry for ' + clueIndex)
       }
@@ -2493,7 +2493,7 @@ Exolve.prototype.setClueMemberships = function() {
         continue
       }
       gridCell.downClueLabel = clueLabel
-      let clueIndex = 'D' + clueLabel
+      let clueIndex = this.getDirClueIndex('D', clueLabel)
       if (!this.clues[clueIndex]) {
         this.throwErr('Somehow did not find clues table entry for ' + clueIndex)
       }
@@ -2752,7 +2752,7 @@ Exolve.prototype.setWordEndsAndHyphens = function() {
       } else {
         clueLabel = gridCell.acrossClueLabel
         positionInClue = 0
-        clueIndex = 'A' + clueLabel
+        clueIndex = this.getDirClueIndex('A', clueLabel);
         if (!this.clues[clueIndex]) {
           if (!this.offNumClueIndices[clueLabel]) {
             clueLabel = ''
@@ -2806,7 +2806,7 @@ Exolve.prototype.setWordEndsAndHyphens = function() {
       } else {
         clueLabel = gridCell.downClueLabel
         positionInClue = 0
-        clueIndex = 'D' + clueLabel
+        clueIndex = this.getDirClueIndex('D', clueLabel);
         if (!this.clues[clueIndex]) {
           if (!this.offNumClueIndices[clueLabel]) {
             clueLabel = ''
@@ -2868,6 +2868,16 @@ Exolve.prototype.cmpGnavSpans = function(s1, s2) {
   }
 }
 
+Exolve.prototype.getDirClueIndex = function(dir, label) {
+  if (!label) return '';
+  if (this.offNumClueIndices[label]) {
+    for (let index of this.offNumClueIndices[label]) {
+      if (index.charAt(0) == dir) return index;
+    }
+  }
+  return dir + label;
+}
+
 Exolve.prototype.setUpGnav = function() {
   let gnavSpans = []
   let cluesAlreadySpanned = {}
@@ -2890,8 +2900,8 @@ Exolve.prototype.setUpGnav = function() {
         if (!pcell.isLight || pcell.hasBarAfter) {
           break;
         }
-        if (pcell.acrossClueLabel) {
-          prefClue = 'A' + pcell.acrossClueLabel
+        const prefClue = this.getDirClueIndex('A', pcell.acrossClueLabel);
+        if (prefClue && this.clues[prefClue]) {
           span.cells = span.cells.concat(this.clues[prefClue].cells)
           cluesAlreadySpanned[prefClue] = true
           break;
@@ -2929,8 +2939,8 @@ Exolve.prototype.setUpGnav = function() {
         if (!pcell.isLight || pcell.hasBarUnder) {
           break;
         }
-        if (pcell.downClueLabel) {
-          prefClue = 'D' + pcell.downClueLabel
+        const prefClue = this.getDirClueIndex('D', pcell.downClueLabel);
+        if (prefClue && this.clues[prefClue]) {
           span.cells = span.cells.concat(this.clues[prefClue].cells)
           cluesAlreadySpanned[prefClue] = true
           break;
@@ -3774,13 +3784,13 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
   if (this.currDir == 'A') {
     if (gridCell.acrossClueLabel) {
       activeClueLabel = gridCell.acrossClueLabel
-      activeClueIndex = 'A' + activeClueLabel
+      activeClueIndex = this.getDirClueIndex('A', activeClueLabel);
     }
     this.gridInputRarr.style.display = ''
   } else if (this.currDir == 'D') {
     if (gridCell.downClueLabel) {
       activeClueLabel = gridCell.downClueLabel
-      activeClueIndex = 'D' + activeClueLabel
+      activeClueIndex = this.getDirClueIndex('D', activeClueLabel);
     }
     this.gridInputDarr.style.display = ''
   } else {
@@ -4051,15 +4061,19 @@ Exolve.prototype.gnavIsClueless = function() {
   if (!gridCell) {
     return false
   }
+  let aIndex = '';
+  let dIndex = '';
   return (gridCell.isDgmless ||
      (this.currDir == 'A' &&
       (!gridCell.acrossClueLabel ||
-       !this.clues['A' + gridCell.acrossClueLabel] ||
-       !this.clues['A' + gridCell.acrossClueLabel].clue)) ||
+       !(aIndex = this.getDirClueIndex('A', gridCell.acrossClueLabel)) ||
+       !this.clues[aIndex] ||
+       !this.clues[aIndex].clue)) ||
      (this.currDir == 'D' &&
       (!gridCell.downClueLabel ||
-       !this.clues['D' + gridCell.downClueLabel] ||
-       !this.clues['D' + gridCell.downClueLabel].clue)) ||
+       !(dIndex = this.getDirClueIndex('D', gridCell.downClueLabel)) ||
+       !this.clues[dIndex] ||
+       !this.clues[dIndex].clue)) ||
      (this.currDir.charAt(0) == 'X' &&
       (!gridCell.nodirClues ||
        !gridCell.nodirClues.includes(this.currDir))));
@@ -4557,6 +4571,9 @@ Exolve.prototype.updateClueState =
     return
   }
   clueIndex = cis[0]  // Use parent for a linked child
+  if (!clueIndex) {
+    return
+  }
   let clue = this.clues[clueIndex]
   if (!clue) {
     return
@@ -4628,11 +4645,11 @@ Exolve.prototype.updateActiveCluesState = function() {
   for (let x of this.activeCells) {
     let gridCell = this.grid[x[0]][x[1]]
     if (gridCell.acrossClueLabel) {
-      let ci = 'A' + gridCell.acrossClueLabel
+      let ci = this.getDirClueIndex('A', gridCell.acrossClueLabel);
       clueIndices[ci] = true
     }
     if (gridCell.downClueLabel) {
-      let ci = 'D' + gridCell.downClueLabel
+      let ci = this.getDirClueIndex('D', gridCell.downClueLabel);
       clueIndices[ci] = true
     }
     if (gridCell.nodirClues) {
@@ -4705,13 +4722,13 @@ Exolve.prototype.handleGridInput = function() {
   }
 
   let cluesAffected = []
-  let label = gridCell.acrossClueLabel
-  if (label) {
-    cluesAffected.push('A' + label)
+  let index = this.getDirClueIndex('A', gridCell.acrossClueLabel);
+  if (index && this.clues[index]) {
+    cluesAffected.push(index);
   }
-  label = gridCell.downClueLabel
-  if (label) {
-    cluesAffected.push('D' + label)
+  index = this.getDirClueIndex('D', gridCell.downClueLabel);
+  if (index && this.clues[index]) {
+    cluesAffected.push(index);
   }
   let otherClues = gridCell.nodirClues
   if (otherClues) {
@@ -5153,10 +5170,10 @@ Exolve.prototype.clearCurr = function() {
     for (let cell of this.activeCells) {
       let gridCell = this.grid[cell[0]][cell[1]]
       if (this.currDir == 'A' && gridCell.acrossClueLabel) {
-        clueIndices.push('A' + gridCell.acrossClueLabel)
+        clueIndices.push(this.getDirClueIndex('A', gridCell.acrossClueLabel));
       }
       if (this.currDir == 'D' && gridCell.downClueLabel) {
-        clueIndices.push('D' + gridCell.downClueLabel)
+        clueIndices.push(this.getDirClueIndex('D', gridCell.downClueLabel));
       }
     }
   } else if (this.currClueIndex) {
@@ -5192,8 +5209,8 @@ Exolve.prototype.clearCurr = function() {
       continue
     }
     if (gridCell.acrossClueLabel && gridCell.downClueLabel) {
-      let across = 'A' + gridCell.acrossClueLabel
-      let down = 'D' + gridCell.downClueLabel
+      let across = this.getDirClueIndex('A', gridCell.acrossClueLabel);
+      let down = this.getDirClueIndex('D', gridCell.downClueLabel);
       let crosser = ''
       if (currClues[across] && !currClues[down]) {
         crosser = down

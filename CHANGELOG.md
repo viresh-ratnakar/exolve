@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.17 August 21 2021
+
+- Bugfix: when non-numeric labels are used for across/down clues, always create
+  the correct clue index instead of just doing 'A'/'D' + label.
+
 ### Version: Quick unnumbered tweak
 
 - Continued attempts to make multiline top clues evenly spaced: reduce font-size
