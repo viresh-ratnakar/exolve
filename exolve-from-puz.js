@@ -185,6 +185,7 @@ ${exolveGrid}
   exolve-title: ${title}
   exolve-setter: ${setter}
   exolve-copyright: ${copyright}
+  exolve-option: ignore-enum-mismatch
   exolve-maker:
     Converted by exolve-from-puz.js from ${fname}
   exolve-grid:
