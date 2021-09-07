@@ -1350,7 +1350,7 @@ following conditions:
 - The state continues to be "fully filled" but the crossword contains
   solutions and the status of whether all solutions are all correct changes.
 
-The `details` object in the custom event has the following fields set:
+The `detail` object in the custom event has the following fields set:
 ```
   id: The puzzle id.
   title: The puzzle title.
