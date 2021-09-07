@@ -1348,7 +1348,8 @@ The software fires a custom JavaScript event (with type `exolve`) under the
 following conditions:
 - The state changes from "not fully filled" to "fully filled" OR
 - The state continues to be "fully filled" but the crossword contains
-  solutions and the status of whether all solutions are all correct changes.
+  solutions and the status of "Are all entries correct?" changes (from
+  true to false or vice versa).
 
 The `detail` object in the custom event has the following fields set:
 ```
