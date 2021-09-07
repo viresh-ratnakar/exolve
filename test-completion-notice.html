@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.18"/>
+<script src="exolve-m.js?v1.18"></script>
+
+<title>Test-Completion-Notices</title>
+
+</head>
+<body>
+
+First puzzle (sans solutions):
+<div id="exolve"></div>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-id: test-completion-sans
+  exolve-title: Test-Completion-Notice (no solutions)
+  exolve-setter: MeMeMe
+  exolve-width: 3
+  exolve-height: 3
+  exolve-grid:
+    000
+    0.0
+    000
+  exolve-option: ignore-unclued
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+</script>
+
+Second puzzle (with solutions):
+<div id="exolve"></div>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-id: test-completion-sols
+  exolve-title: Test-Completion-Notice (with solutions)
+  exolve-width: 3
+  exolve-height: 3
+  exolve-grid:
+    .*AA
+    A.A
+    AA.*
+  exolve-option: ignore-unclued
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+
+const startTime = Date.now();
+document.addEventListener('exolve', function (e) {
+  console.log(e);
+  let msg = 'You have completed the puzzle';
+  if (e.detail.id) msg += ' with id ' + e.detail.id;
+  if (e.detail.title) msg += ', titled ' + e.detail.title;
+  if (e.detail.setter) msg += ' by ' + e.detail.setter;
+  msg += '.';
+  if (e.detail.knownCorrect) msg += ' Your solution is correct!';
+  if (e.detail.knownIncorrect) msg += ' Your solution has mistakes.';
+  msg += ' Time spent: ' + Math.round((Date.now() - startTime) / 60000) + ' minutes.';
+  alert(msg);
+});
+
+</script>
+
+</body>
+</html>

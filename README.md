@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.17 August 21 2021
+### Version: Exolve v1.18 September 6 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -181,6 +181,7 @@ and the `exolve-end` line:
 * `exolve-force-hyphen-below`
 * `exolve-force-bar-right`
 * `exolve-force-bar-below`
+* `exolve-cell-size`
 
 Each section has the section name (`exolve-something`), followed by a colon.
 Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
@@ -1325,6 +1326,48 @@ but just want to provide some/all of the separators. Example:
 Note that if you want to do the opposite of this—that is, if you want to
 suppress hyphens/bars implied by an enum, then use the trick [described
 earlier](#suppressing-enums-or-separators).
+
+## `exolve-cell-size`
+
+Normally, crosswords are displayed using square cells with width and height
+equal to 31 pixels. For some large grids and/or small displays, the software
+may use a smaller cell size.
+
+You can override the cell size and set it to any width and height (that is, you
+can create rectangular cells that are not squares too) using
+`exolve-cell-size`. For example:
+```
+  exolve-cell-size: 31 43
+```
+The first parameter is the cell width and the second parameter is the cell
+height. Both values must be at least 10.
+
+## Completion event
+
+The software fires a custom JavaScript event (with type `exolve`) under the
+following conditions:
+- The state changes from "not fully filled" to "fully filled" OR
+- The state continues to be "fully filled" but the crossword contains
+  solutions and the status of whether all solutions are all correct changes.
+
+The `details` object in the custom event has the following fields set:
+```
+  id: The puzzle id.
+  title: The puzzle title.
+  setter: The puzzle setter.
+  toFill: The number of cells to be filled.
+  filled: The number of cells filled.
+  knownCorrect: true/false.
+  knownIncorrect: true/false.
+```
+The `knownCorrect` and `knownIncorrect` fields are both always `false` if
+the puzzle does not contain solutions.
+
+The event is fired on the outermost div of the puzzle (that has class
+`xlv-frame`) and it bubbles up.
+
+You can see `test-completion-notice.html` for an example of how to use this
+event.
 
 ## Saving state
 

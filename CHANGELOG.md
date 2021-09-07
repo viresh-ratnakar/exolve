@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v1.18 September 6 2021
+
+- Allow the cell size to be overridden via `exolve-cell-size: <w> <h>`
+- Fire a custom JavaScript event of type `exolve` upon puzzle completion, with
+  a `details` object that looks like this:
+  - id: The puzzle id.
+  - title: The puzzle title.
+  - setter: The puzzle setter.
+  - toFill: The number of cells to be filled.
+  - filled: The number of cells filled.
+  - knownCorrect: true/false.
+  - knownIncorrect: true/false.
+
+
 ### Version: Exolve v1.17 August 21 2021
 
 - Bugfix: when non-numeric labels are used for across/down clues, always create
