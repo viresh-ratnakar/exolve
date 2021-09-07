@@ -1366,8 +1366,8 @@ the puzzle does not contain solutions.
 The event is fired on the outermost div of the puzzle (that has class
 `xlv-frame`) and it bubbles up.
 
-You can see `test-completion-notice.html` for an example of how to use this
-event.
+You can see `test-completion-notice.html`(test-completion-notice.html) for an
+example of how to use this event.
 
 ## Saving state
 
