@@ -27,20 +27,34 @@ createExolve(`
 exolve-begin
   exolve-id: some-unique-identifier
   exolve-title: Quick 3x3 (replace with puzzle title)
-  exolve-setter: Gussalufz (replace with setter's pseudonym)
-  exolve-copyright: 2020 Copyright Holder(s) (delete or replace)
+
+  exolve-setter: Your-Setter-Name-Or-Pseudonym (replace with setter's pseudonym)
+  exolve-copyright: 2021 Comma-separated-copyright-holders (delete or replace)
+
   exolve-width: 3
   exolve-height: 3
+
+  # You can provide solution letters instead of zeroes in the grid, which
+  # will create control buttons for revealing and checking entered letters.
   exolve-grid:
     000
     0.0
     000
+
   exolve-across:
     1 Running with placement, essentially, for single (3)
     3 Oddly fluent and entertaining (3)
+
   exolve-down:
     1 Retreating thief forgot to hide bananas (3)
     2 One suffering for a long time (3)
+
+    # Note that you can provide an annotation after the closing parenthesis in
+    # any clue, which will get shown after the solver "Reveal"s the clue.
+
+  # The Exolve format has lots of additional features. See details in the
+  # documentation at:
+  #   https://github.com/viresh-ratnakar/exolve/blob/master/README.md
 exolve-end
 
 ======REPLACE WITH YOUR PUZZLE ABOVE======
