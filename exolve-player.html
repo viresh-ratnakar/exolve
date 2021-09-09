@@ -65,19 +65,23 @@ pre {
     <p><a href="https://gussalufz.com/">Cryptic crosswords by Gussalufz</a></p>
   </div>
   <br>
-  <div>
-    <details>
-      <summary>View Exolve-formatted specs for the current crossword</summary>
-      <pre id="xlvp-src">
+  <button id="xlvp-save" disabled onclick="xlvpSave()">
+     Save Exolve-converted crossword as exolve-player-output.html
+  </button>
+  <details id="xlvp-view">
+    <summary>
+      View Exolve-formatted specs for the current crossword
+    </summary>
+    <pre id="xlvp-src">
       There isn't a current crossword. Perhaps open one?
-      </pre>
-    </details>
-  </div>
+    </pre>
+  </details>
 </div>
 
 <script>
-xlvpFileName = ''
-function xlvpShowExolve(specs) {
+xlvpFileName = '';
+xlvpData = '';
+function xlvpShowExolve(specs, converted=false) {
   let start = specs.indexOf('exolve-begin')
   let end = specs.indexOf('exolve-end')
   if (start < 0 || end < 0 || start >= end) {
@@ -86,18 +90,52 @@ function xlvpShowExolve(specs) {
   while (start > 0 && specs.charAt(start - 1) == ' ') {
     start--;
   }
-  const exolve = specs.substring(start, end) + 'exolve-end';
+  xlvpData = specs.substring(start, end) + 'exolve-end';
 
-  document.getElementById('xlvp-src').innerText = exolve;
+  document.getElementById('xlvp-src').innerText = xlvpData;
   document.getElementById('exolve-frame').innerHTML = '';
   for (id in exolvePuzzles) {
     if (isNaN(exolvePuzzles[id])) {
       delete exolvePuzzles[id];
     }
   }
-  createExolve(exolve, 'exolve-frame', false)
+  createExolve(xlvpData, 'exolve-frame', false);
+  document.getElementById('xlvp-save').disabled = !converted;
   return true;
 }
+
+function xlvpSave() {
+  const data = '' +
+    '<!DOCTYPE html>\n' +
+    '<html lang="en">\n' +
+    '<head>\n' +
+    '<meta charset="utf-8"/>\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n' +
+    '<link rel="stylesheet" type="text/css" ' +
+    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.18"/>\n' +
+    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.18">' +
+    '<\/script>\n' +
+    '<\/head>\n' +
+    '<body>\n' +
+    '<script>\n' +
+    'createExolve(`' +
+    `\n${xlvpData}` +
+    '`);\n' +
+    '<\/script>\n' +
+    '<\/body>\n' +
+    '<\/html>\n';
+  const a = document.createElement("a");
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.href = window.URL.createObjectURL(
+    new Blob([data], {type: "text/html;charset=UTF-8"})
+  );
+  a.setAttribute("download", 'exolve-player-output.html');
+  a.click();
+  window.URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+}
+
 function xlvpShowIpuz(specs, id, fname) {
   let start = specs.indexOf('{')
   let end = specs.lastIndexOf('}')
@@ -111,7 +149,7 @@ function xlvpShowIpuz(specs, id, fname) {
     if (!exolve) {
       return false;
     }
-    return xlvpShowExolve(exolve);
+    return xlvpShowExolve(exolve, true);
   } catch (err) {
     console.log(err);
   }
@@ -122,7 +160,7 @@ function xlvpShowPuz(buffer, id, fname) {
   if (!exolve) {
     return false;
   }
-  return xlvpShowExolve(exolve);
+  return xlvpShowExolve(exolve, true);
 }
 function xlvpId(buffer) {
   const dv = new DataView(buffer);
