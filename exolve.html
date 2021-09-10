@@ -126,7 +126,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.18 September 6 2021';
+  this.VERSION = 'Exolve v1.19 September 9 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -1358,7 +1358,7 @@ Exolve.prototype.checkConsistency = function() {
       this.gridHeight < 1 || this.gridHeight > this.MAX_GRID_SIZE) {
     this.throwErr('Bad/missing width/height');
   } else if (this.gridFirstLine < 0 || this.gridLastLine < this.gridFirstLine ||
-             this.gridHeight != this.gridLastLine - this.gridFirstLine + 1) {
+             this.gridHeight > this.gridLastLine - this.gridFirstLine + 1) {
     this.throwErr('Mismatched width/height');
   }
   if (this.submitURL) {

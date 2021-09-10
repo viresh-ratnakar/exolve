@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.19 September 9 2021
+
+- Bug-fix: blank lines in exolve specs mean grid height may be less than
+  grid specs line span.
+
 ### Version: Exolve v1.18 September 6 2021
 
 - Allow the cell size to be overridden via `exolve-cell-size: <w> <h>`
