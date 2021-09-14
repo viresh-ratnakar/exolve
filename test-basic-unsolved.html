@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.19"/>
-<script src="exolve-m.js?v1.19"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.20"/>
+<script src="exolve-m.js?v1.20"></script>
 
 <title>Test-Basic</title>
 
@@ -35,6 +35,16 @@ exolve-begin
     2 rna (3)
     3 eli (3)
     4 wed (3)
+  exolve-nodir:
+    [A] This (13) clue ends (word) here! (4)
+    [B] This (13) clue also ends (1 word) here! (4) Some annotation follows.
+    [C] This (13) clue also ends (2 letters) here! (8) [SOLUTION] Some annotation follows.
+    [D] This (13) clue also ends (words) here! (8) [] [t]WITTER The anno has (3) enum-like parts.
+    [E] This is an enum-less and anno-less clue that ends here!
+    [F] This is also an enum-less and anno-less clue that also ends here! (?)*
+    [G] This is also an enum-less but with-anno clue that also ends here! (?)* [] [t]WITTER. Here is the anno.
+    [H] This clue, even though its anno contains an enum-like substring, ends here! (4) The (word) and (4 letters) enum-like parts here are not numeric.
+    [I] This clue (13) does not end now (4) as [square brackets do not follow immediately]; it ends here! (4)
   exolve-postscript:
     It all ends <b>here</b>!
 exolve-end

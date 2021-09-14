@@ -1,5 +1,22 @@
 # Changelog
 
+### Version: Exolve v1.20 September 14 2021
+
+- If a clue has multiple enum-like parts, use the *last* one.
+- However, override that if there is an earlier enum-like substring
+  that is immediately (or with intervening spaces) followed by "[...]"
+  (which is a tell-tale start of the annotation part).
+- Allow an empty "[]" to be placed to mark the end of the clue part
+  for dealing with ambiguities and also for the corner case that
+  the anno has to start with "[...]" without making the contents of
+  the square brackets be treated like the solution. This used to
+  require explicitly providing the solution (like
+  "... clue (6) [WITTER] [t]WITTER") but can now also be tackled
+  with "... clue (6) [] [t]WITTER". The empty "[]" is not shown in the
+  clue or the anno.
+- Bugfix: in the case when an anno is provided in a crossword
+  without solutions, "reveal this" was clearing the cells (now doesn't).
+
 ### Version: Exolve v1.19 September 9 2021
 
 - Bug-fix: blank lines in exolve specs mean grid height may be less than

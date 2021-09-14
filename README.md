@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.19 September 9 2021
+### Version: Exolve v1.20 September 14 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -478,7 +478,12 @@ of opening and closing parentheses, containing only numbers, hyphens, commas,
 apostrophes, and periods, starting with a number. The software also treats a
 pair of parentheses containing the text "word" or "letter" or "?" with anything
 before are after it as an enum (to allow the setter to specify the enum as
-"(two words)" or "(?)", for example).
+"(two words)" or "(?)", for example). But it looks for such enums only if a
+normal enum is not present in the clue.
+
+In the rare case that there are multiple candidate enum parts in a clue, the
+last one is used. However, this can be overridden by explicitly using "[]"
+to mark the end of the clue (see [`Annotations`](#annotations) below).
 
 ### Suppressing enums or separators
 
@@ -546,7 +551,25 @@ this option.
 If the leading part of the anno needs to be something in square brackets, such
 as "... (6) [t]WITTER ...," then setters should include the solution before
 that (even if it can be inferred from the grid), to avoid misinterpreting the
-leading part as the solution, like "... (6) [WITTER] [t]WITTER ..."
+leading part as the solution, like "... (6) [WITTER] [t]WITTER ..." Or, they
+can use an empty pair of square brackets to mark the end of the clue, like
+"... (6) [] [t]WITTER ..." The special "[]" clue-end marker string is also
+useful if there is any ambiguity about where the clue ends (perhaps because of
+multiple enum-like substrings) that cannot be resolved by providing the
+solution in square brackets.
+
+Here are some more complex examples of enum/annotation parsing.
+```
+  1 This (13) clue ends (word) here! (4)
+  2 This (13) clue also ends (1 word) here! (4) Some annotation follows.
+  3 This (13) clue also ends (2 letters) here! (8) [SOLUTION] Some annotation follows.
+  4 This (13) clue also ends (words) here! (8) [] [t]WITTER The anno has (3) enum-like parts.
+  5 This is an enum-less and anno-less clue that ends here!
+  6 This is also an enum-less and anno-less clue that also ends here! (?)*
+  7 This is also an enum-less but with-anno clue that also ends here! (?)* [] [t]WITTER Here is the anno.
+  8 This clue, even though its anno contains an enum-like substring, ends here! (4) The (word) and (4 letters) enum-like parts here are not numeric.
+  9 This clue (13) does not end now (4) as [square brackets do not follow immediately]; it ends here! (4)
+```
 
 #### In-clue annotations
 You can also decorate sub-phrases in the clue with underlines, different styles,
