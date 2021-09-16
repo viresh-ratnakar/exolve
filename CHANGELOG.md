@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Quick unnumbered tweak
+
+- Turn off any clues panel max-heights in effect from exolve-clue-lines when
+  printing (otherwise clues might overlap in the printout/PDF).
+
 ### Version: Exolve v1.20 September 14 2021
 
 - If a clue has multiple enum-like parts, use the *last* one.

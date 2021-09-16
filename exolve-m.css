@@ -460,6 +460,7 @@ Version: Exolve v1.20 September 14 2021
     display: none;
   }
   .xlv-clues-box {
+    max-height: none !important;
     height: auto;
     overflow-y: visible;
   }
