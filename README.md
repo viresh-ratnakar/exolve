@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.20 September 14 2021
+### Version: Exolve v1.21 September 20 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1131,6 +1131,12 @@ The list of currently supported options is as follows:
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
+- **`print-completed-3cols` and `print-incomplete-2cols`** These option
+  override the default layout choices used for printing puzzles (and creating
+  PDFs). By default, a completed puzzle is printed in 2 columns
+  (`print-completed-3cols` makes that 3 columns) while an incomplete puzzle is
+  printed in 3 columns (`print-incomplete-2cols` makes that 2 columns). See
+  [`Printing`](#printing) for more details.
 
 ### Colour schemes
 Using a bunch of `exolve-option: colour-<name>:<c>` (or, of course,
@@ -1598,25 +1604,43 @@ have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).
 
 You can print the current state of the grid by using the browser's "Print"
 command (ctrl-P or cmd-P). The printed puzzle id laid out in a newspaper-like
-2-column layout (similar to what you get with the `columnar-layout` option,
-but using exactly 2 columns always (you can get upto 3 columns in the on-screen
-columnar-layout option).
+multi-column layout (similar to what you get with the `columnar-layout` option).
+You can create PDF files for your crosswords by "printing to file" in most
+browsers.
+
+If not all the puzzle entries have been filled in, then the printing is done in
+three columns, with the grid occupying two columns. This makes the grid a bit
+larger and easier for writing into. This three-column rendering  (with the
+grid occupying two of the columns and the clues balanced across the three
+columns) is implemented using some code to do the balanced layout as there is
+no CSS support for such layouts.
+
+If all the puzzle entries have been filled in, then the printing is done in
+two columns, with the grid occupying the first column (which makes it slightly
+smaller than the three-column layout for incomplete puzzles). If the puzzle
+provides annotations and/or explanations that get revealed, then this two-column
+layout is especially useful to limit the printed size.
 
 For most puzzles, this layout should fit in Portrait mode for standard paper
 size (or PDF). You can reduce the printing scale manually if it just goes
 over a single page by a few lines.
 
-Note that you can unhighlight the current clue before printing by clicking on
-any black square or clicking on the puzzle title.
+You can override the column choices for completed (default: 2 columns) and
+incomplete (default: 3 columns) puzzles using the options
+`print-completed-3cols` and `print-incomplete-2cols` respectively.
 
-If it does not make sense for some chunks of text or some HTML elements to be printed (for example,
-some instructions that only make sense in interactive mode), you can enclose them in an HTML element
-(such as a `DIV` or a `SPAN`) that has the class `xlv-dont-print`.
+Before printing, any highlighting of the currently active clue is removed,
+and it is restored after printing.
 
-## Layout
+If it does not make sense for some chunks of text or some HTML elements to be
+printed (for example, some instructions that only make sense in interactive
+mode), you can enclose them in an HTML element (such as a `DIV` or a `SPAN`)
+that has the class `xlv-dont-print`.
+
+## On-screen layout
 
 This is a quick summary of layout-related notes (already covered in various
-sections above). This summary only applies to on-display layout (see above
+sections above). This summary only applies to on-screen layout (see above
 for print layout).
 
 The layout of the crossword depends on the available width. This

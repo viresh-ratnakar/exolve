@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.20 September 14 2021';
+  this.VERSION = 'Exolve v1.21 September 20 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -355,6 +355,8 @@ function Exolve(puzzleSpec,
   this.ignoreUnclued = false;
   this.ignoreEnumMismatch = false;
   this.showCellLevelButtons = false;
+  this.printCompleted3Cols = false;
+  this.printIncomplete2Cols = false;
 
   this.createPuzzle();
 }
@@ -536,8 +538,8 @@ Exolve.prototype.init = function() {
             </div>
           </div>
         </div> <!-- xlv-clues -->
-      </div>
-  </div> <!-- xlv-frame -->
+      </div> <!-- xlv-grid-and-clues-flex -->
+    </div> <!-- xlv-frame -->
   `;
 
   if (document.getElementById(this.prefix + '-frame')) {
@@ -1073,6 +1075,14 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "clues-at-right-in-two-columns") {
       this.cluesToRight = true
+      continue
+    }
+    if (spart == "print-incomplete-2cols") {
+      this.printIncomplete2Cols = true;
+      continue
+    }
+    if (spart == "print-completed-3cols") {
+      this.printCompleted3Cols = true;
       continue
     }
     if (spart == "ignore-unclued") {
@@ -3313,7 +3323,6 @@ Exolve.prototype.displayClues = function() {
         insertAdjacentHTML('beforeend', this.nodirHeading);
     }
   }
-  // Make all xlv-clues-box divs have the same width.
   const cbs = document.getElementsByClassName('xlv-clues-box')
   this.cluesBoxWidth = 0;
   for (let x = 0; x < cbs.length; x++) {
@@ -3322,9 +3331,15 @@ Exolve.prototype.displayClues = function() {
       this.cluesBoxWidth = e.offsetWidth;
     }
   }
-  if (this.cluesBoxWidth > 0) {
+  this.equalizeClueWidths(this.cluesBoxWidth);
+}
+
+Exolve.prototype.equalizeClueWidths = function(w) {
+  // Make all xlv-clues-box divs have the same width w.
+  if (w > 0) {
+    const cbs = document.getElementsByClassName('xlv-clues-box')
     for (let x = 0; x < cbs.length; x++) {
-      cbs[x].style.width = this.cluesBoxWidth + 'px'
+      cbs[x].style.width = w + 'px'
     }
   }
 }
@@ -3375,9 +3390,10 @@ Exolve.prototype.computeGridSize = function(maxDim) {
 
 Exolve.prototype.setColumnLayout = function() {
   if (!this.columnarLayout) {
+    this.cluesContainer.className = 'xlv-clues xlv-clues-flex'
+    this.gridcluesContainer.className = 'xlv-grid-and-clues-flex'
     if (this.cluesToRight) {
-      this.cluesContainer.className =
-          'xlv-clues xlv-clues-flex xlv-clues-to-right'
+      this.cluesContainer.classList.add('xlv-clues-to-right');
     }
     return;
   }
@@ -3401,8 +3417,8 @@ Exolve.prototype.handleResize = function() {
 }
 
 Exolve.prototype.displayGridBackground = function() {
-  let svgWidth = this.boxWidth + (2 * this.offsetLeft)
-  let svgHeight = this.boxHeight + (2 * this.offsetTop)
+  const svgWidth = this.boxWidth + (2 * this.offsetLeft)
+  const svgHeight = this.boxHeight + (2 * this.offsetTop)
   this.svg.setAttributeNS(null, 'viewBox', '0 0 ' + svgWidth + ' ' + svgHeight)
   this.svg.setAttributeNS(null, 'width', svgWidth);
   this.svg.setAttributeNS(null, 'height', svgHeight);
@@ -4854,6 +4870,9 @@ Exolve.prototype.createListeners = function() {
   
   window.addEventListener('scroll', this.makeCurrClueVisible.bind(this));
   window.addEventListener('resize', this.handleResize.bind(this));
+
+  window.addEventListener('beforeprint', this.handleBeforePrint.bind(this));
+  window.addEventListener('afterprint', this.handleAfterPrint.bind(this));
 }
 
 Exolve.prototype.recolourCells = function() {
@@ -5901,6 +5920,276 @@ Exolve.prototype.manageStorage = function(e) {
     slist.style.display = 'none'
     b.innerText = this.textLabels['manage-storage']
     b.title = this.textLabels['manage-storage.hover']
+  }
+}
+
+Exolve.prototype.handleAfterPrint = function() {
+  if (this.printingChanges) {
+    this.columnarLayout = this.printingChanges.columnarLayout;
+    if (this.printingChanges.moves) {
+      // Undo the moves, in reverse order.
+      for (let i = this.printingChanges.moves.length - 1; i >= 0; i--) {
+        const move = this.printingChanges.moves[i];
+        move.target.insertAdjacentElement('afterbegin', move.elem);
+      }
+    }
+    if (this.printingChanges.extras) {
+      for (let extra of this.printingChanges.extras) {
+        extra.remove();
+      }
+    }
+    this.setColumnLayout();
+    this.equalizeClueWidths(this.cluesBoxWidth);
+    this.recolourCells();
+    this.redisplayNinas();
+
+    // Restore active clue/cells.
+    if (this.printingChanges.usingGnav) {
+      this.currDir = this.printingChanges.currDir;
+      this.activateCell(this.printingChanges.currRow,
+                        this.printingChanges.currCol);
+    } else {
+      this.cnavTo(this.printingChanges.currClueIndex);
+    }
+  }
+  this.printingChanges = null;
+}
+
+Exolve.prototype.handleBeforePrint = function() {
+  this.handleAfterPrint();  // Unnecessary, but can't hurt to be sure.
+
+  this.printingChanges = {
+    'columnarLayout': this.columnarLayout,
+    'currRow': this.currRow, 'currCol': this.currCol,
+    'usingGnav': this.usingGnav, 'currClueIndex': this.currClueIndex,
+    'currDir': this.currDir};
+  // Unhighlight current cell/clue (handleAfterPrint() will restore).
+  this.deactivator();
+
+  if (this.numCellsToFill == this.numCellsFilled) {
+    if (!this.printCompleted3Cols) {
+      return;
+    }
+  } else {
+    if (this.printIncomplete2Cols) {
+      return;
+    }
+  }
+
+  /**
+   * The code below does a 3-column layout where the grid occupies two
+   * columns. This sort of a layout is not supported by CSS, but is
+   * quite useful for solving-on-paper (as the grid is larger and the
+   * three balanced clue columns have a pleasant appearance). The surgery
+   * done on the layout is undone in handleAfterPrint().
+   */
+
+  // Force non-columnar layout.
+  this.columnarLayout = false;
+  this.setColumnLayout();
+
+  const svgWidth = this.boxWidth + (2 * this.offsetLeft)
+  const svgHeight = this.boxHeight + (2 * this.offsetTop)
+  const goodGridDim = 662;
+  const scale = Math.min(1.75, 
+      Math.max(1.0, goodGridDim / Math.max(svgWidth, svgHeight)));
+  const scaledH = svgHeight * scale;
+  const scaledW = svgWidth * scale;
+
+  // We need to apply the print media style, with an additional 3-col
+  // grid layout. We'll then measure clue row heights and balance
+  // them across 3 columns.
+  customStyles = document.createElement('style');
+  customStyles.innerHTML = `
+  body {
+    zoom: 100%;
+  }
+  #${this.prefix}-grid-parent-centerer {
+    text-align: left;
+    height: ${'' + scaledH + 'px'};
+  }
+  #${this.prefix}-grid {
+    transform: scale(${scale});
+    transform-origin: top left;
+  }
+  .xlv-controls,
+  .xlv-status,
+  .xlv-saving,
+  .xlv-button,
+  .xlv-curr-clue-parent,
+  .xlv-small-button,
+  .xlv-small-print,
+  .xlv-dont-print,
+  .xlv-postscript {
+    display: none;
+  }
+  .xlv-clues-box {
+    max-height: none !important;
+  }
+  #${this.prefix}-frame .xlv-clues-box {
+    font-size: 18px;
+  }
+  #${this.prefix}-frame .xlv-wide-box {
+    width: ${Math.max(480, scaledW)}px;
+  }
+  #${this.prefix}-frame .xlv-grid-and-clues-2-columnar,
+  #${this.prefix}-frame .xlv-grid-and-clues-3-columnar,
+  #${this.prefix}-frame .xlv-grid-and-clues-flex {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: max-content max-content;
+  }
+  #${this.prefix}-frame .xlv-grid-panel {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding: 0 0 8px 0;
+  }
+  #${this.prefix}-frame .xlv-clues,
+  #${this.prefix}-frame .xlv-clues-columnar,
+  #${this.prefix}-frame .xlv-clues-flex {
+    display: block;
+  }
+  #${this.prefix}-clues {
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-column-start: 3;
+    grid-column-end: 4;
+  }
+  #${this.prefix}-printed-clues-1 {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 2;
+  }
+  #${this.prefix}-printed-clues-2 {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 3;
+  }
+  `;
+  this.frame.appendChild(customStyles);
+
+  // Scaling of coloured cells and ninas has to be done like with code: they
+  // are not in SVG.
+  const colouredCells = [];
+  for (let i = 0; i < this.colourGroup.children.length; i++) {
+    colouredCells.push(this.colourGroup.children[i]);
+  }
+  for (let i = 0; i < this.ninaGroup.children.length; i++) {
+    colouredCells.push(this.ninaGroup.children[i]);
+  }
+  for (let e of colouredCells) {
+    e.style.left =  '' +  (parseFloat(e.style.left) * scale) + 'px';
+    e.style.top =  '' +  (parseFloat(e.style.top) * scale) + 'px';
+    e.style.width =  '' +  (parseFloat(e.style.width) * scale) + 'px';
+    e.style.height =  '' +  (parseFloat(e.style.height) * scale) + 'px';
+  }
+
+  // Extra clues column in the first column.
+  const printedClues1 = document.createElement("div");
+  printedClues1.id = `${this.prefix}-printed-clues-1` 
+  printedClues1.className = 'xlv-clues xlv-clues-panel';
+  printedClues1.innerHTML = `
+    <div class="xlv-clues-box">
+      <table id="${this.prefix}-printed-clues-table-1">
+      </table>
+    </div>`
+  this.gridcluesContainer.appendChild(printedClues1);
+  const printedTable1 = document.getElementById(
+      `${this.prefix}-printed-clues-table-1`);
+
+  // Extra clues column in the second column.
+  const printedClues2 = document.createElement("div");
+  printedClues2.id = `${this.prefix}-printed-clues-2` 
+  printedClues2.className = 'xlv-clues xlv-clues-panel';
+  printedClues2.innerHTML = `
+    <div class="xlv-clues-box">
+      <table id="${this.prefix}-printed-clues-table-2">
+      </table>
+    </div>`
+  this.gridcluesContainer.appendChild(printedClues2);
+  const printedTable2 = document.getElementById(
+      `${this.prefix}-printed-clues-table-2`);
+
+  this.equalizeClueWidths(325);
+  this.printingChanges.extras = [printedClues1, printedClues2, customStyles];
+
+  const cluesPanels = this.frame.getElementsByClassName('xlv-clues-panel');
+  const cluesTables = [];
+  const clues = [];
+
+  let minH = 1000;
+  let h = 0;
+  for (let p = 0; p < cluesPanels.length; p++) {
+    const cluesPanel = cluesPanels[p];
+    cluesTables.push(null);
+    const heading = cluesPanel.firstElementChild;
+    if (!heading || cluesPanel.children.length != 2 ||
+        !cluesPanel.children[1].firstElementChild) {
+      continue;
+    }
+    const cluesTable = cluesPanel.children[1].firstElementChild;
+    cluesTables[p] = cluesTable;
+    const clueTRs = cluesTable.getElementsByTagName("tr");
+
+    for (let c = 0; c < clueTRs.length; c++) {
+      const clue = {
+        'tr': clueTRs[c],
+        'p': p,
+        'c': c,
+        'heading': (c == 0) ? heading : null
+      };
+      let ch = clue.tr.getBoundingClientRect().height;
+      if (ch < minH) minH = ch;
+      h += ch;
+      if (c == 0) {
+        h += heading.getBoundingClientRect().height;
+      }
+      clue.h = h;
+      clues.push(clue);
+    }
+  }
+
+  const gridPanelH = this.gridPanel.getBoundingClientRect().height;
+  let best1end = 0;
+  let best2end = 0;
+  let bestGap = 1000;
+  for (let i = 0; i < clues.length; i++) {
+    const h1 = clues[i].h;
+    for (let j = i + 1; j < clues.length; j++) {
+      const h2 = clues[j].h - clues[i].h;
+      if (h2 > h1 + minH) break;
+      if (Math.abs(h1 - h2) > minH) continue;
+      const h3 = h - clues[j].h;
+      let gap = Math.max(h1, h2) + gridPanelH - h3;
+      if (gap > bestGap) break;
+      gap = Math.abs(gap);
+      if (gap < bestGap) {
+        bestGap = gap;
+        best1end = i + 1;
+        best2end = j + 1;
+      }
+    }
+  }
+
+  // Move clue #s [0, best1end) to the first column and
+  // [best1end, best2end) to the second column.
+  this.printingChanges.moves = [];
+  for (let c = 0; c < best2end; c++) {
+    const clue = clues[c];
+    if (clue.heading) {
+      const dest = (c < best1end) ? printedClues1 : printedClues2;
+      dest.insertAdjacentElement('afterbegin', clue.heading);
+      this.printingChanges.moves.push(
+          {'target': cluesPanels[clue.p], 'elem': clue.heading});
+    }
+    const dest = (c < best1end) ? printedTable1 : printedTable2;
+    dest.appendChild(clue.tr);
+    this.printingChanges.moves.push(
+        {'target': cluesTables[clue.p], 'elem': clue.tr});
   }
 }
 

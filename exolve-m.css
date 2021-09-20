@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.20 September 14 2021
+Version: Exolve v1.21 September 20 2021
 */
 
 @media (max-width: 500px) {
@@ -160,7 +160,7 @@ Version: Exolve v1.20 September 14 2021
   break-inside: avoid;
 }
 .xlv-frame .xlv-clues td {
-  padding: 4px 6px 0 0;
+  padding: 0 6px 4px 0;
   vertical-align: top;
 }
 .xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
@@ -461,8 +461,6 @@ Version: Exolve v1.20 September 14 2021
   }
   .xlv-clues-box {
     max-height: none !important;
-    height: auto;
-    overflow-y: visible;
   }
   .xlv-clues-columnar,
   .xlv-clues-flex {
@@ -474,7 +472,7 @@ Version: Exolve v1.20 September 14 2021
     display: block;
     column-count: 2;
   }
-  .xlv-coloured-cell {
+  .xlv-coloured-cell, .xlv-clues {
     color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }

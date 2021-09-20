@@ -1,5 +1,26 @@
 # Changelog
 
+### Version: Exolve v1.21 September 20 2021
+
+- Add a new, 3-column layout for printing (and creating PDFs). This is
+  now the default layout when printing while there are any unfilled
+  cells. This layout makes the grid larger (as it spans 2 of the 3 columns)
+  and is easier to write into. This is implemented using code to figure
+  out where to split the clues lists for balancing across three columns (as
+  CSS does not handle this kind of columnar layout where an element spans
+  multiple but not all columns).
+- The 2-column layout (with the grid placed in the first column) continues
+  to be the default for printing completed grids. This choice works well
+  especially when there are annotations/explanations revealed, as it is
+  more likely to get everything to fit within a single page.
+- Add `exolve-option`s `print-incomplete-2cols` and `print-completed-3cols`
+  to override the above defaults if needed.
+- Unhighlight the current clue/cells before printing (and restore after
+  printing).
+- If there are span-specified ninas, make their colour appear in printing
+  too (this was a minor bug) by adding a CSS rule for .xlv-clue to render
+  the colour properly within that class when printing.
+
 ### Version: Quick unnumbered tweak
 
 - Turn off any clues panel max-heights in effect from exolve-clue-lines when
