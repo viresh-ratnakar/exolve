@@ -1747,6 +1747,11 @@ of September, 2021.
   something like 70%.
 - In Chrome, if the margin is too high (say, more than 0.7 inches), then some
   content may get clipped.
+- When using "Print crossword" to print only the crossword, if the crossword
+  is part of a long web page, then you might see a lot of pages in the output
+  (blank or with the crossword duplicated). Please use the browser's print
+  dialog to specify a page-range selection to limit to just the first few
+  pages that the crossword occupies.
 
 ## API
 

@@ -6091,12 +6091,14 @@ Exolve.prototype.handleBeforePrint = function() {
     customStyles.insertAdjacentHTML('beforeend', `
     body {
       visibility: hidden;
+      background: white;
     }
     #${this.prefix}-frame, #${this.prefix}-frame * {
       visibility: visible;
     }
     #${this.prefix}-frame {
-      position: absolute;
+      background: white;
+      position: fixed;
       left: 0;
       top: 0;
     }`);
