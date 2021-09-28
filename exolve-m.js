@@ -5998,7 +5998,11 @@ Exolve.prototype.handleAfterPrint = function() {
       // Undo the moves.
       for (let i = 0; i < this.printingChanges.moves.length; i++) {
         const move = this.printingChanges.moves[i];
-        move.target.insertAdjacentElement('afterbegin', move.elem);
+        if (move.hasOwnProperty('sibling')) {
+          move.target.insertBefore(move.elem, move.sibling);
+        } else {
+          move.target.insertAdjacentElement('afterbegin', move.elem);
+        }
       }
     }
     if (this.printingChanges.extras) {
@@ -6087,6 +6091,12 @@ Exolve.prototype.handleBeforePrint = function() {
   const settings = this.getPrintSettings();
 
   if (settings.onlyCrossword) {
+    const nextSibling = this.frame.nextSibling;
+    const parent = this.frame.parentNode;
+    document.body.insertAdjacentElement('afterbegin', this.frame);
+    this.printingChanges.moves.push(
+        {'elem': this.frame, 'target': parent, 'sibling': nextSibling});
+
     const customStyles = document.createElement('style');
     customStyles.insertAdjacentHTML('beforeend', `
     body {
@@ -6098,7 +6108,7 @@ Exolve.prototype.handleBeforePrint = function() {
     }
     #${this.prefix}-frame {
       background: white;
-      position: fixed;
+      position: absolute;
       left: 0;
       top: 0;
     }`);
