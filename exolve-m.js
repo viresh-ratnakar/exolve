@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.21 September 20 2021';
+  this.VERSION = 'Exolve v1.22 September 28 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -337,6 +337,20 @@ function Exolve(puzzleSpec,
         '"ignore-enum-mismatch" <a href="https://github.com/viresh-ratnakar/' +
         'exolve/blob/master/README.md#exolve-option">options</a>:',
     'warnings.hover': 'Issues detected: click on [&times;] to dismiss',
+    'print': 'Print',
+    'print.hover': 'Show/hide settings for printing or creating PDFs',
+    'print-heading': 'Settings for printing/PDFs:',
+    'print-size': 'Page size:',
+    'print-margin': 'Margin (inches):',
+    'print-font': 'Font size:',
+    'print-font-normal': 'Normal',
+    'print-font-large': 'Large',
+    'print-font-xlarge': 'Extra Large',
+    'print-font-small': 'Small',
+    'print-page': 'Print page',
+    'print-page.hover': 'Print the whole page',
+    'print-crossword': 'Print crossword',
+    'print-crossword.hover': 'Print just this crossword, hiding any content outside it',
   };
 
   // Variables set by exolve-option
@@ -483,9 +497,58 @@ Exolve.prototype.init = function() {
                       spellcheck="false" rows="2"></textarea>
                 </div>
               </div>
+              <div id="${this.prefix}-print-settings"
+                  class="xlv-print-settings" style="display:none">
+                ${this.textLabels['print-heading']}
+                <div>
+                  <div>
+                    ${this.textLabels['print-font']}
+                    <select name="${this.prefix}-print-font" id="${this.prefix}-print-font">
+                      <option value="18px">${this.textLabels['print-font-normal']}</option>
+                      <option value="22px">${this.textLabels['print-font-large']}</option>
+                      <option value="26px">${this.textLabels['print-font-xlarge']}</option>
+                      <option value="14px">${this.textLabels['print-font-small']}</option>
+                    </select>
+                  </div>
+                  <div>
+                    ${this.textLabels['print-size']}
+                    <select name="${this.prefix}-page-size" id="${this.prefix}-page-size">
+                      <option value="letter">Letter: 8.5in x 11in</option>
+                      <option value="A4">A4: 210mm x 297mm</option>
+                      <option value="A3">A3: 297mm x 420mm</option>
+                      <option value="A5">A5: 148mm x 210mm</option>
+                      <option value="B4">B4: 250mm x 353mm</option>
+                      <option value="B5">B5: 176mm x 250mm</option>
+                      <option value="legal">Legal: 8.5in x 14in</option>
+                      <option value="ledger">Ledger: 11in x 17in</option>
+                    </select>
+                  </div>
+                  <div>
+                    ${this.textLabels['print-margin']}
+                    <input class="xlv-answer" id="${this.prefix}-page-margin"
+                      name="${this.prefix}-page-margin" size="5" value="0.5">
+                    </input>
+                  </div>
+                  <div>
+                    <button id="${this.prefix}-print-page"
+                        class="xlv-small-button"
+                        title="${this.textLabels['print-page.hover']}">
+                      ${this.textLabels['print-page']}
+                    </button>
+                    <button id="${this.prefix}-print-crossword"
+                        class="xlv-small-button"
+                        title="${this.textLabels['print-crossword.hover']}">
+                      ${this.textLabels['print-crossword']}
+                    </button>
+                  </div>
+                </div>
+              </div>
               <a id="${this.prefix}-tools-link" href=""
                   title="${this.textLabels['tools-link.hover']}"
                   >${this.textLabels['tools-link']}</a>
+              <a id="${this.prefix}-print" href=""
+                  title="${this.textLabels['print.hover']}"
+                  >${this.textLabels['print']}</a>
               <a id="${this.prefix}-report-bug"
                 href="https://github.com/viresh-ratnakar/exolve/issues/new"
                     >${this.textLabels['report-bug']}</a>
@@ -677,8 +740,15 @@ Exolve.prototype.init = function() {
   this.submitButton = document.getElementById(this.prefix + '-submit');
   this.submitButton.addEventListener('click', this.submitSolution.bind(this));
 
+  const printPage = document.getElementById(this.prefix + '-print-page');
+  printPage.addEventListener('click', this.printNow.bind(this, false));
+  const printCrossword = document.getElementById(this.prefix + '-print-crossword');
+  printCrossword.addEventListener('click', this.printNow.bind(this, true));
+
   document.getElementById(this.prefix + '-tools-link').addEventListener(
-        'click', this.toggleTools.bind(this));
+        'click', this.togglePanel.bind(this, '-tools'));
+  document.getElementById(this.prefix + '-print').addEventListener(
+        'click', this.togglePanel.bind(this, '-print-settings'));
 
   document.getElementById(this.prefix + '-manage-storage').addEventListener(
     'click', this.manageStorage.bind(this));
@@ -1486,7 +1556,6 @@ Exolve.prototype.newGridCell = function(row, col, letter, escaped=false) {
 //   hasDgmlessCells
 //   hasUnsolvedCells
 Exolve.prototype.parseGrid = function() {
-  let hasSolvedCells = false
   let allEntriesAre0s = true
   const DECORATORS = ' +|_@!*~'
   const reDecorators = new RegExp('[' + DECORATORS + ']')
@@ -1584,16 +1653,10 @@ Exolve.prototype.parseGrid = function() {
       if (gridCell.isDgmless) {
         this.hasDgmlessCells = true
       }
-      if (gridCell.isLight && !gridCell.prefill && gridCell.solution != '0') {
-        this.hasSolvedCells = true
-      }
     }
   }
   if (this.hasDgmlessCells) {
     this.hideCopyPlaceholders = true
-  }
-  if (this.hasUnsolvedCells && this.hasSolvedCells) {
-    this.throwErr('Either all or no solutions should be provided')
   }
 }
 
@@ -5812,12 +5875,12 @@ Exolve.prototype.displayButtons = function() {
   this.scratchPad.cols = Math.max(30, Math.floor(this.textAreaCols * 3 / 4))
 }
 
-Exolve.prototype.toggleTools = function(e) {
-  let tools = document.getElementById(this.prefix + '-tools')
-  if (tools.style.display == 'none') {
-    tools.style.display = ''
+Exolve.prototype.togglePanel = function(panelSuff, e) {
+  const panel = document.getElementById(this.prefix + panelSuff)
+  if (panel.style.display == 'none') {
+    panel.style.display = ''
   } else {
-    tools.style.display = 'none'
+    panel.style.display = 'none'
   }
   e.preventDefault()
 }
@@ -5923,12 +5986,17 @@ Exolve.prototype.manageStorage = function(e) {
   }
 }
 
+Exolve.prototype.printNow = function(onlyCrossword) {
+  this.printOnlyCrossword = onlyCrossword;
+  window.print();
+}
+
 Exolve.prototype.handleAfterPrint = function() {
   if (this.printingChanges) {
     this.columnarLayout = this.printingChanges.columnarLayout;
     if (this.printingChanges.moves) {
-      // Undo the moves, in reverse order.
-      for (let i = this.printingChanges.moves.length - 1; i >= 0; i--) {
+      // Undo the moves.
+      for (let i = 0; i < this.printingChanges.moves.length; i++) {
         const move = this.printingChanges.moves[i];
         move.target.insertAdjacentElement('afterbegin', move.elem);
       }
@@ -5951,8 +6019,54 @@ Exolve.prototype.handleAfterPrint = function() {
     } else {
       this.cnavTo(this.printingChanges.currClueIndex);
     }
+
+    if (this.printingChanges.pageYOffset) {
+      window.scrollTo({top: this.printingChanges.pageYOffset});
+    }
   }
   this.printingChanges = null;
+}
+
+Exolve.prototype.getPrintSettings = function() {
+  const pageSizeElt = document.getElementById(this.prefix + '-page-size');
+  const pageMarginElt = document.getElementById(this.prefix + '-page-margin');
+  const fontElt = document.getElementById(this.prefix + '-print-font');
+
+  const page = (pageSizeElt ? pageSizeElt.value : 'letter') || 'letter';
+
+  let marginIn = 0.5;
+  const marginStr = pageMarginElt ? pageMarginElt.value : '';
+  if (marginStr) {
+    const val = parseFloat(marginStr);
+    if (!isNaN(val) && val >= 0.0) marginIn = val;
+  }
+  const widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
+                  ((page == 'A4') ? 210.0/25.4 :
+                  ((page == 'A3') ? 297.0/25.4 :
+                  ((page == 'A5') ? 148.0/25.4 :
+                  ((page == 'B5') ? 176.0/25.4 :
+                  ((page == 'B4') ? 250.0/25.4 :
+                  ((page == 'ledger') ? 11.0 : 8.5)))))));
+  const heightIn = ((page == 'letter') ? 11.0 :
+                   ((page == 'A4') ? 297.0/25.4 :
+                   ((page == 'A3') ? 420.0/25.4 :
+                   ((page == 'A5') ? 210.0/25.4 :
+                   ((page == 'B5') ? 250.0/25.4 :
+                   ((page == 'B4') ? 353.0/25.4 :
+                   ((page == 'legal') ? 14.0 :
+                   ((page == 'ledger') ? 17.0 : 11.0))))))));
+  const font = (fontElt ? fontElt.value : '18px') || '18px';
+
+  const onlyCrossword = this.printOnlyCrossword || false;
+  this.printOnlyCrossword = false;
+  return {
+    page: page,
+    font: font,
+    onlyCrossword: onlyCrossword,
+    pageMarginIn: marginIn,
+    pageWidthIn: widthIn,
+    pageHeightIn: heightIn,
+  };
 }
 
 Exolve.prototype.handleBeforePrint = function() {
@@ -5962,55 +6076,58 @@ Exolve.prototype.handleBeforePrint = function() {
     'columnarLayout': this.columnarLayout,
     'currRow': this.currRow, 'currCol': this.currCol,
     'usingGnav': this.usingGnav, 'currClueIndex': this.currClueIndex,
-    'currDir': this.currDir};
+    'currDir': this.currDir,
+    'pageYOffset': window.pageYOffset,
+    'extras': [],
+    'moves': [],
+  };
   // Unhighlight current cell/clue (handleAfterPrint() will restore).
   this.deactivator();
 
-  if (this.numCellsToFill == this.numCellsFilled) {
-    if (!this.printCompleted3Cols) {
-      return;
-    }
-  } else {
-    if (this.printIncomplete2Cols) {
-      return;
-    }
-  }
+  const settings = this.getPrintSettings();
 
-  /**
-   * The code below does a 3-column layout where the grid occupies two
-   * columns. This sort of a layout is not supported by CSS, but is
-   * quite useful for solving-on-paper (as the grid is larger and the
-   * three balanced clue columns have a pleasant appearance). The surgery
-   * done on the layout is undone in handleAfterPrint().
-   */
+  if (settings.onlyCrossword) {
+    const customStyles = document.createElement('style');
+    customStyles.insertAdjacentHTML('beforeend', `
+    body {
+      visibility: hidden;
+    }
+    #${this.prefix}-frame, #${this.prefix}-frame * {
+      visibility: visible;
+    }
+    #${this.prefix}-frame {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }`);
+    this.frame.appendChild(customStyles);
+    this.printingChanges.extras.push(customStyles);
+  }
 
   // Force non-columnar layout.
   this.columnarLayout = false;
   this.setColumnLayout();
 
-  const svgWidth = this.boxWidth + (2 * this.offsetLeft)
-  const svgHeight = this.boxHeight + (2 * this.offsetTop)
-  const goodGridDim = 662;
-  const scale = Math.min(1.75, 
-      Math.max(1.0, goodGridDim / Math.max(svgWidth, svgHeight)));
-  const scaledH = svgHeight * scale;
-  const scaledW = svgWidth * scale;
-
-  // We need to apply the print media style, with an additional 3-col
-  // grid layout. We'll then measure clue row heights and balance
-  // them across 3 columns.
-  customStyles = document.createElement('style');
+  const customStyles = document.createElement('style');
   customStyles.innerHTML = `
+  @page {
+    size: ${settings.page};
+    margin: ${settings.pageMarginIn}in;
+  }
   body {
     zoom: 100%;
+    margin: 0;
   }
-  #${this.prefix}-grid-parent-centerer {
-    text-align: left;
-    height: ${'' + scaledH + 'px'};
+  #${this.prefix}-frame {
+    font-size: ${settings.font};
+    width: 992px;
   }
-  #${this.prefix}-grid {
-    transform: scale(${scale});
-    transform-origin: top left;
+  .xlv-preamble {
+    margin: 8px 0 20px;
+  }
+  .xlv-clues {
+    padding-bottom: 0;
+    margin-bottom: 0;
   }
   .xlv-controls,
   .xlv-status,
@@ -6023,33 +6140,281 @@ Exolve.prototype.handleBeforePrint = function() {
   .xlv-postscript {
     display: none;
   }
-  .xlv-clues-box {
+  #${this.prefix}-frame .xlv-clues-box {
     max-height: none !important;
   }
-  #${this.prefix}-frame .xlv-clues-box {
-    font-size: 18px;
+  #${this.prefix}-frame .xlv-clues,
+  #${this.prefix}-frame .xlv-clues-columnar,
+  #${this.prefix}-frame .xlv-clues-flex {
+    display: block;
+  }
+  #${this.prefix}-frame .xlv-clues-panel {
+    margin-right: 0;
+  }
+  .xlv-coloured-cell, .xlv-clues {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .xlv-print-break {
+    break-after: page;
+    page-break-after: always;
+    break-inside: unset;
+    page-break-inside: unset;
+  }
+  `;
+  this.frame.appendChild(customStyles);
+  this.printingChanges.extras.push(customStyles);
+
+  let threeColumns = false;
+  if (this.numCellsToFill == this.numCellsFilled) {
+    if (this.printCompleted3Cols) {
+      threeColumns = true;
+    }
+  } else {
+    if (!this.printIncomplete2Cols) {
+      threeColumns = true;
+    }
+  }
+
+  if (threeColumns) {
+    this.printThreeColumns(settings);
+  } else {
+    this.printTwoColumns(settings);
+  }
+}
+
+Exolve.prototype.addPrintedCluesTable = function(elem, width, num) {
+  const box = document.createElement('div');
+  box.className = 'xlv-clues-box';
+  box.style.width = width + 'px'
+  const table = document.createElement('table');
+  table.id = this.prefix + '-printed-clues-table-' + num;
+  box.appendChild(table);
+  elem.insertAdjacentElement('afterbegin', box);
+  return table;
+}
+
+Exolve.prototype.scaleColouredRects = function(scale) {
+  // Scaling of coloured cells and ninas has to be done like this with code:
+  // they are not in SVG.
+  const colouredCells = [];
+  for (let i = 0; i < this.colourGroup.children.length; i++) {
+    colouredCells.push(this.colourGroup.children[i]);
+  }
+  for (let i = 0; i < this.ninaGroup.children.length; i++) {
+    colouredCells.push(this.ninaGroup.children[i]);
+  }
+  for (let e of colouredCells) {
+    e.style.left =  '' +  (parseFloat(e.style.left) * scale) + 'px';
+    e.style.top =  '' +  (parseFloat(e.style.top) * scale) + 'px';
+    e.style.width =  '' +  (parseFloat(e.style.width) * scale) + 'px';
+    e.style.height =  '' +  (parseFloat(e.style.height) * scale) + 'px';
+  }
+}
+
+Exolve.prototype.printTwoColumns = function(settings) {
+  const COLUMN_WIDTH = 488;
+  const COLUMN_SEP = 16;
+  console.assert(COLUMN_SEP + (2 * COLUMN_WIDTH) == 992);
+
+  const svgWidth = this.boxWidth + (2 * this.offsetLeft)
+  const svgHeight = this.boxHeight + (2 * this.offsetTop)
+  const goodGridDim = COLUMN_WIDTH;
+  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scaledH = svgHeight * scale;
+
+  const customStyles = document.createElement('style');
+  customStyles.innerHTML = `
+  #${this.prefix}-grid-parent-centerer {
+    text-align: left;
+    height: ${'' + scaledH + 'px'};
+  }
+  #${this.prefix}-grid {
+    transform: scale(${scale});
+    transform-origin: top left;
   }
   #${this.prefix}-frame .xlv-wide-box {
-    width: ${Math.max(480, scaledW)}px;
+    width: ${COLUMN_WIDTH}px;
   }
+  `;
+  this.frame.appendChild(customStyles);
+
+  const controlsEtcH = document.getElementById(
+      this.prefix + '-controls-etc').clientHeight;
+
+  // We need to apply the print media style, with an additional 2-col
+  // grid layout. We'll then measure clue row heights and balance
+  // them across 2 columns.
+  const customStyles2 = document.createElement('style');
+  customStyles2.innerHTML = `
+  #${this.prefix}-frame .xlv-grid-and-clues-2-columnar,
+  #${this.prefix}-frame .xlv-grid-and-clues-3-columnar,
+  #${this.prefix}-frame .xlv-grid-and-clues-flex {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: ${COLUMN_SEP}px;
+    grid-template-rows: ${scaledH + controlsEtcH}px max-content;
+    row-gap: ${COLUMN_SEP}px;
+  }
+  #${this.prefix}-frame .xlv-grid-panel {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    padding: 0;
+  }
+  #${this.prefix}-clues {
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 3;
+  }
+  #${this.prefix}-printed-clues-1 {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 2;
+  }
+  `;
+  this.frame.appendChild(customStyles2);
+
+  this.scaleColouredRects(scale);
+
+  let extraTableNum = 1;
+
+  // Extra clues column in the first column.
+  const printedClues1 = document.createElement("div");
+  printedClues1.id = `${this.prefix}-printed-clues-1` 
+  printedClues1.className = 'xlv-clues xlv-clues-panel';
+  let printedTable1 = this.addPrintedCluesTable(
+      printedClues1, COLUMN_WIDTH, extraTableNum++);
+  this.gridcluesContainer.appendChild(printedClues1);
+
+  this.equalizeClueWidths(COLUMN_WIDTH);
+  this.printingChanges.extras.push(printedClues1, customStyles, customStyles2);
+
+  const cluesPanels = this.frame.getElementsByClassName('xlv-clues-panel');
+  const cluesTables = [];
+  const clues = [];
+
+  let minH = 1000;
+  let h = 0;
+  for (let p = 0; p < cluesPanels.length; p++) {
+    const cluesPanel = cluesPanels[p];
+    cluesTables.push(null);
+    const heading = cluesPanel.firstElementChild;
+    if (!heading || cluesPanel.children.length != 2 ||
+        !cluesPanel.children[1].firstElementChild) {
+      continue;
+    }
+    const cluesTable = cluesPanel.children[1].firstElementChild;
+    cluesTables[p] = cluesTable;
+    const clueTRs = cluesTable.getElementsByTagName("tr");
+
+    for (let c = 0; c < clueTRs.length; c++) {
+      const clue = {
+        'tr': clueTRs[c],
+        'p': p,
+        'c': c,
+        'heading': (c == 0) ? heading : null
+      };
+      let ch = clue.tr.getBoundingClientRect().height;
+      if (ch < minH) minH = ch;
+      h += ch;
+      if (c == 0) {
+        h += heading.getBoundingClientRect().height;
+      }
+      clue.h = h;
+      clues.push(clue);
+    }
+  }
+
+  const gridPanelH = this.gridPanel.getBoundingClientRect().height;
+  let best1end = 0;
+  let bestGap = 1000;
+  for (let i = 0; i < clues.length; i++) {
+    const h1 = clues[i].h;
+    const h2 = h - clues[i].h;
+    let gap = h1 + gridPanelH - h2;
+    if (gap > bestGap) break;
+    gap = Math.abs(gap);
+    if (gap < bestGap) {
+      bestGap = gap;
+      best1end = i + 1;
+    }
+  }
+
+  // Move clue #s [0, best1end) to the first column.
+  for (let c = best1end - 1; c >= 0; c--) {
+    const clue = clues[c];
+    let newTable = null;
+    if (clue.heading) {
+      printedClues1.insertAdjacentElement('afterbegin', clue.heading);
+      this.printingChanges.moves.push(
+          {'target': cluesPanels[clue.p], 'elem': clue.heading});
+      newTable = this.addPrintedCluesTable(printedClues1, COLUMN_WIDTH, extraTableNum++);
+    }
+    printedTable1.insertAdjacentElement('afterbegin', clue.tr);
+    this.printingChanges.moves.push(
+        {'target': cluesTables[clue.p], 'elem': clue.tr});
+    if (newTable) {
+      printedTable1 = newTable;
+    }
+  }
+
+  this.paginate(settings);
+}
+
+Exolve.prototype.printThreeColumns = function(settings) {
+  const COLUMN_WIDTH = 320;
+  const COLUMN_SEP = 16;
+  console.assert((2 * COLUMN_SEP) + (3 * COLUMN_WIDTH) == 992);
+
+  const svgWidth = this.boxWidth + (2 * this.offsetLeft)
+  const svgHeight = this.boxHeight + (2 * this.offsetTop)
+  const goodGridDim = COLUMN_SEP + 2 * COLUMN_WIDTH;
+  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scaledH = svgHeight * scale;
+
+  const customStyles = document.createElement('style');
+  customStyles.innerHTML = `
+  #${this.prefix}-grid-parent-centerer {
+    text-align: left;
+    height: ${'' + scaledH + 'px'};
+  }
+  #${this.prefix}-grid {
+    transform: scale(${scale});
+    transform-origin: top left;
+  }
+  #${this.prefix}-frame .xlv-wide-box {
+    width: ${COLUMN_SEP + (2 * COLUMN_WIDTH)}px;
+  }
+  `;
+  this.frame.appendChild(customStyles);
+
+  const controlsEtcH = document.getElementById(
+      this.prefix + '-controls-etc').clientHeight;
+
+  // We need to apply the print media style, with an additional 3-col
+  // grid layout. We'll then measure clue row heights and balance
+  // them across 3 columns.
+  const customStyles2 = document.createElement('style');
+  customStyles2.innerHTML = `
   #${this.prefix}-frame .xlv-grid-and-clues-2-columnar,
   #${this.prefix}-frame .xlv-grid-and-clues-3-columnar,
   #${this.prefix}-frame .xlv-grid-and-clues-flex {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: max-content max-content;
+    column-gap: ${COLUMN_SEP}px;
+    grid-template-rows: ${scaledH + controlsEtcH}px max-content;
+    row-gap: ${COLUMN_SEP}px;
   }
   #${this.prefix}-frame .xlv-grid-panel {
     grid-row-start: 1;
     grid-row-end: 2;
     grid-column-start: 1;
     grid-column-end: 3;
-    padding: 0 0 8px 0;
-  }
-  #${this.prefix}-frame .xlv-clues,
-  #${this.prefix}-frame .xlv-clues-columnar,
-  #${this.prefix}-frame .xlv-clues-flex {
-    display: block;
+    padding: 0;
   }
   #${this.prefix}-clues {
     grid-row-start: 1;
@@ -6070,52 +6435,30 @@ Exolve.prototype.handleBeforePrint = function() {
     grid-column-end: 3;
   }
   `;
-  this.frame.appendChild(customStyles);
+  this.frame.appendChild(customStyles2);
 
-  // Scaling of coloured cells and ninas has to be done like with code: they
-  // are not in SVG.
-  const colouredCells = [];
-  for (let i = 0; i < this.colourGroup.children.length; i++) {
-    colouredCells.push(this.colourGroup.children[i]);
-  }
-  for (let i = 0; i < this.ninaGroup.children.length; i++) {
-    colouredCells.push(this.ninaGroup.children[i]);
-  }
-  for (let e of colouredCells) {
-    e.style.left =  '' +  (parseFloat(e.style.left) * scale) + 'px';
-    e.style.top =  '' +  (parseFloat(e.style.top) * scale) + 'px';
-    e.style.width =  '' +  (parseFloat(e.style.width) * scale) + 'px';
-    e.style.height =  '' +  (parseFloat(e.style.height) * scale) + 'px';
-  }
+  this.scaleColouredRects(scale);
+
+  let extraTableNum = 1;
 
   // Extra clues column in the first column.
   const printedClues1 = document.createElement("div");
   printedClues1.id = `${this.prefix}-printed-clues-1` 
   printedClues1.className = 'xlv-clues xlv-clues-panel';
-  printedClues1.innerHTML = `
-    <div class="xlv-clues-box">
-      <table id="${this.prefix}-printed-clues-table-1">
-      </table>
-    </div>`
+  let printedTable1 = this.addPrintedCluesTable(
+      printedClues1, COLUMN_WIDTH, extraTableNum++);
   this.gridcluesContainer.appendChild(printedClues1);
-  const printedTable1 = document.getElementById(
-      `${this.prefix}-printed-clues-table-1`);
 
   // Extra clues column in the second column.
   const printedClues2 = document.createElement("div");
   printedClues2.id = `${this.prefix}-printed-clues-2` 
   printedClues2.className = 'xlv-clues xlv-clues-panel';
-  printedClues2.innerHTML = `
-    <div class="xlv-clues-box">
-      <table id="${this.prefix}-printed-clues-table-2">
-      </table>
-    </div>`
+  let printedTable2 = this.addPrintedCluesTable(
+      printedClues2, COLUMN_WIDTH, extraTableNum++);
   this.gridcluesContainer.appendChild(printedClues2);
-  const printedTable2 = document.getElementById(
-      `${this.prefix}-printed-clues-table-2`);
 
-  this.equalizeClueWidths(325);
-  this.printingChanges.extras = [printedClues1, printedClues2, customStyles];
+  this.equalizeClueWidths(COLUMN_WIDTH);
+  this.printingChanges.extras.push(printedClues1, printedClues2, customStyles, customStyles2);
 
   const cluesPanels = this.frame.getElementsByClassName('xlv-clues-panel');
   const cluesTables = [];
@@ -6177,19 +6520,88 @@ Exolve.prototype.handleBeforePrint = function() {
 
   // Move clue #s [0, best1end) to the first column and
   // [best1end, best2end) to the second column.
-  this.printingChanges.moves = [];
-  for (let c = 0; c < best2end; c++) {
+  for (let c = best2end - 1; c >= 0; c--) {
     const clue = clues[c];
+    let newTable = null;
     if (clue.heading) {
       const dest = (c < best1end) ? printedClues1 : printedClues2;
       dest.insertAdjacentElement('afterbegin', clue.heading);
       this.printingChanges.moves.push(
           {'target': cluesPanels[clue.p], 'elem': clue.heading});
+      newTable = this.addPrintedCluesTable(dest, COLUMN_WIDTH, extraTableNum++);
     }
     const dest = (c < best1end) ? printedTable1 : printedTable2;
-    dest.appendChild(clue.tr);
+    dest.insertAdjacentElement('afterbegin', clue.tr);
     this.printingChanges.moves.push(
         {'target': cluesTables[clue.p], 'elem': clue.tr});
+    if (newTable) {
+      if (c < best1end) {
+        printedTable1 = newTable;
+      } else {
+        printedTable2 = newTable;
+      }
+    }
+  }
+
+  this.paginate(settings);
+}
+
+Exolve.prototype.paginate = function(settings) {
+  if (navigator.userAgent.indexOf('Firefox/') >= 0) {
+    // Firefox printing is complicated, give up.
+    return;
+  }
+  const outerBox = this.frame.getBoundingClientRect();
+  const bodyBox = document.body.getBoundingClientRect();
+  if (outerBox.top - bodyBox.top > 5 || outerBox.left - bodyBox.left > 5) {
+    // Not much point trying to paginate.
+    return;
+  }
+
+  let whRatio = 1.0;
+  const margin2 = 2 * settings.pageMarginIn;
+  if (settings.pageWidthIn > margin2 && settings.pageHeightIn > margin2) {
+    whRatio = ((settings.pageWidthIn - margin2) /
+               (settings.pageHeightIn - margin2));
+  }
+
+  const neededWidth = (whRatio * outerBox.height) + 10;
+  if (neededWidth > outerBox.width && neededWidth < outerBox.width * 1.05) {
+    // We can fit in one page by making slightly smaller.
+    const margin = Math.ceil(neededWidth - outerBox.width);
+    const customStyles = document.createElement('style');
+    // Add all the margin to the left, as right margin seems to get absorbed
+    customStyles.insertAdjacentHTML('beforeend', `
+    #${this.prefix}-frame {
+      margin: 0 0 0 ${margin}px;
+    }`);
+    this.frame.appendChild(customStyles);
+    this.printingChanges.extras.push(customStyles);
+    return;
+  }
+  const pageHeight = Math.floor(outerBox.width / whRatio);
+  const cluesPanels = this.frame.getElementsByClassName('xlv-clues-panel');
+
+  const breakBefores = [];
+
+  for (let p = 0; p < cluesPanels.length; p++) {
+    const clueTRs = cluesPanels[p].getElementsByTagName("tr");
+    let lastBottom = 0;
+    for (let c = 0; c < clueTRs.length; c++) {
+      const box = clueTRs[c].getBoundingClientRect();
+      const bottom = (box.top - outerBox.top) + box.height;
+      if (c > 0 && lastBottom < pageHeight && bottom > pageHeight) {
+        breakBefores.push([clueTRs[c], Math.ceil(pageHeight - lastBottom)]);
+      }
+      lastBottom = bottom;
+    }
+  }
+  for (let eh of breakBefores) {
+    const breaker = document.createElement('div');
+    breaker.className = 'xlv-print-break';
+    breaker.style.height = '' + eh[1] + 'px';
+    eh[0].insertAdjacentElement('beforebegin', breaker);
+    this.printingChanges.extras.push(breaker);
   }
 }
 

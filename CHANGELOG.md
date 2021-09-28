@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v1.22 September 28 2021
+
+- Printing tweaks and bug-fixes. Do 2-columns manually like 3-columns.
+  Measure and fit more carefully. Avoid clipping at the bottom by
+  inserting special, measured DIVs at the bottom of the first page,
+  in each clues column.
+- Add a "Print" link. Give controls for page size, margin, font size.
+  Allow printing just the crossword (useful when the crossword is
+  buried in some section of the whole page).
+- Lots of nuances to this change, see the details in the updated
+  [documentation](README.md#printing).
+
 ### Version: Exolve v1.21 September 20 2021
 
 - Add a new, 3-column layout for printing (and creating PDFs). This is

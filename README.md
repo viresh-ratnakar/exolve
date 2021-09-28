@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.21 September 20 2021
+### Version: Exolve v1.22 September 28 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1317,8 +1317,21 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
 | `warnings-label` | Please fix or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
-| `warnings.hover` | Issues detected: click &times; to dismiss|
-
+| `warnings.hover` | Issues detected: click &times; to dismiss       |
+| `print` | Print                                                  |
+| `print.hover` | Show/hide settings for printing or creating PDFs |
+| `print-heading` | Settings for printing/PDFs:                    |
+| `print-size` | Page size:                                        |
+| `print-margin` | Margin (inches):                                |
+| `print-font` | Font size:                                        |
+| `print-font-normal` | Normal                                     |
+| `print-font-large` | Large                                       |
+| `print-font-xlarge` | Extra Large                                |
+| `print-font-small` | Small                                       |
+| `print-page` | Print page                                        |
+| `print-page.hover` | Print the whole page                        |
+| `print-crossword` | Print crossword                              |
+| `print-crossword.hover` | Print just this crossword, hiding any content outside it |
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.
@@ -1600,47 +1613,10 @@ find a good OCR solution, I'll also enable opening pictures of crosswords.
 You can use your own copy of the player, or you can use [the one that I
 have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).
 
-## Printing
-
-You can print the current state of the grid by using the browser's "Print"
-command (ctrl-P or cmd-P). The printed puzzle id laid out in a newspaper-like
-multi-column layout (similar to what you get with the `columnar-layout` option).
-You can create PDF files for your crosswords by "printing to file" in most
-browsers.
-
-If not all the puzzle entries have been filled in, then the printing is done in
-three columns, with the grid occupying two columns. This makes the grid a bit
-larger and easier for writing into. This three-column rendering  (with the
-grid occupying two of the columns and the clues balanced across the three
-columns) is implemented using some code to do the balanced layout as there is
-no CSS support for such layouts.
-
-If all the puzzle entries have been filled in, then the printing is done in
-two columns, with the grid occupying the first column (which makes it slightly
-smaller than the three-column layout for incomplete puzzles). If the puzzle
-provides annotations and/or explanations that get revealed, then this two-column
-layout is especially useful to limit the printed size.
-
-For most puzzles, this layout should fit in Portrait mode for standard paper
-size (or PDF). You can reduce the printing scale manually if it just goes
-over a single page by a few lines.
-
-You can override the column choices for completed (default: 2 columns) and
-incomplete (default: 3 columns) puzzles using the options
-`print-completed-3cols` and `print-incomplete-2cols` respectively.
-
-Before printing, any highlighting of the currently active clue is removed,
-and it is restored after printing.
-
-If it does not make sense for some chunks of text or some HTML elements to be
-printed (for example, some instructions that only make sense in interactive
-mode), you can enclose them in an HTML element (such as a `DIV` or a `SPAN`)
-that has the class `xlv-dont-print`.
-
 ## On-screen layout
 
 This is a quick summary of layout-related notes (already covered in various
-sections above). This summary only applies to on-screen layout (see above
+sections above). This summary only applies to on-screen layout (see below
 for print layout).
 
 The layout of the crossword depends on the available width. This
@@ -1672,6 +1648,105 @@ the clues panels will not get unduly tall, so in that case, even in
 two-column rendering, we lay out the clues panels to the right of the grid.
 You can also use the `clues-at-right-in-two-columns` option to force
 this kind of rendering in two-column mode.
+
+## Printing
+
+You can print web pages containing Exolve crosswords using the browser's "Print"
+command (Ctrl-P or Cmd-P) or by using the "Print" link shown under the grid
+(this latter way of printing opens up a panel that provides some additional
+settings: see below). The current state of the crossword gets printed. If you
+want to print the blank grid after you've already filled some entries, or if
+you want to print the "fully revealed" grid (if available), then you can
+re-open the crossword in an incognito window, get it to the state you desire to
+print, and then print.
+
+The printed puzzle is laid out in a newspaper-like multi-column layout (similar
+to what you get with the `columnar-layout` option). You can create PDF files for
+your crosswords by "printing to file" in most browsers.
+
+If not all the puzzle entries have been filled in, then the printing is done in
+three columns, with the grid occupying two columns. This makes the grid a bit
+larger and easier for writing into.
+
+If all the puzzle entries have been filled in, then the printing is done in
+two columns, with the grid occupying the first column (which makes it slightly
+smaller than the three-column layout for incomplete puzzles). If the puzzle
+provides annotations and/or explanations that get revealed, then this two-column
+layout is especially useful to limit the printed size.
+
+For most puzzles, this layout should fit within a single page, in Portrait mode,
+for standard page sizes. You can reduce the printing scale manually (in the
+browser's print settings) if it just goes over a single page by a few lines.
+
+You can override the column choices for completed (default: 2 columns) and
+incomplete (default: 3 columns) puzzles using the options
+`print-completed-3cols` and `print-incomplete-2cols` respectively.
+
+Before printing, any highlighting of the currently active clue is removed,
+and it is restored after printing.
+
+If it does not make sense for some chunks of text or some HTML elements to be
+printed (for example, some instructions that only make sense in interactive
+mode), you can enclose them in an HTML element (such as a `DIV` or a `SPAN`)
+that has the class `xlv-dont-print`.
+
+### Additional settings for printing
+
+Clicking on the "Print" link (that's shown under the grid) toggles a panel
+with the title "Settings for printing/PDFs". This lets you specify:
+
+- Page size (such as 'Letter' or 'A4'). As of September 2021, you still need to
+  pick the same page size in the printer's settings that open up when you
+  print, if you use a paper size that's not the current choice in the printer's
+  settings.
+- Page margin in inches. Caveat: large margins may lead to some parts getting
+  clipped.
+- Font size (Normal, Large, Extra Large, Small).
+
+Additionally, from this panel, you have two buttons for printing:
+
+- You can click on a button labelled "Print page". This will print the whole
+  page, just like what you'll get from the browser's "print" function.
+- You can click on a button labelled "Print crossword". This will print *only*
+  the crossword. This is useful if the crossword is embedded with some
+  background or other content around it.
+
+### Printing layout algorithm details
+
+In preparation for printing, Exolve lays out the crossword part of the page
+(which is usually the whole page) using a width of 992 pixels (488 + 16 in
+2-columns format, and 320 + 16 + 320 + 16 + 320 in 3-column format) with 0
+margin. It then balances the clues across the 3 or 2 columns, so that the
+bottom edge is even.
+
+This is followed by an attempt at pagination (only done if the top-left of the
+Exolve crossword is very near the top-left of the page). The aspect ratio of
+the page size specified (taking into account the margins) is used to find where
+the page boundary is (in pixels). If the content already fits in one page, then
+nothing further needs to be done. If the content seems to only slighlty spill
+over to a second page, then a small left margin is added, sufficient to make the
+aspect ratio fit. If there's a non-trivial spill onto a second page, then
+Exolve inserts empty helper divs (with heights set as needed) to try to ensure
+that no clue is cut midway at the bottom of the first page *and* that the the
+remaining clues line up at the top on the second page. The hope is that browser
+will simply scale the content correctly and will arrive at the same page
+boundary.
+
+After printing, Exolve reverts the page rendering to its original state.
+
+### Browser-specific printing peculiarities
+
+Brwosers have their own printing layout algorithms that sometimes do not behave
+as expected by Exolve's printing layout algorithm. Here are some known issues as
+of September, 2021.
+
+- Printing settings in Firefox seem especially complex, and Exolve turns off
+  the pagination attempts described above if it detects the browser to be
+  Firefox. If the printed area seems too small with Firefox, try unchecking the
+  option: "Ignore Scaling and Shrink to Fit Page Width" and set the scale to
+  something like 70%.
+- In Chrome, if the margin is too high (say, more than 0.7 inches), then some
+  content may get clipped.
 
 ## API
 
