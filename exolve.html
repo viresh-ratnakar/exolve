@@ -6138,23 +6138,37 @@ Exolve.prototype.handleBeforePrint = function() {
   const settings = this.getPrintSettings();
 
   if (settings.onlyCrossword) {
-    const nextSibling = this.frame.nextSibling;
-    const parent = this.frame.parentNode;
+    const puzSibling = this.frame.nextSibling;
+    const puzParent = this.frame.parentNode;
+
+    const hider = document.createElement('div');
+    hider.className = 'xlv-dont-print';
+    const topNodes = [];
+    for (let i = 0; i < document.body.childNodes.length; i++) {
+      topNodes.push(document.body.childNodes[i]);
+    }
+    // topNodes[] is not a live list, unlike d.b.childNodes[]
+    for (let node of topNodes) {
+      if (node.isSameNode(this.frame)) continue;
+      hider.insertBefore(node, null);
+      this.printingChanges.moves.push(
+          {'elem': node, 'target': document.body, 'sibling': null});
+    }
+    document.body.insertAdjacentElement('beforeend', hider);
+    this.printingChanges.extras.push(hider);
+
+    // Exolve frame is moved after siblings, so it can be reinstated wrt an
+    // already reinstated sibling later, if one exists.
     document.body.insertAdjacentElement('afterbegin', this.frame);
     this.printingChanges.moves.push(
-        {'elem': this.frame, 'target': parent, 'sibling': nextSibling});
+        {'elem': this.frame, 'target': puzParent, 'sibling': puzSibling});
 
     const customStyles = document.createElement('style');
     customStyles.insertAdjacentHTML('beforeend', `
     body {
-      visibility: hidden;
-      background: white;
-    }
-    #${this.prefix}-frame, #${this.prefix}-frame * {
-      visibility: visible;
+      background: none !important;
     }
     #${this.prefix}-frame {
-      background: white;
       position: absolute;
       left: 0;
       top: 0;

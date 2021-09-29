@@ -1732,6 +1732,10 @@ remaining clues line up at the top on the second page. The hope is that browser
 will simply scale the content correctly and will arrive at the same page
 boundary.
 
+If printing only the crossword, all other page content is temporarily moved
+inside a DIV that is not displayed, whereas the top frame DIV of the Exolve
+crossword is moved to the beginning of `document.body`.
+
 After printing, Exolve reverts the page rendering to its original state.
 
 ### Browser-specific printing peculiarities
@@ -1747,10 +1751,6 @@ of September, 2021.
   something like 70%.
 - In Chrome, if the margin is too high (say, more than 0.7 inches), then some
   content may get clipped.
-- When using "Print crossword" to print only the crossword, if the crossword
-  is part of a long web page, then you might see a lot of blank pages in the
-  output. Please use the browser's print dialog to specify a page-range
-  selection to limit to just the first few pages that the crossword occupies.
 
 ## API
 
