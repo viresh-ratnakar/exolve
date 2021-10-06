@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.22 September 28 2021
+### Version: Exolve v1.23 October 6 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -146,6 +146,12 @@ as the square with the cursor is visible.
 
 "Clear/Check/Reveal all" buttons, the "Show ninas" button, and the "Submit"
 button solicit additional confirmation from the solver.
+
+Clicking on a clue in the clues table makes that clue active. If that clue
+was not the previously active clue, then the keyboard focus goes to the
+first letter of that clue, in the grid. If the clue was already active,
+then the focus stays with the clue, letting you select and copy parts of
+the clue/anno if needed.
 
 You can click on the black background or on the puzzle title, setter, or
 preamble (if present) to unhighlight the current clue (for printing or
@@ -1329,9 +1335,9 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-xlarge` | Extra Large                                |
 | `print-font-small` | Small                                       |
 | `print-page` | Print page                                        |
-| `print-page.hover` | Print the whole page                        |
+| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P)      |
 | `print-crossword` | Print crossword                              |
-| `print-crossword.hover` | Print just this crossword, hiding any content outside it |
+| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl-b) |
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.
@@ -1706,10 +1712,13 @@ with the title "Settings for printing/PDFs". This lets you specify:
 Additionally, from this panel, you have two buttons for printing:
 
 - You can click on a button labelled "Print page". This will print the whole
-  page, just like what you'll get from the browser's "print" function.
+  page, just like what you'll get from the browser's "print" function (which
+  can be invoked with a Ctrl-p or Cmd-p).
 - You can click on a button labelled "Print crossword". This will print *only*
   the crossword. This is useful if the crossword is embedded with some
-  background or other content around it.
+  background or other content around it. You can also print just the crossword
+  using the shortcut Ctrl-b after clicking on any light cell in the crossword
+  grid.
 
 ### Printing layout algorithm details
 

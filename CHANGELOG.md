@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v1.23 October 6, 2021
+
+- Allow printing "just the crossword" with Ctrl-b too (in addition to
+  the button shown in the print panel). Useful if the print-panel is
+  simply not displayed by choice. The Ctrl-b has to be entered after
+  clicking on a grid cell or on a clue.
+- Allow selecting text from the clues tables. Clicking on a new clue
+  continues to switch focus to the first letter of that clue in the
+  grid. However, now, if you click on the current clue itself in the
+  clues table, focus does not go away, letting you copy its text.
+
 ### Version: Exolve v1.22 September 28 2021
 
 - Printing tweaks and bug-fixes. Do 2-columns manually like 3-columns.

@@ -126,7 +126,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.22 September 28 2021';
+  this.VERSION = 'Exolve v1.23 October 6 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -395,9 +395,9 @@ function Exolve(puzzleSpec,
     'print-font-xlarge': 'Extra Large',
     'print-font-small': 'Small',
     'print-page': 'Print page',
-    'print-page.hover': 'Print the whole page',
+    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p)',
     'print-crossword': 'Print crossword',
-    'print-crossword.hover': 'Print just this crossword, hiding any content outside it',
+    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-b)',
   };
 
   // Variables set by exolve-option
@@ -4289,6 +4289,9 @@ Exolve.prototype.gnavIsClueless = function() {
 }
 
 Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
+  if (activeClueIndex == this.currClueIndex) {
+    return;
+  }
   this.deactivateCurrClue();
   let cellDir = this.cnavToInner(activeClueIndex, grabFocus)
   if (cellDir) {
@@ -4660,7 +4663,7 @@ Exolve.prototype.handleKeyUp = function(e) {
   this.handleKeyUpInner(key)
 }
 
-// For tab/shift-tab, ctrl-q, ctrl-Q
+// For tab/shift-tab, ctrl-q, ctrl-Q, ctrl-b
 Exolve.prototype.handleKeyDown = function(e) {
   let key = e.which || e.keyCode
   if (key == 9) {
@@ -4676,6 +4679,10 @@ Exolve.prototype.handleKeyDown = function(e) {
     } else {
       this.clearCurr();
     }
+  } else if (e.ctrlKey && e.key == 'b') {
+    e.stopPropagation();
+    e.preventDefault();
+    this.printNow(true);
   }
 }
 
