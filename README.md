@@ -1334,6 +1334,7 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-large` | Large                                       |
 | `print-font-xlarge` | Extra Large                                |
 | `print-font-small` | Small                                       |
+| `print-font-other` | Other                                       |
 | `print-page` | Print page                                        |
 | `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P)      |
 | `print-crossword` | Print crossword                              |
