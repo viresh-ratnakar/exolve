@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v1.24 October 7, 2021
+
+- Add a way to specify any particular font size to use when ptinting
+  (apart from the canned options).
+- Add a way to disable "fancy" printing (for eg, from Exet): just set
+  puz.printAsIs = true in customizeExolve(puz).
+- Reduce a few margins somewhat.
+
 ### Version: Exolve v1.23 October 6, 2021
 
 - Allow printing "just the crossword" with Ctrl-b too (in addition to

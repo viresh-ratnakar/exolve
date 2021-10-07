@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.23 October 6 2021
+### Version: Exolve v1.24 October 7 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1707,7 +1707,11 @@ with the title "Settings for printing/PDFs". This lets you specify:
   settings.
 - Page margin in inches. Caveat: large margins may lead to some parts getting
   clipped.
-- Font size (Normal, Large, Extra Large, Small).
+- Font size (Normal, Large, Extra Large, Small, or specify an arbitrary font
+  size). Please note that the specific font size picked, such as "18px" may
+  not be the actual printed size exactly (because of scaling). However, in
+  general, you can increase/decrease the font size setting and the printed
+  size will increase/decrease accordingly.
 
 Additionally, from this panel, you have two buttons for printing:
 
@@ -1746,6 +1750,14 @@ inside a DIV that is not displayed, whereas the top frame DIV of the Exolve
 crossword is moved to the beginning of `document.body`.
 
 After printing, Exolve reverts the page rendering to its original state.
+
+If, for some reason, you do not want Exolve to use its printing layout
+algorithm, then you can turn it off by setting a field, like this:
+```
+  function customizeExolve(p) {
+    p.printAsIs = true;
+  }
+```
 
 ### Browser-specific printing peculiarities
 

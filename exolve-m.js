@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.23 October 6 2021';
+  this.VERSION = 'Exolve v1.24 October 7 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -347,6 +347,7 @@ function Exolve(puzzleSpec,
     'print-font-large': 'Large',
     'print-font-xlarge': 'Extra Large',
     'print-font-small': 'Small',
+    'print-font-other': 'Other',
     'print-page': 'Print page',
     'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p)',
     'print-crossword': 'Print crossword',
@@ -508,7 +509,11 @@ Exolve.prototype.init = function() {
                       <option value="22px">${this.textLabels['print-font-large']}</option>
                       <option value="26px">${this.textLabels['print-font-xlarge']}</option>
                       <option value="14px">${this.textLabels['print-font-small']}</option>
+                      <option value="other">${this.textLabels['print-font-other']}</option>
                     </select>
+                    <input class="xlv-answer" id="${this.prefix}-print-font-inp"
+                      name="${this.prefix}-print-font-inp" size="5" value="18px">
+                    </input>
                   </div>
                   <div>
                     ${this.textLabels['print-size']}
@@ -744,6 +749,11 @@ Exolve.prototype.init = function() {
   printPage.addEventListener('click', this.printNow.bind(this, false));
   const printCrossword = document.getElementById(this.prefix + '-print-crossword');
   printCrossword.addEventListener('click', this.printNow.bind(this, true));
+  this.printFontMenu = document.getElementById(this.prefix + '-print-font');
+  this.printFontMenu.addEventListener('change', this.setPrintFont.bind(this, true));
+  this.printFontInput = document.getElementById(this.prefix + '-print-font-inp');
+  this.printFontInput.addEventListener(
+      'change', this.setPrintFont.bind(this, false));
 
   document.getElementById(this.prefix + '-tools-link').addEventListener(
         'click', this.togglePanel.bind(this, '-tools'));
@@ -6038,10 +6048,29 @@ Exolve.prototype.handleAfterPrint = function() {
   this.printingChanges = null;
 }
 
+Exolve.prototype.setPrintFont = function(fromMenu) {
+  if (!this.printFontMenu || !this.printFontInput) return;
+  if (fromMenu && this.printFontMenu.value != 'other') {
+    this.printFontInput.value = this.printFontMenu.value;
+  }
+  if (!this.printFontInput.value) {
+    this.printFontInput.value = '18px';
+  }
+  if (this.printFontInput.value != this.printFontInput.value.toLowerCase()) {
+    this.printFontInput.value = this.printFontInput.value.toLowerCase();
+  }
+  if (!fromMenu) {
+    if (['18px', '22px', '26px', '14px'].includes(this.printFontInput.value)) {
+      this.printFontMenu.value = this.printFontInput.value;
+    } else {
+      this.printFontMenu.value = 'other';
+    }
+  }
+}
+
 Exolve.prototype.getPrintSettings = function() {
   const pageSizeElt = document.getElementById(this.prefix + '-page-size');
   const pageMarginElt = document.getElementById(this.prefix + '-page-margin');
-  const fontElt = document.getElementById(this.prefix + '-print-font');
 
   const page = (pageSizeElt ? pageSizeElt.value : 'letter') || 'letter';
 
@@ -6066,7 +6095,7 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'B4') ? 353.0/25.4 :
                    ((page == 'legal') ? 14.0 :
                    ((page == 'ledger') ? 17.0 : 11.0))))))));
-  const font = (fontElt ? fontElt.value : '18px') || '18px';
+  const font = (this.printFontInput ? this.printFontInput.value : '18px') || '18px';
 
   const onlyCrossword = this.printOnlyCrossword || false;
   this.printOnlyCrossword = false;
@@ -6081,6 +6110,9 @@ Exolve.prototype.getPrintSettings = function() {
 }
 
 Exolve.prototype.handleBeforePrint = function() {
+  if (this.printAsIs) {
+    return;
+  }
   this.handleAfterPrint();  // Unnecessary, but can't hurt to be sure.
 
   this.printingChanges = {
