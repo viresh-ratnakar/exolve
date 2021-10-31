@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.24"/>
-<script src="exolve-m.js?v1.24"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.25"/>
+<script src="exolve-m.js?v1.25"></script>
 
 <script>
 function customizeExolve(p) {
@@ -12,7 +12,7 @@ function customizeExolve(p) {
   c = p.addCellText(0, 3, '①', 16, 14, true, true)
   c.style.stroke = 'blue'
   c = p.addCellText(1, 0, '*', 18, 10, false, true)
-  c = p.addCellText(1, 2, '%', 12, 8, false, false)
+  c = p.addCellText(1, 2, '&alpha;', 12, 8, false, false)
   p.activateCell(0,0)
 
   p.background.setAttributeNS(null, 'fill', 'red')
@@ -31,6 +31,15 @@ function customizeExolve(p) {
     'p.GRIDLINE',
     'p.squareDim',
     'p.circleR',
+    'p.questions',
+    'p.answersList',
+    'p.id',
+    'p.clearAllButton',
+    'p.clearButton',
+    'p.submitButton',
+    'p.gridInput',
+    'p.gridInputWrapper',
+    'p.allClueIndices',
   ]
   for (let v of expectedVars) {
     eval('console.log("' + v + ' = " + ' + v + ')')
@@ -53,6 +62,8 @@ function customizeExolve(p) {
     'p.revealAll',
     'p.clearCurr',
     'p.clearAll',
+    'p.parseState',
+    'p.updateClueState',
   ]
   for (let f of expectedFunctions) {
     eval('console.log("func ' + f + ' = " + (' + f + '!= null))')
@@ -75,6 +86,12 @@ function customizeExolve(p) {
     'xlv1-across-label',
     'xlv1-down-label',
     'xlv1-saving',
+    'xlv1-controls-etc',
+    'xlv1-button-row-1',
+    'xlv1-button-row-2',
+    'xlv1-saving',
+    'xlv1-small-print',
+    'xlv1-grid-parent',
   ]
   for (let id of expectedIds) {
     let elt = document.getElementById(id)
@@ -83,7 +100,8 @@ function customizeExolve(p) {
       return
     }
   }
-  p.background.setAttributeNS(null, 'fill', 'green')
+  p.background.setAttributeNS(null, 'fill', 'green');
+  p.background.style.fill = 'green';
 }
 </script>
 

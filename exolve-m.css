@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.24 October 7 2021
+Version: Exolve v1.25 October 31 2021
 */
 
 @media (max-width: 500px) {
@@ -25,6 +25,7 @@ Version: Exolve v1.24 October 7 2021
 .xlv-saving,
 .xlv-solution,
 .xlv-answer,
+.xlv-input,
 .xlv-incluefill,
 .xlv-scratchpad,
 .xlv-shuffle {
@@ -69,6 +70,7 @@ Version: Exolve v1.24 October 7 2021
   .xlv-saving,
   .xlv-solution,
   .xlv-answer,
+  .xlv-input,
   .xlv-incluefill,
   .xlv-scratchpad,
   .xlv-shuffle {
@@ -286,14 +288,24 @@ Version: Exolve v1.24 October 7 2021
   z-index: 1;
 }
 .xlv-grid-input-rarr {
-  position: relative;
-  right: -40%;
-  top: -85%;
+  position: absolute;
+  right: 0;
+  top: 20%;
+}
+.xlv-grid-input-larr {
+  position: absolute;
+  left: 0;
+  top: 20%;
 }
 .xlv-grid-input-darr {
-  position: relative;
-  right: 0;
-  top: -40%;
+  position: absolute;
+  left: 40%;
+  top: 65%;
+}
+.xlv-grid-input-uarr {
+  position: absolute;
+  left: 40%;
+  top: -20%;
 }
 .xlv-grid-input {
   text-align: center;
@@ -379,6 +391,7 @@ Version: Exolve v1.24 October 7 2021
 .xlv-question {
   margin: 12px 0 2px 0;
 }
+.xlv-input,
 .xlv-answer {
   border: none;
   padding: 0 0 6px 0;

@@ -1,8 +1,43 @@
 # Changelog
 
+### Version: Exolve v1.25 October 28, 2021
+
+- Kinda major changes in this release.
+- 3-D crosswords are now supported!
+  - See detailed documentation in [README.md](README.md#exolve-3d).
+  - Use `exolve-3d` to specify the number of layers, and the displayed
+    layer "parallelogram" appearance.
+  - Use `exolve-3d-across`, `exolve-3d-towards`, and `exolve-3d-down` to
+    specify the clues.
+- You can reverse the orientation of any light now, with `exolve-reversals`.
+  - Changes clue numbering.
+  - We introduce suffixes "b" ("back") and "u" ("up") for reversed clues.
+  - 3-D clues can be be reversed too. 3-D clues use these 2-letter suffixes:
+    "ac" ("across"), "ba" ("back"), "to" ("towards"), "aw" ("away"),
+    "dn" ("down"), and "up" ("up").
+- Add left/up arrows in the active cell too, as cisual guides for reversed
+  lights. In 3-D crosswords, for "up" use left and up arrows together, and
+  for "dn" use right and down arrows together.
+- The display positioning for these arrows was done with css relative
+  positioning earlier, which was a mistake. Fixed now, changing to absolute.
+- Lots of other refactoring for 3-D and reversals support.
+- Bug-fix: use a separate css class other than `xlv-answer` for printer
+  settings inputs (otherwise my 'Al Tricks' puzzle gets messed up!).
+- Deal with two corner cases created by linking lights. When a light ends on
+  the same cell where the next linked light starts, then that cell is now *not*
+  counted twice.
+- The second corner case can come from linking and reversals: if you link a
+  sequence of lights (including some reversed lights) such that the last cell
+  of the linked group is exactly its starting cell, then that cell is also not
+  counted twice. Further, the interface lets you type letters in a loop along
+  the sequence (as that seems to be the fun thing to do for this corner case).
+  For backspacing (when erasing) cells in such a snake-swallowing-its-own-head
+  loopy linked group, the interface stops the backspacing at the first cell.
+
+
 ### Version: Exolve v1.24 October 7, 2021
 
-- Add a way to specify any particular font size to use when ptinting
+- Add a way to specify any particular font size to use when printing
   (apart from the canned options).
 - Add a way to disable "fancy" printing (for eg, from Exet): just set
   puz.printAsIs = true in customizeExolve(puz).

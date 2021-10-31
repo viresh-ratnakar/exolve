@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.25"/>
+<script src="exolve-m.js?v1.25"></script>
+
+<title>Test-3D-Small</title>
+
+</head>
+<body>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-title: Test 3D Small
+  exolve-id: test-3d-small
+  exolve-width: 3
+  exolve-height: 9
+  exolve-3d: 3
+  exolve-grid:
+
+
+    0 0 0
+    0 . 0
+    0 0 0
+
+    0@ . 0
+    . . .
+    0 . 0
+
+    0 0 0
+    0 . 0
+    0 0 0
+
+  exolve-3d-away:
+    1 Away clue for a7-a9 (3)
+    2 Away clue for c7-c9 (3)
+    5 Away clue for a1-a3 (3)
+    6 Away clue for c1-c3 (3)
+  exolve-3d-down: 
+    1 Down clue for a7,a4,a1 (3)
+    2 Down clue for c7,c4,c1 (3)
+    3 Down clue for a9,a6,a3 (3)
+    4 Down clue for c9,c6,c3 (3)
+  exolve-3d-across:
+    1 Across clue for a7-c7 (3)
+    3 Across clue for a9-c9 (3)
+    5 Across clue for a1-c1 (3)
+    7 Across clue for a3-c3 (3)
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+</script>
+</body>
+</html>

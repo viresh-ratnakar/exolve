@@ -2,11 +2,11 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.24 October 7 2021
+### Version: Exolve v1.25 October 31 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
-diagramless or are 3-d, etc.) in any language.
+diagramless or are 3-D, etc.) in any language.
 
 The file [exolve.html](exolve.html) contains *all* the code you need: just
 make a copy and then replace the part that contains the example grid with your
@@ -174,6 +174,11 @@ and the `exolve-end` line:
 * `exolve-across`
 * `exolve-down`
 * `exolve-nodir`
+* `exolve-reversals`
+* `exolve-3d`
+* `exolve-3d-across`
+* `exolve-3d-away`
+* `exolve-3d-down`
 * `exolve-explanations`
 * `exolve-nina`
 * `exolve-colour` / `exolve-color`
@@ -420,6 +425,13 @@ the solver is entering a value in a light for which the clue association is not
 known, the highlighted "current clue" browsable interface runs through all the
 clues for which all grid cells are not known.
 
+Clue numbering can be affected by the following additional factors covered in
+other sections:
+- The "skip numbering" decorator ('~') covered above in the
+  [`exolve-grid`](#exolve-grid) section.
+- [`exolve-reversals`](#exolve-reversals)
+- [`exolve-3d`](#exolve-3d)
+
 ## Extended chessboard notation
 In a few cases (such as when specifying colouring or ninas or locations of
 some clue numbers in diagramless puzzles), you will need to specify the location
@@ -490,6 +502,11 @@ normal enum is not present in the clue.
 In the rare case that there are multiple candidate enum parts in a clue, the
 last one is used. However, this can be overridden by explicitly using "[]"
 to mark the end of the clue (see [`Annotations`](#annotations) below).
+
+In a 3-D crossword, instead of `exolve-across` and `exolve-down` you should use
+`exolve-3d-across` and `exolve-3d-away` sections, respectively, with an
+`exolve-3d-down` section providing the clues for the vertical lights through
+the layers. You can find the details in the [`exolve-3d`](#exolve-3d) section.
 
 ### Suppressing enums or separators
 
@@ -601,7 +618,7 @@ are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
 
-### Linked clues
+### Linked lights and clues
 If a linked clue includes other "children clues," this can be indicated by
 appending a comma-separated list of children clue numbers to the parent clue
 number. Example:
@@ -615,8 +632,22 @@ number. Example:
 ```
 As shown in the above example, if a child clue (2d in the example) has a
 different direction from the parent, the direction can be specified with a
-one-letter suffix ("a" or "d").
+one-letter suffix ("a" or "d" or "b" or "u"), or, in 3-D crosswords, with
+a two-letter suffix ("ac" or "aw" or "dn" or "ba" or "to" or "up").
 
+Linking lights can create two corner cases that are noteworthy. (1) When a
+light ends on the same cell where the next linked light starts, then that
+cell is *not* counted twice. So, in a 3x3 grid with 3-letter lights 1a and 2d
+linked, where 2d starts on the same cell as where 1a ends (cell r3c3), the total
+length of the linked lights would be 5 not 6. (2) If you link a sequence of
+lights (including some reversed lights) such that the last cell of the linked
+group is exactly its starting cell, then that cell is also not counted twice.
+Further, the interface lets you type letters in a loop along the sequence (as
+that seems to be the fun thing to do for this corner case). For backspacing
+(when erasing) cells in such a snake-swallowing-its-own-head loopy linked
+group, the interface stops the backspacing at the first cell.
+
+### Filled clues
 While solving, when a light is fully filled in, its clue number changes
 colour (to a light shade of blue, making the unsolved clue numbers stand out).
 There are some minor exceptions when this does not happen (diagramless cells
@@ -741,9 +772,11 @@ a nodir clue can be scattered arbitrarily in the grid). Example:
   exolve-nodir:
     #c3 #c5 #c8 #f6 [A] One hundred years lived in prison (4)
 ```
-Note that this technique can be used to create 3-d (or 4-d!) puzzles. Use a
-nodir section for the third dimension, explicitly specifying the cells for
-each clue along the third dimension.
+Note that this technique can be used to create multidimensional (like 4-D!)
+puzzles: use a nodir section for specifiying lights along all the extra
+dimensions, explicitly specifying their cells. For 3-D crosswords, Exolve
+provides better and more complete support, including a nice 3-D appearance
+(see the [`exolve-3d`](#exolve-3d) section).
 
 ### Skipped-number cells and clues with cells specified
 If an across/down clue's start cell has the decorator "\~", its normal numbering
@@ -899,6 +932,128 @@ mark an across/down clue "deleted" by simply setting it to \*. For example:
     #a3 #a2 #a1 #b1 #c1 [1] tacky (5)
   
 ```
+
+## `exolve-reversals`
+The grid implies a sequence of cells for each light (top-to-left for across
+clues and top-to-bottom for down clues). You can reverse this orientation for
+selected lights by specifying their starting and ending cells on one (or more)
+`exolve-reversals` lines. For example:
+```
+  exolve-reversals: a5-a10 r10c2-r4c2
+```
+In this example, the across light running in the bottom row from columns
+5 to 10 will get reversed, as will the down light running in the second
+column from row 10 down to row 4.
+
+Note that the starting and ending cells should be listed (separated by a
+hyphen) *in their original, unreversed order.* The reversal modifies
+clue/light-numbering, as the number is assigned at the new starting cell
+(after reversal).
+
+When you reverse an across clue, its distinctive letter suffix becomes "b"
+(for "back") instead of "a". So you can refer to "12b" when linking clues,
+when specifying lights with coloured cells, etc. Similarly, the letter
+suffix for a reversed down clue becomes "u" instead of "d".
+
+Reversals can also be done for the vertical clues in 3-D crosswords
+(see below). They should not be done for general nodir clues where you've
+specified the cells (as you can easily just specify the cells in the desired
+order).
+
+## `exolve-3d`
+A special and popular case of n-dimensional crosswords is "3-D" crosswords, and
+Exolve offers direct support to create such puzzles, rendering them in a nice
+stack of layers of 2-D grids.
+
+You can specify that a crossword is a 3-D crossword by using the `exolve-3d`
+section. The number of "layers" in the 3-D scheme is specified as a parameter,
+like `exolve-3d: 3`. This number must be an integer that is bigger than 1 and
+must be a divisor of the height of the grid. Additionally, you can control the
+appearance of the 3-D grid (which looks like stacked parallelograms, one for
+each layer) with two optional parameters that follow the number of layers:
+angle (in degrees, default is 55) and each cell parallelogram's height-to-width
+ratio (default is 0.75). So, the `exolve-3d` line looks like:
+`exolve-3d: <num-layers> [<angle-degrees> [<height-to-width-ratio>]]`.
+The following line would make the parallelograms look much more "spaced out":
+```
+  exolve-3d: 5 45 1.4
+```
+And this one uses less space vertically, rendering very "squished"
+parallelograms:
+```
+  exolve-3d: 5 35 0.6
+```
+
+The grid in a 3-D crossword should be provided layer-by-layer (starting at the
+top layer). Note that the height of the grid divided by the number of layers is
+the depth of each layer.
+
+The clues in a 3-D crossword should be provided using `exolve-3d-across`,
+`exolve-3d-away`, and `exolve-3d-down` clues sections (the `exolve-across`
+and `exolve-down` sections should not be used).
+
+For example:
+```
+  exolve-width: 3
+  exolve-height: 9
+  exolve-3d: 3
+  exolve-grid:
+    0 0 0
+    0 . 0
+    0 0 0
+
+    0 . 0
+    . . .
+    0 . 0
+
+    0 0 0
+    0 . 0
+    0 0 0
+  exolve-3d-across:
+    1 Across clue for a7-c7 (3)
+    3 Across clue for a9-c9 (3)
+    5 Across clue for a1-c1 (3)
+    7 Across clue for a3-c3 (3)
+  exolve-3d-away:
+    1 Away clue for a7-a9 (3)
+    2 Away clue for c7-c9 (3)
+    5 Away clue for a1-a3 (3)
+    6 Away clue for c1-c3 (3)
+  exolve-3d-down: 
+    1 Down clue for a7,a4,a1 (3)
+    2 Down clue for c7,c4,c1 (3)
+    3 Down clue for a9,a6,a3 (3)
+    4 Down clue for c9,c6,c3 (3)
+
+```
+
+When you need to specify a clue number + direction in a 3-D crossword (for
+example, for linking clues, or for specifying ninas, etc.), you should use the
+following 2-letter suffixes: "ac"/"aw"/"dn". You can reverse the orientation of
+selected lights in a 3-D crossword, including the lights running vertically
+down through the layers. Note that the "normal" (unreversed) orientations are
+across, away, and down. For reversed lights, you should use the suffixes "ba"
+(for "back"), "ro" (for "towards"), and "dn" (for "down").  These suffixes only
+work in 3-D crosswords.
+
+A few more notes on 3-D crosswords:
+
+- Clue numbering goes top layer to bottom layer, and within each layer it starts
+  at the nearest row and goes back, and within each row, it goes left to right.
+- You can use bars to additionally break across/back/away/towards lights (but
+  not down/up lights).
+- As you can probably tell, "away" and "towards" lights are internally
+  implemented as what would have been "down" lights in a 2-D crossword. You
+  cannot use the normal 2-D directional suffixes ("a", "b", "d", u") in 3-D
+  crosswords, to avoid confusion.
+- The specified angle should be in the range [20, 90], and the specified ratio
+  must be in the range [0.4, 1.6].
+- You cannot have diagramless cells in a 3-D crossword (for now!).
+- Internally, Exolve separates the layers using horizontal bars.
+- If you specify `exolve-cell-size` then the specified width/height become the
+  width/height of the cell's parallelogram, ignoring any height-to-width ratio
+  specified on the `exolve-3d` line.
+- Hyphens and word-end separators are not displayed in 3-D down/up lights.
 
 ## `exolve-explanations`
 In a grid that includes solutions, the setter may provide additional notes,
@@ -1167,7 +1322,7 @@ be overriding), and descriptions.
 | `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
 | `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
 | `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
-| `colour-arrow`             | mistyrose     | The right- or down-arrow in the square where the solver is typing.|
+| `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
 | `colour-prefill`           | blue          | Any letters pre-filled with the ! decorator.|
 | `colour-anno`              | darkgreen     | The text of the annotation.       |
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
@@ -1285,6 +1440,10 @@ Here are all the names of pieces of text that you can relabel:
 | `squares-filled` | Squares filled                       |
 | `across-label`   | Across                               |
 | `down-label`     | Down                                 |
+| `3d-ac-label`     | Across & Back                        |
+| `3d-aw-label`     | Away & Towards                       |
+| `3d-dn-label`     | Down & Up'                           |
+| `nodir-label`    | Other                                |
 | `tools-link`     | Tools                                |
 | `tools-link.hover` | Show/hide tools: manage storage, see list of control keys and scratch pad|
 | `tools-msg`      | Control keys: &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|
@@ -1303,6 +1462,14 @@ Here are all the names of pieces of text that you can relabel:
 | `shuffle.hover`  | Shuffle selected text (or all text, if none selected)|
 | `across-letter`  | a                                    |
 | `down-letter`    | d                                    |
+| `back-letter`    | b                                    |
+| `up-letter`      | u                                    |
+| `3d-ac`          | ac                                   |
+| `3d-ba`          | ba                                   |
+| `3d-aw`          | aw                                   |
+| `3d-to`          | to                                   |
+| `3d-dn`          | dn                                   |
+| `3d-up`          | up                                   |
 | `mark-clue.hover` | Click to forcibly mark/unmark as solved <sub>(Only used for clue labels on clues that do not have all their cell-associations known)</sub>|
 | `placeholder.hover` | You can record your solution here before copying to squares |
 | `placeholder-copy` | &#8690; |
