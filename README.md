@@ -1033,7 +1033,7 @@ following 2-letter suffixes: "ac"/"aw"/"dn". You can reverse the orientation of
 selected lights in a 3-D crossword, including the lights running vertically
 down through the layers. Note that the "normal" (unreversed) orientations are
 across, away, and down. For reversed lights, you should use the suffixes "ba"
-(for "back"), "ro" (for "towards"), and "dn" (for "down").  These suffixes only
+(for "back"), "to" (for "towards"), and "dn" (for "down").  These suffixes only
 work in 3-D crosswords.
 
 A few more notes on 3-D crosswords:
