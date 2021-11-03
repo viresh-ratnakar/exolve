@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.26 November 3, 2021
+
+- Bug-fix: ninas and coloured cells were not working in 3-D crosswords.
+  Fixed, along with some refactoring.
+- Bug-fix: parseClueLabel() was calling "away" the reversed direction
+  (now "towards") in 3-D.
+- Keep the list of reversals around (transferring them to usedReversals after
+  using) for Exet.
+
 ### Version: Exolve v1.25 October 28, 2021
 
 - Kinda major changes in this release.

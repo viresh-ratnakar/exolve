@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.25 October 31 2021';
+  this.VERSION = 'Exolve v1.26 November 3 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -92,6 +92,8 @@ function Exolve(puzzleSpec,
   this.layers3d = 1;
   this.h3dLayer = 0;
   this.angle3d = 55;
+  this.skew3d = `skewX(${this.angle3d - 90}deg)`;
+  this.offset3d = 0;
   this.ratio3d = 0.75;
   this.cellW = 0;
   this.cellH = 0;
@@ -140,6 +142,7 @@ function Exolve(puzzleSpec,
   this.hasZ3dClues = false;
   this.hasNodirClues = false;
   this.reversals = {};
+  this.usedReversals = {};
   // Clues labeled non-numerically (like [A] a clue...) use this to create a
   // unique clueIndex.
   this.nextNonNumId = 1;
@@ -1777,6 +1780,7 @@ Exolve.prototype.parse3d = function(s) {
       this.ratio3d < 0.4 || this.ratio3d > 1.6) {
     this.throwErr('exolve-3d: invalid parameters specified')
   }
+  this.skew3d = `skewX(${this.angle3d - 90}deg)`;
 }
 
 Exolve.prototype.startsAcrossClue = function(i, j) {
@@ -1874,6 +1878,7 @@ Exolve.prototype.newClue = function(index) {
   clue.wordEndAfter = [];
   clue.anno = '';
   clue.linkedOffset = 0;
+  clue.reversed = false;
   return clue;
 }
 
@@ -1881,6 +1886,7 @@ Exolve.prototype.maybeReverseLight = function(cells) {
   const key = this.reversalKey(cells);
   if (!this.reversals[key]) return false;
   cells.reverse();
+  this.usedReversals[key] = this.reversals[key];
   delete this.reversals[key];
   return true;
 }
@@ -2211,14 +2217,14 @@ Exolve.prototype.parseDir = function(s) {
       skip = match[0].length;
       if (dirStr == 'ac') {
         parse.dir = 'A';
-      } else if (dirStr == 'to') {
+      } else if (dirStr == 'aw') {
         parse.dir = 'D';
       } else if (dirStr == 'dn') {
         parse.dir = 'Z';
       } else if (dirStr == 'ba') {
         parse.dir = 'A';
         parse.reversed = true;
-      } else if (dirStr == 'aw') {
+      } else if (dirStr == 'to') {
         parse.dir = 'D';
         parse.reversed = true;
       } else if (dirStr == 'up') {
@@ -2245,6 +2251,7 @@ Exolve.prototype.parseDir = function(s) {
 // isOffNum
 // dir = A/D/Z/X
 // dirStr
+// dirIsPrefix
 // reversed (for d/u and ba/aw/up).
 // hasChildren
 // skip
@@ -2261,6 +2268,7 @@ Exolve.prototype.parseClueLabel = function(clueLine) {
   const prefDir = this.parseDir(clueLine);
   if (prefDir.dir) {
     parse.dir = prefDir.dir;
+    parse.dirIsPrefix = true;
     parse.dirStr = prefDir.dirStr;
     parse.reversed = prefDir.reversed;
     parse.skip += prefDir.skip;
@@ -2958,8 +2966,7 @@ Exolve.prototype.processClueChildren = function() {
       const child = clue.children[chi];
       // Direction could be the same as the direction of the parent. Or,
       // if there is no such clue, then direction could be the other direction.
-      // The direction could also be explicitly specified with a 'd' or 'a'
-      // suffix.
+      // The direction could also be explicitly specified with a suffix.
       let childIndex = this.getDirClueIndex(clue.dir, child.label);
       if (!child.isOffNum) {
         if (!this.clues[childIndex]) {
@@ -4339,12 +4346,9 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
   }
 
   if (this.layers3d > 1) {
-    const li = this.currRow % this.h3dLayer;
-    const offset = (this.h3dLayer - li) * this.offset3d;
     this.gridInputWrapper.style.transformOrigin = 'top left';
-    const transform = `skewX(${this.angle3d - 90}deg) ` +
-                      `translate(${offset}px)`;
-    this.gridInputWrapper.style.transform = transform;
+    this.gridInputWrapper.style.transform =
+      this.skew3d + ` translate(${gridCell.offset3d}px)`;
   }
 
   return activeClueIndex
@@ -5250,7 +5254,7 @@ Exolve.prototype.createListeners = function() {
   window.addEventListener('afterprint', this.handleAfterPrint.bind(this));
 }
 
-Exolve.prototype.recolourCells = function() {
+Exolve.prototype.recolourCells = function(scale=1) {
   // Set colours specified through exolve-colour.
   this.colourGroup.innerHTML = '';
   for (let cellColour of this.cellColours) {
@@ -5263,13 +5267,13 @@ Exolve.prototype.recolourCells = function() {
       for (let cell of clue.cells) {
         const row = cell[0]
         const col = cell[1]
-        this.colourGroup.appendChild(this.makeColouredRect(row, col, colour));
+        this.colourGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
       }
     } else {
       const row = cellColour[0]
       const col = cellColour[1]
       const colour = cellColour[2]
-      this.colourGroup.appendChild(this.makeColouredRect(row, col, colour));
+      this.colourGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
     }
   }
   this.colourGroup.style.display = (this.cellColours.length > 0) ? '' : 'none';
@@ -5372,8 +5376,6 @@ Exolve.prototype.displayGrid = function() {
     }
   }
 
-  this.recolourCells();
-
   // Bars/word-ends to the right and under; hyphens.
   for (let i = 0; i < this.gridHeight; i++) {
     for (let j = 0; j < this.gridWidth; j++) {
@@ -5442,20 +5444,19 @@ Exolve.prototype.displayGrid = function() {
     }
   }
   this.statusNumTotal.innerHTML = this.numCellsToFill
-  if (this.layers3d > 1) {
-    this.makeDisplay3D();
-  }
 }
 
-Exolve.prototype.makeDisplay3D = function() {
+Exolve.prototype.makeGrid3D = function() {
   if (this.layers3d <= 1) {
     return;
   }
-  // Add background cells and boundary lines as we do not use
-  // a full background for 3-d.
+  // Set offset3d in each cell. Add background cells and boundary lines as we
+  // do not use a full background for 3-d.
   for (let i = 0; i < this.gridHeight; i++) {
+    const offset3d = this.offset3d * (this.h3dLayer - (i % this.h3dLayer));
     for (let j = 0; j < this.gridWidth; j++) {
       const gridCell = this.grid[i][j]
+      gridCell.offset3d = offset3d;
       if (!gridCell.isLight && !gridCell.isDgmless) {
         gridCell.cellGroup =
             document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -5493,15 +5494,12 @@ Exolve.prototype.makeDisplay3D = function() {
     }
   }
   for (let i = 0; i < this.gridHeight; i++) {
-    const li = i % this.h3dLayer;
-    const offset = (this.h3dLayer - li) * this.offset3d;
     for (let j = 0; j < this.gridWidth; j++) {
       const gridCell = this.grid[i][j];
       const g = gridCell.cellGroup;
       const origin = `${gridCell.cellLeft}px ${gridCell.cellTop}px`;
+      const transform = this.skew3d + ` translate(${gridCell.offset3d}px)`;
       g.style.transformOrigin = origin;
-      const transform = `skewX(${this.angle3d - 90}deg) ` +
-                        `translate(${offset}px)`;
       g.style.transform = transform;
       if (gridCell.miscGroup) {
         gridCell.miscGroup.style.transformOrigin = origin;
@@ -5540,22 +5538,30 @@ Exolve.prototype.addCellText = function(row, col, text,
   return cellText;
 }
 
-Exolve.prototype.makeColouredRect = function(row, col, colour) {
+Exolve.prototype.makeCellDiv = function(row, col, colour, scale=1) {
+  const gridCell = this.grid[row][col];
+  const cellLeft = gridCell.cellLeft * scale;
+  const cellTop = gridCell.cellTop * scale;
+
   const rect = document.createElement('div');
-  const cellLeft = this.cellLeftPos(col, this.GRIDLINE)
-  const cellTop = this.cellTopPos(row, this.GRIDLINE)
-  rect.style.left =  '' +  cellLeft + 'px';
-  rect.style.top = '' + cellTop + 'px';
-  rect.style.width = '' + this.cellW + 'px';
-  rect.style.height = '' + this.cellH + 'px';
   rect.style.backgroundColor = colour;
   rect.setAttributeNS(null, 'class', 'xlv-coloured-cell');
+
+  rect.style.left =  '' +  cellLeft + 'px';
+  rect.style.top = '' + cellTop + 'px';
+  rect.style.width = '' + (this.cellW * scale) + 'px';
+  rect.style.height = '' + (this.cellH * scale) + 'px';
+  if (this.layers3d > 1) {
+    rect.style.transformOrigin = 'top left';
+    rect.style.transform =
+      `${this.skew3d} translate(${gridCell.offset3d * scale}px)`;
+  }
   rect.addEventListener(
       'click', this.cellActivator.bind(this, row, col));
   return rect;
 }
 
-Exolve.prototype.redisplayNinas = function() {
+Exolve.prototype.redisplayNinas = function(scale=1) {
   this.ninaGroup.innerHTML = '';
   this.ninaClassElements = [];
   let ninaColorIndex = 0;
@@ -5594,7 +5600,7 @@ Exolve.prototype.redisplayNinas = function() {
       }
       const row = cellOrClass[0]
       const col = cellOrClass[1]
-      this.ninaGroup.appendChild(this.makeColouredRect(row, col, colour));
+      this.ninaGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
     }
   }
 }
@@ -6596,24 +6602,6 @@ Exolve.prototype.addPrintedCluesTable = function(elem, width, num) {
   return table;
 }
 
-Exolve.prototype.scaleColouredRects = function(scale) {
-  // Scaling of coloured cells and ninas has to be done like this with code:
-  // they are not in SVG.
-  const colouredCells = [];
-  for (let i = 0; i < this.colourGroup.children.length; i++) {
-    colouredCells.push(this.colourGroup.children[i]);
-  }
-  for (let i = 0; i < this.ninaGroup.children.length; i++) {
-    colouredCells.push(this.ninaGroup.children[i]);
-  }
-  for (let e of colouredCells) {
-    e.style.left =  '' +  (parseFloat(e.style.left) * scale) + 'px';
-    e.style.top =  '' +  (parseFloat(e.style.top) * scale) + 'px';
-    e.style.width =  '' +  (parseFloat(e.style.width) * scale) + 'px';
-    e.style.height =  '' +  (parseFloat(e.style.height) * scale) + 'px';
-  }
-}
-
 Exolve.prototype.printTwoColumns = function(settings) {
   const COLUMN_WIDTH = 488;
   const COLUMN_SEP = 16;
@@ -6680,7 +6668,8 @@ Exolve.prototype.printTwoColumns = function(settings) {
   `;
   this.frame.appendChild(customStyles2);
 
-  this.scaleColouredRects(scale);
+  this.recolourCells(scale);
+  this.redisplayNinas(scale)
 
   let extraTableNum = 1;
 
@@ -6839,7 +6828,8 @@ Exolve.prototype.printThreeColumns = function(settings) {
   `;
   this.frame.appendChild(customStyles2);
 
-  this.scaleColouredRects(scale);
+  this.recolourCells(scale);
+  this.redisplayNinas(scale)
 
   let extraTableNum = 1;
 
@@ -7027,11 +7017,18 @@ Exolve.prototype.createPuzzle = function() {
 
   this.redisplayQuestions()
   this.displayClues()
+
   this.displayGridBackground()
   this.displayGrid()
-  this.redisplayNinas()
-  this.displayButtons()
 
+  if (this.layers3d > 1) {
+    this.makeGrid3D();
+  }
+
+  this.recolourCells();
+  this.redisplayNinas()
+
+  this.displayButtons()
   this.parseAndDisplayPS()
   this.setColumnLayout()
 
