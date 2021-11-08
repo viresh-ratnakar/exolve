@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.27 November 7, 2021
+
+- Setting light-level ninas/colours had bugs, esp in 3-D. Re-implemented
+  (now non-hacky!) how ninas/clours are stored as well.
+- Always init clue object's "placeholder" and "solution"
+- Do not throw fatal errors if reversals/ninas/colours are flawed.
+
 ### Version: Exolve v1.26 November 3, 2021
 
 - Bug-fix: ninas and coloured cells were not working in 3-D crosswords.

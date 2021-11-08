@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.26 November 3 2021';
+  this.VERSION = 'Exolve v1.27 November 7 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -128,10 +128,13 @@ function Exolve(puzzleSpec,
     'force-bar-right': [],
     'force-bar-below': [],
   }
+  this.colourfuls = [];
+
+  this.ninaLines = [];
+  this.colourLines = [];
 
   this.grid = [];
   this.clues = {};
-  this.cellColours = [];
   this.submitURL = null;
   this.submitKeys = [];
   this.hasDgmlessCells = false;
@@ -893,10 +896,10 @@ Exolve.prototype.parseOverall = function() {
         this.throwErr('exolve-cell-size: <width>, <height> must be >= 10');
       }
     } else if (parsedSec.section == 'nina') {
-      this.parseNina(parsedSec.value)
+      this.ninaLines.push(firstLine - 1);
     } else if (parsedSec.section == 'colour' ||
                parsedSec.section == 'color') {
-      this.parseColour(parsedSec.value)
+      this.colourLines.push(firstLine - 1)
     } else if (parsedSec.section == 'force-hyphen-right' ||
                parsedSec.section == 'force-hyphen-below' ||
                parsedSec.section == 'force-bar-right' ||
@@ -926,6 +929,17 @@ Exolve.prototype.parseOverall = function() {
   this.dirOrder['X'] = (this.sectionLines['nodir'] || [0])[0];
 }
 
+Exolve.prototype.colonSplit = function(s) {
+  let index = s.indexOf(':');
+  if (index < 0) {
+    index = s.length;
+  }
+  return {
+    section: s.substr(0, index).trim().toLowerCase(),
+    value: s.substr(index + 1).trim(),
+  };
+}
+
 // specLines[] has been parsed till line # nextLine. Find the
 // next line beginning with 'exolve-<section>' and return <section> as well
 // as the 'value' of the section (the part after ':').
@@ -936,17 +950,12 @@ Exolve.prototype.parseSection = function() {
     this.nextLine++;
   }
   if (this.nextLine >= this.numLines) {
-    return null
+    return null;
   }
   // Skip past MARKER
-  let line = this.specLines[this.nextLine].trim().substr(MARKER.length)
-  let index = line.indexOf(':')
-  if (index < 0) {
-    index = line.length
-  }
-  this.nextLine++
-  return {section: line.substr(0, index).trim().toLowerCase(),
-          value: line.substr(index + 1).trim()}
+  const line = this.specLines[this.nextLine].trim().substr(MARKER.length);
+  this.nextLine++;
+  return this.colonSplit(line);
 }
 
 Exolve.prototype.clueLabelDisp = function(clue) {
@@ -982,72 +991,88 @@ Exolve.prototype.isColour = function(s) {
   return e.color !== '';
 }
 
+Exolve.prototype.parseColoursNinas = function(s) {
+  let nextNinaColour = 0;
+  for (let n of this.ninaLines) {
+    nextNinaColour = this.parseNina(this.specLines[n], nextNinaColour);
+  }
+  for (let c of this.colourLines) {
+    this.parseColour(this.specLines[c]);
+  }
+}
+
 // Parse a nina line, which consists of cell locations or clue indices.
-// Convert the cell locations to [row col] and push an array of these to the
-// global ninas array.
-Exolve.prototype.parseNina = function(s) {
-  let ninaList = []
-  let cellsOrOthers = s.split(' ')
+Exolve.prototype.parseNina = function(s, nextNinaColour) {
+  s = this.colonSplit(s).value;
+  const ninaList = []
+  const ccccStrs = s.split(' ')
   let colour = ''
-  for (let cellOrOther of cellsOrOthers) {
-    if (!cellOrOther) {
+  for (let ccccStr of ccccStrs) {
+    if (!ccccStr) {
       continue
     }
-    if (this.isColour(cellOrOther)) {
+    const cccc = this.parseCCCC(ccccStr);
+    if (cccc.colour) {
       if (colour) {
         this.throwErr(
-          cellOrOther + ' is a colour in a nina already coloured: ' + colour);
+          ccccStr + ' is a colour in a nina already coloured: ' + colour);
       }
-      colour = cellOrOther;
-      continue;
-    }
-    let cellLocation = this.parseCellLocation(cellOrOther)
-    if (!cellLocation) {
-      // Must be a class name, for a span-class-specified nina OR a clue index
-      ninaList.push(cellOrOther)
+      colour = cccc.colour;
+    } else if (cccc.cells || cccc.cls) {
+      ninaList.push(cccc);
     } else {
-      ninaList.push(cellLocation)
+      console.log('Skipping invalid nina location: ' + ccccStr);
     }
   }
   if (ninaList.length == 0) {
-    this.throwErr('No cells/clues/classes in nina: ' + s);
+    console.log('No cells/clues/classes in nina: ' + s);
+    return nextNinaColour;
+  }
+  if (!colour) {
+    colour = this.NINA_COLORS[nextNinaColour % this.NINA_COLORS.length];
+    nextNinaColour = (nextNinaColour + 1) % this.NINA_COLORS.length
   }
   this.ninas.push({
       colour: colour,
       list: ninaList,
   });
+  return nextNinaColour;
 }
 
 Exolve.prototype.parseColour = function(s) {
-  let colourAndCells = s.split(' ');
+  s = this.colonSplit(s).value;
+  const cList = [];
+  const ccccStrs = s.split(' ');
   let colour = '';
-  for (let c of colourAndCells) {
-    if (!c) {
-      continue;
+  for (let ccccStr of ccccStrs) {
+    if (!ccccStr) {
+      continue
     }
-    if (this.isColour(c)) {
-      if (!colour) {
-        colour = c;
-      } else {
+    const cccc = this.parseCCCC(ccccStr);
+    if (cccc.colour) {
+      if (colour) {
         this.throwErr(
-          c + ' is a colour in exolve-colour already coloured: ' + colour);
+          ccccStr + ' is a colour in exolve-colour already coloured: ' + colour);
       }
+      colour = cccc.colour;
+    } else if (cccc.cells) {
+      cList.push(cccc);
+    } else {
+      console.log('Skipping invalid exolve-colour location: ' + ccccStr);
     }
   }
   if (!colour) {
-    this.throwErr('No valid colour name in: "' + s + '"');
+    console.log('No valid colour in exolve-colour: ' + s);
+    return;
   }
-  for (let c of colourAndCells) {
-    if (!c || this.isColour(c)) {
-      continue;
-    }
-    let cellLocation = this.parseCellLocation(c);
-    if (!cellLocation) {
-      this.cellColours.push([c, colour]);
-    } else {
-      this.cellColours.push(cellLocation.concat(colour));
-    }
+  if (cList.length == 0) {
+    console.log('No cells/clues in exolve-colour: ' + s);
+    return;
   }
+  this.colourfuls.push({
+      colour: colour,
+      list: cList,
+  });
 }
 
 Exolve.prototype.reversalKey = function(cells) {
@@ -1879,6 +1904,8 @@ Exolve.prototype.newClue = function(index) {
   clue.anno = '';
   clue.linkedOffset = 0;
   clue.reversed = false;
+  clue.placeholder = '';
+  clue.solution = '';
   return clue;
 }
 
@@ -1970,8 +1997,8 @@ Exolve.prototype.markClueStartsUsingGrid = function() {
   }
   // All the reversals specified should have been used
   if (Object.keys(this.reversals).length > 0) {
-    this.throwErr('These reversals specified in exolve-reverse were invalid: ' +
-                  JSON.stringify(this.reversals));
+    console.log('These reversals specified in exolve-reverse were invalid: ' +
+                JSON.stringify(this.reversals));
   }
 
   let nextClueNum = 1;
@@ -2326,6 +2353,49 @@ Exolve.prototype.parseClueLabel = function(clueLine) {
   }
   parse.notLabel = false;
   return parse
+}
+
+/**
+ * Parses colour or cell or clue-label or class, essentially the possibilities
+ * in exolve-colour and exolve-nina (class will be rejected in exolve-colour).
+ * Returns an object like: {
+ *   str: s, 
+ *   colour: '' or name,
+ *   cells: null or [[r1,c2], ...]
+ *   isLight: false or true
+ *   cls: '' or name
+ * }
+ */
+Exolve.prototype.parseCCCC = function(s) {
+  const ret = {
+    str: s,
+    colour: '',
+    cells: null,
+    isLight: false,
+    cls: '',
+  };
+  const s2 = s.trim();
+  if (this.isColour(s2)) {
+    ret.colour = s2;
+    return ret;
+  }
+  const cell = this.parseCellLocation(s2);
+  if (cell) {
+    ret.cells = [cell];
+    return ret;
+  }
+  const clue = this.clueFromLabel(s2);
+  if (clue && clue.cells && clue.cells.length > 1) {
+    ret.cells = clue.cells;
+    ret.isLight = true;
+    return ret;
+  }
+  const elts = document.getElementsByClassName(s2);
+  if (elts && elts.length > 0) {
+    ret.cls = s2;
+    return ret;
+  }
+  return ret;
 }
 
 Exolve.prototype.clueFromLabel = function(s) {
@@ -5257,26 +5327,17 @@ Exolve.prototype.createListeners = function() {
 Exolve.prototype.recolourCells = function(scale=1) {
   // Set colours specified through exolve-colour.
   this.colourGroup.innerHTML = '';
-  for (let cellColour of this.cellColours) {
-    if (cellColour.length == 2) {
-      const clue = this.clueFromLabel(cellColour[0]);
-      if (!clue) {
-        this.throwErr('Light listed for color is not valid: ' + cellColour[0]);
-      }
-      let colour = cellColour[1]
-      for (let cell of clue.cells) {
+  for (let colourSpec of this.colourfuls) {
+    for (let cccc of colourSpec.list) {
+      for (let cell of cccc.cells) {
         const row = cell[0]
         const col = cell[1]
-        this.colourGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
+        this.colourGroup.appendChild(
+            this.makeCellDiv(row, col, colourSpec.colour, scale));
       }
-    } else {
-      const row = cellColour[0]
-      const col = cellColour[1]
-      const colour = cellColour[2]
-      this.colourGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
     }
   }
-  this.colourGroup.style.display = (this.cellColours.length > 0) ? '' : 'none';
+  this.colourGroup.style.display = (this.colourfuls.length > 0) ? '' : 'none';
 }
 
 Exolve.prototype.displayGrid = function() {
@@ -5566,41 +5627,29 @@ Exolve.prototype.redisplayNinas = function(scale=1) {
   this.ninaClassElements = [];
   let ninaColorIndex = 0;
   for (let nina of this.ninas) {
-    // First resolve clue indices to cells.
-    let nina2 = []
-    for (let cellOrOther of nina.list) {
-      const clue = Array.isArray(cellOrOther) ? null :
-        this.clueFromLabel(cellOrOther);
-      if (clue) {
-        nina2 = nina2.concat(clue.cells);
-      } else {
-        nina2.push(cellOrOther)
-      }
-    }
-    let colour = nina.colour;
-    if (!colour) {
-      colour = this.NINA_COLORS[ninaColorIndex];
-      ninaColorIndex = (ninaColorIndex + 1) % this.NINA_COLORS.length
-    }
-    for (let cellOrClass of nina2) {
-      if (!Array.isArray(cellOrClass)) {
+    console.assert(nina.colour, nina);
+    for (let cccc of nina.list) {
+      if (cccc.cls) {
         // span-class-specified nina
-        const elts = document.getElementsByClassName(cellOrClass)
+        const elts = document.getElementsByClassName(cccc.cls);
         if (!elts || elts.length == 0) {
-          this.throwErr('Nina ' + cellOrClass + ' is not a cell/clue ' +
-                        'location nor a class with html tags');
+          console.log('Nina ' + cccc.str + ' is not a cell/clue ' +
+                      'location nor a class with html tags');
+          continue;
         }
         for (let x = 0; x < elts.length; x++) {
           this.ninaClassElements.push({
             element: elts[x],
-            colour: colour,
+            colour: nina.colour,
           });
         }
-        continue
+      } else if (cccc.cells) {
+        for (let cell of cccc.cells) {
+          const row = cell[0]
+          const col = cell[1]
+          this.ninaGroup.appendChild(this.makeCellDiv(row, col, nina.colour, scale));
+        }
       }
-      const row = cellOrClass[0]
-      const col = cellOrClass[1]
-      this.ninaGroup.appendChild(this.makeCellDiv(row, col, colour, scale));
     }
   }
 }
@@ -7025,6 +7074,8 @@ Exolve.prototype.createPuzzle = function() {
     this.makeGrid3D();
   }
 
+  // Now that we know light numbering:
+  this.parseColoursNinas();
   this.recolourCells();
   this.redisplayNinas()
 
