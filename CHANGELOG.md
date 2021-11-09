@@ -1,5 +1,21 @@
 # Changelog
 
+### Version: Exolve v1.28 November 9, 2021
+
+- Change the default colour of the small arrow triangles in the active cell
+  to white from mistyrose, making them a bit more visible.
+- Make parseClueLabel() record the amount of leading whiespace, and give it
+  a param to avoid skipping trailing comma/period. This is just to make it
+  usable in multiple ways in Exet.
+- If a clue direction is reversed (even if the parent in its linked group is
+  also reversed), make its display label show the directional suffix (b/u
+  in 2-D, ba, to, up in 3-D).
+- Indent single-letter clue labels in the clue lists even when they have
+  a directional suffix.
+- Bug-fix: make clearCurr() actually clear all currently active cells in
+  the corener cases of those cells belonging to multi-directional linked
+  groups (including "snake"s).
+
 ### Version: Exolve v1.27 November 7, 2021
 
 - Setting light-level ninas/colours had bugs, esp in 3-D. Re-implemented
