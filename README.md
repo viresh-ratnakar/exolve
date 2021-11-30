@@ -893,6 +893,11 @@ Placeholder blanks normally get displayed only in front of "orphan" clues whose
 light locations are not provided to the solver. However, you can force a
 placeholder blank next to any clue by following it with one or more underscores.
 If you're providing annotations, place the undescrores before the annotations.
+
+This can be useful to solvers when, for example, the puzzle instructions call
+for some modification (such as letter omissions) to solutions before they can
+be entered into the grid.
+
 Examples:
 ```
   exolve-across:
