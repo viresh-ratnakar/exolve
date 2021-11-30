@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.29 November 29, 2021
+
+- Allow adding placeholder blanks next to any clue by appending one (or more)
+  underscores to the clue.
+- Bug-fix: if you click again on the current clue, focus should continue to
+  be on the current cell if was there previously.
+
 ### Version: Exolve v1.28 November 9, 2021
 
 - Change the default colour of the small arrow triangles in the active cell

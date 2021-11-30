@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.28 November 9 2021';
+  this.VERSION = 'Exolve v1.29 November 29 2021';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -192,7 +192,7 @@ function Exolve(puzzleSpec,
   this.knownIncorrect = false;
 
   this.allClueIndices = [];
-  this.DEFAULT_ORPHAN_LEN = 15;
+  this.PLACEHOLDER_BLANK_LEN = 15;
 
   this.BLOCK_CHAR = '⬛';
   // If someone wants to use 0/1/./? using allow-chars, we cannot use them in
@@ -821,7 +821,7 @@ Exolve.prototype.init = function() {
       'https://github.com/viresh-ratnakar/exolve/issues/new?body=' +
       encodeURIComponent(info);
 
-  this.CURR_ORPHAN_ID = this.prefix + '-curr-orphan';
+  this.CURR_PLACEHOLDER_BLANK_ID = this.prefix + '-curr-blank';
 
   this.followDirOrder();
 
@@ -2810,6 +2810,14 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
     anno = anno.substr(indexOfBrac + 1).trim();
     this.hasReveals = true
   }
+  let numBlanks = 0;
+  while (anno && anno.substr(0, 1) == '_') {
+    numBlanks++;
+    anno = anno.substr(1).trim();
+  }
+  if (numBlanks > 0) {
+    theClue.showBlanks = numBlanks;
+  }
   theClue.anno = anno;
 }
 
@@ -3186,14 +3194,15 @@ Exolve.prototype.finalClueTweaks = function() {
     this.setClueSolution(clueIndex)
     theClue.dispSol = ''
     if (this.addSolutionToAnno && theClue.solution &&
-        !this.isOrphan(clueIndex) &&
+        !this.isOrphan(clueIndex) && !theClue.showBlanks &&
         (theClue.explicitSol ||
          !this.roughlyStartsWith(theClue.anno, theClue.solution))) {
-      // For orphans, we reveal in their placeholder blanks.
+      // For clues with placeholder blanks, we reveal in those.
       theClue.dispSol = '<span class="xlv-solution">' + theClue.solution +
                         '. </span>';
     }
-    if (theClue.anno || theClue.dispSol) {
+    if (theClue.anno || theClue.dispSol ||
+        (theClue.solution && theClue.showBlanks)) {
       this.hasReveals = true
     }
     if (!theClue.fullDisplayLabel) {
@@ -3695,18 +3704,21 @@ Exolve.prototype.displayClues = function() {
       col2.style.textIndent = '' + indent + 'ch'
     }
 
-    if (this.isOrphan(clueIndex) && !theClue.parentClueIndex) {
+    if ((theClue.showBlanks || this.isOrphan(clueIndex)) &&
+        !theClue.parentClueIndex) {
       let placeholder = ''
-      let len = this.DEFAULT_ORPHAN_LEN
+      let len = this.PLACEHOLDER_BLANK_LEN
       if (theClue.placeholder) {
         placeholder = theClue.placeholder
         len = placeholder.length
       }
-      this.addOrphanUI(col2, false, len, placeholder, clueIndex)
-      theClue.orphanPlaceholder =
-        col2.lastElementChild.firstElementChild;
+      if (theClue.showBlanks && theClue.showBlanks > 1) {
+        len = theClue.showBlanks;
+      }
+      theClue.placeholderBlank =
+          this.addPlaceholderBlank(col2, false, len, placeholder, clueIndex);
       this.answersList.push({
-        input: theClue.orphanPlaceholder,
+        input: theClue.placeholderBlank,
         isq: false,
       });
     }
@@ -4621,20 +4633,17 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
     currLab.addEventListener(
         'click', this.toggleClueSolvedState.bind(this, this.currClueIndex))
   }
-  if (orphan) {
+  if (this.clues[parentIndex].placeholderBlank) {
     let placeholder = ''
-    let len = this.DEFAULT_ORPHAN_LEN
+    let len = this.clues[parentIndex].placeholderBlank.size ||
+              this.PLACEHOLDER_BLANK_LEN;
     if (this.clues[parentIndex].placeholder) {
       placeholder = this.clues[parentIndex].placeholder
-      len = placeholder.length
     }
-    this.addOrphanUI(this.currClue, true, len, placeholder, parentIndex)
-    this.copyOrphanEntryToCurr(parentIndex)
-    if (grabFocus && !this.usingGnav && this.clues[parentIndex].clueTR) {
-      let plIns = this.clues[parentIndex].clueTR.getElementsByTagName('input')
-      if (plIns && plIns.length > 0) {
-        plIns[0].focus()
-      }
+    this.addPlaceholderBlank(this.currClue, true, len, placeholder, parentIndex);
+    this.copyPlaceholderBlankToCurr(parentIndex)
+    if (grabFocus && !this.usingGnav && parentIndex == activeClueIndex) {
+      this.clues[parentIndex].placeholderBlank.focus();
     }
   }
   this.currClue.style.background = orphan ?
@@ -4676,6 +4685,7 @@ Exolve.prototype.gnavIsClueless = function() {
 
 Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
   if (activeClueIndex == this.currClueIndex) {
+    this.refocus();
     return;
   }
   this.deactivateCurrClue();
@@ -4692,16 +4702,16 @@ Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
   this.updateDisplayAndGetState()
 }
 
-Exolve.prototype.copyOrphanEntry = function(clueIndex) {
+Exolve.prototype.copyPlaceholderBlank = function(clueIndex) {
   if (this.hideCopyPlaceholders || this.activeCells.length < 1 ||
       !clueIndex || !this.clues[clueIndex] || !this.clues[clueIndex].clueTR) {
     return
   }
-  let ips = this.clues[clueIndex].clueTR.getElementsByTagName('input')
-  if (ips.length != 1) {
+  const inp = this.clues[clueIndex].placeholderBlank;
+  if (!inp) {
     return
   }
-  let entry = ips[0].value
+  let entry = inp.value
   let letters = ''
   for (let i = 0; i < entry.length; i++) {
     let letter = entry[i]
@@ -4763,24 +4773,21 @@ Exolve.prototype.copyOrphanEntry = function(clueIndex) {
 
 // inCurr is set to true when this is called oninput in the currClue strip
 // and false when called oninput in the clues table.
-Exolve.prototype.updateOrphanEntry = function(clueIndex, inCurr) {
+Exolve.prototype.updateOrphanEntry = function(clueIndex, inCurr, evt) {
   if (!clueIndex || !this.clues[clueIndex] || !this.clues[clueIndex].clueTR ||
-      !this.isOrphan(clueIndex) || this.clues[clueIndex].parentClueIndex) {
+      this.clues[clueIndex].parentClueIndex ||
+      !this.clues[clueIndex].placeholderBlank) {
     return
   }
-  let clueInputs = this.clues[clueIndex].clueTR.getElementsByTagName('input')
-  if (clueInputs.length != 1) {
-    this.log('Missing placeholder input for clue ' + clueIndex)
-    return
-  }
-  let theInput = clueInputs[0]
+  evt.stopPropagation();
+  const theInput = this.clues[clueIndex].placeholderBlank;
   if (!inCurr) {
     let cursor = theInput.selectionStart
     theInput.value = theInput.value.toUpperCase().trimLeft()
     theInput.selectionEnd = cursor
     this.updateAndSaveState()
   }
-  let curr = document.getElementById(this.CURR_ORPHAN_ID)
+  let curr = document.getElementById(this.CURR_PLACEHOLDER_BLANK_ID)
   if (!curr) {
     return
   }
@@ -4801,37 +4808,38 @@ Exolve.prototype.updateOrphanEntry = function(clueIndex, inCurr) {
 }
 
 // Copy placeholder value from clue table to the newly created curr clue.
-Exolve.prototype.copyOrphanEntryToCurr = function(clueIndex) {
+Exolve.prototype.copyPlaceholderBlankToCurr = function(clueIndex) {
   if (!clueIndex || !this.clues[clueIndex] || !this.clues[clueIndex].clueTR ||
-      !this.isOrphan(clueIndex) || this.clues[clueIndex].parentClueIndex) {
+      this.clues[clueIndex].parentClueIndex ||
+      !this.clues[clueIndex].placeholderBlank) {
     return
   }
-  let clueInputs = this.clues[clueIndex].clueTR.getElementsByTagName('input')
-  if (clueInputs.length != 1) {
-    this.log('Missing placeholder input for clue ' + clueIndex)
-    return
-  }
-  let curr = document.getElementById(this.CURR_ORPHAN_ID)
+  const clueInput = this.clues[clueIndex].placeholderBlank;
+  const curr = document.getElementById(this.CURR_PLACEHOLDER_BLANK_ID);
   if (!curr) {
-    return
+    return;
   }
-  let currInputs = curr.getElementsByTagName('input')
-  if (clueInputs.length != 1) {
-    return
+  const currInputs = curr.getElementsByTagName('input');
+  if (currInputs.length != 1) {
+    return;
   }
-  currInputs[0].value = clueInputs[0].value
+  currInputs[0].value = clueInput.value;
 }
 
-Exolve.prototype.orphanCopier = function(clueIndex, e) {
-  this.copyOrphanEntry(clueIndex)
+Exolve.prototype.phBlankCopier = function(clueIndex, e) {
+  this.copyPlaceholderBlank(clueIndex)
   e.stopPropagation()
 }
 
-Exolve.prototype.addOrphanUI =
-    function(elt, inCurr, len, placeholder, clueIndex) {
+Exolve.prototype.phBlankOnClick = function(e) {
+  e.stopPropagation();
+}
+
+Exolve.prototype.addPlaceholderBlank = function(
+    elt, inCurr, len, placeholder, clueIndex) {
   let html = '<span'
   if (inCurr) {
-    html = html + ' id="' + this.CURR_ORPHAN_ID + '"'
+    html = html + ' id="' + this.CURR_PLACEHOLDER_BLANK_ID + '"'
   }
   html = html + ' class="xlv-nobr">' +
     '<input size="' + len + '" class="xlv-incluefill" placeholder="' +
@@ -4847,14 +4855,16 @@ Exolve.prototype.addOrphanUI =
   }
   html = html + '</span>'
   elt.insertAdjacentHTML('beforeend', html)
-  let incluefill = elt.lastElementChild.firstElementChild
-  incluefill.style.color = this.colorScheme['solution']
-  incluefill.addEventListener(
-      'input', this.updateOrphanEntry.bind(this, clueIndex, inCurr))
+  const incluefill = elt.lastElementChild.firstElementChild;
+  incluefill.style.color = this.colorScheme['solution'];
+  incluefill.addEventListener('input',
+      this.updateOrphanEntry.bind(this, clueIndex, inCurr));
+  incluefill.addEventListener('click', this.phBlankOnClick.bind(this));
   if (!this.hideCopyPlaceholders) {
     elt.lastElementChild.lastElementChild.addEventListener(
-      'click', this.orphanCopier.bind(this, clueIndex))
+      'click', this.phBlankCopier.bind(this, clueIndex));
   }
+  return incluefill;
 }
 
 Exolve.prototype.followDirOrder = function() {
@@ -5897,8 +5907,8 @@ Exolve.prototype.clearAll = function(conf=true) {
 
   for (let ci of this.allClueIndices) {
     this.updateClueState(ci, false, 'unsolved')
-    if (clearingPls && this.isOrphan(ci) && this.clues[ci].orphanPlaceholder) {
-      this.clues[ci].orphanPlaceholder.value = ''
+    if (clearingPls && this.clues[ci].placeholderBlank) {
+      this.clues[ci].placeholderBlank.value = ''
     }
   }
   if (clearingPls && this.currClue) {
@@ -6054,11 +6064,11 @@ Exolve.prototype.revealClueAnno = function(ci) {
     if (theClue.annoSpan) {
       theClue.annoSpan.style.display = ''
     }
-    if (theClue.orphanPlaceholder) {
+    if (theClue.placeholderBlank) {
       if (theClue.solution) {
-        theClue.orphanPlaceholder.value = theClue.solution
+        theClue.placeholderBlank.value = theClue.solution
         if (clueIndex == this.currClueIndex) {
-          this.copyOrphanEntryToCurr(clueIndex)
+          this.copyPlaceholderBlankToCurr(clueIndex)
         }
       }
     }

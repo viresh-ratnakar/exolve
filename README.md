@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.28 November 3 2021
+### Version: Exolve v1.29 November 29 2021
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -801,7 +801,6 @@ Here, the top-left and bottom-left cells are skipped-number cells. The [B]
 across clue gets merged with the bottom row light, and the [Q] nodir clue
 gets merged with the top row light. The light in the first column is unclued.
 
-
 ### Jigsaw puzzle clues
 If there is any nodir clue without cells explicitly specified, or an
 across/down clue with a non-numeric label whose start/cells are not specified,
@@ -811,6 +810,9 @@ should be entered. Solvers can transfer recorded letters from these placeholder
 areas by simply clicking the "copy-placeholder" button (that looks like [⇲])
 next to the placeholder area, whenever they have some squares highlighted for
 entry in the grid.
+
+You can force a placeholder blank to appear after any clue (not just "orphan"
+ones that qualify using the criteria listed above). See the next sub-section.
 
 The placeholder entries do NOT get cleared with 'Clear this/all' (they can
 simply by erased directly by clicking on them and deleting though). For clearing
@@ -884,6 +886,30 @@ For example:
 Note also that "Reveal all" does not reveal orphan-clue-to-grid-light
 associations. But, even after "Reveal all," solvers may go through orphan
 clues, clicking "Reveal this" for each.
+
+### Forcing the display of "placeholder blanks"
+
+Placeholder blanks normally get displayed only in front of "orphan" clues whose
+light locations are not provided to the solver. However, you can force a
+placeholder blank next to any clue by following it with one or more underscores.
+If you're providing annotations, place the undescrores before the annotations.
+Examples:
+```
+  exolve-across:
+    5: This clue will get placeholder blanks (4) _
+    6: Here we're specifying that there should be 7 blanks, regardless of enum (4) _______
+    7: The underscores can have intervening spaces and can be followed by annos (8) _ _ _ Some anno.
+```
+
+If you place just one underscore, then the actual displayed size of the blank
+will be determined using the enum. If you place more than one underscore, then
+the displayed size of the blank will equal the number of underscores that you
+have provided.
+
+Just like the placeholder blanks that appear in orphan clues, these forced
+placeholder blanks will also be accompanied by "copy-placeholder buttons"
+(that looks like [⇲]), unless disabled by specifying
+`exolve-option: hide-copy-placeholder-buttons`.
 
 ### Some clue numbering nuances
 If you have a non-numeric clue label (say, P) for an across (down) clue, and
