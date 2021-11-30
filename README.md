@@ -896,9 +896,9 @@ If you're providing annotations, place the undescrores before the annotations.
 Examples:
 ```
   exolve-across:
-    5: This clue will get placeholder blanks (4) _
-    6: Here we're specifying that there should be 7 blanks, regardless of enum (4) _______
-    7: The underscores can have intervening spaces and can be followed by annos (8) _ _ _ Some anno.
+    5 This clue will get placeholder blanks (4) _
+    6 Here we're specifying that there should be 7 blanks, regardless of enum (4) _______
+    7 The underscores can have intervening spaces and can be followed by annos (8) _ _ _ Some anno.
 ```
 
 If you place just one underscore, then the actual displayed size of the blank
