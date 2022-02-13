@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v1.30 February 12, 2022
+
+- Allow &amp; to be used as the separator between clue numbers in a linked
+  clue. Remember the separator used, and use it when displaying too.
+- Add `exolve-option: no-nina-button` that will suppress the display of
+  the "Show ninas" button even if there are ninas. "Reveal all" will
+  display the ninas and will also bring up the "Hide ninas" button. Hiding
+  ninas will again hide the nina button when the option is true.
+- Vertically top-align the next/prev button in the current clue.
+- When a cell gets the same colour twice from ninas (for example, a cell
+  at the intersection of two lights that are marked as ninas), create only
+  one coloured overlay, so as to avoid double-colouring. Do the same for
+  ninas (but not across ninas and colours).
+
 ### Version: Exolve v1.29 November 29, 2021
 
 - Allow adding placeholder blanks next to any clue by appending one (or more)

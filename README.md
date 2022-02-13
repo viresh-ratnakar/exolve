@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.29 November 29 2021
+### Version: Exolve v1.30 February 12, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -620,8 +620,8 @@ own custom CSS rules.
 
 ### Linked lights and clues
 If a linked clue includes other "children clues," this can be indicated by
-appending a comma-separated list of children clue numbers to the parent clue
-number. Example:
+appending a comma-separated (or &amp;-separated) list of children clue numbers
+to the parent clue number. Example:
 ```
   exolve-across:
     1, 5, 2d In spite of adverse circumstances (7,3,4)
@@ -629,8 +629,10 @@ number. Example:
     ...
   exolve-down:
     2 See 1 Across
+    3 & 7 See neck (4,3)
+    7 See 3 Down
 ```
-As shown in the above example, if a child clue (2d in the example) has a
+As shown in the above examples, if a child clue (2d in the first example) has a
 different direction from the parent, the direction can be specified with a
 one-letter suffix ("a" or "d" or "b" or "u"), or, in 3-D crosswords, with
 a two-letter suffix ("ac" or "aw" or "dn" or "ba" or "to" or "up").
@@ -1272,7 +1274,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of February 2021, columnar layout is quirky: Chrome supports it best,
+  As of February 2022, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`clues-at-right-in-two-columns`** If this option is specified, it affects
   the column layout when the available width is wide enough for exactly two
@@ -1319,6 +1321,9 @@ The list of currently supported options is as follows:
   used. Set this option to disable that. Useful if you want to control
   how the solution appears in the anno. Also see the note on "anno" in the
   section on clues.
+  **`no-nina-button`** In a grid with ninas, a nina-toggline button gets
+  shown normally. You can suppress the creation of this button by using this
+  option.
 - **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
@@ -1900,7 +1905,7 @@ that has the class `xlv-dont-print`.
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
 with the title "Settings for printing/PDFs". This lets you specify:
 
-- Page size (such as 'Letter' or 'A4'). As of September 2021, you still need to
+- Page size (such as 'Letter' or 'A4'). As of February 2022, you still need to
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.
@@ -1962,7 +1967,7 @@ algorithm, then you can turn it off by setting a field, like this:
 
 Brwosers have their own printing layout algorithms that sometimes do not behave
 as expected by Exolve's printing layout algorithm. Here are some known issues as
-of September, 2021.
+of February, 2022.
 
 - Printing settings in Firefox seem especially complex, and Exolve turns off
   the pagination attempts described above if it detects the browser to be

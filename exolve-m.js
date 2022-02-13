@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.29 November 29 2021';
+  this.VERSION = 'Exolve v1.30 February 12, 2022';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -397,6 +397,7 @@ function Exolve(puzzleSpec,
   this.showCellLevelButtons = false;
   this.printCompleted3Cols = false;
   this.printIncomplete2Cols = false;
+  this.noNinaButton = false;
 
   this.createPuzzle();
 }
@@ -1258,6 +1259,10 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "ignore-enum-mismatch") {
       this.ignoreEnumMismatch = true
+      continue
+    }
+    if (spart == "no-nina-button" || spart == "no-ninas-button") {
+      this.noNinaButton = true
       continue
     }
     if (spart == "allow-digits") {
@@ -2280,12 +2285,13 @@ Exolve.prototype.parseDir = function(s) {
 // dirStr
 // dirIsPrefix
 // reversed (for b/d and ba/to/up).
-// hasChildren
+// hasChildren, linkSep
 // skip
 // leadSpace
 Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true) {
   let parse = {dir: '', label: '', notLabel: true};
   parse.hasChilden = false;
+  parse.linkSep = '';
   parse.skip = 0;
   parse.leadSpace = '';
   const space = clueLine.match(/^\s*/);
@@ -2342,9 +2348,11 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true) {
   }
   parse.notLabel = false;
   if (consumeTrailing) {
-    commaParts = clueLine.match(/^\s*,/)
+    commaParts = clueLine.match(/^\s*[,&]/)
     if (commaParts && commaParts.length == 1) {
-      parse.hasChildren = true
+      parse.hasChildren = true;
+      // Store the separator char in linkSep
+      parse.linkSep = commaParts[0][commaParts[0].length - 1]
       parse.skip += commaParts[0].length
       clueLine = clueLine.substr(commaParts[0].length)
     }
@@ -2597,6 +2605,7 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clue.index = clueIndex
 
   clueLine = clueLine.substr(clueLabelParse.skip)
+  clue.linkSep = clueLabelParse.linkSep || '';
   clue.children = []
   while (clueLabelParse.hasChildren) {
     clueLabelParse = this.parseClueLabel(clueLine)
@@ -3045,6 +3054,7 @@ Exolve.prototype.processClueChildren = function() {
     let lastRowColDir = clue.dir
     dupes = {}
     const allDirections = ['A', 'D', 'Z', 'X']
+    let linkSep = (clue.linkSep != ',') ? (' ' + clue.linkSep + ' ') : ', ';
     for (let chi = 0; chi < clue.children.length; chi++) {
       const child = clue.children[chi];
       // Direction could be the same as the direction of the parent. Or,
@@ -3089,12 +3099,13 @@ Exolve.prototype.processClueChildren = function() {
         if (!childClue.fullDisplayLabel) {
           childClue.fullDisplayLabel = this.clueLabelDisp(childClue);
         }
-        clue.displayLabel = clue.displayLabel + ', ' +
+        clue.displayLabel = clue.displayLabel + linkSep +
             ((childClue.dir == clue.dir) && !childClue.reversed ?
              childClue.label : childClue.fullDisplayLabel);
-        clue.fullDisplayLabel = clue.fullDisplayLabel + ', ' +
+        clue.fullDisplayLabel = clue.fullDisplayLabel + linkSep +
                                 childClue.fullDisplayLabel;
       }
+      linkSep = (child.linkSep != ',') ?  (' ' + child.linkSep + ' ') : ', ';
       clue.childrenClueIndices.push(childIndex)
       childClue.parentClueIndex = clueIndex
 
@@ -3661,7 +3672,8 @@ Exolve.prototype.displayClues = function() {
 
     let col1Chars = theClue.displayLabel.replace(/&[^;]*;/g, '#')
     let col1NumChars = [...col1Chars].length
-    if (col1Chars.substr(1, 1) == ',' ||
+    const linkSep = col1Chars.substr(1, 2);
+    if (linkSep == ', ' || linkSep == ' &' ||
         (revSuff && col1Chars.substr(1, revSuff.length) == revSuff)) {
       // Linked clue that begins with a single-letter/digit clue number.
       // Or, reversed single-letter/digit clue.
@@ -3685,16 +3697,16 @@ Exolve.prototype.displayClues = function() {
     if (col1NumChars > 2) {
       // More than two unicode chars in col1. Need to indent col2.
       col1Chars = col1Chars.substr(2)
-      // spaces and equal number of commas use 0.6
-      let col1Spaces = col1Chars.split(' ').length - 1
-      let indent = col1Spaces * 2 * 0.6
+      // spaces and commas use 0.6
+      const col1Spammas = col1Chars.replace(/[^, ]*/g, '').length
+      let indent = col1Spammas * 0.6
       // digits, lowercase letters use 1
-      let col1Digits = col1Chars.replace(/[^0-9a-z]*/g, '').length
+      const col1Digits = col1Chars.replace(/[^0-9a-z]*/g, '').length
       indent = indent + (col1Digits * 1)
-      // uppercase letters use 1.1
-      let col1Letters = col1Chars.replace(/[^A-Z]*/g, '').length
-      indent = indent + (col1Letters * 1.1)
-      let rem = col1Chars.length - col1Letters - col1Digits - (2 * col1Spaces);
+      // uppercase letters and & use 1.3
+      const col1Letters = col1Chars.replace(/[^A-Z&]*/g, '').length
+      indent = indent + (col1Letters * 1.3)
+      const rem = col1Chars.length - col1Letters - col1Digits - col1Spammas;
       if (rem > 0) {
         indent = indent + (rem * 2.8)
       }
@@ -4535,11 +4547,13 @@ Exolve.prototype.getLinkedClues = function(clueIndex) {
 // Get HTML for back/forth buttons in current clue.
 Exolve.prototype.getCurrClueButtons = function() {
   return `<span>
-      <button id="${this.prefix}-curr-clue-prev" class="xlv-small-button"
-      title="${this.textLabels['curr-clue-prev.hover']}"
+      <button id="${this.prefix}-curr-clue-prev"
+        class="xlv-small-button xlv-nextprev"
+        title="${this.textLabels['curr-clue-prev.hover']}"
           >${this.textLabels['curr-clue-prev']}</button>
-      <button id="${this.prefix}-curr-clue-next" class="xlv-small-button"
-      title="${this.textLabels['curr-clue-next.hover']}"
+      <button id="${this.prefix}-curr-clue-next"
+        class="xlv-small-button xlv-nextprev"
+        title="${this.textLabels['curr-clue-next.hover']}"
           >${this.textLabels['curr-clue-next']}</button></span>`;
 }
 
@@ -5360,13 +5374,16 @@ Exolve.prototype.createListeners = function() {
 Exolve.prototype.recolourCells = function(scale=1) {
   // Set colours specified through exolve-colour.
   this.colourGroup.innerHTML = '';
+  const dupes = {};
   for (let colourSpec of this.colourfuls) {
     for (let cccc of colourSpec.list) {
       for (let cell of cccc.cells) {
         const row = cell[0]
         const col = cell[1]
+        if (dupes[[row, col, colourSpec.colour]]) continue;
         this.colourGroup.appendChild(
             this.makeCellDiv(row, col, colourSpec.colour, scale));
+        dupes[[row, col, colourSpec.colour]] = true;
       }
     }
   }
@@ -5659,6 +5676,7 @@ Exolve.prototype.redisplayNinas = function(scale=1) {
   this.ninaGroup.innerHTML = '';
   this.ninaClassElements = [];
   let ninaColorIndex = 0;
+  const dupes = {};
   for (let nina of this.ninas) {
     console.assert(nina.colour, nina);
     for (let cccc of nina.list) {
@@ -5680,7 +5698,9 @@ Exolve.prototype.redisplayNinas = function(scale=1) {
         for (let cell of cccc.cells) {
           const row = cell[0]
           const col = cell[1]
+          if (dupes[[row, col, nina.colour]]) continue;
           this.ninaGroup.appendChild(this.makeCellDiv(row, col, nina.colour, scale));
+          dupes[[row, col, nina.colour]] = true;
         }
       }
     }
@@ -5695,6 +5715,10 @@ Exolve.prototype.showNinas = function() {
   this.ninasButton.innerHTML = this.textLabels['hide-ninas']
   this.ninasButton.title = this.textLabels['hide-ninas.hover']
   this.showingNinas = true
+  if (this.ninas.length > 0 && this.noNinaButton) {
+    // Show the "hide-ninas" button
+    this.ninasButton.style.display = ''
+  }
 }
 
 Exolve.prototype.hideNinas = function() {
@@ -5705,6 +5729,10 @@ Exolve.prototype.hideNinas = function() {
   this.ninasButton.innerHTML = this.textLabels['show-ninas']
   this.ninasButton.title = this.textLabels['show-ninas.hover']
   this.showingNinas = false
+  if (this.ninas.length > 0 && this.noNinaButton) {
+    // Hide the "show-ninas" button
+    this.ninasButton.style.display = 'none'
+  }
 }
 
 Exolve.prototype.toggleNinas = function() {
@@ -6314,7 +6342,7 @@ Exolve.prototype.displayButtons = function() {
     this.revealButton.title = this.textLabels['reveal.hover']
     this.revealButton.disabled = true
   }
-  if (this.ninas.length > 0) {
+  if (this.ninas.length > 0 && !this.noNinaButton) {
     this.ninasButton.style.display = ''
     this.ninasButton.title = this.textLabels['show-ninas.hover']
   }
