@@ -1321,9 +1321,12 @@ The list of currently supported options is as follows:
   used. Set this option to disable that. Useful if you want to control
   how the solution appears in the anno. Also see the note on "anno" in the
   section on clues.
-  **`no-nina-button`** In a grid with ninas, a nina-toggline button gets
+- **`no-nina-button`** In a grid with ninas, a nina-toggling button gets
   shown normally. You can suppress the creation of this button by using this
-  option.
+  option. If you do have ninas and you've used this option, once "Reveal all"
+  is used, the button does get shown (in case the user wants to hide the ninas,
+  say for printing). If at that point, the user does "Hide ninas" or
+  "Clear all", then the nina button is hidden again.
 - **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
