@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.30 February 12, 2022
+Version: Exolve v1.31 March 4, 2022
 */
 
 /**
@@ -32,14 +32,11 @@ Version: Exolve v1.30 February 12, 2022
  * crossword format (http://ipuz.org/crossword) to a string in the Exolve
  * format and returns it. Upon any error, this returns the empty string.
  *
- * If the ipuz does not have a uniqueid, then the passed id is used (if that
- * is null then a random id is created).
- * 
  * The following ipuz features are currently unsupported:
  * - Clue directions other than Across and Down.
  * - Omitted cells (they get rendered as black cells).
  */
-exolveFromIpuz = function(ipuz, id=null, fname='') {
+exolveFromIpuz = function(ipuz, fname='') {
   if (!ipuz['dimensions']) {
     console.log('ipuz: missing "dimensions"')
     return '';
@@ -58,14 +55,16 @@ exolveFromIpuz = function(ipuz, id=null, fname='') {
     console.log('ipuz: missing "height"')
     return '';
   }
-  id = ipuz['uniqueid'] || id ||
-       `ipuz--${Math.random().toString(36).substring(2, 8)}`
+  const id = ipuz['uniqueid'] || '';
 
   let exolve = `
     exolve-begin
-      exolve-id: ${id}
       exolve-width: ${w}
       exolve-height: ${h}`
+  if (id) {
+    exolve += `
+      exolve-id: ${id}`
+  }
   if (!fname) {
     fname = 'unknown'
   }

@@ -79,7 +79,8 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.30 February 12, 2022';
+  this.VERSION = 'Exolve v1.31 March 4, 2022';
+  this.id = '';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -411,17 +412,13 @@ Exolve.prototype.init = function() {
 
   const SPECIAL_ID = '42xlvIndex42';
 
-  if (!this.id || this.id == SPECIAL_ID) {
-    this.throwErr('Puzzle id should be non-empty: ' + this.id);
+  if (this.id && this.id == SPECIAL_ID) {
+    this.throwErr('Puzzle id cannot be: ' + this.id);
   }
   if (!exolvePuzzles) {
     exolvePuzzles = {};
     exolvePuzzles[SPECIAL_ID] = 1;
   }
-  if (exolvePuzzles[this.id]) {
-    this.throwErr('Puzzle id ' + this.id + ' is already in use');
-  }
-  exolvePuzzles[this.id] = this;
   this.index = exolvePuzzles[SPECIAL_ID]++;
   this.prefix = 'xlv' + this.index;
 
@@ -496,7 +493,8 @@ Exolve.prototype.init = function() {
                 class="xlv-wide-box xlv-small-print">
               <div id="${this.prefix}-tools" style="display:none">
                 <div id="${this.prefix}-id" class="xlv-metadata">
-                  <b>${this.textLabels['crossword-id']}: ${this.id}</b>
+                  <b>${this.textLabels['crossword-id']}:
+                     <span id="${this.prefix}-id-span"><span></b>
                 </div>
                 <div id="${this.prefix}-metadata" class="xlv-metadata">
                   ${this.VERSION}
@@ -1538,9 +1536,11 @@ Exolve.prototype.checkConsistency = function() {
       if (noClueList) noClueList += ', '
       noClueList += cname
     }
-    const lightLen = this.getAllCells(ci).length;
+    const cells = this.getAllCells(ci);
+    const lightLen = cells.length;
     if (!this.ignoreEnumMismatch && !this.hasDgmlessCells &&
-        clue.enumLen > 0 && lightLen > 0 && clue.enumLen != lightLen) {
+        clue.enumLen > 0 && lightLen > 0 && clue.enumLen != lightLen &&
+        (!cells.endsOnStart || clue.enumLen != lightLen + 1)) {
       this.showWarning(cname + ": enum asks for " + clue.enumLen +
           " cells, but the grid shows " + lightLen + " cells");
     }
@@ -2225,40 +2225,70 @@ Exolve.prototype.parseDir = function(s) {
   const parse = {dir: '', reversed: false};
   let dirStr = '';
   let skip = 0;
+  const lcs = s.toLowerCase();
   if (this.layers3d <= 1) {
-    const match = s.match(/^[aAdDbBuU]/);
+    const match = lcs.match(/^[adbu]/);
     if (match && match.length == 1) {
-      dirStr = match[0].toLowerCase().trimLeft();
+      dirStr = match[0].trimLeft();
       skip = match[0].length;
       if (dirStr == 'a') {
         parse.dir = 'A';
+        if (lcs.startsWith('across')) {
+          skip = 6;
+        }
       } else if (dirStr == 'd') {
         parse.dir = 'D';
+        if (lcs.startsWith('down')) {
+          skip = 4;
+        }
       } else if (dirStr == 'b') {
         parse.dir = 'A';
         parse.reversed = true;
+        if (lcs.startsWith('back')) {
+          skip = 4;
+        }
       } else if (dirStr == 'u') {
         parse.dir = 'D';
         parse.reversed = true;
+        if (lcs.startsWith('up')) {
+          skip = 2;
+        }
       }
     }
   } else {
-    const match = s.match(/^[a-zA-Z][a-zA-Z]/);
+    const match = lcs.match(/^[a-z][a-z]/);
     if (match && match.length == 1) {
-      dirStr = match[0].toLowerCase().trimLeft();
+      dirStr = match[0].trimLeft();
       skip = match[0].length;
       if (dirStr == 'ac') {
         parse.dir = 'A';
+        if (lcs.startsWith('across')) {
+          skip = 6;
+        }
       } else if (dirStr == 'aw') {
         parse.dir = 'D';
-      } else if (dirStr == 'dn') {
+        if (lcs.startsWith('away')) {
+          skip = 4;
+        }
+      } else if (dirStr == 'dn' || dirStr == 'do') {
         parse.dir = 'Z';
+        if (lcs.startsWith('down')) {
+          skip = 4;
+        }
       } else if (dirStr == 'ba') {
         parse.dir = 'A';
         parse.reversed = true;
+        if (lcs.startsWith('back')) {
+          skip = 4;
+        }
       } else if (dirStr == 'to') {
         parse.dir = 'D';
         parse.reversed = true;
+        if (lcs.startsWith('towards')) {
+          skip = 7;
+        } else if (lcs.startsWith('toward')) {
+          skip = 6;
+        }
       } else if (dirStr == 'up') {
         parse.dir = 'Z';
         parse.reversed = true;
@@ -2275,6 +2305,7 @@ Exolve.prototype.parseDir = function(s) {
 // Parse a clue label from the start of clueLine. The clue label can be
 // specified like:
 //   5 or 5d or 5D or d5 or D5 or [P] or [P]d or [P]D or d[P] or D[P]
+//   or 5down or 5across
 // The letter part can be a/d/b/u. In 3-D crosswords it has to be one of
 //   ac/ba/to/aw/dn/up (ignoring case).
 // Return an object with the following properties:
@@ -2742,6 +2773,7 @@ Exolve.prototype.getAllCells = function(ci) {
       cells[0][0] == cells[last][0] &&
       cells[0][1] == cells[last][1]) {
     cells.pop();
+    cells.endsOnStart = true;
   }
   return cells;
 }
@@ -7115,6 +7147,50 @@ Exolve.prototype.paginate = function(settings) {
   }
 }
 
+Exolve.prototype.javaHash = function(arr) {
+  const str = arr.join(' ');
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    let c = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + c;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+Exolve.prototype.createIdIfNeeded = function() {
+  if (!this.id) {
+    const idHashFodders = [];
+    for (let r = 0; r < this.gridHeight; r++) {
+      let rowstr = '';
+      for (let c = 0; c < this.gridWidth; c++) {
+        const gridCell = this.grid[r][c];
+        rowstr += gridCell.isLight ? '0' : '.';
+        if (gridCell.hasBarAfter) rowStr += '|';
+        if (gridCell.hasBarUnder) rowStr += '_';
+        if (gridCell.isDiagramless) rowStr += '*';
+      }
+      idHashFodders.push(rowstr);
+    }
+    for (let ci of this.allClueIndices) {
+      const clue = this.clues[ci];
+      let label = ci;
+      if (clue.childrenClueIndices && clue.childrenClueIndices.length > 0) {
+        label += ',' + clue.childrenClueIndices.join(',');
+      }
+      idHashFodders.push(label + ' ' + clue.clue);
+    }
+    const hash = this.javaHash(idHashFodders);
+    this.id = `xlv-#${hash.toString(36)}`;
+    this.log('Created puzzle id');
+  }
+  if (exolvePuzzles[this.id]) {
+    this.throwErr('Puzzle id ' + this.id + ' is already in use');
+  }
+  exolvePuzzles[this.id] = this;
+  document.getElementById(this.prefix + '-id-span').innerText = this.id;
+}
+
 Exolve.prototype.createPuzzle = function() {
   this.init()
 
@@ -7130,6 +7206,8 @@ Exolve.prototype.createPuzzle = function() {
   this.finalClueTweaks()
   this.setWordEndsAndHyphens();
   this.setUpGnav()
+
+  this.createIdIfNeeded();
 
   this.applyStyles()
 

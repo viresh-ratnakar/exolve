@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.30 February 12, 2022
+### Version: Exolve v1.31 March 4, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -33,9 +33,6 @@ Here is a minimal example of the puzzle specification:
 
 ```
 exolve-begin
-  exolve-id: tiny-42
-  exolve-title: Tiny Demo Crossword
-  exolve-setter: Exolve
   exolve-width: 5
   exolve-height: 5
   exolve-grid:
@@ -55,8 +52,8 @@ exolve-end
 ```
 
 The format is very simple and uses plain text (but the parsing code is
-also simplistic and not very forgiving, so please go through the format
-documentation). The setter has the option to provide solutions (as in the
+also simplistic and occasionally not very forgiving, so please go through the
+format documentation). The setter has the option to provide solutions (as in the
 example above), or to just use 0 to indicate a square that needs to be filled
 (i.e., is a part of a "light," in crossword terms).
 
@@ -157,20 +154,37 @@ You can click on the black background or on the puzzle title, setter, or
 preamble (if present) to unhighlight the current clue (for printing or
 screenshotting, for example).
 
-## Format
+## Extended chessboard notation
+In a few cases (such as when specifying colouring or ninas or locations of
+some clue numbers in diagramless puzzles), you might need to specify the location
+of a square in the grid. You can do that in one of the following ways:
+```
+a3 (column "a": the 1st column from the left, and row 3 from the bottom)
+f11 (column "f": the 6th column from the left, and row 11 from the bottom)
+```
+The letters (a-z) must be in lower case and must precede the row number, with
+no intervening space.
+
+This chessboard notation is insufficient if your grid has more than 26 columns.
+You can directly specify the row and the column too, like this:
+```
+c1r3 (the 1st column from the left, and row 3 from the bottom)
+r11c6 (the 6th column from the left, and row 11 from the bottom)
+```
+
+## Exolve format overview
 The puzzle can contain the following "sections" between the `exolve-begin` line
 and the `exolve-end` line:
 
-* **`exolve-id`**
-* `exolve-title`
-* `exolve-setter`
-* `exolve-copyright`
-* `exolve-credits`
 * **`exolve-width`**
 * **`exolve-height`**
-* `exolve-preamble` / `exolve-prelude`
-* `exolve-postscript`
 * **`exolve-grid`**
+* `exolve-title`
+* `exolve-setter`
+* `exolve-id`
+* `exolve-copyright`
+* `exolve-credits`
+* `exolve-preamble` / `exolve-prelude`
 * `exolve-across`
 * `exolve-down`
 * `exolve-nodir`
@@ -193,6 +207,7 @@ and the `exolve-end` line:
 * `exolve-force-bar-right`
 * `exolve-force-bar-below`
 * `exolve-cell-size`
+* `exolve-postscript`
 
 Each section has the section name (`exolve-something`), followed by a colon.
 Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
@@ -201,7 +216,7 @@ Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
 be repeated though). For such single-line sections, the "value" of the section
 is the text following the colon on the same line.
 
-The bolded sections, namely, `exolve-id`, `exolve-width`, `exolve-height`, and
+The bolded sections, namely, `exolve-width`, `exolve-height`, and
 `exolve-grid` are required. The other sections are optional, but
 `exolve-across`, `exolve-down`, `exolve-title`, `exolve-setter` should probably
 be present in most puzzles.
@@ -217,74 +232,12 @@ notation—[see this section](#extended-chessboard-notation)). I did not use
 
 Any text appearing before `exolve-begin` or after `exolve-end` is ingored.
 
-## `exolve-id`
-Provide a unique id for this crossword puzzle. This id is used as the key for
-saving/restoring state and also to distinguish between multiple puzzles on a
-single page. You can create an unsolved version of a puzzle (to run a contest,
-for example) and, later, a version of the same puzzle that has the solutions,
-giving them both the same `exolve-id`. Then, when solvers visit the version
-with solutions, they can see their own entries and see which mistakes they
-made, if any. Example:
-```
-  exolve-id: tiny-42
-```
-
-## `exolve-title`, `exolve-setter`
-The title of the puzzle and the name/pseudonym of the crossword setter. Example:
-```
-  exolve-title: My Lovely Crossword
-  exolve-setter: Narsi Sus
-```
-
-## `exolve-copyright`
-If your provide this, it will be displayed with the copyright symbol, under
-the rendered puzzle grid. Example:
-```
-  exolve-copyright: 2019 Viresh Ratnakar
-```
-
-## `exolve-credits`
-If your provide this, it will be displayed under the copyright. You can provide
-multiple instance of this.
-Example:
-```
-  exolve-credits: Test solver: Zaphod Beeblebrox
-  exolve-credits: Custom code: H. A. C. Ker
-```
-
 ## `exolve-width`, `exolve-height`
 The width and height of the puzzle—i.e., how many squares across and how many
 squares down is the crossword grid. Example:
 ```
   exolve-width: 15
   exolve-height: 15
-```
-
-## `exolve-preamble`, `exolve-prelude`
-Crossword puzzles often come with a preamble that contains special instructions
-and/or hints. The preamble text occupies multiple lines—starting from the
-line *after* the `exolve-preamble` (or `exolve-prelude`) line, and going all the
-way down to the line preceding the next `exolve-something` section. The preamble
-may include HTML tags. The preamble is rendered just above the grid, in the
-rendered puzzle. Example:
-```
-  exolve-preamble:
-    Words should be entered in the grid <i>after</i> deleting one letter. The
-    letters thus deleted, in clue order, form the name of a famous farm
-    animal.
-```
-
-## `exolve-postscript`
-If this section is provided, it gets rendered under the whole puzzle. Like
-`exolve-preamble`, this is also a multiline section and can include arbitrary
-HTML. Example:
-```
-  exolve-postscript:
-    <ul>
-     <li><a href="puzzle-41.html">Previous puzzle</a></li>
-     <li><a href="index.html">Home</a></li>
-     <li><a href="puzzle-43.html">Next puzzle</a></li>
-   </ul>
 ```
 
 ## `exolve-grid`
@@ -415,42 +368,7 @@ have to escape `0` using an `&` prefix if `0` has been allowed in the grid via
 completeness) is that you cannot create a degenerate grid that has all entries
 made up entirely of `0s`.
 
-## Some details about clue numbers
-Across and down clue numbers are automatically inferred from the grid, except
-in two cases. The first is when there are diagramless cells and solutions
-have not been provided. The second is in jigsaw-style puzzles, where the setter
-opts to deliberately not provide associations between grid squares and clues,
-by using non-numeric clue labels without providing their grid locations. When
-the solver is entering a value in a light for which the clue association is not
-known, the highlighted "current clue" browsable interface runs through all the
-clues for which all grid cells are not known.
-
-Clue numbering can be affected by the following additional factors covered in
-other sections:
-- The "skip numbering" decorator ('~') covered above in the
-  [`exolve-grid`](#exolve-grid) section.
-- [`exolve-reversals`](#exolve-reversals)
-- [`exolve-3d`](#exolve-3d)
-
-## Extended chessboard notation
-In a few cases (such as when specifying colouring or ninas or locations of
-some clue numbers in diagramless puzzles), you will need to specify the location
-of a square in the grid. You can do that in one of the following ways:
-```
-a3 (column "a": the 1st column from the left, and row 3 from the bottom)
-f11 (column "f": the 6th column from the left, and row 11 from the bottom)
-```
-The letters (a-z) must be in lower case and must precede the row number, with
-no intervening space.
-
-This chessboard notation is insufficient if your grid has more than 26 columns.
-You can directly specify the row and the column too, like this:
-```
-c1r3 (the 1st column from the left, and row 3 from the bottom)
-r11c6 (the 6th column from the left, and row 11 from the bottom)
-```
-
-## Some details about diagramless cells
+### Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
 in a light or is a blocked square—if the setter has used any bars, they do get
 displayed to the solver, even in diagramless cells.
@@ -471,6 +389,60 @@ start locations for *some* clues. Exolve provides a way to do this: the setter
 can optionally include the location of the square where a clue starts for any
 clue, using the extended chessboard notation. Details are provided in the next
 section.
+
+## `exolve-title`, `exolve-setter`
+The title of the puzzle and the name/pseudonym of the crossword setter. Example:
+```
+  exolve-title: My Lovely Crossword
+  exolve-setter: Narsi Sus
+```
+
+## `exolve-id`
+Optionally provide a unique id for this crossword puzzle. This id is used as
+the key for saving/restoring state and also to distinguish between multiple
+puzzles on a single page. You can create an unsolved version of a puzzle (to
+run a contest, for example) and, later, a version of the same puzzle that has
+the solutions, giving them both the same `exolve-id`. Then, when solvers visit
+the version with solutions, they can see their own entries and see which
+mistakes they made, if any. Example:
+```
+  exolve-id: tiny-42
+```
+
+If you do not provide an id, the software will create one from a signature of
+the grid and the clues. This will ensure that if you load the same crossword
+without making any changes to the clues or the grid, then you will recover
+the state, even without an explicit id.
+
+## `exolve-copyright`
+If your provide this, it will be displayed with the copyright symbol, under
+the rendered puzzle grid. Example:
+```
+  exolve-copyright: 2019 Viresh Ratnakar
+```
+
+## `exolve-credits`
+If your provide this, it will be displayed under the copyright. You can provide
+multiple instance of this.
+Example:
+```
+  exolve-credits: Test solver: Zaphod Beeblebrox
+  exolve-credits: Custom code: H. A. C. Ker
+```
+
+## `exolve-preamble`, `exolve-prelude`
+Crossword puzzles often come with a preamble that contains special instructions
+and/or hints. The preamble text occupies multiple lines—starting from the
+line *after* the `exolve-preamble` (or `exolve-prelude`) line, and going all the
+way down to the line preceding the next `exolve-something` section. The preamble
+may include HTML tags. The preamble is rendered just above the grid, in the
+rendered puzzle. Example:
+```
+  exolve-preamble:
+    Words should be entered in the grid <i>after</i> deleting one letter. The
+    letters thus deleted, in clue order, form the name of a famous farm
+    animal.
+```
 
 ## `exolve-across`, `exolve-down`, `exolve-nodir`
 The `exolve-across` and `exolve-down` sections should be used to specify the
@@ -732,6 +704,23 @@ example get ignored. If you have consecutive periods, they do not get ignored
     [Q.]. Hop... (4)
     [R] ... aboard! (6)
 ```
+
+### Some details about clue numbers
+Across and down clue numbers are automatically inferred from the grid, except
+in two cases. The first is when there are diagramless cells and solutions
+have not been provided. The second is in jigsaw-style puzzles, where the setter
+opts to deliberately not provide associations between grid squares and clues,
+by using non-numeric clue labels without providing their grid locations. When
+the solver is entering a value in a light for which the clue association is not
+known, the highlighted "current clue" browsable interface runs through all the
+clues for which all grid cells are not known.
+
+Clue numbering can be affected by the following additional factors covered in
+other sections:
+- The "skip numbering" decorator ('~') covered above in the
+  [`exolve-grid`](#exolve-grid) section.
+- [`exolve-reversals`](#exolve-reversals)
+- [`exolve-3d`](#exolve-3d)
 
 ### Clues without a specified direction
 If you want to create a section of clues without a specified across/down
@@ -1257,7 +1246,6 @@ modify the URL to make a direct submission link, like this:
   exolve-submit: https://docs.google.com/forms/d/e/1FAIpQLSeezqRzI7N77Huk8_TYwAB40wp2E6HgQaOsNPMc1KgJp-7O8Q/formResponse?submit=SUBMIT entry.411104056 entry.464339112 entry.861079418 entry.1052922113
 ```
 
-
 ## `exolve-option`
 In this single-line, repeatable section, the setter can specify certain options.
 Multiple, space-separated options may be provided on each exolve-option line.
@@ -1274,7 +1262,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of February 2022, columnar layout is quirky: Chrome supports it best,
+  As of March 2022, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`clues-at-right-in-two-columns`** If this option is specified, it affects
   the column layout when the available width is wide enough for exactly two
@@ -1597,6 +1585,19 @@ can create rectangular cells that are not squares too) using
 The first parameter is the cell width and the second parameter is the cell
 height. Both values must be at least 10.
 
+## `exolve-postscript`
+If this section is provided, it gets rendered under the whole puzzle. Like
+`exolve-preamble`, this is also a multiline section and can include arbitrary
+HTML. Example:
+```
+  exolve-postscript:
+    <ul>
+     <li><a href="puzzle-41.html">Previous puzzle</a></li>
+     <li><a href="index.html">Home</a></li>
+     <li><a href="puzzle-43.html">Next puzzle</a></li>
+   </ul>
+```
+
 ## Completion event
 
 The software fires a custom JavaScript event (with type `exolve`) under the
@@ -1630,7 +1631,8 @@ example of how to use this event.
 The software automatically saves state. It does so in the browser's local
 storage. Users can also copy and share a URL that saves the state after the #
 (if requested through provideStateUrl=true in the constructor). The state uses
-the puzzle id specified in the [`exolve-id`](#exolve-id) section as the key.
+the puzzle id specified in the [`exolve-id`](#exolve-id) section (or the id
+automatically created, if that section is not there) as the key.
 
 Please note that a variety of factors control access to and size limits of
 local storage. Especially when embedding Exolve puzzles in cross-site iframes,
@@ -1816,12 +1818,62 @@ You can load the additional script file, `exolve-from-puz.js` and call
 `exolveFromPuz(puz)` on the contents of a .puz file (which are in the
 [puz format](https://code.google.com/archive/p/puz/wikis/FileFormat.wiki)).
 
+### Plain text of just the clues
+You can load the additional script file, `exolve-from-text.js` and call
+`exolveFromText(w, h, text)` where `text` has all the clues separated by
+line-breaks, with 'Across' and 'Down' as headings for the two clues sections.
+This will figure out the matching `w`x`h` blocked grid using cues from clue
+numbers and enums. The grid can be easily and uniquely figured out in most
+cases (you might have done this when solving a diagramless puzzle) with a few
+caveats listed below. Occasionally, multiple grids will match the pattern
+implied by the clues, and all are returned for the calling application
+to pass on to the user to disambiguate. The prime use-case is that of PDFs (see
+the next subsection).
+
+Each clue can be split over multiple lines, but if one of those lines
+leads with a number then the parsing code will get confused. Best to pre-process
+to have one clue per line.
+
+The plain text can optionally include a title, a byline, a copyright line, and
+a preamble, before the 'Across' line that marks the beginning of the clues. The
+parsing code for these sections is *very* naive and may make mistakes.
+
+This functionality is only supported for standard, blocked, UK-style crossword
+grids. Here are the constraints under which this works:
+- The grid is symmetric and is derived by blackening some cells in
+  one of the four possible chequered template starting points.
+- No light is shorter than 3 letters.
+- Enums are provided for all clues. The only exception is child clues
+  in linked groups.
+- For a linked group of clues, the component lights split the linked
+  entry at exactly word-breaks or hyphens. Moreover (to keep the
+  algorithm complexity in check), only one extra word-break/hyphen in the
+  entry is supported (compared to the number of linked clues).
+- There aren't very long strips of consecutive blackened squares.
+
+
+### .pdf
+While it is tempting to add support for reading crosswords out of PDFs, it is
+very hard to do so without adding package dependencies. For your own use,
+you can do it by using external packages for PDFs. However, with the
+`exolveFromText()` function, you can simply use the text from a PDF file
+(completely ignoring the grid image in the PDF) and create an
+interactively playable Exolve crossword. You can grab the text using
+select-and-copy in a PDF viewer, or you can use a commandline tool such as
+`pdftotext`.
+
 ### exolve-player.html
 This is a generic web app for loading any crossword file (Exolve/ipuz/puz)
 to allow interactive solving. In case of Exolve, of course, if you have
 an HTML file already, you do not really need to use `exolve-player.html`.
-But, for ipuz/puz files, this might be a convenient player to use. Once I
-find a good OCR solution, I'll also enable opening pictures of crosswords.
+But, for ipuz/puz/pdf files, this might be a convenient player to use. Once I
+find a good OCR solution, I'll also try to enable opening pictures of
+crosswords.
+
+For crossword puzzles in PDF files, just copy the text of the crossword
+(don't worry about the grid!) and past it into the `Paste text ...` area
+in the interface. The software will be able to figure out the grid automatically
+in most cases (see details above in).
 
 You can use your own copy of the player, or you can use [the one that I
 have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).
@@ -1908,7 +1960,7 @@ that has the class `xlv-dont-print`.
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
 with the title "Settings for printing/PDFs". This lets you specify:
 
-- Page size (such as 'Letter' or 'A4'). As of February 2022, you still need to
+- Page size (such as 'Letter' or 'A4'). As of March 2022, you still need to
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.
@@ -1970,7 +2022,7 @@ algorithm, then you can turn it off by setting a field, like this:
 
 Brwosers have their own printing layout algorithms that sometimes do not behave
 as expected by Exolve's printing layout algorithm. Here are some known issues as
-of February, 2022.
+of March, 2022.
 
 - Printing settings in Firefox seem especially complex, and Exolve turns off
   the pagination attempts described above if it detects the browser to be
@@ -2026,13 +2078,16 @@ var exolvePuzzles;
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
+ * saveState If false, state is not saved in local storage. Useful for
+ *    creating temporary/preview puzzles.
  */
 function Exolve(puzzleText,
                 containerId="",
                 customizer=null,
                 provideStateUrl=true,
                 visTop=0,
-                maxDim=0) {...}
+                maxDim=0,
+                saveState=true) {...}
 
 /**
  * createExolve(puzzleText) is just a convenient wrapper that looks for

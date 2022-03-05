@@ -1,5 +1,30 @@
 # Changelog
 
+### Version: Exolve v1.31 March 4, 2022
+
+- Make exolve-id optional. We compute a hash of the unsolved grid and the
+  clues to create an id now, if one is not provided. The hashing ensures
+  that (for eg), with-solutions and sans-solutions versions of the same
+  crossword get the same id.
+- getAllCell() drops the last cell if it is the same as the first cell
+  (for a linked group). This is fine if the enum for the clue does not
+  count that cell twice (which is the norm for "snake" clues). But
+  the enum can be and often is the length including that cell twice. Do
+  not wanr about that. Do this by making the getAllCells() returned
+  array have an extra boolean attribute called ".endsOnStart"
+- Allow clue labels in linked groups to spell out direction names fully
+  (like "4, 5Across" instead of "4, 5a").
+- exolve-from-{puz,ipuz}.js: Remove the ",id" parameter for conversions—if
+  no id is provided, the resulting Exolve specs won't have an exolve-id,
+  which is now fine.
+- exolve-from-text.js: New auxiliary code file for exolve-player. Provides
+  the exolveFromText() function that figures out the whole grid from just
+  the clues (as if it were a diagramless puzzle). There are some notes
+  and caveats—please read the documentation in the file.
+- exolve-player: Now uses exolveFromText() to convert text from an arbitrary
+  crossword (eg, copied from a PDF) into an interactively playable puzzle.
+- Reorganized the README file a bit.
+
 ### Version: Exolve v1.30 February 12, 2022
 
 - Allow &amp; to be used as the separator between clue numbers in a linked

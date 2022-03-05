@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.30 February 12, 2022
+Version: Exolve v1.31 March 4, 2022
 */
 
 function exolveFromPuzNextNull(buffer, offset) {
@@ -37,7 +37,7 @@ function exolveFromPuzNextNull(buffer, offset) {
   return offset;
 }
 
-function exolveFromPuz(buffer, id=null, fname='') {
+function exolveFromPuz(buffer, fname='') {
   const dotPuzShort = function(buffer, offset) {
     return (buffer[offset + 1] << 8) + buffer[offset];
   }
@@ -83,7 +83,6 @@ function exolveFromPuz(buffer, id=null, fname='') {
   // We use the Exolve code to figure out clue numbering:
   const exolvePuz = new Exolve(`
   exolve-begin
-  exolve-id: ${dummyId}
   exolve-width: ${width}
   exolve-height: ${height}
   exolve-grid:
@@ -175,11 +174,7 @@ ${exolveGrid}
   if (!fname) {
     fname = 'unknown'
   }
-  if (!id) {
-    id = `puzxlv-${Math.random().toString(36).substring(2, 8)}`
-  }
   return `  exolve-begin
-  exolve-id: ${id}
   exolve-width: ${width}
   exolve-height: ${height}
   exolve-title: ${title}
