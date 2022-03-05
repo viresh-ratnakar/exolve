@@ -288,12 +288,22 @@ ${sections.preamble}`;
 
   const candidates = inferrer.expandLinkedGroups();
 
+  // Even in chequered templates, sometimes we find grids with a few lights in
+  // "non-light" rows/cols. Keep everything blank in the middle 5x5 to find
+  // some such grids (the shenanigans are more likely to be near the middle).
+  const midClear = 5;
+  const midRowStart = Math.floor((h/2) - (midClear/2));
+  const midColStart = Math.floor((w/2) - (midClear/2));
   for (let rowpar = 0; rowpar < 2; rowpar++) {
     for (let colpar = 0; colpar < 2; colpar++) {
       for (let candidateBase of candidates) {
         const candidate = candidateBase.clone();
         for (let r = 0; r < h; r++) {
           for (let c = 0; c < w; c++) {
+            if (r >= midRowStart && r < midRowStart + midClear &&
+                c >= midColStart && c < midColStart + midClear) {
+              continue;
+            }
             if (((r % 2) != rowpar) && ((c % 2) != colpar)) {
               candidate.grid[r][c] = '.';
             }
@@ -651,7 +661,6 @@ ExolveGridInferrer.prototype.mapLight = function(dir, len, rowcolStart) {
       }
     }
   }
-  const light = mapped.lights[this.mapped.length][dir];
   return mapped;
 }
 
@@ -679,10 +688,10 @@ ExolveGridInferrer.prototype.infer = function(results) {
   let numUnsetCellsSet = 0;
   /* Only consider blackening up to 5 open cells, to keep complexity in check */
   while (this.rowcol.isValid() && numUnsetCellsSet <= 5) {
-    let candidates = [this.clone()];
     if (this.grid[this.rowcol.row][this.rowcol.col] == '_') {
       numUnsetCellsSet++;
     }
+    let candidates = [this.clone()];
     this.rowcol.incr(1);
     for (let dir of ['A', 'D']) {
       if (!(dir in lights)) {
@@ -703,7 +712,7 @@ ExolveGridInferrer.prototype.infer = function(results) {
       if (!candidate.isValid()) {
         continue;
       }
-      candidate.mapped.push(candidate.rowcol);
+      candidate.mapped.push(candidate.rowcol.clone());
       candidate.rowcol.incr(1);
       candidate.infer(results);
     }

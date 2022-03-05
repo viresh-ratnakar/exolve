@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Quick unnumbered tweak, March 5, 2022
+
+- Handle some special cases in parsing clue directions within linked clue
+  specs: allow a/d/across/down preceded by a space. This is to help
+  exolve-from-text parse some newspaper crosswords.
+- exolveFomText(): In chequerer templates, leave a middle 5x5 area
+  blank to start with, to deal with the case that occasionally some
+  lights are placed in rows/cols that are not aligned with the chequered
+  template. Only look for such lights in the middle 5x5 (a likely area
+  for such shenangans) to keep complexity in check.
+
 ### Version: Exolve v1.31 March 4, 2022
 
 - Make exolve-id optional. We compute a hash of the unsolved grid and the

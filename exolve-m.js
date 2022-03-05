@@ -2221,7 +2221,13 @@ Exolve.prototype.parseEnum = function(clueLine) {
   return parse;
 }
 
-Exolve.prototype.parseDir = function(s) {
+/**
+ * The direction prefix must start at the beginning of s, with this 2-d
+ * exception if matchSpecial==true (for parsing linked clue numbers
+ * coming from non-exolve text):
+ * <n> [a|d|across|down]((, *[0-9])|( [A-Z]))
+ */
+Exolve.prototype.parseDir = function(s, matchSpecial) {
   const parse = {dir: '', reversed: false};
   let dirStr = '';
   let skip = 0;
@@ -2252,6 +2258,31 @@ Exolve.prototype.parseDir = function(s) {
         parse.reversed = true;
         if (lcs.startsWith('up')) {
           skip = 2;
+        }
+      }
+    } else if (matchSpecial) {
+      // Try the special cases.
+      let specSkip = 0;
+      let specDir = '';
+      if (lcs.startsWith(' across')) {
+        specSkip = 7;
+        specDir = 'A';
+      } else if (lcs.startsWith(' a')) {
+        specSkip = 2;
+        specDir = 'A';
+      } else if (lcs.startsWith(' down')) {
+        specSkip = 5;
+        specDir = 'D';
+      } else if (lcs.startsWith(' d')) {
+        specSkip = 2;
+        specDir = 'D';
+      }
+      if (specSkip > 0) {
+        const suffRE = /^((,[ ]?[0-9])|( [A-Z0-9]))/;
+        if (suffRE.test(s.substr(specSkip))) {
+          parse.dir = specDir;
+          skip = specSkip;
+          dirStr = lcs.substr(1, 1);
         }
       }
     }
@@ -2319,7 +2350,7 @@ Exolve.prototype.parseDir = function(s) {
 // hasChildren, linkSep
 // skip
 // leadSpace
-Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true) {
+Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChild=false) {
   let parse = {dir: '', label: '', notLabel: true};
   parse.hasChilden = false;
   parse.linkSep = '';
@@ -2368,7 +2399,9 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true) {
   clueLine = clueLine.substr(lskip)
 
   if (!parse.dir) {
-    const suffDir = this.parseDir(clueLine);
+    // If isChild=true, then parseDir will also match a space followed by 'a/across/d/down' if there
+    // is a number or capital letter afterwards.
+    const suffDir = this.parseDir(clueLine, isChild);
     if (suffDir.dir) {
       parse.dir = suffDir.dir;
       parse.dirStr = suffDir.dirStr;
@@ -2639,7 +2672,7 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clue.linkSep = clueLabelParse.linkSep || '';
   clue.children = []
   while (clueLabelParse.hasChildren) {
-    clueLabelParse = this.parseClueLabel(clueLine)
+    clueLabelParse = this.parseClueLabel(clueLine, true, true /* isChild */);
     clue.children.push(clueLabelParse)
     clueLine = clueLine.substr(clueLabelParse.skip)
   }
