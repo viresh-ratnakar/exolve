@@ -33,10 +33,11 @@ summary {
   cursor: pointer;
   font-size: 70%;
 }
-pre {
+pre,
+#xlvp-help {
   border: 1px solid gray;
   background: white;
-  padding: 4px;
+  padding: 8px;
 }
 #xlvp-text,
 #xlvp-chooser {
@@ -86,25 +87,51 @@ pre {
   <h3><b>Interactively solve a crossword</b></h3>
   <br>
   <ul class="xlvp-list">
-    <li><b>Drag and drop a crossword file in these formats: Exolve, ipuz, puz</b></li>
+    <li><b>Drag and drop a crossword file in these formats: Exolve, ipuz, puz, text</b></li>
     <li><b>Or:</b> <input id="xlvp-file" onchange="xlvpOnOpenFile();" type="file"></input></li>
     <li><b>Or: Enter crossword text (selected from a PDF file, for example):</b>
       <br>
       <div class="xlvp-hscroll">
-        <textarea
+        <textarea onchange="xlvpSaveState()"
           placeholder='Paste just the clues from the text of a blocked, symmetric (UK-style) crossword here, including the lines that say "Across" and "Down", optionally preceded by Title/Byline/Preamble. Clues can span multiple lines, but if one of those lines starts with a number then please join it up with the previous line. Change the grid width and height below if different.'
           id="xlvp-text" rows="8" cols="80"></textarea>
       </div>
       <div style="margin-top:8px">
         <label for="xlvp-w">Width:</label> <input id="xlvp-w" name="xlvp-w" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
         <label for="xlvp-h">Height:</label> <input id="xlvp-h" name="xlvp-h" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
-        <button onclick="xlvpOnText()"><b>Try to infer a blocked crossword from the above text</b></button>
+        <button onclick="xlvpOnText()"><b>Try to infer the crossword from the above text</b></button>
       </div>
     <div id="xlvp-chooser" class="xlvphscroll">
       <h3 id="xlvp-multiple-msg">Multiple grids match the text, choose the right one:</h3>
       <div id="xlvp-chooser-strip" class="xlvp-hscroll">
       </div>
     </div></li>
+    <li>
+      <details>
+        <summary>Help</summary>
+        <div id="xlvp-help">
+          <p>
+          You can specify the crossword to be opened by choosing a file to open, or by dragging-and-dropping it onto the player.
+          You can also paste plain-text-formatted crosswords into the "Enter crossword text" area.
+          Here are some details on the various supported formats:
+          </p>
+          <p><ul>
+            <li><b>Exolve:</b> You can open Exolve-formatted files with exolve-player. Such files have to contain
+              a crossword in the Exolve format between "exolve-begin" and "exolve-end" lines. They can be HTML
+              files too, as long as the Exolve-formatted data is present in them.</li>
+            <li><b>PUZ:</b> You can open <a href="https://code.google.com/archive/p/puz/wikis/FileFormat.wiki">.puz files</a> with exolve-player.
+              <li><b>IPUZ:</b> You can open <a href="http://www.ipuz.org/">.ipuz files</a> with exolve-player.
+            <li><b>Text:</b> You can open text files or paste the text into the "Enter crossword text" area and
+              click on the "Try to infer the crossword from the above text" button. In either case, the
+              software will try to figure out the grid from the clue numbers and thein enumerations. The text
+              should include clues with enumerations, along with the "Across" and "Down" heading lines.
+              Grid inference currently works only for standard blocked grids following chequered templates.
+              The width and the height of the crossword should be set in the entry fields under the
+              "Enter crossword text" area (for both pasted text and opened text files).</li>
+          </ul></p>
+        </div>
+      </details>
+    </li>
   </ul>
   <div id="xlvp-links" style="font-size:80%">
     <p><b>Links</b></p>
@@ -113,7 +140,6 @@ pre {
     <p><a href="https://exet.app/">Exet web app: start setting a crossword right away!</a></p>
     <p><a href="https://gussalufz.com/">Cryptic crosswords by Gussalufz</a></p>
   </div>
-  <br>
   <button id="xlvp-save" disabled onclick="xlvpSave()">
      Save Exolve-converted crossword as exolve-player-output.html
   </button>
@@ -131,6 +157,7 @@ pre {
 
 let xlvpFileName = '';
 let xlvpData = '';
+
 const xlvpFrame = document.getElementById('xlvp-frame');
 const xlvpSrc = document.getElementById('xlvp-src');
 const xlvpSaveButton = document.getElementById('xlvp-save');
@@ -140,6 +167,44 @@ const xlvpW = document.getElementById('xlvp-w');
 const xlvpH = document.getElementById('xlvp-h');
 const xlvpChooser = document.getElementById('xlvp-chooser');
 const xlvpChooserStrip = document.getElementById('xlvp-chooser-strip');
+
+const xlvpStateKey = '42-xlvp-player-state';
+
+function xlvpSaveState() {
+  const state = {
+    'data': xlvpData,
+    'textW': xlvpW.value,
+    'textH': xlvpH.value,
+    'textData': xlvpText.value,
+    'saveDisabled': xlvpSaveButton.disabled,
+  };
+  try {
+    window.localStorage.setItem(xlvpStateKey, JSON.stringify(state));
+  } catch (err) {
+    console.log(err);
+    console.log('Could not save state—local storage is full.');
+  }
+}
+
+function xlvpRestoreState() {
+  let state = window.localStorage.getItem(xlvpStateKey);
+  if (!state) {
+    return;
+  }
+  try {
+    state = JSON.parse(state)
+    if (state.textW) xlvpW.value = state.textW;
+    if (state.textH) xlvpH.value = state.textH;
+    if (state.textData) xlvpText.value = state.textData;
+    if (state.data) {
+      xlvpShowExolveInner(state.data, !state.saveDisabled, true);
+    }
+    console.log('Successfully restored exolve-player state');
+  } catch (err) {
+    console.log(err);
+    console.log('Failed to parse exolve-player state');
+  }
+}
 
 function xlvpDeleteOld(hideChooser=true) {
   for (id in exolvePuzzles) {
@@ -153,9 +218,19 @@ function xlvpDeleteOld(hideChooser=true) {
     xlvpChooserStrip.innerHTML = '';
   }
 }
+
 xlvpDeleteOld();
+xlvpRestoreState();
 
 function xlvpShowExolve(specs, converted=false, hideChooser=true) {
+  const ret = xlvpShowExolveInner(specs, converted, hideChooser);
+  if (ret) {
+    xlvpSaveState();
+  }
+  return ret;
+}
+
+function xlvpShowExolveInner(specs, converted, hideChooser) {
   let start = specs.indexOf('exolve-begin')
   let end = specs.indexOf('exolve-end')
   if (start < 0 || end < 0 || start >= end) {
@@ -164,12 +239,19 @@ function xlvpShowExolve(specs, converted=false, hideChooser=true) {
   while (start > 0 && specs.charAt(start - 1) == ' ') {
     start--;
   }
-  xlvpData = specs.substring(start, end) + 'exolve-end';
+  const data = specs.substring(start, end) + 'exolve-end';
 
   xlvpDeleteOld(hideChooser);
 
-  createExolve(xlvpData, 'xlvp-frame', false);
+  try {
+    createExolve(data, 'xlvp-frame', false);
+  } catch (err) {
+    console.log(err);
+    console.log('createExolve() failed');
+    return false;
+  }
 
+  xlvpData = data;
   xlvpSrc.innerText = xlvpData;
   xlvpSaveButton.disabled = !converted;
   xlvpFrame.scrollIntoView();
@@ -246,6 +328,9 @@ function xlvpShow(buffer, fname) {
   if (xlvpShowPuz(buffer, fname)) {
     return;
   }
+  if (xlvpShowText(specs)) {
+    return;
+  }
   alert('Could not read the crossword file');
 }
 function xlvpOpenFile(f) {
@@ -277,14 +362,20 @@ function xlvpDrop(ev) {
 function xlvpDrag(ev) {
   ev.preventDefault();
 }
+
 function xlvpOnText() {
+  if (!xlvpShowText(xlvpText.value)) {
+    alert('Could not infer a ' + xlvpW.value + 'x' + xlvpH.value + ' grid from the crossword text provided.');
+  }
+}
+
+function xlvpShowText(text) {
   const w = xlvpW.value;
   const h = xlvpH.value;
-  const specs = exolveFromText(w, h, xlvpText.value);
+  const specs = exolveFromText(w, h, text);
 
   if (!specs || specs.length == 0) {
-    alert('Could not infer a ' + w + 'x' + h + ' grid from the crossword text provided.');
-    return;
+    return false;
   }
   xlvpDeleteOld();
   if (specs.length > 1) {
@@ -324,6 +415,7 @@ function xlvpOnText() {
     const spec = specs[0].exolve;
     xlvpShowExolve(spec, true);
   }
+  return true;
 }
 </script>
 </body>

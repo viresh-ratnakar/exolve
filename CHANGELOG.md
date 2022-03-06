@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Another unnumbered tweak, March 5, 2022
+
+- In the special case for parsing clue directions within linked clue
+  specs (from the previous tweak), also allow & as separator.
+- exolve-player: save/restore state using local storage so that the
+  last opened puzzle shows up again on reloading.
+- exolve-player: allow text files to be opened too.
+- exolve-player: add a "Help" section.
+- exolve-from-text: The 5x5-middle-area-clearing from the last tweak:
+  don't do it if the width/height is too small!
+
 ### Version: Quick unnumbered tweak, March 5, 2022
 
 - Handle some special cases in parsing clue directions within linked clue

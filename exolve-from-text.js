@@ -300,7 +300,8 @@ ${sections.preamble}`;
         const candidate = candidateBase.clone();
         for (let r = 0; r < h; r++) {
           for (let c = 0; c < w; c++) {
-            if (r >= midRowStart && r < midRowStart + midClear &&
+            if (h >= midClear + 2 && w >= midClear + 2 &&
+                r >= midRowStart && r < midRowStart + midClear &&
                 c >= midColStart && c < midColStart + midClear) {
               continue;
             }
