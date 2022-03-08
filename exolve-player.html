@@ -62,6 +62,12 @@ pre,
 .xlvp-list li + li {
   margin-top: 16px;
 }
+.xlvp-button {
+  padding: 2px 6px;
+}
+.xlvp-button:hover:enabled {
+  background: lightgreen;
+}
 #xlvp-multiple-msg {
   margin-top: 16px;
   background: lightgreen;
@@ -85,7 +91,6 @@ pre,
 <div id="xlvp-player" ondrop="xlvpDrop(event);" ondragover="xlvpDrag(event);">
   <h2><b>Exolve Player</b></h2>
   <h3><b>Interactively solve a crossword</b></h3>
-  <br>
   <ul class="xlvp-list">
     <li><b>Drag and drop a crossword file in these formats: Exolve, ipuz, puz, text</b></li>
     <li><b>Or:</b> <input id="xlvp-file" onchange="xlvpOnOpenFile();" type="file"></input></li>
@@ -99,7 +104,7 @@ pre,
       <div style="margin-top:8px">
         <label for="xlvp-w">Width:</label> <input id="xlvp-w" name="xlvp-w" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
         <label for="xlvp-h">Height:</label> <input id="xlvp-h" name="xlvp-h" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
-        <button onclick="xlvpOnText()"><b>Try to infer the crossword from the above text</b></button>
+        <button class="xlvp-button" onclick="xlvpOnText()"><b>"Auto-grid": Try to infer the crossword from the above text</b></button>
       </div>
     <div id="xlvp-chooser" class="xlvphscroll">
       <h3 id="xlvp-multiple-msg">Multiple grids match the text, choose the right one:</h3>
@@ -122,12 +127,12 @@ pre,
             <li><b>PUZ:</b> You can open <a href="https://code.google.com/archive/p/puz/wikis/FileFormat.wiki">.puz files</a> with exolve-player.
               <li><b>IPUZ:</b> You can open <a href="http://www.ipuz.org/">.ipuz files</a> with exolve-player.
             <li><b>Text:</b> You can open text files or paste the text into the "Enter crossword text" area and
-              click on the "Try to infer the crossword from the above text" button. In either case, the
-              software will try to figure out the grid from the clue numbers and their enumerations. The text
-              should include clues with enumerations, along with the "Across" and "Down" heading lines.
-              Grid inference currently works only for standard blocked grids following chequered templates.
-              The width and the height of the crossword should be set in the entry fields under the
-              "Enter crossword text" area (for pasted text as well as text files).</li>
+              click on the "Auto-grid" button. In either case, the software will try to figure out the grid
+              from the clue numbers and their enumerations. The text should include clues with enumerations,
+              along with the "Across" and "Down" heading lines. Grid inference currently works only for
+              standard blocked grids following chequered templates. The width and the height of the crossword
+              should be set in the entry fields under the "Enter crossword text" area (for pasted text as well
+              as text files).</li>
           </ul></p>
         </div>
       </details>
@@ -140,7 +145,7 @@ pre,
     <p><a href="https://exet.app/">Exet web app: start setting a crossword right away!</a></p>
     <p><a href="https://gussalufz.com/">Cryptic crosswords by Gussalufz</a></p>
   </div>
-  <button id="xlvp-save" disabled onclick="xlvpSave()">
+  <button id="xlvp-save" class="xlvp-button" disabled onclick="xlvpSave()">
      Save Exolve-converted crossword as exolve-player-output.html
   </button>
   <details id="xlvp-view">
