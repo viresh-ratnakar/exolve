@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Yet another unnumbered tweak, March 9, 2022
+
+- Add exolve-maker from exolve-from-text.js.
+- exolve-player.html: Add auto-hscroll to exolve specs block.
+
 ### Version: Another unnumbered tweak, March 5, 2022
 
 - In the special case for parsing clue directions within linked clue

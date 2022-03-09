@@ -63,7 +63,7 @@ Version: Exolve v1.31 March 3, 2022
  *   algorithm complexity in check), only one extra word-break/hyphen in the
  *   entry is supported (compared to the number of linked clues).
  */
-exolveFromText = function(w, h, text) {
+exolveFromText = function(w, h, text, fname='') {
   let sections = {
     title: '',
     setter: '',
@@ -71,6 +71,7 @@ exolveFromText = function(w, h, text) {
     copyright: '',
     across: [],
     down: [],
+    file: fname || '[provided text]',
   };
   let seenClues = false;
   let inDown = false;
@@ -180,6 +181,9 @@ exolveFromTextSections = function(w, h, sections) {
     specs += `
     exolve-copyright: ${sections.copyright}`;
   }
+  specs += `
+    exolve-maker:
+      Converted by exolve-from-text.js from ${sections.file}`
   if (sections.preamble) {
     specs += `
     exolve-preamble:

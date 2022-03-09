@@ -152,7 +152,7 @@ pre,
     <summary>
       View Exolve-formatted specs for the current crossword
     </summary>
-    <pre id="xlvp-src">
+    <pre id="xlvp-src" class="xlvp-hscroll">
       There isn't a current crossword. Perhaps open one?
     </pre>
   </details>
@@ -333,7 +333,7 @@ function xlvpShow(buffer, fname) {
   if (xlvpShowPuz(buffer, fname)) {
     return;
   }
-  if (xlvpShowText(specs)) {
+  if (xlvpShowText(specs, fname)) {
     return;
   }
   alert('Could not read the crossword file');
@@ -374,10 +374,10 @@ function xlvpOnText() {
   }
 }
 
-function xlvpShowText(text) {
+function xlvpShowText(text, fname='') {
   const w = xlvpW.value;
   const h = xlvpH.value;
-  const specs = exolveFromText(w, h, text);
+  const specs = exolveFromText(w, h, text, fname);
 
   if (!specs || specs.length == 0) {
     return false;
