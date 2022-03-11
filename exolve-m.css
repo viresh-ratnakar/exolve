@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.31 March 4, 2022
+Version: Exolve v1.32 March 10, 2022
 */
 
 @media (max-width: 500px) {
@@ -173,6 +173,14 @@ Version: Exolve v1.31 March 4, 2022
   overflow: visible;
   font-weight: bold;
   text-align: right;
+}
+.xlv-invisible {
+  color: transparent;
+  font-weight: bold;
+  text-align: right;
+}
+.xlv-clue-indent {
+  text-indent: -2ch;
 }
 .xlv-clickable:hover {
   cursor: pointer;

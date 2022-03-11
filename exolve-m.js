@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.31 March 4, 2022';
+  this.VERSION = 'Exolve v1.32 March 10, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2234,31 +2234,24 @@ Exolve.prototype.parseDir = function(s, matchSpecial) {
   const lcs = s.toLowerCase();
   if (this.layers3d <= 1) {
     const match = lcs.match(/^[adbu]/);
+    const extMatch = lcs.match(/^[a-z]*/);
     if (match && match.length == 1) {
-      dirStr = match[0].trimLeft();
-      skip = match[0].length;
-      if (dirStr == 'a') {
+      console.assert(extMatch && extMatch.length == 1, match, extMatch);
+      dirStr = match[0];
+      if (dirStr == 'a' && 'across'.startsWith(extMatch[0])) {
         parse.dir = 'A';
-        if (lcs.startsWith('across')) {
-          skip = 6;
-        }
-      } else if (dirStr == 'd') {
+        skip = extMatch[0].length;
+      } else if (dirStr == 'd' && ('down'.startsWith(extMatch[0]) || extMatch[0] == 'dn')) {
         parse.dir = 'D';
-        if (lcs.startsWith('down')) {
-          skip = 4;
-        }
-      } else if (dirStr == 'b') {
+        skip = extMatch[0].length;
+      } else if (dirStr == 'b' && 'back'.startsWith(extMatch[0])) {
         parse.dir = 'A';
         parse.reversed = true;
-        if (lcs.startsWith('back')) {
-          skip = 4;
-        }
-      } else if (dirStr == 'u') {
+        skip = extMatch[0].length;
+      } else if (dirStr == 'u' && 'up'.startsWith(extMatch[0])) {
         parse.dir = 'D';
         parse.reversed = true;
-        if (lcs.startsWith('up')) {
-          skip = 2;
-        }
+        skip = extMatch[0].length;
       }
     } else if (matchSpecial) {
       // Try the special cases.
@@ -2412,13 +2405,19 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
   }
   parse.notLabel = false;
   if (consumeTrailing) {
-    commaParts = clueLine.match(/^\s*[,&]/)
+    // Look for ,/&/and
+    commaParts = clueLine.match(/^\s*(?:[,&]|and\s*[1-9])/)
     if (commaParts && commaParts.length == 1) {
       parse.hasChildren = true;
       // Store the separator char in linkSep
-      parse.linkSep = commaParts[0][commaParts[0].length - 1]
-      parse.skip += commaParts[0].length
-      clueLine = clueLine.substr(commaParts[0].length)
+      parse.linkSep = commaParts[0].trim();
+      let skipLen = commaParts[0].length;
+      if (parse.linkSep.startsWith('and')) {
+        parse.linkSep = '&';
+        skipLen--;  // One digit was in RE.
+      }
+      parse.skip += skipLen;
+      clueLine = clueLine.substr(skipLen);
     }
     // Consume trailing period if it is there (but not if it's followed
     // immediately by another period (i.e., don't skip "...")
@@ -3737,6 +3736,7 @@ Exolve.prototype.displayClues = function() {
 
     let col1Chars = theClue.displayLabel.replace(/&[^;]*;/g, '#')
     let col1NumChars = [...col1Chars].length
+    let indenterHTML = '';
     const linkSep = col1Chars.substr(1, 2);
     if (linkSep == ', ' || linkSep == ' &' ||
         (revSuff && col1Chars.substr(1, revSuff.length) == revSuff)) {
@@ -3745,7 +3745,7 @@ Exolve.prototype.displayClues = function() {
       // Indent!
       col1.style.textIndent =
         this.caseCheck(col1Chars.substr(0, 1)) ? '0.55ch' : '1ch'
-      col1Chars = '0' + col1Chars
+      indenterHTML = '0';
       col1NumChars++
     }
     if (!this.allCellsKnown(clueIndex)) {
@@ -3755,31 +3755,19 @@ Exolve.prototype.displayClues = function() {
                             this.clueStateToggler.bind(this, clueIndex));
     }
     let col2 = document.createElement('td')
+    if (col1NumChars > 2) {
+      // More than two unicode chars in col1. Need to indent col2.
+      indenterHTML += theClue.displayLabel;
+      const indenter = document.createElement('span');
+      indenter.className = 'xlv-invisible';
+      indenter.innerHTML = indenterHTML;
+      col2.appendChild(indenter);
+      col2.classList.add('xlv-clue-indent');
+    }
     let clueSpan = document.createElement('span')
     this.renderClueSpan(theClue, clueSpan)
     col2.appendChild(clueSpan)
     theClue.clueSpan = clueSpan
-    if (col1NumChars > 2) {
-      // More than two unicode chars in col1. Need to indent col2.
-      col1Chars = col1Chars.substr(2)
-      // spaces and commas use 0.6
-      const col1Spammas = col1Chars.replace(/[^, ]*/g, '').length
-      let indent = col1Spammas * 0.6
-      // digits, lowercase letters use 1
-      const col1Digits = col1Chars.replace(/[^0-9a-z]*/g, '').length
-      indent = indent + (col1Digits * 1)
-      // uppercase letters and & use 1.3
-      const col1Letters = col1Chars.replace(/[^A-Z&]*/g, '').length
-      indent = indent + (col1Letters * 1.3)
-      const rem = col1Chars.length - col1Letters - col1Digits - col1Spammas;
-      if (rem > 0) {
-        indent = indent + (rem * 2.8)
-      }
-      if (indent < 0.5) {
-        indent = 0.5
-      }
-      col2.style.textIndent = '' + indent + 'ch'
-    }
 
     if ((theClue.showBlanks || this.isOrphan(clueIndex)) &&
         !theClue.parentClueIndex) {

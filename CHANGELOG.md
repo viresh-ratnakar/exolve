@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.32 March 10, 2022
+
+- Darned linked clue separators! Allow 'and' to be used as a separator.
+- Instead of just 'a' or 'across', allow any prefix of 'across' as
+  the non-space-preceded clue label qualifier. Similarly, for 'down',
+  (also support 'dn'), 'back', 'up'. Leave 3-d as-is (ie, only exact
+  2-letter codes ac/ba/aw/...
+- Do clue-column indentation for linked clues properly: insert invisible
+  text instead of doing complex indentation calculations.
+
 ### Version: Yet another unnumbered tweak, March 9, 2022
 
 - Add exolve-maker from exolve-from-text.js.
