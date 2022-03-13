@@ -6,7 +6,7 @@
   of the 4 chequered starting points. Previously, we had hacked
   some limited leeway by clearing the chequered pattern only in a
   5x5 central area. Now, if the 4 chequered starting points do
-  not yeid a result, we also try the fully unchequered starting
+  not yield a result, we also try the fully unchequered starting
   point.
 - This last option is slower. It was *much* slower, but adding one
   trick has salvaged it to be viable: abort as soon as you find that
@@ -14,6 +14,7 @@
     00
     00
 - Dedupe inferred grids.
+- Add several test files for grid inference.
 
 ### Version: Exolve v1.32 March 10, 2022
 
