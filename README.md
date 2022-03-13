@@ -1840,8 +1840,8 @@ parsing code for these sections is *very* naive and may make mistakes.
 
 This functionality is only supported for standard, blocked, UK-style crossword
 grids. Here are the constraints under which this works:
-- The grid is symmetric and is derived by blackening some cells in
-  one of the four possible chequered template starting points.
+- The grid is symmetric
+- Every 4x4 area has at least one black cell.
 - No light is shorter than 3 letters.
 - Enums are provided for all clues. The only exception is child clues
   in linked groups.

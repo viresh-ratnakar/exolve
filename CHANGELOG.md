@@ -1,5 +1,20 @@
 # Changelog
 
+### Version: Unnumbered tweak only to exolve-from-text, March 12, 2022
+
+- Deal with grid inference when the grid is not derived from one
+  of the 4 chequered starting points. Previously, we had hacked
+  some limited leeway by clearing the chequered pattern only in a
+  5x5 central area. Now, if the 4 chequered starting points do
+  not yeid a result, we also try the fully unchequered starting
+  point.
+- This last option is slower. It was *much* slower, but adding one
+  trick has salvaged it to be viable: abort as soon as you find that
+  setting the current cell to 0 will create the pattern:
+    00
+    00
+- Dedupe inferred grids.
+
 ### Version: Exolve v1.32 March 10, 2022
 
 - Darned linked clue separators! Allow 'and' to be used as a separator.

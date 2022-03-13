@@ -53,8 +53,8 @@ Version: Exolve v1.32 March 3, 2022
  *
  * This assumes that the grid is in a standard, blocked, UK-style format:
  *
- * - The grid is symmetric and is derived by blackening some cells in
- *   one of the four possible chequered template starting points.
+ * - The grid is symmetric.
+ * - Every 4x4 area has at least one black cell.
  * - No light is shorter than 3 letters.
  * - Enums are provided for all clues. The only exception is child clues
  *   in linked groups.
@@ -292,23 +292,15 @@ ${sections.preamble}`;
 
   const candidates = inferrer.expandLinkedGroups();
 
-  // Even in chequered templates, sometimes we find grids with a few lights in
-  // "non-light" rows/cols. Keep everything blank in the middle 5x5 to find
-  // some such grids (the shenanigans are more likely to be near the middle).
-  const midClear = 5;
-  const midRowStart = Math.floor((h/2) - (midClear/2));
-  const midColStart = Math.floor((w/2) - (midClear/2));
+  const startTime = Date.now();
+
+  // Try chequered templates first.
   for (let rowpar = 0; rowpar < 2; rowpar++) {
     for (let colpar = 0; colpar < 2; colpar++) {
       for (let candidateBase of candidates) {
         const candidate = candidateBase.clone();
         for (let r = 0; r < h; r++) {
           for (let c = 0; c < w; c++) {
-            if (h >= midClear + 2 && w >= midClear + 2 &&
-                r >= midRowStart && r < midRowStart + midClear &&
-                c >= midColStart && c < midColStart + midClear) {
-              continue;
-            }
             if (((r % 2) != rowpar) && ((c % 2) != colpar)) {
               candidate.grid[r][c] = '.';
             }
@@ -318,10 +310,24 @@ ${sections.preamble}`;
       }
     }
   }
+
+  if (results.length == 0) {
+    console.log('Trying non-chequered templates');
+    for (let candidate of candidates) {
+      candidate.infer(results);
+    }
+  }
+
+  console.log('Time take for grid-inference: ' + (Date.now() - startTime) + 'ms');
+
+  const dedupe = {};
   const matches = [];
   for (let inf of results) {
     gridSpecLines = inf.gridSpecLines();
     if (gridSpecLines) {
+      const hash = puz.javaHash([gridSpecLines]);
+      if (dedupe[hash]) continue;
+      dedupe[hash] = true;
       matches.push({
         'grid': gridSpecLines,
         'exolve': specs + gridSpecLines + '\n  exolve-end',
@@ -501,6 +507,18 @@ ExolveGridInferrer.prototype.setGrid = function(rc, letter) {
   if (this.grid[sym.row][sym.col] != '_' &&
       this.grid[sym.row][sym.col] != letter) {
     return false;
+  }
+  if (letter == '0') {
+    const prow = rc.row - 1;
+    const pcol = rc.col - 1;
+    // Cannot create 00
+    //               00
+    if (prow >= 0 && pcol >= 0 &&
+        this.grid[rc.row][pcol] == '0' &&
+        this.grid[prow][rc.col] == '0' &&
+        this.grid[prow][pcol] == '0') {
+      return false;
+    }
   }
   this.grid[rc.row][rc.col] = letter;
   this.grid[sym.row][sym.col] = letter;
@@ -691,8 +709,10 @@ ExolveGridInferrer.prototype.infer = function(results) {
   const lights = this.lights[this.mapped.length];
   const rowcolStart = this.rowcol.clone();
   let numUnsetCellsSet = 0;
-  /* Only consider blackening up to 5 open cells, to keep complexity in check */
-  while (this.rowcol.isValid() && numUnsetCellsSet <= 5) {
+
+  /* Only consider blackening up to these many cells */
+  const maxToBlacken = 5;
+  while (this.rowcol.isValid() && numUnsetCellsSet <= maxToBlacken) {
     if (this.grid[this.rowcol.row][this.rowcol.col] == '_') {
       numUnsetCellsSet++;
     }
