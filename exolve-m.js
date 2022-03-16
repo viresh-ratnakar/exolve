@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.32 March 10, 2022';
+  this.VERSION = 'Exolve v1.33 March 15, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -773,7 +773,7 @@ Exolve.prototype.init = function() {
   this.checkcellButton.addEventListener('click', this.checkCell.bind(this));
 
   this.checkAllButton = document.getElementById(this.prefix + '-check-all');
-  this.checkAllButton.addEventListener('click', this.checkAll.bind(this));
+  this.checkAllButton.addEventListener('click', this.checkAllHandler.bind(this));
 
   this.ninasButton = document.getElementById(this.prefix + '-ninas');
   this.ninasButton.addEventListener('click', this.toggleNinas.bind(this));
@@ -786,7 +786,7 @@ Exolve.prototype.init = function() {
   this.revealcellButton.addEventListener('click', this.revealCell.bind(this));
 
   this.revealAllButton = document.getElementById(this.prefix + '-reveal-all');
-  this.revealAllButton.addEventListener('click', this.revealAll.bind(this));
+  this.revealAllButton.addEventListener('click', this.revealAllHandler.bind(this));
 
   this.submitButton = document.getElementById(this.prefix + '-submit');
   this.submitButton.addEventListener('click', this.submitSolution.bind(this));
@@ -6102,6 +6102,10 @@ Exolve.prototype.checkCurr = function() {
   this.cellNotLight = false;
 }
 
+Exolve.prototype.checkAllHandler = function(ev) {
+  this.checkAll();
+}
+
 Exolve.prototype.checkAll = function(conf=true, erase=true) {
   if (conf && !this.maybeConfirm(this.textLabels['confirm-check-all'])) {
     this.refocus()
@@ -6126,16 +6130,28 @@ Exolve.prototype.checkAll = function(conf=true, erase=true) {
       }
     }
   }
-  if (allCorrect) {
-    this.revealAll(false)  // calls updateAndSaveState()
-  } else if (erase) {
-    for (let ci of this.allClueIndices) {
-      this.updateClueState(ci, false, null)
+  for (let ci of this.allClueIndices) {
+    const cells = this.getAllCells(ci);
+    if (cells && cells.length > 0) {
+      let clueCorrect = true;
+      for (let x of cells) {
+        let row = x[0]
+        let col = x[1]
+        let gridCell = this.grid[row][col]
+        if (gridCell.currLetter != gridCell.solution) {
+          clueCorrect = false;
+          break;
+        }
+      }
+      if (clueCorrect) {
+        this.revealClueAnno(ci);
+      }
     }
-    this.updateAndSaveState()
+    this.updateClueState(ci, false, null)
   }
-  this.refocus()
-  return allCorrect
+  this.updateAndSaveState()
+  this.refocus();
+  return allCorrect;
 }
 
 Exolve.prototype.revealClueAnno = function(ci) {
@@ -6257,6 +6273,10 @@ Exolve.prototype.revealCurr = function() {
   this.updateAndSaveState();
   this.refocus();
   this.cellNotLight = false;
+}
+
+Exolve.prototype.revealAllHandler = function(ev) {
+  this.revealAll();
 }
 
 Exolve.prototype.revealAll = function(conf=true) {
@@ -7187,9 +7207,9 @@ Exolve.prototype.createIdIfNeeded = function() {
       for (let c = 0; c < this.gridWidth; c++) {
         const gridCell = this.grid[r][c];
         rowstr += gridCell.isLight ? '0' : '.';
-        if (gridCell.hasBarAfter) rowStr += '|';
-        if (gridCell.hasBarUnder) rowStr += '_';
-        if (gridCell.isDiagramless) rowStr += '*';
+        if (gridCell.hasBarAfter) rowstr += '|';
+        if (gridCell.hasBarUnder) rowstr += '_';
+        if (gridCell.isDiagramless) rowstr += '*';
       }
       idHashFodders.push(rowstr);
     }
@@ -7203,7 +7223,6 @@ Exolve.prototype.createIdIfNeeded = function() {
     }
     const hash = this.javaHash(idHashFodders);
     this.id = `xlv-#${hash.toString(36)}`;
-    this.log('Created puzzle id');
   }
   if (exolvePuzzles[this.id]) {
     this.throwErr('Puzzle id ' + this.id + ' is already in use');

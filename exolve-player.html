@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.32"/>
-<script src="exolve-m.js?v1.32"></script>
-<script src="exolve-from-ipuz.js?v1.32"></script>
-<script src="exolve-from-puz.js?v1.32"></script>
-<script src="exolve-from-text.js?v1.32x"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.33"/>
+<script src="exolve-m.js?v1.33"></script>
+<script src="exolve-from-ipuz.js?v1.33"></script>
+<script src="exolve-from-puz.js?v1.33"></script>
+<script src="exolve-from-text.js?v1.33"></script>
 
 <style>
 .xlvp-wait {
@@ -62,11 +62,20 @@ pre,
 .xlvp-list li + li {
   margin-top: 16px;
 }
-.xlvp-button {
+.xlvp-button,
+.xlvp-button-working {
   padding: 2px 6px;
 }
 .xlvp-button:hover:enabled {
   background: lightgreen;
+}
+.xlvp-button-working {
+  background: lightpink;
+  font-weight: bold;
+}
+#xlvp-infer-msg {
+  font-size: small;
+  font-style: italic;
 }
 #xlvp-multiple-msg {
   margin-top: 16px;
@@ -102,9 +111,11 @@ pre,
           id="xlvp-text" rows="8" cols="80"></textarea>
       </div>
       <div style="margin-top:8px">
-        <label for="xlvp-w">Width:</label> <input id="xlvp-w" name="xlvp-w" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
-        <label for="xlvp-h">Height:</label> <input id="xlvp-h" name="xlvp-h" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
-        <button class="xlvp-button" onclick="xlvpOnText()"><b>"Auto-grid": Try to infer the crossword from the above text</b></button>
+        <label for="xlvp-w">Width:</label> <input id="xlvp-w" name="xlvp-w" onchange="xlvpSaveState()" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
+        <label for="xlvp-h">Height:</label> <input id="xlvp-h" name="xlvp-h" onchange="xlvpSaveState()" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
+        <button id="xlvp-infer"
+          class="xlvp-button" onclick="xlvpOnText()">"Auto-grid": Try to infer the crossword from the above text</button>
+        <span id="xlvp-infer-msg"></span>
       </div>
     <div id="xlvp-chooser" class="xlvphscroll">
       <h3 id="xlvp-multiple-msg">Multiple grids match the text, choose the right one:</h3>
@@ -129,10 +140,13 @@ pre,
             <li><b>Text:</b> You can open text files or paste the text into the "Enter crossword text" area and
               click on the "Auto-grid" button. In either case, the software will try to figure out the grid
               from the clue numbers and their enumerations. The text should include clues with enumerations,
-              along with the "Across" and "Down" heading lines. Grid inference currently works only for
-              standard blocked grids ("UK-style": any 4x4 area must have at least one black cell). The width
-              and the height of the crossword should be set in the entry fields under the "Enter crossword
-              text" area (for pasted text as well as text files).</li>
+              along with the "Across" and "Down" heading lines. Additionally, the clues may be optionally
+              preceded by some text, the first line of which will be taken to be the title and the remaining
+              lines will be treated as the preamble (with some slight attempt at parsing out a setter name).
+              Grid inference works for standard blocked grids ("UK-style": any 4x4 area must have at least one
+              black cell) with 180-deg./90-deg./-90-deg./hor.-flip/ver.-flip symmetry. The width and the height
+              of the crossword should be set in the entry fields under the "Enter crossword text" area (for
+              pasted text as well as text files).</li>
           </ul></p>
         </div>
       </details>
@@ -170,6 +184,8 @@ const xlvpFile = document.getElementById('xlvp-file');
 const xlvpText = document.getElementById('xlvp-text');
 const xlvpW = document.getElementById('xlvp-w');
 const xlvpH = document.getElementById('xlvp-h');
+const xlvpInfer = document.getElementById('xlvp-infer');
+const xlvpInferMsg = document.getElementById('xlvp-infer-msg');
 const xlvpChooser = document.getElementById('xlvp-chooser');
 const xlvpChooserStrip = document.getElementById('xlvp-chooser-strip');
 
@@ -271,8 +287,8 @@ function xlvpSave() {
     '<meta charset="utf-8"/>\n' +
     '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n' +
     '<link rel="stylesheet" type="text/css" ' +
-    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.32"/>\n' +
-    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.32">' +
+    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.33"/>\n' +
+    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.33">' +
     '<\/script>\n' +
     '<\/head>\n' +
     '<body>\n' +
@@ -333,10 +349,8 @@ function xlvpShow(buffer, fname) {
   if (xlvpShowPuz(buffer, fname)) {
     return;
   }
-  if (xlvpShowText(specs, fname)) {
-    return;
-  }
-  alert('Could not read the crossword file');
+  // This last one is async.
+  xlvpShowText(specs, fname);
 }
 function xlvpOpenFile(f) {
   let fr = new FileReader(); 
@@ -369,57 +383,108 @@ function xlvpDrag(ev) {
 }
 
 function xlvpOnText() {
-  if (!xlvpShowText(xlvpText.value)) {
-    alert('Could not infer a ' + xlvpW.value + 'x' + xlvpH.value + ' grid from the crossword text provided.');
-  }
+  xlvpShowText(xlvpText.value);
 }
 
-function xlvpShowText(text, fname='') {
+function xlvpShowText(text, fname='provided text') {
   const w = xlvpW.value;
   const h = xlvpH.value;
-  const specs = exolveFromText(w, h, text, fname);
 
-  if (!specs || specs.length == 0) {
-    return false;
-  }
-  xlvpDeleteOld();
-  if (specs.length > 1) {
-    let html = '<table><tr>';
-    for (let i = 0; i < specs.length; i++) {
-      html += `<td id="xlvp-chooser-${i}" class="xlvp-chooser-entry"></td>`;
+  const workers = [];
+  const matches = [];
+
+  const savedButton = xlvpInfer.innerHTML;
+  xlvpInfer.className = 'xlvp-button-working';
+  xlvpInfer.innerHTML = 'Working!';
+  xlvpInfer.disabled = true;
+
+  const finisher = () => {
+    for (let worker of workers) {
+      clearTimeout(worker);
     }
-    html += '</tr></table>'
-    xlvpChooserStrip.innerHTML = html;
-    for (let i = 0; i < specs.length; i++) {
-      const smallSpecs = `
+    workers.length = 0;
+    if (matches.length == 0) {
+      alert('Could not parse or infer a ' + xlvpW.value + 'x' +
+            xlvpH.value + ' grid from ' + fname);
+    }
+    xlvpInfer.innerHTML = savedButton;
+    xlvpInfer.disabled = false;
+    xlvpInfer.className = 'xlvp-button';
+    xlvpInferMsg.innerHTML = '';
+  };
+
+  const candidates = exolveFromText(w, h, text, fname) || [];
+
+  for (let candidate of candidates) {
+    workers.push(setTimeout(() => {
+      xlvpInferMsg.innerHTML = candidate.name;
+    }, 0));
+    const worker = () => {
+      const results = [];
+      candidate.infer(results);
+      if (results.length == 0) {
+        return;
+      }
+      const dedupe = {};
+      for (let result of results) {
+        gridSpecLines = result.gridSpecLines();
+        if (gridSpecLines) {
+          if (dedupe[gridSpecLines]) continue;
+          dedupe[gridSpecLines] = true;
+          matches.push({
+            'grid': gridSpecLines,
+            'exolve': result.exolve(),
+          });
+        }
+      }
+      if (matches.length == 0) {
+        return;
+      }
+      console.log('Was able to infer ' + matches.length + ' grid(s) with: ' + candidate.name);
+      xlvpDeleteOld();
+      if (matches.length > 1) {
+        let html = '<table><tr>';
+        for (let i = 0; i < matches.length; i++) {
+          html += `<td id="xlvp-chooser-${i}" class="xlvp-chooser-entry"></td>`;
+        }
+        html += '</tr></table>'
+        xlvpChooserStrip.innerHTML = html;
+        for (let i = 0; i < matches.length; i++) {
+          const smallSpecs = `
   exolve-begin
     exolve-width: ${w}
     exolve-height: ${h}
     exolve-option: ignore-unclued ignore-enum-mismatch
     exolve-grid:
-      ${specs[i].grid}
+      ${matches[i].grid}
   exolve-end`;
-      const smallXlv = new Exolve(smallSpecs, `xlvp-chooser-${i}`, function(puz) {
-        document.getElementById(puz.prefix + '-controls-etc').style.display = 'none';
-        document.getElementById(puz.prefix + '-curr-clue-parent').style.display = 'none';
-      }, false, 0, 150, false);
-      const chooser = document.getElementById(`xlvp-chooser-${i}`);
-      chooser.addEventListener('click', () => {
-        xlvpShowExolve(specs[i].exolve, true, false);
-        chooser.classList.add('xlvp-chooser-entry-sel');
-        for (let j = 0; j < specs.length; j++) {
-          if (j == i) {
-            continue;
-          }
-          document.getElementById(`xlvp-chooser-${j}`).className = 'xlvp-chooser-entry';
+          const smallXlv = new Exolve(smallSpecs, `xlvp-chooser-${i}`, function(puz) {
+            document.getElementById(puz.prefix + '-controls-etc').style.display = 'none';
+            document.getElementById(puz.prefix + '-curr-clue-parent').style.display = 'none';
+          }, false, 0, 150, false);
+          const chooser = document.getElementById(`xlvp-chooser-${i}`);
+          chooser.addEventListener('click', () => {
+            xlvpShowExolve(matches[i].exolve, true, false);
+            chooser.classList.add('xlvp-chooser-entry-sel');
+            for (let j = 0; j < matches.length; j++) {
+              if (j == i) {
+                continue;
+              }
+              document.getElementById(`xlvp-chooser-${j}`).className = 'xlvp-chooser-entry';
+            }
+          });
         }
-      });
-    }
-    xlvpChooser.style.display = '';
-  } else {
-    const spec = specs[0].exolve;
-    xlvpShowExolve(spec, true);
+        xlvpChooser.style.display = '';
+      } else {
+        const spec = matches[0].exolve;
+        xlvpShowExolve(spec, true);
+      }
+      finisher();
+    };
+    workers.push(setTimeout(worker, 0));
   }
+  setTimeout(finisher, 0);
+
   return true;
 }
 </script>

@@ -1,5 +1,21 @@
 # Changelog
 
+### Version: Exolve v1.33 March 15, 2022
+
+- checkAll() and revealAll() were used as event handlers directly,
+  which conflated their first args with the event object param. Created
+  checkAllHandler() and revealAllHandler().
+- checkAll() should not reveal ninas/explanations even when all the solutions
+  are correct (it will continue to reveal annos).
+- Exploit the "no-4x4-zeros" optimization even more to reduce complexity
+  in exolve-from-text.js (there were some overlooked cases).
+- This was needed as we now also try out different symmetries apart from
+  the standard 180-degrees one. 90-deg/-90-deg/hor-flip/ver-flip.
+- Since this can at times take some time, change the UI a bit to
+  show a status message listing what grid-template/symmetry is getting
+  tried out.
+- Update exolve-player.html to use this new scheme.
+
 ### Version: Unnumbered tweak only to exolve-from-text, March 12, 2022
 
 - Deal with grid inference when the grid is not derived from one

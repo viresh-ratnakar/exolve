@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.32 March 3, 2022
+Version: Exolve v1.33 March 15, 2022
 */
 
 /**
@@ -38,22 +38,36 @@ Version: Exolve v1.32 March 3, 2022
  * You shouldn't use this code to cheat on a crossword that has been presented
  * diagramlessly :-).
  *
- * The return value is an array of possible grids. Each matched grid is returned
- * as an object that looks like: {
- *   'grid': '...',
- *   'exolve': '...',
- * }
- * Here the 'grid' value has just the text lines containing the grid (in
- * Exolve format). The 'exolve' value is the full Exolve-formatted crossword.
+ * Usage:
+ *   const cadidates = exolveFromText(w, h, text, filename);
+ *   const results = [];
+ *   for (let candidate of candidates) {
+ *     console.log('Trying ' + candidate.name);
+ *     candidate.infer(results);
+ *     if (results.length > 0) {
+ *       break;
+ *     }
+ *   }
+ *   for (let result of results) {
+ *     // Use result.exolve()
+ *   }
  *
- * If a grid could not be inferred, [] is returned.
+ * This API is broken up like this because there may be several
+ * variations to be tried (chequered variants, symmetries, etc.) which may take
+ * a while, so it might be useful to give some UI signals to the user (see
+ * usage in exolve-player.html for an example).
  *
- * Occasionally, multiple grids may match the pattern implied by the clues. They
- * are all returned in the array.
+ * Each matched grid is returned as an object (in the "results" array) that
+ * has functions .gridSpecLines() and .exolve() that return the grid specs
+ * and the full exolve specs, respectively.
+ *
+ * Usually, only one grid gets matched, but occasionally, multiple grids may
+ * match the pattern implied by the clues. They are all returned in the
+ * results array.
  *
  * This assumes that the grid is in a standard, blocked, UK-style format:
  *
- * - The grid is symmetric.
+ * - The grid is symmetric using one of 180/90/-90/hflip/vflip symmetries.
  * - Every 4x4 area has at least one black cell.
  * - No light is shorter than 3 letters.
  * - Enums are provided for all clues. The only exception is child clues
@@ -150,12 +164,12 @@ exolveFromText = function(w, h, text, fname='') {
 exolveFromTextSections = function(w, h, sections) {
   if (w <= 0 || h <= 0) {
     console.log('Width and height must both be at least 1');
-    return null;
+    return [];
   }
   if (!sections.across || sections.across.length <= 0 ||
       !sections.down || sections.down.length <= 0) {
     console.log('Text has to contain at least one across clue and one down clue');
-    return null;
+    return [];
   }
   let specs = '';
   // Create an invisible Exolve puzzle.
@@ -220,7 +234,7 @@ ${sections.preamble}`;
 
   const puz = new Exolve(tempSpecs, xlvpid, null, false, 0, 0, false);
 
-  const inferrer = new ExolveGridInferrer(puz);
+  const inferrer = new ExolveGridInferrer(puz, specs);
   if (exolvePuzzles && exolvePuzzles[xlvpid]) {
     delete exolvePuzzles[xlvpid];
   }
@@ -242,7 +256,7 @@ ${sections.preamble}`;
     let num = parseInt(clue.label);
     if (isNaN(num) || num <= 0) {
       console.log('Found non-positive-number clue label: ' + clue.label);
-      return null;
+      return [];
     }
     if (inferrer.lights.length <= num) {
       inferrer.lights.length = num + 1;
@@ -252,7 +266,7 @@ ${sections.preamble}`;
     }
     if (clue.enumLen == 0 && !clue.parentClueIndex) {
       console.log('Found non-linked-child clue without parent: ' + clue.label + clue.dir);
-      return null;
+      return [];
     }
     inferrer.lights[num][clue.dir] = {
       label: num,
@@ -263,17 +277,17 @@ ${sections.preamble}`;
   }
   if (inferrer.lights.length < 2) {
     console.log('Did not find any clues');
-    return null;
+    return [];
   }
 
   for (let i = 1; i < inferrer.lights.length; i++) {
     if (!inferrer.lights[i]) {
       console.log('Found missing clue ' + i);
-      return null;
+      return [];
     }
     if (!('A' in inferrer.lights[i]) && !('D' in inferrer.lights[i])) {
       console.log('Found a hole at clue ' + i);
-      return null;
+      return [];
     }
     for (let dir of ['A', 'D']) {
       if (!(dir in inferrer.lights[i])) {
@@ -288,17 +302,13 @@ ${sections.preamble}`;
     }
   }
 
-  const results = [];
+  const candidates = [];
+  const inferrers = inferrer.expandLinkedGroups();
 
-  const candidates = inferrer.expandLinkedGroups();
-
-  const startTime = Date.now();
-
-  // Try chequered templates first.
   for (let rowpar = 0; rowpar < 2; rowpar++) {
     for (let colpar = 0; colpar < 2; colpar++) {
-      for (let candidateBase of candidates) {
-        const candidate = candidateBase.clone();
+      for (let inferrer of inferrers) {
+        const candidate = inferrer.clone();
         for (let r = 0; r < h; r++) {
           for (let c = 0; c < w; c++) {
             if (((r % 2) != rowpar) && ((c % 2) != colpar)) {
@@ -306,42 +316,24 @@ ${sections.preamble}`;
             }
           }
         }
-        candidate.infer(results);
+        candidate.name = 'Chequered template ' + rowpar + '' + colpar;
+        candidate.appendWithSyms(candidates);
       }
     }
   }
-
-  if (results.length == 0) {
-    console.log('Trying non-chequered templates');
-    for (let candidate of candidates) {
-      candidate.infer(results);
-    }
+  for (let inferrer of inferrers) {
+    const candidate = inferrer.clone();
+    candidate.name = 'Non-chequered template';
+    candidate.appendWithSyms(candidates);
   }
-
-  console.log('Time take for grid-inference: ' + (Date.now() - startTime) + 'ms');
-
-  const dedupe = {};
-  const matches = [];
-  for (let inf of results) {
-    gridSpecLines = inf.gridSpecLines();
-    if (gridSpecLines) {
-      const hash = puz.javaHash([gridSpecLines]);
-      if (dedupe[hash]) continue;
-      dedupe[hash] = true;
-      matches.push({
-        'grid': gridSpecLines,
-        'exolve': specs + gridSpecLines + '\n  exolve-end',
-      });
-    }
-  }
-  return matches;
+  return candidates;
 }
 
-function ExolveRowCol(w, h) {
+function ExolveRowCol(w, h, row=0, col=0) {
   this.w = w;
   this.h = h;
-  this.row = 0;
-  this.col = 0;
+  this.row = row;
+  this.col = col;
 }
 
 ExolveRowCol.prototype.isValid = function() {
@@ -369,12 +361,6 @@ ExolveRowCol.prototype.clone = function() {
   copy.col = this.col;
   return copy;
 }
-ExolveRowCol.prototype.sym = function() {
-  const symcell = new ExolveRowCol(this.w, this.h);
-  symcell.row = this.h - 1 - this.row;
-  symcell.col = this.w - 1 - this.col;
-  return symcell;
-}
 
 ExolveRowCol.prototype.isLessThan = function(other) {
   return this.row < other.row ||
@@ -385,8 +371,9 @@ ExolveRowCol.prototype.isLessThan = function(other) {
  * Captures a candidate inferred grid. Grid entries with '_' have not
  * been decided at any point.
  */
-function ExolveGridInferrer(puz) {
+function ExolveGridInferrer(puz, specs) {
   this.puz = puz;
+  this.specs = specs;
   this.w = puz.gridWidth;
   this.h = puz.gridHeight;
   /* The 'cursor': the next light will be placed at a cell here onwards */
@@ -397,14 +384,18 @@ function ExolveGridInferrer(puz) {
   this.lights = null;
   /* mapped[x] (for x = 1,2,..) is the cell where label x has been placed */
   this.mapped = null;
+  this.name = '';
+  this.sym = null;
 }
 
 ExolveGridInferrer.prototype.clone = function() {
-  const copy = new ExolveGridInferrer(this.puz);
+  const copy = new ExolveGridInferrer(this.puz, this.specs);
   copy.rowcol.row = this.rowcol.row;
   copy.rowcol.col = this.rowcol.col;
   copy.mapped = this.mapped.slice();
   copy.parents = this.parents;
+  copy.sym = this.sym;
+  copy.name = this.name;
 
   copy.grid = new Array(this.h);
   for (let r = 0; r < this.h; r++) {
@@ -456,25 +447,10 @@ ExolveGridInferrer.prototype.canStartD = function(rc) {
 }
 
 ExolveGridInferrer.prototype.canStart = function(rc) {
-  if (!rc.isValid()) {
-    return false;
-  }
-  const gcell = this.grid[rc.row][rc.col];
-  if (gcell == '.') {
-    return false;
-  }
-  if ((rc.col == 0 || this.grid[rc.row][rc.col - 1] == '.') &&
-      rc.col < rc.w - 1 && this.grid[rc.row][rc.col + 1] != '.') {
-    return true;
-  }
-  if ((rc.row == 0 || this.grid[rc.row - 1][rc.col] == '.') &&
-      rc.row < rc.h - 1 && this.grid[rc.row + 1][rc.col] != '.') {
-    return true;
-  }
-  return false;
+  return this.canStartA(rc) || this.canStartD(rc);
 }
 
-ExolveGridInferrer.prototype.isValid = function() {
+ExolveGridInferrer.prototype.isViable = function() {
   for (let par of this.parents) {
     const clue = this.lights[par[0]][par[1]].clue;
     const grp = this.puz.getLinkedClues('' + par[1] + par[0]);
@@ -493,6 +469,52 @@ ExolveGridInferrer.prototype.isValid = function() {
   return true;
 }
 
+ExolveGridInferrer.prototype.symListRect = {
+  '180 deg.': (rc) => new ExolveRowCol(rc.w, rc.h, rc.h - 1 - rc.row, rc.w - 1 - rc.col),
+  'Hor. flip': (rc) => new ExolveRowCol(rc.w, rc.h, rc.row, rc.w - 1 - rc.col),
+  'Ver. flip': (rc) => new ExolveRowCol(rc.w, rc.h, rc.h - 1 - rc.row, rc.col),
+};
+ExolveGridInferrer.prototype.symListSq = {
+  '90-R deg.': (rc) => new ExolveRowCol(rc.h, rc.w, rc.w - 1 - rc.col, rc.h - 1 - rc.row),
+  '90-L deg.': (rc) => new ExolveRowCol(rc.h, rc.w, rc.col, rc.row),
+}
+
+/**
+ * Returns a list of rowcols rc2 such that rc-rc2 form a diagonal
+ * with 0s in the two cross-diagonal cells.
+ */
+ExolveGridInferrer.prototype.threeZerosAll = function(rc) {
+  console.assert(this.grid[rc.row][rc.col] == '0', rc);
+  const ret = [];
+  const row = rc.row;
+  const col = rc.col;
+  const prow = row - 1;
+  const pcol = col - 1;
+  const nrow = row + 1;
+  const ncol = col + 1;
+  if (prow >= 0 && pcol >= 0 &&
+      this.grid[row][pcol] == '0' &&
+      this.grid[prow][col] == '0') {
+    ret.push(new ExolveRowCol(rc.w, rc.h, prow, pcol));
+  }
+  if (nrow < this.h && ncol < this.w &&
+      this.grid[row][ncol] == '0' &&
+      this.grid[nrow][col] == '0') {
+    ret.push(new ExolveRowCol(rc.w, rc.h, nrow, ncol));
+  }
+  if (prow >= 0 && ncol < this.w &&
+      this.grid[row][ncol] == '0' &&
+      this.grid[prow][col] == '0') {
+    ret.push(new ExolveRowCol(rc.w, rc.h, prow, ncol));
+  }
+  if (nrow < this.h && pcol >= 0 &&
+      this.grid[nrow][col] == '0' &&
+      this.grid[row][pcol] == '0') {
+    ret.push(new ExolveRowCol(rc.w, rc.h, nrow, pcol));
+  }
+  return ret;
+}
+
 /**
  * Set entry at rc and its symmetric locaion to letter if possible. Return
  * false if either one is already set to something else.
@@ -503,25 +525,21 @@ ExolveGridInferrer.prototype.setGrid = function(rc, letter) {
       this.grid[rc.row][rc.col] != letter) {
     return false;
   }
-  const sym = rc.sym();
+  const sym = this.sym(rc);
   if (this.grid[sym.row][sym.col] != '_' &&
       this.grid[sym.row][sym.col] != letter) {
     return false;
   }
-  if (letter == '0') {
-    const prow = rc.row - 1;
-    const pcol = rc.col - 1;
-    // Cannot create 00
-    //               00
-    if (prow >= 0 && pcol >= 0 &&
-        this.grid[rc.row][pcol] == '0' &&
-        this.grid[prow][rc.col] == '0' &&
-        this.grid[prow][pcol] == '0') {
-      return false;
-    }
-  }
   this.grid[rc.row][rc.col] = letter;
   this.grid[sym.row][sym.col] = letter;
+  if (letter == '0') {
+    const mustBlock = this.threeZerosAll(rc);
+    for (let rc2 of mustBlock) {
+      if (!this.setGrid(rc2, '.')) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
@@ -687,6 +705,23 @@ ExolveGridInferrer.prototype.mapLight = function(dir, len, rowcolStart) {
   return mapped;
 }
 
+ExolveGridInferrer.prototype.appendWithSyms = function(candidates) {
+  for (let symName in this.symListRect) {
+    const candidate = this.clone();
+    candidate.name = this.name + ': ' + symName;
+    candidate.sym = this.symListRect[symName];
+    candidates.push(candidate);
+  }
+  if (this.w == this.h) {
+    for (let symName in this.symListSq) {
+      const candidate = this.clone();
+      candidate.sym = this.symListSq[symName];
+      candidate.name = this.name + ': ' + symName;
+      candidates.push(candidate);
+    }
+  }
+}
+
 /**
  * Infer the remaining grid recursively. Append any fully successfully
  * filled grids to results.
@@ -696,11 +731,11 @@ ExolveGridInferrer.prototype.infer = function(results) {
     while (this.rowcol.isValid()) {
       this.setGrid(this.rowcol, '.');
       if (this.canStart(this.rowcol)) {
-        return false;
+        return;
       }
       this.rowcol.incr(1);
     }
-    if (!this.isValid()) {
+    if (!this.isViable()) {
       return;
     }
     results.push(this);
@@ -713,34 +748,33 @@ ExolveGridInferrer.prototype.infer = function(results) {
   /* Only consider blackening up to these many cells */
   const maxToBlacken = 5;
   while (this.rowcol.isValid() && numUnsetCellsSet <= maxToBlacken) {
-    if (this.grid[this.rowcol.row][this.rowcol.col] == '_') {
+    const gridCell = this.grid[this.rowcol.row][this.rowcol.col];
+    if (gridCell == '_') {
       numUnsetCellsSet++;
     }
-    let candidates = [this.clone()];
+    let candidate = this.clone();
     this.rowcol.incr(1);
+    console.assert(('A' in lights) || ('D' in lights), lights);
     for (let dir of ['A', 'D']) {
       if (!(dir in lights)) {
         continue;
       }
       const light = lights[dir];
-      const dirCands = candidates.slice();
-      candidates = [];
-      for (let candidate of dirCands) {
-        console.assert(light.len >= 3, light);
-        const candidateMapped = candidate.mapLight(dir, light.len, rowcolStart);
-        if (candidateMapped) {
-          candidates.push(candidateMapped);
-        }
+      console.assert(light.len >= 3, light);
+      candidate = candidate.mapLight(dir, light.len, rowcolStart);
+      if (!candidate) {
+        break;
       }
     }
-    for (let candidate of candidates) {
-      if (!candidate.isValid()) {
-        continue;
-      }
-      candidate.mapped.push(candidate.rowcol.clone());
-      candidate.rowcol.incr(1);
-      candidate.infer(results);
+    if (!candidate) {
+      continue;
     }
+    candidate.mapped.push(candidate.rowcol.clone());
+    candidate.rowcol.incr(1);
+    if (!candidate.isViable()) {
+      continue;
+    }
+    candidate.infer(results);
   }
 }
 
@@ -749,19 +783,30 @@ ExolveGridInferrer.prototype.infer = function(results) {
  */
 ExolveGridInferrer.prototype.gridSpecLines = function() {
   if (this.rowcol.isValid()) {
-    return '';
+    return null;
   }
   let lines = ''
   for (let r = 0; r < this.h; r++) {
     let rowLine = '';
     for (let c = 0; c < this.w; c++) {
-      if (this.grid[r][c] == '_') {
+      const gridCell = this.grid[r][c];
+      if (gridCell == '_') {
         return '';
       }
-      rowLine += this.grid[r][c];
+      rowLine += gridCell;
     }
     lines += `
       ${rowLine}`;
   }
   return lines;
+}
+/**
+ * Return the crossword in Exolve format, if fully filled. Otherwise return null.
+ */
+ExolveGridInferrer.prototype.exolve = function() {
+  const gridSpecLines = this.gridSpecLines();
+  if (!gridSpecLines) {
+    return null;
+  }
+  return this.specs + gridSpecLines + '\n  exolve-end';
 }
