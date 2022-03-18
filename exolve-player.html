@@ -21,7 +21,7 @@
   margin: 20px 0;
   font-size: 16px;
   font-family: monospace;
-  background-image: linear-gradient(45deg, #F0F0F0 25%, transparent 25%), linear-gradient(-45deg, #F0F0F0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #F0F0F0 75%), linear-gradient(-45deg, transparent 75%, #F0F0F0 75%);
+  background-image: linear-gradient(45deg, #f8f8f8 25%, transparent 25%), linear-gradient(-45deg, #f8f8f8 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f8f8f8 75%), linear-gradient(-45deg, transparent 75%, #f8f8f8 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
 }
@@ -58,6 +58,9 @@ pre,
 .xlvp-chooser-entry:hover {
   background: lightgreen;
   border: 1px solid darkgreen;
+}
+.xlvp-list {
+  padding-left: 18px;
 }
 .xlvp-list li + li {
   margin-top: 16px;
@@ -353,12 +356,15 @@ function xlvpShow(buffer, fname) {
   xlvpShowText(specs, fname);
 }
 function xlvpOpenFile(f) {
+  if (!f) {
+    return;
+  }
   let fr = new FileReader(); 
   fr.onload = function(){ 
     xlvpShow(fr.result, xlvpFileName);
   }
-  xlvpFileName = f.name
-  fr.readAsArrayBuffer(f)
+  xlvpFileName = f.name;
+  fr.readAsArrayBuffer(f);
 }
 function xlvpOnOpenFile(ev) {
   let f = xlvpFile.files[0];
@@ -428,14 +434,12 @@ function xlvpShowText(text, fname='provided text') {
       const dedupe = {};
       for (let result of results) {
         gridSpecLines = result.gridSpecLines();
-        if (gridSpecLines) {
-          if (dedupe[gridSpecLines]) continue;
-          dedupe[gridSpecLines] = true;
-          matches.push({
-            'grid': gridSpecLines,
-            'exolve': result.exolve(),
-          });
-        }
+        if (dedupe[gridSpecLines]) continue;
+        dedupe[gridSpecLines] = true;
+        matches.push({
+          'grid': gridSpecLines,
+          'exolve': result.exolve(),
+        });
       }
       if (matches.length == 0) {
         return;

@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Unnumbered tweak with a story: March 17, 2022
+
+- Add grid connectivity check at the end in ecolve-from-text.js.
+- This change really just has minor twiddles to exolve-from-text.js.
+  But these changes are relics of an ambitious new feature that
+  I had implemented with some nicely satifying algorithms, but one that
+  is not going to be useful: inference of barred grids. It turns out
+  that too many barred grids (hundreds) typically match a set of clues,
+  and picking the right one visually is a hopeless task. Some details
+  on the algorithms are in [this reddit
+  thread](https://www.reddit.com/r/crosswords/comments/t7oy8r/comment/i128on2/?utm_source=share&utm_medium=web2x&context=3).
+
 ### Version: Exolve v1.33 March 15, 2022
 
 - checkAll() and revealAll() were used as event handlers directly,
