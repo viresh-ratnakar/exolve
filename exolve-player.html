@@ -125,36 +125,36 @@ pre,
       <div id="xlvp-chooser-strip" class="xlvp-hscroll">
       </div>
     </div></li>
-    <li>
-      <details>
-        <summary>Help</summary>
-        <div id="xlvp-help">
-          <p>
-          You can specify the crossword to be opened by choosing a file to open, or by dragging-and-dropping it onto the player.
-          You can also paste plain-text-formatted crosswords into the "Enter crossword text" area.
-          Here are some details on the various supported formats:
-          </p>
-          <p><ul>
-            <li><b>Exolve:</b> You can open Exolve-formatted files with exolve-player. Such files have to contain
-              a crossword in the Exolve format between "exolve-begin" and "exolve-end" lines. They can be HTML
-              files too, as long as the Exolve-formatted data is present in them.</li>
-            <li><b>PUZ:</b> You can open <a href="https://code.google.com/archive/p/puz/wikis/FileFormat.wiki">.puz files</a> with exolve-player.
-              <li><b>IPUZ:</b> You can open <a href="http://www.ipuz.org/">.ipuz files</a> with exolve-player.
-            <li><b>Text:</b> You can open text files or paste the text into the "Enter crossword text" area and
-              click on the "Auto-grid" button. In either case, the software will try to figure out the grid
-              from the clue numbers and their enumerations. The text should include clues with enumerations,
-              along with the "Across" and "Down" heading lines. Additionally, the clues may be optionally
-              preceded by some text, the first line of which will be taken to be the title and the remaining
-              lines will be treated as the preamble (with some slight attempt at parsing out a setter name).
-              Grid inference works for standard blocked grids ("UK-style": any 4x4 area must have at least one
-              black cell) with 180-deg./90-deg./-90-deg./hor.-flip/ver.-flip symmetry. The width and the height
-              of the crossword should be set in the entry fields under the "Enter crossword text" area (for
-              pasted text as well as text files).</li>
-          </ul></p>
-        </div>
-      </details>
-    </li>
   </ul>
+  <div>
+    <details>
+      <summary>Help</summary>
+      <div id="xlvp-help">
+        <p>
+        You can specify the crossword to be opened by choosing a file to open, or by dragging-and-dropping it onto the player.
+        You can also paste plain-text-formatted crosswords into the "Enter crossword text" area.
+        Here are some details on the various supported formats:
+        </p>
+        <p><ul>
+          <li><b>Exolve:</b> You can open Exolve-formatted files with exolve-player. Such files have to contain
+            a crossword in the Exolve format between "exolve-begin" and "exolve-end" lines. They can be HTML
+            files too, as long as the Exolve-formatted data is present in them.</li>
+          <li><b>PUZ:</b> You can open <a href="https://code.google.com/archive/p/puz/wikis/FileFormat.wiki">.puz files</a> with exolve-player.
+            <li><b>IPUZ:</b> You can open <a href="http://www.ipuz.org/">.ipuz files</a> with exolve-player.
+          <li><b>Text:</b> You can open text files or paste the text into the "Enter crossword text" area and
+            click on the "Auto-grid" button. In either case, the software will try to figure out the grid
+            from the clue numbers and their enumerations. The text should include clues with enumerations,
+            along with the "Across" and "Down" heading lines. Additionally, the clues may be optionally
+            preceded by some text, the first line of which will be taken to be the title and the remaining
+            lines will be treated as the preamble (with some slight attempt at parsing out a setter name).
+            Grid inference works for standard blocked grids ("UK-style": any 4x4 area must have at least one
+            black cell) with 180-deg./90-deg./-90-deg./hor.-flip/ver.-flip symmetry. The width and the height
+            of the crossword should be set in the entry fields under the "Enter crossword text" area (for
+            pasted text as well as text files).</li>
+        </ul></p>
+      </div>
+    </details>
+  </div>
   <div id="xlvp-links" style="font-size:80%">
     <p><b>Links</b></p>
     <p><a href="https://github.com/viresh-ratnakar/exolve">Exolve (free, open source crossword-solving software used here) on GitHub</a></p>
