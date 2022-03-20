@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Exolve v1.34: March 20, 2022
+
+- Add support for Webifi, an experimental feature that adds a
+  command-line interface for interacting with a crossword. See details
+  in [README.md](README.md#webifi).
+
 ### Version: Unnumbered tweak with a story: March 17, 2022
 
 - Add grid connectivity check at the end in ecolve-from-text.js.

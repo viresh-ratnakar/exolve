@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.33 March 15, 2022
+### Version: Exolve v1.34 March 20, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1481,7 +1481,9 @@ Here are all the names of pieces of text that you can relabel:
 | `manage-storage-close` | Close (manage storage)         |
 | `manage-storage-close-hover` | Close the local storage management panel|
 | `exolve-link`    | Exolve on GitHub                     |
-| `report-bug`     | Report bug                           |
+| `report-bug`     | Bug                                  |
+| `webifi`         | Webifi                               |
+| `webifi.hover`         | Show/hide "Webifi", the interactive-fictionesque text/audio interface|
 | `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
 | `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
@@ -2031,6 +2033,28 @@ of March, 2022.
   something like 70%.
 - In Chrome, if the margin is too high (say, more than 0.7 inches), then some
   content may get clipped.
+
+## Webifi
+
+Webifi is an experimental feature (as of March 2022). It adds a command-line
+interface where you can enter simple text commands to interact with a
+crossword. I hope to develop Webifi into something that enable sight-challenged
+people to enjoy solving crosswords. It can also be used to solve crosswords
+when use of a screen is not available or advisable (such as while going for
+a walk or a run!).
+
+A Webifi link is placed under the crossword automatically, but only if the
+necessary Webifi script files are made available on the serving side in the
+same directory as the crossword. This should make it easy for anyone to
+either completely ignore Webifi for their own site, or enable it in a simple
+manner for all their crosswords without having to add any options to the
+crosswords themselves. You can find the details in the
+[Webifi repository](https://github.com/viresh-ratnakar/webifi).
+
+I have not yet enabled Webifi for all my own crosswords, but have made
+[one crossword](https://viresh-ratnakar.github.io/dev/gussalufz-21-solved.html)
+available with Webifi enabled. Please feel free to play with it and offer
+feedback.
 
 ## API
 
