@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.34 March 20, 2022
+### Version: Exolve v1.35 March 20, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1325,6 +1325,8 @@ The list of currently supported options is as follows:
   (`print-completed-3cols` makes that 3 columns) while an incomplete puzzle is
   printed in 3 columns (`print-incomplete-2cols` makes that 2 columns). See
   [`Printing`](#printing) for more details.
+- **`webifi`** Provide a "Webifi" link under the crossword. See the
+  [Webifi section](#webifi) for details.
 
 ### Colour schemes
 Using a bunch of `exolve-option: colour-<name>:<c>` (or, of course,
@@ -1483,7 +1485,7 @@ Here are all the names of pieces of text that you can relabel:
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Bug                                  |
 | `webifi`         | Webifi                               |
-| `webifi.hover`         | Show/hide "Webifi", the interactive-fictionesque text/audio interface|
+| `webifi.hover`   | Show/hide "Webifi", the interactive-fictionesque text/audio interface|
 | `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
 | `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
@@ -2041,15 +2043,22 @@ interface where you can enter simple text commands to interact with a
 crossword. I hope to develop Webifi into something that enable sight-challenged
 people to enjoy solving crosswords. It can also be used to solve crosswords
 when use of a screen is not available or advisable (such as while going for
-a walk or a run!).
+a walk or a run!). You can read details in the
+[Webifi user guide](https://github.com/viresh-ratnakar/webifi/blob/master/README.md).
 
-A Webifi link is placed under the crossword automatically, but only if the
-necessary Webifi script files are made available on the serving side in the
-same directory as the crossword. This should make it easy for anyone to
-either completely ignore Webifi for their own site, or enable it in a simple
-manner for all their crosswords without having to add any options to the
-crosswords themselves. You can find the details in the
+A Webifi link is placed under the crossword under these two scenarios:
+- The webifi script files are included through script tags in the crossword
+  file.
+- `exolve-option: webifi` is used.
+Webifi is also enabled and directly started if "webifi" is passed as a URL
+parameter. Note that in the `exolve-option: webifi` case and in the URL
+parameter case, it is not necessary to add script tags to load the webifi
+scripts, as they will automatically loaded if not already present.
+
+For all of these options, three files from the
 [Webifi repository](https://github.com/viresh-ratnakar/webifi).
+need to be present in the serving directory: `webifi.js`, `words-webifi.js`,
+and `crossword-webifi.js`.
 
 I have not yet enabled Webifi for all my own crosswords, but have made
 [one crossword](https://viresh-ratnakar.github.io/dev/gussalufz-21-solved.html)

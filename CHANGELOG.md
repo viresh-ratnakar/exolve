@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v1.35: March 20, 2022
+
+- Oh well, could not bear to see 404s and script-not-found errors in
+  the debug console. OK, There are 3 ways to enable Webifi now
+  (but without one of these 3, we will now *not* try to load the
+  webifi scripts):
+  - use the new exolve-option, "webifi"
+  - include "webifi" as a URL param (this, as before, directly
+    opens the webifi interface, without creating a toggle link
+    in the puzzle)
+  - actually include the webifi scripts in your puzzle file.
+
 ### Version: Exolve v1.34: March 20, 2022
 
 - Add support for Webifi, an experimental feature that adds a

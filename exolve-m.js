@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.34 March 20, 2022';
+  this.VERSION = 'Exolve v1.35 March 20, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -401,6 +401,7 @@ function Exolve(puzzleSpec,
   this.printCompleted3Cols = false;
   this.printIncomplete2Cols = false;
   this.noNinaButton = false;
+  this.useWebifi = false;
 
   this.createPuzzle();
 }
@@ -1269,6 +1270,10 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "no-nina-button" || spart == "no-ninas-button") {
       this.noNinaButton = true
+      continue
+    }
+    if (spart == "webifi") {
+      this.useWebifi = true
       continue
     }
     if (spart == "allow-digits") {
@@ -4282,7 +4287,30 @@ Exolve.prototype.addWebifi = function() {
   this.webifi.start(this.frame);
 }
 
-Exolve.prototype.loadWebifiScripts = function() {
+/**
+ * If the serving site has provided webifi scripts, we load them async and
+ * add a Webifi button.
+ */
+Exolve.prototype.loadWebifi = function() {
+  if (this.webifi) {
+    return;
+  }
+  if (!this.useWebifi &&
+      (typeof Webifi) != 'undefined' &&
+      (typeof WordsWebifi) != 'undefined' &&
+      (typeof CrosswordWebifi) != 'undefined') {
+    // Webifi scripts were loaded
+    this.useWebifi = true;
+  }
+  if (!this.useWebifi) {
+    // Check for webifi URL param.
+    const urlParams = new URLSearchParams(window.location.search);
+    this.useWebifi = urlParams.has('webifi');
+  }
+  if (!this.useWebifi) {
+    return;
+  }
+
   const handler = this.addWebifi.bind(this);
   const notFound = [];
   if ((typeof Webifi) == 'undefined') {
@@ -4301,40 +4329,8 @@ Exolve.prototype.loadWebifiScripts = function() {
     document.head.append(script);
   }
   if (notFound.length == 0) {
-    xlv.addWebifi();
+    this.addWebifi();
   }
-}
-
-/**
- * If the serving site has provided webifi scripts, we load them async and
- * add a Webifi button.
- */
-Exolve.prototype.loadWebifi = function() {
-  if (this.webifi || !this.saveState) {
-    return;
-  }
-  if (window.location.protocol == "file:") {
-    this.loadWebifiScripts();
-    return;
-  }
-  // We check if 'webifi-version.txt' is getting served. If we find it,
-  // only then we try to load the other webifi script files.
-  var xhttp = new XMLHttpRequest();
-  const xlv = this;
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4) {
-      let now = (new Date()).toLocaleString()
-      if (this.status < 200 || this.status > 299) {
-        console.log(now + ": Webifi version check request failed")
-        return
-      }
-      let ver = this.responseText.trim()
-      console.log(now + ": Webifi version " + ver + " found")
-      xlv.loadWebifiScripts();
-    }
-  };
-  xhttp.open("GET", "webifi-version.txt", true);
-  xhttp.send();
 }
 
 
