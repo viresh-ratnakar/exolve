@@ -396,6 +396,7 @@ function xlvpOpenFile(f) {
 }
 function xlvpOnOpenFile(ev) {
   let f = xlvpFile.files[0];
+  xlvpFile.value = '';
   xlvpOpenFile(f);
 }
 function xlvpDrop(ev) {

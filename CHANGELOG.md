@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Another unnumbered tweak to Exolve-player, March 30, 2022
+
+- If a file is not successfully opened, clear the file input field
+  so that it can be reopened 'onchange' after modifying w/h.
+
 ### Version: Unnumbered tweak to Exolve-player, March 30, 2022
 
 - Add a Show/Hide current crossword button. The last crossword that
