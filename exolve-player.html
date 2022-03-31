@@ -90,6 +90,9 @@ pre,
 #xlvp-view {
   margin-top: 10px;
 }
+#xlvp-last-crossword {
+  float: right;
+}
 </style>
 
 <title>Exolve Player</title>
@@ -101,6 +104,9 @@ pre,
 </div>
 
 <div id="xlvp-player" ondrop="xlvpDrop(event);" ondragover="xlvpDrag(event);">
+  <button id="xlvp-last-crossword">
+    Hide current crossword
+  </button>
   <h2><b>Exolve Player</b></h2>
   <h3><b>Interactively solve a crossword</b></h3>
   <ul class="xlvp-list">
@@ -191,6 +197,8 @@ const xlvpInfer = document.getElementById('xlvp-infer');
 const xlvpInferMsg = document.getElementById('xlvp-infer-msg');
 const xlvpChooser = document.getElementById('xlvp-chooser');
 const xlvpChooserStrip = document.getElementById('xlvp-chooser-strip');
+const xlvpLastCrossword = document.getElementById('xlvp-last-crossword');
+let xlvpShowing = false;
 
 const xlvpStateKey = '42-xlvp-player-state';
 
@@ -241,9 +249,25 @@ function xlvpDeleteOld(hideChooser=true) {
     xlvpChooser.style.display = 'none';
     xlvpChooserStrip.innerHTML = '';
   }
+  xlvpLastCrossword.disabled = true;
+}
+
+function xlvpToggleMinimizeCurrent() {
+  if (xlvpShowing) {
+    xlvpLastCrossword.innerHTML = 'Show current crossword';
+    xlvpFrame.style.display = 'none';
+  } else {
+    xlvpLastCrossword.innerHTML = 'Hide current crossword';
+    xlvpFrame.style.display = '';
+  }
+  xlvpShowing = !xlvpShowing;
 }
 
 xlvpDeleteOld();
+
+xlvpLastCrossword.disabled = true;
+xlvpLastCrossword.addEventListener('click', xlvpToggleMinimizeCurrent);
+
 xlvpRestoreState();
 
 function xlvpShowExolve(specs, converted=false, hideChooser=true) {
@@ -278,6 +302,10 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
   xlvpData = data;
   xlvpSrc.innerText = xlvpData;
   xlvpSaveButton.disabled = !converted;
+  xlvpFrame.style.display = '';
+  xlvpShowing = true;
+  xlvpLastCrossword.innerHTML = 'Hide current crossword';
+  xlvpLastCrossword.disabled = false;
   xlvpFrame.scrollIntoView();
   return true;
 }

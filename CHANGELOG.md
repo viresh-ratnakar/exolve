@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Unnumbered tweak to Exolve-player, March 30, 2022
+
+- Add a Show/Hide current crossword button. The last crossword that
+  you opened shows up again when you reload, and that can be a bit
+  annoying. This lets you hide it (and show it again if needed).
+
 ### Version: Exolve v1.35: March 20, 2022
 
 - Oh well, could not bear to see 404s and script-not-found errors in
