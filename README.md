@@ -1479,9 +1479,9 @@ Here are all the names of pieces of text that you can relabel:
 | `crossword-id`   | Crossword ID                         |
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
-| `manage-storage-hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed|
+| `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed|
 | `manage-storage-close` | Close (manage storage)         |
-| `manage-storage-close-hover` | Close the local storage management panel|
+| `manage-storage-close.hover` | Close the local storage management panel|
 | `exolve-link`    | Exolve on GitHub                     |
 | `report-bug`     | Bug                                  |
 | `webifi`         | Webifi                               |
