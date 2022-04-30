@@ -2,6 +2,10 @@
 
 ### Version: Another unnumbered tweak to Exolve-player, April 29, 2022
 
+- Minor styling changes
+
+### Version: Another unnumbered tweak to Exolve-player, April 29, 2022
+
 - Move the puzzle-specific divs up, above the "Links" section
 
 ### Version: Another unnumbered tweak to Exolve-player, March 30, 2022
