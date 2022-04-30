@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Another unnumbered tweak to Exolve-player, April 29, 2022
+
+- Move the puzzle-specific divs up, above the "Links" section
+
 ### Version: Another unnumbered tweak to Exolve-player, March 30, 2022
 
 - If a file is not successfully opened, clear the file input field
