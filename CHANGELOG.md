@@ -2,6 +2,10 @@
 
 ### Version: Unnumbered css tweak
 
+- Oh, reduce that space from 6px to 4px
+
+### Version: Unnumbered css tweak
+
 - Add a bit more space between title and byline
 
 ### Version: Another unnumbered tweak to Exolve-player, April 29, 2022
