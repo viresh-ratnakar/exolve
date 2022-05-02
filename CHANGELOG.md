@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered css tweak
+
+- Add a bit more space between title and byline
+
 ### Version: Another unnumbered tweak to Exolve-player, April 29, 2022
 
 - Minor styling changes
