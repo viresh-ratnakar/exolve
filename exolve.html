@@ -429,6 +429,20 @@ function Exolve(puzzleSpec,
     'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-b)',
   };
 
+  /**
+   * The URL prefix for loading scripts. Either is empty, or ends with '/'.
+   */
+  this.scriptUrlBase = '';
+  const scriptTags = document.getElementsByTagName('script');
+  for (let i = 0; i < scriptTags.length; i++) {
+    const src = scriptTags[i].src;
+    const loc = src.lastIndexOf('/exolve-m.js');
+    if (loc >= 0) {
+      this.scriptUrlBase = src.substring(0, loc + 1);
+      break;
+    }
+  }
+
   // Variables set by exolve-option
   this.hideInferredNumbers = false;
   this.cluesPanelLines = -1;
@@ -4322,7 +4336,7 @@ Exolve.prototype.addWebifi = function() {
     return;
   }
   console.log('Adding Webifi');
-  this.webifi = new Webifi();
+  this.webifi = new Webifi(this.scriptUrlBase);
   this.wordsWebifi = new WordsWebifi(this.webifi);
   this.crosswordWebifi = new CrosswordWebifi(this.webifi, this);
 
@@ -4371,7 +4385,7 @@ Exolve.prototype.loadWebifi = function() {
   }
   for (let needed of notFound) {
     const script = document.createElement('script');
-    script.src = needed;
+    script.src = this.scriptUrlBase + needed;
     script.onload = handler;
     document.head.append(script);
   }

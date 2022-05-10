@@ -1,5 +1,11 @@
 # Changelog
 
+### Version: Unnumbered small change
+
+- Locate the dir where exolve-m.js is loaded from and save it as
+  scriptUrlBase (to be used for on-demand loading of other scripts,
+  such as those needed for Webifi).
+
 ### Version: Unnumbered css tweak
 
 - Oh, reduce that space from 6px to 4px
