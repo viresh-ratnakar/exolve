@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Unnumbered tweak to exolve-from-text.js
+
+- When a linked clue's enum does not have parts, put in some
+  special-case code to try the following splits: In two parts,
+  6 = 3+3, 7 = 3+4 or 4+3, 8 = 3+5 or 4+4 or 5+3. In three parts,
+  9 = 3+3+3. 
+
 ### Version: Unnumbered small change
 
 - Locate the dir where exolve-m.js is loaded from and save it as

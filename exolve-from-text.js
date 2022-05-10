@@ -548,7 +548,7 @@ ExolveGridInferrer.prototype.setGrid = function(rc, letter) {
 /**
  * For each linked group, split total length into chunks at word/hyphen
  * boundaries to infer component lengths. Allow at most one extra chunk,
- * to keep complexity in check.
+ * to keep complexity in check. Handle some special cases too.
  */
 ExolveGridInferrer.prototype.expandLinkedGroups = function() {
   if (this.parents.length < 1) {
@@ -560,6 +560,27 @@ ExolveGridInferrer.prototype.expandLinkedGroups = function() {
     const phParts = clue.placeholder.split(/[ -]/);
     const grp = this.puz.getLinkedClues('' + par[1] + par[0]);
     if (grp.length > phParts.length) {
+      /* See if this is still workable as a special case */
+      const special = [];
+      if (grp.length == 2 && phParts.length == 1) {
+        if (clue.placeholder.length == 6) {
+          special.push([3,3])
+        } else if (clue.placeholder.length == 7) {
+          special.push([3,4])
+          special.push([4,3])
+        } else if (clue.placeholder.length == 8) {
+          special.push([3,5])
+          special.push([4,4])
+          special.push([5,3])
+        }
+      } else if (grp.length == 3 && phParts.length == 1 &&
+                 clue.placeholder.length == 9) {
+        special.push([3,3,3])
+      }
+      if (special.length > 0) {
+        choices.push(special);
+        continue;
+      }
       console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts but enum only has ' + phParts.length);
       return [];
     }
@@ -627,7 +648,7 @@ ExolveGridInferrer.prototype.expandLinkedGroups = function() {
       }
     }
     if (updatedCandidates.length < 1) {
-      console.log('No linked group choce available for ' + grp[0]);
+      console.log('No linked group choice available for ' + grp[0]);
       return [];
     }
     candidates = updatedCandidates;
