@@ -2038,32 +2038,43 @@ of March, 2022.
 
 ## Webifi
 
-Webifi is an experimental feature (as of March 2022). It adds a command-line
-interface where you can enter simple text commands to interact with a
-crossword. I hope to develop Webifi into something that enable sight-challenged
-people to enjoy solving crosswords. It can also be used to solve crosswords
-when use of a screen is not available or advisable (such as while going for
-a walk or a run!). You can read details in the
-[Webifi user guide](https://github.com/viresh-ratnakar/webifi/blob/master/README.md).
+Webifi is an "interactive-fictionesque" interface to crosswords. It adds a
+chat interface through which you can explore and solve the crossword using simple
+text commands (and get some solving assistance too!).
+
+Webifi can be used as an entertaining addition to the standard graphical
+interface. Webifi supports audio output too. Using audio output and voice
+input, Webifi can be used to solve a crossword even when you have limited
+access to the device screen (such as while you are out on a walk or a run).
+I hope to develop Webifi into something that can also enable sight-challenged
+people to enjoy solving crosswords. The state of voice-input in a web app
+is quite flawed and quirky, unfortunately, as of May 2022. One hopes that
+it will only get better, enabling an excellent crossword-solving experience
+through Webifi.
 
 A Webifi link is placed under the crossword under these two scenarios:
 - The webifi script files are included through script tags in the crossword
   file.
 - `exolve-option: webifi` is used.
-Webifi is also enabled and directly started if "webifi" is passed as a URL
+Webifi is also enabled and directly started if `webifi` is passed as a URL
 parameter. Note that in the `exolve-option: webifi` case and in the URL
 parameter case, it is not necessary to add script tags to load the webifi
 scripts, as they will automatically loaded if not already present.
 
-For all of these options, three files from the
-[Webifi repository](https://github.com/viresh-ratnakar/webifi).
-need to be present in the serving directory: `webifi.js`, `words-webifi.js`,
-and `crossword-webifi.js`.
+If you are using my serving copy of Exolve (i.e.,
+[`viresh-ratnakar.github.io/exolve-m.js`](https://viresh-ratnakar.github.io/exolve-m.js)),
+then all the script files etc. needed for Webifi will automatically be found
+as needed.
 
-I have not yet enabled Webifi for all my own crosswords, but have made
-[one crossword](https://viresh-ratnakar.github.io/dev/gussalufz-21-solved.html)
-available with Webifi enabled. Please feel free to play with it and offer
-feedback.
+You can find out how to serve your own copies of Webifi scripts, as well as
+other Webifi details in the [Webifi user
+guide](https://github.com/viresh-ratnakar/webifi/blob/master/README.md).
+
+I have enabled Webifi for almost all of my own crosswords at
+[gussalufz.com](https://viresh-ratnakar.github.io). In addition, any
+crossword that you open with [`exolve-player`](https://viresh-ratnakar.github.io/exolve-player.html)
+will have Webifi enabled (you will see a `Webifi` link under the crossword).
+Please feel free to play with it and offer feedback.
 
 ## API
 

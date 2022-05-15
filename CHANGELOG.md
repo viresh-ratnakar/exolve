@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered tweak to README
+
+- Update Webifi section
+
 ### Version: Unnumbered tweak to exolve-player.html
 
 - Always enable Wibifi in exolve-player
