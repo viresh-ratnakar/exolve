@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered tweak to exolve-player.html
+
+- Always enable Wibifi in exolve-player
+
 ### Version: Unnumbered tweak to exolve-from-text.js
 
 - When a linked clue's enum does not have parts, put in some

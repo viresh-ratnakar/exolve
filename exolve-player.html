@@ -204,6 +204,7 @@ const xlvpChooser = document.getElementById('xlvp-chooser');
 const xlvpChooserStrip = document.getElementById('xlvp-chooser-strip');
 const xlvpLastCrossword = document.getElementById('xlvp-last-crossword');
 let xlvpShowing = false;
+let xlvpPuz = null;
 
 const xlvpStateKey = '42-xlvp-player-state';
 
@@ -297,11 +298,15 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
   xlvpDeleteOld(hideChooser);
 
   try {
-    createExolve(data, 'xlvp-frame', false);
+    xlvpPuz = new Exolve(data, 'xlvp-frame', null, false);
   } catch (err) {
     console.log(err);
     console.log('createExolve() failed');
     return false;
+  }
+  if (!xlvpPuz.useWebifi) {
+    xlvpPuz.useWebifi = true;
+    xlvpPuz.loadWebifi();
   }
 
   xlvpData = data;
