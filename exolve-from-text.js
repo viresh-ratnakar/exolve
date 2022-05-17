@@ -89,6 +89,12 @@ exolveFromText = function(w, h, text, fname='') {
   };
   let seenClues = false;
   let inDown = false;
+
+  /**
+   * Insert newlines between clues that got stitched together (a common
+   * PDF-to-text failure mode).
+   */
+  text = text.replace(/(\([1-9 ][0-9 ,'-]*\))\s*([1-9][0-9]*)/g, '$1\n$2');
   const lines = text.split('\n');
 
   const clueStartRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*/;

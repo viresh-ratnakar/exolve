@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Unnumbered tweak to exolve-from-text.js
+
+- Insert newlines between clues that got spliced together, which is a common
+  failure mode for pdf-to-text.
+
 ### Version: Unnumbered tweak to README
 
 - Update Webifi section
