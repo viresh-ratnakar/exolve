@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.35 March 20, 2022
+Version: Exolve v1.36 May 17, 2022
 */
 
 /**
@@ -90,16 +90,11 @@ exolveFromText = function(w, h, text, fname='') {
   let seenClues = false;
   let inDown = false;
 
-  /**
-   * Insert newlines between clues that got stitched together (a common
-   * PDF-to-text failure mode).
-   */
-  text = text.replace(/(\([1-9 ][0-9 ,'-]*\))\s*([1-9][0-9]*)/g, '$1\n$2');
-  const lines = text.split('\n');
+  const lines = exolveFromTextClean(text).split('\n');
 
   const clueStartRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*/;
   const clueRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*.*\([0-9, '-]+\)/;
-  const childRE = /^\s*\d{1,2}(?!\d).*see /i;
+  const childRE = /^\s*\d{1,2}(?!\d)\s*see /i;
   const wordsRE = /[a-zA-Z]+/;
   const copyrightRE = /^\s*(copyright|\(c\)|Ⓒ)/i;
   const titleAndSetterRE = /^\s*(.+)\sby\s(.+)/i; 
@@ -167,6 +162,42 @@ exolveFromText = function(w, h, text, fname='') {
   return exolveFromTextSections(w, h, sections);
 }
 
+/**
+ * Do lots of cleaning of the text.
+ */
+exolveFromTextClean = function(s) {
+  /**
+   * Strip out non-alphanumeric weird characters preceding a number and after
+   * some leading space after a newline ("bullets" are often found here).
+   */
+  s = s.replace(/\n\s+[^\w"',\.\(\)-]*([1-9][0-9]*)/g, '\n $1');
+
+  /**
+   * Insert newlines between clues that got stitched together (a common
+   * PDF-to-text failure mode).
+   */
+  s = s.replace(/(\([1-9 ][0-9 ,'-]*\))\s*([1-9][0-9]*)/g, '$1\n$2');
+  return s;
+}
+
+exolveFromTextAddChild = function(sections, par, child) {
+  const parDir = par.charAt(0);
+  const parNum = par.substr(1);
+  const childDir = child.charAt(0);
+  const childNum = child.substr(1);
+  if (parDir != childDir || (parDir != 'A' && parDir != 'D')) {
+    return false;
+  }
+  const arr = parDir == 'A' ? sections.across : sections.down;
+  arr.push(`${childNum} See ${parNum}`);
+  arr.sort((c1, c2) => {
+    const c1i = parseInt(c1);
+    const c2i = parseInt(c2);
+    return c1i - c2i;
+  });
+  return true;
+}
+
 exolveFromTextSections = function(w, h, sections) {
   if (w <= 0 || h <= 0) {
     console.log('Width and height must both be at least 1');
@@ -178,7 +209,10 @@ exolveFromTextSections = function(w, h, sections) {
     return [];
   }
   let specs = '';
-  // Create an invisible Exolve puzzle.
+  /**
+   * Create an invisible Exolve puzzle with a fully blank and diagramless grid,
+   * to parse just the clues.
+   */
   const xlvpid = 'xlvp-from-text-temp';
   document.body.insertAdjacentHTML('beforeend',
       `<div id="${xlvpid}" style="display:none"/>`);
@@ -238,7 +272,22 @@ ${sections.preamble}`;
     exolve-id: ${xlvpid}
   exolve-end`;
 
-  const puz = new Exolve(tempSpecs, xlvpid, null, false, 0, 0, false);
+  let puz;
+  try {
+    puz = new Exolve(tempSpecs, xlvpid, null, false, 0, 0, false);
+  } catch (err) {
+    const re = /^.*Invalid child ([AD][0-9][0-9]*) in ([AD][0-9][0-9]*)/i;
+    const missingChild = err.toString().match(re);
+    if (missingChild.length == 3 &&
+        exolveFromTextAddChild(sections, missingChild[2], missingChild[1])) {
+      console.log('Adding ' + missingChild[1] +
+          ' as child clue for ' + missingChild[2]);
+      return exolveFromTextSections(w, h, sections);
+    }
+    console.log('Exolve had fatal errors in parsing clues: ' + err);
+    console.log(err.stack);
+    return [];
+  }
 
   const inferrer = new ExolveGridInferrer(puz, specs);
   if (exolvePuzzles && exolvePuzzles[xlvpid]) {
@@ -271,7 +320,7 @@ ${sections.preamble}`;
       inferrer.lights[num] = {};
     }
     if (clue.enumLen == 0 && !clue.parentClueIndex) {
-      console.log('Found non-linked-child clue without parent: ' + clue.label + clue.dir);
+      console.log(puz);
       return [];
     }
     inferrer.lights[num][clue.dir] = {
@@ -395,7 +444,7 @@ function ExolveGridInferrer(puz, specs) {
   this.name = '';
 }
 
-ExolveGridInferrer.prototype.clone = function() {
+ExolveGridInferrer.prototype.clone = function(newLights=false) {
   const copy = new ExolveGridInferrer(this.puz, this.specs);
   copy.rowcol.row = this.rowcol.row;
   copy.rowcol.col = this.rowcol.col;
@@ -410,7 +459,11 @@ ExolveGridInferrer.prototype.clone = function() {
   }
   // expandLinkedGroups() makes shallow copies of some lights[] objects.
   // But for other cloning, using the same lights is fine.
-  copy.lights = this.lights;
+  if (newLights) {
+    copy.lights = JSON.parse(JSON.stringify(this.lights));
+  } else {
+    copy.lights = this.lights;
+  }
   return copy;
 }
 
@@ -635,7 +688,7 @@ ExolveGridInferrer.prototype.expandLinkedGroups = function() {
         continue;
       }
       for (let cand of candidates) {
-        const updatedCand = cand.clone();
+        const updatedCand = cand.clone(true);
         for (let j = 0; j < grp.length; j++) {
           const cci = grp[j];
           const num = cci.substr(1);

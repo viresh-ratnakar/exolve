@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.35 March 20, 2022';
+  this.VERSION = 'Exolve v1.36 May 17, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -1471,6 +1471,8 @@ Exolve.prototype.throwErr = function(error) {
   if (e) {
     e.innerHTML = e.innerHTML + '<br/>' + error;
   } else {
+    console.log('Exolve error (stack trace follows):' + error);
+    console.log(error.stack);
     alert('Exolve found unrecoverable error: ' + error);
   }
   this.gridWidth = 0
@@ -3158,8 +3160,9 @@ Exolve.prototype.processClueChildren = function() {
             if (otherDir == clue.dir) {
               continue;
             }
-            childIndex = this.getDirClueIndex(otherDir, child.label);
-            if (this.clues[childIndex]) {
+            const testChildIndex = this.getDirClueIndex(otherDir, child.label);
+            if (this.clues[testChildIndex]) {
+              childIndex = testChildIndex;
               break
             }
           }
@@ -3178,8 +3181,11 @@ Exolve.prototype.processClueChildren = function() {
       }
       let childClue = this.clues[childIndex]
       if (!childClue || childIndex == clueIndex) {
-        this.throwErr('Invalid child ' + childIndex + ' in ' +
-                      clue.label + clue.dir);
+        /**
+         * Note: Keep the format of this exception exactly like this, as
+         * exolve-from-text.js parses this error.
+         */
+        this.throwErr('Invalid child ' + childIndex + ' in ' + clueIndex);
       }
       if (dupes[childIndex]) {
         this.throwErr('Duplicate child ' + childIndex + ' in ' +

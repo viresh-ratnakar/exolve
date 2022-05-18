@@ -1,5 +1,24 @@
 # Changelog
 
+### Version: Exolve v1.36: May 17, 2022
+
+- For the specific error of not finding a child clue in a diagramless
+  puzzles, throw a specifically formatted error that says,
+  'Invalid child A17 in A15' or something like that.
+- Why? We use diagramless puzzles to parse PDF text. Occasionally,
+  there are puzzles where a linked child, if its number comes
+  right after the parent's, is simply omitted. To recover from
+  this, we catch the exception (in exolve-from-text.js) and
+  parse it, and supply the missing child clue.
+- console.log the stack trace when there is an exception caught.
+- exolve-from-text.js:
+  - Do the aforementioned missing-child tweak.
+  - Don't treat the presence of 'see' by itself as a child RE!
+  - Remove leading junk characters (such as bullets)
+  - Insert newlines between clues that get stitched together.
+  - Bugfix: expandLinkedGroups() needs to make a deep clone
+    of the lights object.
+
 ### Version: Unnumbered tweak to exolve-from-text.js
 
 - Insert newlines between clues that got spliced together, which is a common

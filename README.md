@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.35 March 20, 2022
+### Version: Exolve v1.36 May 17, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1262,7 +1262,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of March 2022, columnar layout is quirky: Chrome supports it best,
+  As of May 1722, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`clues-at-right-in-two-columns`** If this option is specified, it affects
   the column layout when the available width is wide enough for exactly two
@@ -1964,7 +1964,7 @@ that has the class `xlv-dont-print`.
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
 with the title "Settings for printing/PDFs". This lets you specify:
 
-- Page size (such as 'Letter' or 'A4'). As of March 2022, you still need to
+- Page size (such as 'Letter' or 'A4'). As of May 1722, you still need to
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.
