@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered tweak to exolve-from-text.js
+
+- Deal with the text 'DOWN" being spliced to the preceding line.
+
 ### Version: Exolve v1.36: May 17, 2022
 
 - For the specific error of not finding a child clue in a diagramless

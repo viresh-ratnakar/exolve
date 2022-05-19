@@ -177,6 +177,26 @@ exolveFromTextClean = function(s) {
    * PDF-to-text failure mode).
    */
   s = s.replace(/(\([1-9 ][0-9 ,'-]*\))\s*([1-9][0-9]*)/g, '$1\n$2');
+
+  /**
+   * If the word DOWN itself has been spliced to the preceding line, separate
+   * it out. But be careful: only do it if it is clear that this is the
+   * start of the down section. Heuristics used for that: a drop in clue
+   * number, position of DOWN right after enum and before clue#.
+   */
+  const downSplicedMatch = s.match(
+      /(.*)([^0-9])([1-9][0-9]*)(\s*[^()]*)(\([0-9 ,'-]*\))[ \t]*DOWN\s*([1-9][0-9]*)(.*)/i);
+  if (downSplicedMatch && downSplicedMatch.length == 8) {
+    const prevNum = parseInt(downSplicedMatch[3]);
+    const nextNum = parseInt(downSplicedMatch[6]);
+    if (nextNum < prevNum) {
+      s = s.substr(0, downSplicedMatch.index) +
+        downSplicedMatch[1] + downSplicedMatch[2] + downSplicedMatch[3] +
+        downSplicedMatch[4] + '(' + downSplicedMatch[5] + ')\nDown\n' +
+        downSplicedMatch[6] + downSplicedMatch[7] +
+        s.substr(downSplicedMatch.index + downSplicedMatch[0].length);
+    }
+  }
   return s;
 }
 
