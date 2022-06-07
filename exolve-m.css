@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.36 May 17, 2022
+Version: Exolve v1.37 June 6, 2022
 */
 
 @media (max-width: 500px) {
@@ -29,14 +29,16 @@ Version: Exolve v1.36 May 17, 2022
 .xlv-incluefill,
 .xlv-scratchpad,
 .xlv-shuffle {
-  font-size: 12px;
-  font-family: monospace;
+  font-size: 12px !important;
+  line-height: normal !important;
+  font-family: monospace !important;
 }
 .xlv-small-print,
 .xlv-small-print *,
 .xlv-metadata,
 .xlv-saving {
-  font-size: x-small;
+  font-size: x-small !important;
+  line-height: normal !important;
   font-family: monospace;
 }
 .xlv-grid-panel {
@@ -74,10 +76,10 @@ Version: Exolve v1.36 May 17, 2022
   .xlv-incluefill,
   .xlv-scratchpad,
   .xlv-shuffle {
-    font-size: 8px;
+    font-size: 8px !important;
   }
   .xlv-saving {
-    font-size: 6px;
+    font-size: 6px !important;
   }
   .xlv-preamble {
     margin: 8px 0 0;
@@ -224,10 +226,10 @@ Version: Exolve v1.36 May 17, 2022
   padding: 0;
 }
 .xlv-small-print {
-  margin: 4px 0 6px 0;
+  margin: 4px 0 6px 0 !important;
 }
 .xlv-small-print > * {
-  padding: 2px 4px 0 0;
+  padding: 2px 4px 0 0 !important;
 }
 .xlv-credit {
   margin: 4px 0 4px 0;
@@ -330,7 +332,7 @@ Version: Exolve v1.36 May 17, 2022
   padding: 0 0 2px 0;
 }
 .xlv-controls-row {
-  margin: 6px 0 6px 0;
+  margin: 6px 0 6px 0 !important;
 }
 .xlv-clues-box {
   overflow-y: auto;

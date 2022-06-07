@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.36 May 17, 2022
+### Version: Exolve v1.37 June 6, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1252,18 +1252,16 @@ Multiple, space-separated options may be provided on each exolve-option line.
 For options that need a value (provided after a colon), there should not be
 any leading space after the colon.
 The list of currently supported options is as follows:
-- **`show-cell-level-buttons`** If this option is specified, then "Check cell"
-  and "Reveal cell" buttons are also shown, in an extra row of buttons, for
-  crosswords with solutions provided.
-- **`columnar-layout`** If this option is specified, then puzzle is rendered
-  in a newspaper-like columnar layout, using CSS "column"s. The number
-  of columns is determined by the current width of the viewport (we
-  assume that all of it is available to the crossword) and is adjusted
-  if the window is resized. The number of columns can only be one of
-  the following: 1 (which is the same as what we get without the
-  columnar-layout option, when the available width is too small), 2, or 3.
-  As of May 1722, columnar layout is quirky: Chrome supports it best,
-  but all browsers seem to have some peculiarities.
+
+- **`allow-chars:<chars>`** If this option is specified, then we allow solvers
+  to enter any of the characters (which would typically be special characters
+  or digits)  listed in `<chars>`. For example, `allow-chars:#!7` will allow the
+  characters `#`, `!`, and `7` to be used in the grid and will allow users to
+  type them. If any of these special characters is also a decorator or is a
+  character with a special meaning in grid specifications (i.e., one of
+  `|_+@!~*.?`), then to specify it in the grid, you have to prefix it with `&`.
+- **`allow-digits`** If this option is specified, then we allow solvers to enter
+  digits in cells.
 - **`clues-at-right-in-two-columns`** If this option is specified, it affects
   the column layout when the available width is wide enough for exactly two
   columns (but not three or more). Normally, the clues panels get rendered
@@ -1272,34 +1270,37 @@ The list of currently supported options is as follows:
   are rendered to the right of the grid. This option is automatically
   turned on when you use the `clues-panel-lines` option (see below). This option
   has no effect if the `columnar-layout` option is used.
-- **`hide-inferred-numbers`** If this option is specified, then the software
-  does not display any clue numbers that were automatically inferred. Setters
-  using non-numeric clue labels may want to specify this option.
-- **`ignore-unclued`** If this option is specified, then any generated warnings
-  about missing clues are suppressed.
-- **`ignore-enum-mismatch`** If this option is specified, then any generated
-  warnings about enum-mismatches are suppressed.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
   a maximum of about N lines of text, adding scrollbars if needed. Also
   implicitly turns on the `clues-at-right-in-two-columns` option.
-- **`offset-top:<N>`** Draw the grid with this much space above and under
-  it (N pixels). Useful for drawing additional art around the grid using
-  `customizeExolve()`, for example.
-- **`offset-left:<N>`** Draw the grid with this much space to the left and
-  to the right (N pixels). Useful for drawing additional art around the grid
-  using `customizeExolve()`, for example.
+- **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
+  colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
+  valid HTML colour name/code (do not include spaces within it though). See the
+  "Colour schemes" subsection below for details.
+- **`columnar-layout`** If this option is specified, then puzzle is rendered
+  in a newspaper-like columnar layout, using CSS "column"s. The number
+  of columns is determined by the current width of the viewport (we
+  assume that all of it is available to the crossword) and is adjusted
+  if the window is resized. The number of columns can only be one of
+  the following: 1 (which is the same as what we get without the
+  columnar-layout option, when the available width is too small), 2, or 3.
+  As of June 2022, columnar layout is quirky: Chrome supports it best,
+  but all browsers seem to have some peculiarities.
+- **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
+  etc.). You can set this to **inherit** to override Exolve's default of
+  **serif**.
+- **`font-size:<fs>`** Set the font-size CSS value (for clues, preamble,
+  etc.). Exolve's default is **16px**.
 - **`grid-background:<c>`** Set the colour of the black cells to &lt;c&gt;,
   which should be a valid HTML colour name/code. This option is deprecated.
-  Please use color-background (see below).
-- **`allow-digits`** If this option is specified, then we allow solvers to enter
-  digits in cells.
-- **`allow-chars:<chars>`** If this option is specified, then we allow solvers
-  to enter any of the characters (which would typically be special characters
-  or digits)  listed in `<chars>`. For example, `allow-chars:#!7` will allow the
-  characters `#`, `!`, and `7` to be used in the grid and will allow users to
-  type them. If any of these special characters is also a decorator or is a
-  character with a special meaning in grid specifications (i.e., one of
-  `|_+@!~*.?`), then to specify it in the grid, you have to prefix it with `&`.
+  Please use color-background (see above).
+- **`hide-inferred-numbers`** If this option is specified, then the software
+  does not display any clue numbers that were automatically inferred. Setters
+  using non-numeric clue labels may want to specify this option.
+- **`ignore-enum-mismatch`** If this option is specified, then any generated
+  warnings about enum-mismatches are suppressed.
+- **`ignore-unclued`** If this option is specified, then any generated warnings
+  about missing clues are suppressed.
 - **`hide-copy-placeholder-buttons`** This is an option that is only applicable
   when there are nodir clues without cells explicitly specified. It turns off
   the display of buttons to copy placeholder texts in those cases (see the
@@ -1315,16 +1316,21 @@ The list of currently supported options is as follows:
   is used, the button does get shown (in case the user wants to hide the ninas,
   say for printing). If at that point, the user does "Hide ninas" or
   "Clear all", then the nina button is hidden again.
-- **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
-  colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
-  valid HTML colour name/code (do not include spaces within it though). See the
-  "Colour schemes" subsection below for details.
+- **`offset-left:<N>`** Draw the grid with this much space to the left and
+  to the right (N pixels). Useful for drawing additional art around the grid
+  using `customizeExolve()`, for example.
+- **`offset-top:<N>`** Draw the grid with this much space above and under
+  it (N pixels). Useful for drawing additional art around the grid using
+  `customizeExolve()`, for example.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   override the default layout choices used for printing puzzles (and creating
   PDFs). By default, a completed puzzle is printed in 2 columns
   (`print-completed-3cols` makes that 3 columns) while an incomplete puzzle is
   printed in 3 columns (`print-incomplete-2cols` makes that 2 columns). See
   [`Printing`](#printing) for more details.
+- **`show-cell-level-buttons`** If this option is specified, then "Check cell"
+  and "Reveal cell" buttons are also shown, in an extra row of buttons, for
+  crosswords with solutions provided.
 - **`webifi`** Provide a "Webifi" link under the crossword. See the
   [Webifi section](#webifi) for details.
 
@@ -1964,7 +1970,7 @@ that has the class `xlv-dont-print`.
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
 with the title "Settings for printing/PDFs". This lets you specify:
 
-- Page size (such as 'Letter' or 'A4'). As of May 1722, you still need to
+- Page size (such as 'Letter' or 'A4'). As of May 2022, you still need to
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.

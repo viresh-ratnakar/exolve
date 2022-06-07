@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.36 May 17, 2022';
+  this.VERSION = 'Exolve v1.37 June 6, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -212,6 +212,13 @@ function Exolve(puzzleSpec,
 
   this.scriptRE = null;
   this.scriptLowerCaseRE = null;
+
+  /**
+   * Font details for clues text.
+   * If fontFamily/fontSize are not set, the CSS rule sets them to serif/16px.
+   */
+  this.fontFamily = '';
+  this.fontSize = '';
 
   this.colorScheme = {
     'background': 'black',
@@ -683,6 +690,12 @@ Exolve.prototype.init = function() {
     document.body.insertAdjacentHTML('beforeend', basicHTML);
   }
   this.frame = document.getElementById(this.prefix + '-frame');
+  if (this.fontFamily) {
+    this.frame.style.fontFamily = this.fontFamily;
+  }
+  if (this.fontSize) {
+    this.frame.style.fontSize = this.fontSize;
+  }
 
   let title = document.getElementById(this.prefix + '-title');
   if (this.title) {
@@ -1324,6 +1337,14 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (kv[0] == 'grid-background') {
       this.colorScheme['background'] = kv[1]
+      continue
+    }
+    if (kv[0] == 'font-family') {
+      this.fontFamily = kv[1]
+      continue
+    }
+    if (kv[0] == 'font-size') {
+      this.fontSize = kv[1]
       continue
     }
     if (kv[0].substr(0, 6) == 'color-' || kv[0].substr(0, 7) == 'colour-') {

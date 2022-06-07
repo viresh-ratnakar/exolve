@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.37: June 6, 2022
+
+- Add exolve-options for font-family and font-size (to allow
+  overriding Exolve's defaults for clues/preamble/etc., which
+  are serif/16px).
+- Sort the exolve-options section in README.md.
+- Add "important" markers on a bunch of CSS rules to avoid
+  weird spacings etc. when embedding in blogs.
+
 ### Version: Unnumbered tweak to exolve-from-text.js
 
 - Deal with the text 'DOWN" being spliced to the preceding line.
