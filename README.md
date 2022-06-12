@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.37 June 6, 2022
+### Version: Exolve v1.38 June 12, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1745,6 +1745,48 @@ in Blogger though.
 The widget options should work across devices and browsers (bug reports are
 welcome!).
 
+### Note for WordPress and some other blogs
+AFAIK, the free version of WordPress does not let you use JavaScript. If you are
+using the paid version, embedding should work. The current clue shown above the
+crossword is a "sticky" HTML element: it will remain visible as you scroll,
+until you have scrolled past the crossword grid (this is useful on small
+devices). However, on WordPress, the stickiness does not work, but can be restored
+with this little change:
+```
+  <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css"/>
+  <script src="https://viresh-ratnakar.github.io/exolve-m.js"></script>
+
+  <div id="exolve"></div>
+  <script>
+    crossword = createExolve(`
+    ======REPLACE WITH YOUR PUZZLE BELOW======
+
+    exolve-begin
+      ...
+    exolve-end
+
+    ======REPLACE WITH YOUR PUZZLE ABOVE======
+    `);
+
+    /**
+     * Make the top-clue stickiness work by killing any "overflow" that is not
+     * visible among ancestor elements.
+     */
+    let parent = crossword.frame.parentElement;
+    while (parent) {
+      const hasOverflow = getComputedStyle(parent).overflow;
+      if (hasOverflow !== 'visible') {
+        parent.style.overflow = 'visible';
+      }
+      parent = parent.parentElement;
+    }
+  </script>
+```
+For the curious: the "position: sticky" CSS style does not work if any ancestor
+element has "overflow: X" set with X being something other than "visible". For
+some reason, WordPress blog entries are wrapped in an element with
+"overflow: hidden".
+
 ## Customizations
 Beyond changing colours and button texts (which can be done through
 exolve-option and exolve-relabel), setters can customize their grids to add
@@ -2148,8 +2190,9 @@ function createExolve(puzzleText, containerId="",
                       provideStateUrl=true, visTop=0, maxDim=0) {
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
-  let p = new Exolve(puzzleText, containerId, customizer,
+  const p = new Exolve(puzzleText, containerId, customizer,
                      provideStateUrl, visTop, maxDim);
+  return p;
 }
 
 /*
@@ -2159,7 +2202,7 @@ function createExolve(puzzleText, containerId="",
  * @deprecated use createExolve().
  */
 function createPuzzle(inIframe=false) {
-  createExolve(puzzleText, "", !inIframe);
+  return createExolve(puzzleText, "", !inIframe);
 }
 ```
 

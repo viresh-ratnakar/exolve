@@ -1,5 +1,20 @@
 # Changelog
 
+### Version: Exolve v1.38: June 12, 2022
+
+- The clue shown above the grid was reposition on scroll events
+  to stay visible. This implementation was quite flickery.
+  Have changed it now to use CSS "position: sticky", which is
+  MUCH smoother.
+- The xlv-curr-clue-parent element is no longer needed as a result, and
+  has been reomved (this impacts Exet too, addressed in Exet v0.71)
+- We do need the clear space that xlv-curr-clue-parent used to create, so
+  have replaced it with a new xlv-clear-area element.
+- Slight tweak to a margin, and a few more CSS "!importants" to help
+  embedding.
+- Make createExolve() and the deprecated createPuzzle() return the created
+  Exolve object.
+
 ### Version: Exolve v1.37: June 6, 2022
 
 - Add exolve-options for font-family and font-size (to allow
