@@ -774,6 +774,7 @@ Exolve.prototype.init = function() {
   this.cluesContainer = document.getElementById(this.prefix + '-clues');
 
   this.clearArea = document.getElementById(this.prefix + '-clear-area');
+  this.gridParent = document.getElementById(this.prefix + '-grid-parent');
   this.currClue = document.getElementById(this.prefix + '-curr-clue');
   this.ninaGroup = document.getElementById(this.prefix + '-nina-group');
   this.colourGroup = document.getElementById(this.prefix + '-colour-group');
@@ -4457,6 +4458,11 @@ Exolve.prototype.resizeCurrClue = function() {
       50, (gpPos.top - bPos.top) - clearance - this.visTop)) + 'px';
   const cPos = this.currClue.getBoundingClientRect();
   this.currClue.style.marginTop = '-' + cPos.height + 'px';
+
+  const gPos = this.gridParent.getBoundingClientRect();
+  const horOffset = (gPos.width >= this.currClueWidth) ?
+    gPos.left : ((gpPos.width - this.currClueWidth) / 2);
+  this.currClue.style.left = horOffset + 'px';
 }
 
 Exolve.prototype.gnavToInner = function(cell, dir) {

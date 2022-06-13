@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered tweak: move curr clue slightly
+
+- Line it up with the grid perfectly if the grid is wide enough.
+
 ### Version: Exolve v1.38: June 12, 2022
 
 - The clue shown above the grid was reposition on scroll events
