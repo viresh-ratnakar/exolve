@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.39: June 20, 2022
+
+- Allow enums like "(8, 2 words)", which do specify the entry length
+  but skip providing word break positions.
+- When either of "words" or "letters" is used inside an enum, allow
+  it to be any subword beginning with w/l (i.e., allow wds, wrds, w,
+  l, ltrs, lttrs, etc., but not wurds, latters, etc.).
+- Update README.md.
+
 ### Version: Unnumbered tweak: move curr clue slightly
 
 - Line it up with the grid perfectly if the grid is wide enough.

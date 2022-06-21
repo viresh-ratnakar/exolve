@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.38 June 12, 2022
+### Version: Exolve v1.39 June 20, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -466,10 +466,13 @@ the hyphen gets displayed in the grid, to help solvers. The software uses the
 following criteria to decide what constitutes the enum part of a clue: a pair
 of opening and closing parentheses, containing only numbers, hyphens, commas,
 apostrophes, and periods, starting with a number. The software also treats a
-pair of parentheses containing the text "word" or "letter" or "?" with anything
-before are after it as an enum (to allow the setter to specify the enum as
-"(two words)" or "(?)", for example). But it looks for such enums only if a
-normal enum is not present in the clue.
+pair of parentheses containing the text "words" or "letters" (or any subword
+beginning with "w" or "l", such as "wrds" or "l" or "ltrs") or containing "?"
+with anything before it, as an enum (to allow the setter to specify the enum
+as "(two words)" or "(?)" or "(7, 2w)", for example). Within these special
+cases, in the corner cases of "(7, 2words)" and "(6 letters)", the parsing
+interprets 7 and 6 respectively to be the length of the entry, and will check
+it against the length of the light as with a normal enum.
 
 In the rare case that there are multiple candidate enum parts in a clue, the
 last one is used. However, this can be overridden by explicitly using "[]"

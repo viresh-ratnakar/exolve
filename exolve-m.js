@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.38 June 12, 2022';
+  this.VERSION = 'Exolve v1.39 June 20, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2178,8 +2178,9 @@ Exolve.prototype.findEnum = function(clueLine) {
     let numeric = true;
     if (enumLocation < 0 && !candidate) {
       numeric = false;
-      // Look for the string 'word'/'letter'/? in parens.
-      enumLocation = cluePart.search(/\([^)]*(word|letter|\?)[^)]*\)/i);
+      // Look for the strings 'words'/'letters' or subwords, or ?, in parens.
+      enumLocation = cluePart.search(
+          /\([^)]*(w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?|\?)[^)a-z]*\)/i);
     }
     if (enumLocation < 0) {
       break;
@@ -2197,9 +2198,11 @@ Exolve.prototype.findEnum = function(clueLine) {
   return candidate;
 }
 
-// Parse an enum like (4) or (4,5), or (5-2,4).
+// Parse an enum like (4) or (4,5), or (5-2,4). Also allow enums like these:
+//   (?), (2 words) (5 letters), (6, 2 wds)
 // Return an object with the following properties:
-// enumLen
+// enumLen: set to 0 if the enum is something like (?) or (2 words), else
+//   the #letters implied by the enum.
 // hyphenAfter[] (0-based indices)
 // wordEndAfter[] (0-based indices)
 // afterClue index after clue
@@ -2235,6 +2238,21 @@ Exolve.prototype.parseEnum = function(clueLine) {
     parse.afterClue = parse.afterEnum;
   }
   if (!isNumeric) {
+    /* Salvage an enumLen from cases like (6, 2 words) and (5 letters) */
+    let k = 0;
+    const kLetters = parse.enumStr.match(
+        /\(\s*(\d+)\s*l[e]?[t]?[t]?[e]?[r]?[s]?\s*\)/i);
+    if (kLetters) {
+      k = parseInt(kLetters[1], 10);
+    }
+    const kWords = parse.enumStr.match(
+        /\(\s*(\d+)\s*,\s*\d+\s*w[o]?[r]?[d]?[s]?\s*\)/i);
+    if (kWords) {
+      k = parseInt(kWords[1], 10);
+    }
+    if (!isNaN(k) && k > 0) {
+      parse.enumLen = k;
+    }
     return parse;
   }
   let enumLeft = clueLine.substring(enumLocation + 1, enumEndLocation);
