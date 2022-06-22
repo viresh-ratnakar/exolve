@@ -104,7 +104,7 @@ exolveFromText = function(w, h, text, fname='') {
 
   let joinedLine = '';
   for (let rawLine of lines) {
-    const line = rawLine.replace(/\s/g, ' ').replace(/\s+/g, ' ').trim();
+    let line = rawLine.replace(/\s/g, ' ').replace(/\s+/g, ' ').trim();
     if (seenClues) {
       if (!inDown && downRE.test(line)) {
         inDown = true;
@@ -112,6 +112,14 @@ exolveFromText = function(w, h, text, fname='') {
         continue;
       }
       if (clueRE.test(line) || childRE.test(line)) {
+        if (joinedLine) {
+          const tryLine = joinedLine + ' ' + line;
+          if (clueRE.test(tryLine) || childRE.test(tryLine)) {
+            line = tryLine;
+          } else {
+            console.log('Ignored potential clue start: ' + joinedLine);
+          }
+        }
         if (!inDown) sections.across.push(line.trim());
         else sections.down.push(line.trim());
         joinedLine = '';
@@ -298,7 +306,7 @@ ${sections.preamble}`;
   } catch (err) {
     const re = /^.*Invalid child ([AD][0-9][0-9]*) in ([AD][0-9][0-9]*)/i;
     const missingChild = err.toString().match(re);
-    if (missingChild.length == 3 &&
+    if (missingChild && missingChild.length == 3 &&
         exolveFromTextAddChild(sections, missingChild[2], missingChild[1])) {
       console.log('Adding ' + missingChild[1] +
           ' as child clue for ' + missingChild[2]);

@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Unnumbered tweak: exolve-from-text fixes
+
+- If a text line starts like a clue, but you already have a previous line
+  that seems to start a clue, and the current line can conclude it, use the
+  previous line, do not discard it. Eg, part of clue after newline starts
+  with some number.
+- Bugfix in exolve-player.html: kill ref to curr-clue-parent.
+
 ### Version: Exolve v1.39: June 20, 2022
 
 - Allow enums like "(8, 2 words)", which do specify the entry length

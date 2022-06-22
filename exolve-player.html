@@ -503,7 +503,7 @@ function xlvpShowText(text, fname='provided text') {
   exolve-end`;
           const smallXlv = new Exolve(smallSpecs, `xlvp-chooser-${i}`, function(puz) {
             document.getElementById(puz.prefix + '-controls-etc').style.display = 'none';
-            document.getElementById(puz.prefix + '-curr-clue-parent').style.display = 'none';
+            document.getElementById(puz.prefix + '-clear-area').style.display = 'none';
           }, false, 0, 150, false);
           const chooser = document.getElementById(`xlvp-chooser-${i}`);
           chooser.addEventListener('click', () => {
