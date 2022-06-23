@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Unnumbered tweak: exolve-player fixes
+
+- In Exolve player, if loading Webifi fails, turn it off (this happens
+  on older Safari, where String.replaceAll() isn't supported, for e.g.).
+- In Exolve player, delete old Webifi element.
+- In Exolve, if useWebifi is false but the Webifi scripts have been loaded
+  (as would happen in the ExolvePlayer context when parsing a new text file
+  into a temp Exolve puzzle), do not load webifi, to avoid unnecessary
+  console errors.
+
 ### Version: Unnumbered tweak: exolve-from-text fixes
 
 - If a text line starts like a clue, but you already have a previous line

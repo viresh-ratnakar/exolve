@@ -256,6 +256,10 @@ function xlvpDeleteOld(hideChooser=true) {
     xlvpChooserStrip.innerHTML = '';
   }
   xlvpLastCrossword.disabled = true;
+  webifi = document.getElementById('webifi-root');
+  if (webifi) {
+    webifi.remove();
+  }
 }
 
 function xlvpToggleMinimizeCurrent() {
@@ -306,7 +310,12 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
   }
   if (!xlvpPuz.useWebifi) {
     xlvpPuz.useWebifi = true;
-    xlvpPuz.loadWebifi();
+    try {
+      xlvpPuz.loadWebifi();
+    } catch (err) {
+      console.log('Disabling webifi because of error: ' + err);
+      xlvpPuz.useWebifi = false;
+    }
   }
 
   xlvpData = data;

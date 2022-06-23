@@ -4352,19 +4352,13 @@ Exolve.prototype.addWebifi = function() {
 }
 
 /**
- * If the serving site has provided webifi scripts, we load them async and
- * add a Webifi button.
+ * If the puzzle has the useWebifi option set (or there is a URL param for
+ * webifi), and the serving site has provided webifi scripts, then we load
+ * them async and add a Webifi button.
  */
 Exolve.prototype.loadWebifi = function() {
   if (this.webifi) {
     return;
-  }
-  if (!this.useWebifi &&
-      (typeof Webifi) != 'undefined' &&
-      (typeof WordsWebifi) != 'undefined' &&
-      (typeof CrosswordWebifi) != 'undefined') {
-    // Webifi scripts were loaded
-    this.useWebifi = true;
   }
   if (!this.useWebifi) {
     // Check for webifi URL param.
@@ -4374,7 +4368,6 @@ Exolve.prototype.loadWebifi = function() {
   if (!this.useWebifi) {
     return;
   }
-
   const handler = this.addWebifi.bind(this);
   const notFound = [];
   if ((typeof Webifi) == 'undefined') {
