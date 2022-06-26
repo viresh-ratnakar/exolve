@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered README tweak
+
+- Add another customization example.
+
 ### Version: Unnumbered tweak: exolve-player fixes
 
 - In Exolve player, if loading Webifi fails, turn it off (this happens

@@ -1799,15 +1799,41 @@ this may get hard to maintain over time, as Exolve goes through new versions.
 The recommended way to customize is to load separate, additional JavaScript
 and/or CSS files. Exolve provides a JavaScript hook to do any custom
 initialization and/or to modify the HTML using JavaScript. If the setter has
-defined a function called `customizeExolve(p)`, then it gets called after
-Exolve has finished with its own set-up, with the puzzle object passed as p.
-For example, the following code, if added within the &lt;script&gt; tag or
-loaded from a script file, will customize the HTML by inserting the italicized
-red text *Whew!* after the puzzle.
+defined a function called `customizeExolve(p)`, then it gets called by
+`createExolve(...)` after Exolve has finished with its own set-up, with the puzzle
+object passed as p. For example, the following code, if added within the
+&lt;script&gt; tag or loaded from a script file, will customize the HTML by
+inserting the italicized red text *Whew!* after the puzzle (that is created
+by calling `createExolve(...)`.
 ```
   function customizeExolve(p) {
     p.frame.insertAdjacentHTML(
         'beforeend', '<span style="color:red;font-style:italic">Whew!</span>')
+  }
+```
+
+Here is an example of customizing by adding a function that is called when
+any letter is entered into the grid. Here, we call `checkCurr()` from this
+function if the current entry is full, never letting the solver enter a full
+incorrect entry,
+```
+  function customizeExolve(puz) {
+    puz.afterInput = function(evt) {
+      let allEntered = (this.activeCells.length > 0);
+      for (let cell of this.activeCells) {
+        const row = cell[0];
+        const col = cell[1];
+        const letter = this.grid[row][col].currLetter;
+        if (letter < 'A' || letter > 'Z') {
+          allEntered = false;
+          break;
+        }
+      }
+      if (allEntered) {
+        this.checkCurr();
+      }
+    }
+    puz.gridInput.addEventListener('input', puz.afterInput.bind(puz));
   }
 ```
 
@@ -1816,6 +1842,9 @@ by using `customizeExolve()` for customizations, instead of editing the
 HTML or JavaScript directly. You can examine the JavaScript/CSS code to see all
 the members of the Exolve object (passed as the parameter p above) and all the
 HTML class names and IDs.
+
+The `Exolve()` constructor can also be used to pass a custom customization
+function as a parameter (named `customizer`).
 
 I try to make sure that all Exolve JavaScript/CSS changes are backwards
 compatible (so, for example, I do not change element IDs in the HTML) so that
