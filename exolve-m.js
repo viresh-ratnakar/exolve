@@ -792,6 +792,9 @@ Exolve.prototype.init = function() {
     this.savingURL = document.getElementById(this.prefix + '-saving-url');
   }
 
+  this.buttonRow1 = document.getElementById(this.prefix + '-button-row-1');
+  this.buttonRow2 = document.getElementById(this.prefix + '-button-row-2');
+
   this.clearButton = document.getElementById(this.prefix + '-clear');
   this.clearButton.addEventListener('click', this.clearCurr.bind(this));
 

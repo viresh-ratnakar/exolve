@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered minor tweak
+
+- Add buttonRow1 and buttonRow2 members to the Exolve object.
+
 ### Version: Unnumbered README tweak
 
 - Add another customization example.
