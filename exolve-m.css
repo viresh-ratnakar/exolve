@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.39 June 20, 2022
+Version: Exolve v1.40 July 3, 2022
 */
 
 @media (max-width: 500px) {
@@ -147,13 +147,17 @@ Version: Exolve v1.39 June 20, 2022
   fill: rgba(0,0,0,0.0);
 }
 .xlv-frame .xlv-clues table {
+  border: none;
   border-collapse: collapse;
   border-spacing: 0;
+  margin: inherit;
 }
 .xlv-frame .xlv-clues tr {
+  border: none;
   break-inside: avoid;
 }
 .xlv-frame .xlv-clues td {
+  border: none;
   padding: 0 6px 4px 0;
   vertical-align: top;
 }
@@ -280,10 +284,12 @@ Version: Exolve v1.39 June 20, 2022
   position: relative;
   display: inline-block;
 }
-.xlv-grid-input-wrapper {
+.xlv-frame .xlv-grid-input-wrapper {
   position: absolute;
   border: none;
   border-width: 0;
+  margin: 0;
+  padding: 0;
   z-index: 1;
 }
 .xlv-grid-input-rarr {
@@ -306,16 +312,19 @@ Version: Exolve v1.39 June 20, 2022
   left: 40%;
   top: -20%;
 }
-.xlv-grid-input {
+.xlv-frame .xlv-grid-input,
+.xlv-frame .xlv-grid-input:focus {
+  background: rgba(0,0,0,0.0);
+  border: none;
+  color: rgba(0,0,0,0.0);
+  font-weight: normal;
+  height: 100%;
+  line-height: normal;
+  outline: none;
+  padding: 2px 0 0 0;
   text-align: center;
   text-anchor: middle;
-  border: none;
   width: 100%;
-  height: 100%;
-  padding: 2px 0 0 0;
-  color: rgba(0,0,0,0.0);
-  background: rgba(0,0,0,0.0);
-  outline: none;
 }
 .xlv-controls-etc {
   padding: 0 0 2px 0;
@@ -335,18 +344,19 @@ Version: Exolve v1.39 June 20, 2022
   break-after: avoid;
 }
 .xlv-nextprev {
-  vertical-align: top;
+  vertical-align: text-top;
 }
 .xlv-frame hr {
   margin: 0 0 4px 0;
 }
-.xlv-button {
+.xlv-frame .xlv-button {
   border: none;
+  display: inline-block;
+  font-family: monospace;
+  line-height: normal;
   outline: none;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-family: monospace;
 }
 .xlv-button:hover {
   cursor: pointer;
@@ -354,17 +364,21 @@ Version: Exolve v1.39 June 20, 2022
 .xlv-button:disabled {
   cursor: not-allowed;
 }
-.xlv-small-button {
+.xlv-frame .xlv-small-button {
   border: 1px solid gray;
-  outline: none;
-  padding: 0 4px 2px 4px;
-  margin: 0;
-  text-align: center;
-  text-decoration: none;
+  border-radius: 0;
+  box-shadow: none;
   display: inline-block;
   font-family: monospace;
   font-size: 13px;
   font-weight: bold;
+  line-height: normal;
+  margin: 0;
+  outline: none;
+  padding: 0 4px 2px 4px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: none;
 }
 .xlv-small-button:hover {
   cursor: pointer;

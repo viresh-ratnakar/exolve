@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.40: July 3, 2022
+
+- Make the next/prev buttons in the top clue have vertical-align
+  'text-top' rather than 'top' (the difference shows up when font
+  size is increased).
+- When parsing multiline exolve sections (such as exolve-preamble),
+  also include any text on the section line itself.
+- Lots more css tweaks, mainly to ensure blog themese do not encroach and
+  override critical exolve css.
+
 ### Version: Unnumbered minor tweak
 
 - Add buttonRow1 and buttonRow2 members to the Exolve object.

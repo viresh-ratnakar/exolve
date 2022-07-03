@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.39 June 20, 2022
+### Version: Exolve v1.40 July 3, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1287,7 +1287,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of June 2022, columnar layout is quirky: Chrome supports it best,
+  As of July 322, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
   etc.). You can set this to **inherit** to override Exolve's default of

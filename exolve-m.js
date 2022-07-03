@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.39 June 20, 2022';
+  this.VERSION = 'Exolve v1.40 July 3, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -956,7 +956,7 @@ Exolve.prototype.parseOverall = function() {
     } else if (parsedSec.section == 'language') {
       this.parseLanguage(parsedSec.value)
     }
-    parsedSec = nextParsedSec
+    parsedSec = nextParsedSec;
   }
   this.dirOrder = {}
   this.dirOrder['A'] = (this.sectionLines[
@@ -1407,13 +1407,26 @@ Exolve.prototype.parseLanguage = function(s) {
 }
 
 Exolve.prototype.extractSectionLines = function(start, end) {
-  let text = this.specLines[start];
-  let l = start + 1;
+  /**
+   * Grab any text after the exolve-*: marker, which is at index start-1.
+   */
+  let text = '';
+  if (start > 0) {
+    const markerLine = this.specLines[start - 1].trim();
+    if (markerLine.startsWith('exolve-')) {
+      const colon = markerLine.indexOf(':');
+      if (colon >= 0) {
+        text = markerLine.substr(colon + 1).trim();
+      }
+    }
+  }
+  let l = start;
   while (l <= end) {
-    text = text + '\n' + this.specLines[l];
+    if (text) text += '\n';
+    text += this.specLines[l];
     l++;
   }
-  return text;
+  return text.trim();
 }
 
 // Extracts the prelude from its previously identified lines and sets up
@@ -1421,19 +1434,25 @@ Exolve.prototype.extractSectionLines = function(start, end) {
 Exolve.prototype.parseAndDisplayPrelude = function() {
   const lines = this.sectionLines['prelude'] ||
                 this.sectionLines['preamble'] || [-1,-1];
-  if (lines[0] < 0 || lines[1] < lines[0]) {
+  if (lines[0] < 0) {
     return;
   }
-  document.getElementById(this.prefix + '-preamble').innerHTML =
-    this.extractSectionLines(lines[0], lines[1]);
+  const preamble = this.extractSectionLines(lines[0], lines[1]);
+  if (!preamble) {
+    return;
+  }
+  document.getElementById(this.prefix + '-preamble').innerHTML = preamble;
 }
 
 Exolve.prototype.parseAndDisplayPS = function() {
   const lines = this.sectionLines['postscript'] || [-1,-1];
-  if (lines[0] < 0 || lines[1] < lines[0]) {
+  if (lines[0] < 0) {
     return;
   }
   const psText = this.extractSectionLines(lines[0], lines[1]);
+  if (!psText) {
+    return;
+  }
   psHTML = `<div id='${this.prefix}-postscript'
     class='xlv-postscript'><hr> ${psText} </div>`;
   this.frame.insertAdjacentHTML('beforeend', psHTML);
@@ -1443,23 +1462,29 @@ Exolve.prototype.parseAndDisplayPS = function() {
 // populates its element, and adds it to revelationList.
 Exolve.prototype.parseAndDisplayExplanations = function() {
   const lines = this.sectionLines['explanations'] || [-1,-1];
-  if (lines[0] < 0 || lines[1] < lines[0]) {
+  if (lines[0] < 0) {
+    return;
+  }
+  const explnText = this.extractSectionLines(lines[0], lines[1]);
+  if (!explnText) {
     return;
   }
   const expln = document.getElementById(this.prefix + '-explanations');
-  expln.innerHTML = this.extractSectionLines(lines[0], lines[1]);
+  expln.innerHTML = explnText;
   this.revelationList.push(expln);
 }
 
 Exolve.prototype.parseAndDisplayMaker = function() {
   const lines = this.sectionLines['maker'] || [-1,-1];
-  if (lines[0] < 0 || lines[1] < lines[0]) {
+  if (lines[0] < 0) {
     return;
   }
-  let maker = `<br>${this.textLabels['maker-info']}:<br>\n` +
-    '<div style="margin:0 0 0 4ex">\n' +
-    this.specLines.slice(lines[0], lines[1] + 1).join('\n') +
-    '</div>';
+  const makerText = this.extractSectionLines(lines[0], lines[1]);
+  if (!makerText) {
+    return;
+  }
+  const maker = `<br>${this.textLabels['maker-info']}:<br>\n` +
+    '<div style="margin:0 0 0 4ex">\n' + makerText + '</div>';
   const elt = document.getElementById(this.prefix + '-metadata')
   elt.insertAdjacentHTML('beforeend', maker)
 }
@@ -1467,24 +1492,27 @@ Exolve.prototype.parseAndDisplayMaker = function() {
 // Parses exolve-relabel, noting relabelled texts of various buttons etc.
 Exolve.prototype.parseRelabel = function() {
   const lines = this.sectionLines['relabel'] || [-1,-1];
-  if (lines[0] < 0 || lines[1] < lines[0]) {
+  if (lines[0] < 0) {
     return;
   }
-  let l = lines[0];
-  while (l <= lines[1]) {
-    const colon = this.specLines[l].indexOf(':')
+  const relabelText = this.extractSectionLines(lines[0], lines[1]);
+  if (!relabelText) {
+    return;
+  }
+  const relabelLines = relabelText.split('\n');
+  for (specLine of relabelLines) {
+    const colon = specLine.indexOf(':')
     if (colon < 0) {
       this.throwErr('Line in exolve-relabel does not look like ' +
-                    '"name: new-label":' + this.specLines[l])
+                    '"name: new-label":' + specLine)
     }
-    let id = this.specLines[l].substr(0, colon).trim()
-    let val = this.specLines[l].substr(colon + 1).trim()
+    let id = specLine.substr(0, colon).trim()
+    let val = specLine.substr(colon + 1).trim()
     if (this.textLabels[id]) {
       this.textLabels[id] = val
     } else {
       this.throwErr('exolve-relabel: unsupported id: ' + id)
     }
-    l++;
   }
 }
 
@@ -3665,21 +3693,21 @@ Exolve.prototype.applyStyles = function() {
       color: ${this.colorScheme['imp-text']};
     }
     #${this.prefix}-frame .xlv-button {
-      background-color: ${this.colorScheme['button']};
+      background: ${this.colorScheme['button']};
       color: ${this.colorScheme['button-text']};
     }
     #${this.prefix}-frame .xlv-button:hover {
-      background-color: ${this.colorScheme['button-hover']};
+      background: ${this.colorScheme['button-hover']};
     }
     #${this.prefix}-frame .xlv-button:disabled {
-      background-color: gray;
+      background: gray;
     }
     #${this.prefix}-frame .xlv-small-button {
-      background-color: ${this.colorScheme['small-button']};
+      background: ${this.colorScheme['small-button']};
       color: ${this.colorScheme['small-button-text']};
     }
     #${this.prefix}-frame .xlv-small-button:hover {
-      background-color: ${this.colorScheme['small-button-hover']};
+      background: ${this.colorScheme['small-button-hover']};
     }
   `;
 }
@@ -5558,6 +5586,8 @@ Exolve.prototype.recolourCells = function(scale=1) {
 }
 
 Exolve.prototype.displayGrid = function() {
+  this.gridInput.style.fontSize = this.letterSize + 'px'
+  this.gridInputWrapper.style.fontSize = this.letterSize + 'px'
   this.numCellsToFill = 0
   this.numCellsPrefilled = 0
   for (let i = 0; i < this.gridHeight; i++) {
