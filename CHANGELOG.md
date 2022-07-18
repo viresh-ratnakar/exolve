@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.41: July 18, 2022
+
+- When treating '&' as a linked child indicator in a clue label, only do so
+  if a numeric label follows.
+
 ### Version: Exolve v1.40: July 3, 2022
 
 - Make the next/prev buttons in the top clue have vertical-align

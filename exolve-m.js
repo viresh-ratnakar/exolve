@@ -79,7 +79,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.40 July 3, 2022';
+  this.VERSION = 'Exolve v1.41 July 18, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2505,13 +2505,16 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
   parse.notLabel = false;
   if (consumeTrailing) {
     // Look for ,/&/and
-    commaParts = clueLine.match(/^\s*(?:[,&]|and\s*[1-9])/)
+    // For & and "and": only treat them as child indicators if followed by a
+    // number.
+    commaParts = clueLine.match(/^\s*(?:,|(?:and|&)\s*[1-9])/);
     if (commaParts && commaParts.length == 1) {
       parse.hasChildren = true;
       // Store the separator char in linkSep
       parse.linkSep = commaParts[0].trim();
       let skipLen = commaParts[0].length;
-      if (parse.linkSep.startsWith('and')) {
+      if (parse.linkSep.startsWith('and') ||
+          parse.linkSep.startsWith('&')) {
         parse.linkSep = '&';
         skipLen--;  // One digit was in RE.
       }
