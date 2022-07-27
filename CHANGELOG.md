@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Unnumbered minor tweak: July 26, 2022
+
+- Do not display the xlv-clear-area strip when printing.
+
 ### Version: Exolve v1.41: July 18, 2022
 
 - When treating '&' as a linked child indicator in a clue label, only do so

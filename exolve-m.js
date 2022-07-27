@@ -6875,14 +6875,15 @@ Exolve.prototype.handleBeforePrint = function() {
     padding-bottom: 0;
     margin-bottom: 0;
   }
-  .xlv-controls,
-  .xlv-status,
-  .xlv-saving,
   .xlv-button,
+  .xlv-clear-area,
+  .xlv-controls,
+  .xlv-dont-print,
+  .xlv-postscript,
+  .xlv-saving,
   .xlv-small-button,
   .xlv-small-print,
-  .xlv-dont-print,
-  .xlv-postscript {
+  .xlv-status {
     display: none;
   }
   #${this.prefix}-frame .xlv-clues-box {
