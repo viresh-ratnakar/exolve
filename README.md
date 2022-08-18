@@ -320,7 +320,7 @@ with a clue that is specified or revealed separately). One way the clue can
 be provided is with a [nodir clue or a non-numerically labelled
 clue](#exolve-across-exolve-down-exolve-nodir), as described later.
 
-As a convenient reference, here again is the complete list of decorators:
+As a convenient reference, here again is the complete list of [decorators](https://www.scaler.com/topics/python/python-decorators/):
 | Decorator | Meaning                            |
 |-----------|------------------------------------|
 | `\|`      | Has a bar after it, to the right.  |
