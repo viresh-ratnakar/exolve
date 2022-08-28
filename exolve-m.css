@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.41 July 18, 2022
+Version: Exolve v1.42 August 27, 2022
 */
 
 @media (max-width: 500px) {
@@ -162,17 +162,21 @@ Version: Exolve v1.41 July 18, 2022
   vertical-align: top;
 }
 .xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
-  max-width: 2ch;
   box-sizing: content-box;
-  white-space: nowrap;
-  overflow: visible;
   font-weight: bold;
+  max-width: 2ch;
+  overflow: visible;
   text-align: right;
+  word-break: normal;
+  word-wrap: normal;
+  white-space: nowrap;
 }
 .xlv-invisible {
   color: transparent;
   font-weight: bold;
   text-align: right;
+  word-break: normal;
+  word-wrap: normal;
 }
 .xlv-clue-indent {
   text-indent: -2ch;

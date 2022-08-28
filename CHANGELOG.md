@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v1.42: August 27, 2022
+
+- Several printing fixes/improvements:
+- Bug-fix: when printing just the crossword from a blog (or from widgets in
+  general), the exolve stylesheet was (sometimes) not getting applied. Some
+  browser bug (?) got triggered when the element containing the link tag
+  for the stylsheet got moved. The code now does not move elements (only
+  moves top-level text nodes), styling them to be invisible directly
+  while printing.
+- Add a "Print wysiwyg" button to allow printing without having Exolve
+  do crossword-reformatting.
+- Improve/fix printing layout: in 3-column modea, minimize the sum of
+  two gaps: |col1 - col2| + |col3 - min(col1,col2)|.
+
 ### Version: Unnumbered minor tweak: July 26, 2022
 
 - Do not display the xlv-clear-area strip when printing.
@@ -16,7 +30,7 @@
   size is increased).
 - When parsing multiline exolve sections (such as exolve-preamble),
   also include any text on the section line itself.
-- Lots more css tweaks, mainly to ensure blog themese do not encroach and
+- Lots more css tweaks, mainly to ensure blog themes do not encroach and
   override critical exolve css.
 
 ### Version: Unnumbered minor tweak

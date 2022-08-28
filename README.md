@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.41 July 18, 2022
+### Version: Exolve v1.42 August 27, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1287,7 +1287,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of July 1822, columnar layout is quirky: Chrome supports it best,
+  As of August 2722, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
   etc.). You can set this to **inherit** to override Exolve's default of
@@ -1542,10 +1542,12 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-xlarge` | Extra Large                                |
 | `print-font-small` | Small                                       |
 | `print-font-other` | Other                                       |
-| `print-page` | Print page                                        |
-| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P)      |
 | `print-crossword` | Print crossword                              |
 | `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl-b) |
+| `print-page` | Print page                                        |
+| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P)      |
+| `print-page-wysiwyg` | Print wysiwyg                             |
+| `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword |
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.
@@ -2056,16 +2058,19 @@ with the title "Settings for printing/PDFs". This lets you specify:
   general, you can increase/decrease the font size setting and the printed
   size will increase/decrease accordingly.
 
-Additionally, from this panel, you have two buttons for printing:
+Additionally, from this panel, you have three buttons for printing:
 
-- You can click on a button labelled "Print page". This will print the whole
-  page, just like what you'll get from the browser's "print" function (which
-  can be invoked with a Ctrl-p or Cmd-p).
 - You can click on a button labelled "Print crossword". This will print *only*
   the crossword. This is useful if the crossword is embedded with some
   background or other content around it. You can also print just the crossword
   using the shortcut Ctrl-b after clicking on any light cell in the crossword
   grid.
+- You can click on a button labelled "Print page". This will print the whole
+  page, just like what you'll get from the browser's "print" function (which
+  can be invoked with a Ctrl-p or Cmd-p).
+- If you want to print the whole page *without reformatting the crossword*
+  (if Exolve's reformatting plays havoc, overlapping with the surrounding
+  content, for example), then you can click on "Print wysiwyg".
 
 ### Printing layout algorithm details
 
@@ -2093,13 +2098,6 @@ inside a DIV that is not displayed, whereas the top frame DIV of the Exolve
 crossword is moved to the beginning of `document.body`.
 
 After printing, Exolve reverts the page rendering to its original state.
-
-If, for some reason, you do not want Exolve to use its printing layout
-algorithm, then you can turn it off by setting a field, like this:
-```
-  function customizeExolve(p) {
-    p.printAsIs = true;
-  }
 ```
 
 ### Browser-specific printing peculiarities

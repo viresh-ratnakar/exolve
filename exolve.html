@@ -126,7 +126,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 saveState=true) {
-  this.VERSION = 'Exolve v1.41 July 18, 2022';
+  this.VERSION = 'Exolve v1.42 August 27, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -430,10 +430,12 @@ function Exolve(puzzleSpec,
     'print-font-xlarge': 'Extra Large',
     'print-font-small': 'Small',
     'print-font-other': 'Other',
-    'print-page': 'Print page',
-    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p)',
     'print-crossword': 'Print crossword',
     'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-b)',
+    'print-page': 'Print page',
+    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p)',
+    'print-page-wysiwyg': 'Print wysiwyg',
+    'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword',
   };
 
   /**
@@ -449,6 +451,11 @@ function Exolve(puzzleSpec,
       break;
     }
   }
+
+  /** Printing-related */
+  this.printingChanges = null;
+  this.printAsIs = false;
+  this.printOnlyCrossword = false;
 
   // Variables set by exolve-option
   this.hideInferredNumbers = false;
@@ -630,15 +637,20 @@ Exolve.prototype.init = function() {
                     </input>
                   </div>
                   <div>
+                    <button id="${this.prefix}-print-crossword"
+                        class="xlv-small-button"
+                        title="${this.textLabels['print-crossword.hover']}">
+                      ${this.textLabels['print-crossword']}
+                    </button>
                     <button id="${this.prefix}-print-page"
                         class="xlv-small-button"
                         title="${this.textLabels['print-page.hover']}">
                       ${this.textLabels['print-page']}
                     </button>
-                    <button id="${this.prefix}-print-crossword"
+                    <button id="${this.prefix}-print-wysiwyg"
                         class="xlv-small-button"
-                        title="${this.textLabels['print-crossword.hover']}">
-                      ${this.textLabels['print-crossword']}
+                        title="${this.textLabels['print-page-wysiwyg.hover']}">
+                      ${this.textLabels['print-page-wysiwyg']}
                     </button>
                   </div>
                 </div>
@@ -875,9 +887,11 @@ Exolve.prototype.init = function() {
   this.submitButton.addEventListener('click', this.submitSolution.bind(this));
 
   const printPage = document.getElementById(this.prefix + '-print-page');
-  printPage.addEventListener('click', this.printNow.bind(this, false));
+  printPage.addEventListener('click', this.printNow.bind(this, 'page'));
   const printCrossword = document.getElementById(this.prefix + '-print-crossword');
-  printCrossword.addEventListener('click', this.printNow.bind(this, true));
+  printCrossword.addEventListener('click', this.printNow.bind(this, 'crossword'));
+  const printWysiwyg = document.getElementById(this.prefix + '-print-wysiwyg');
+  printWysiwyg.addEventListener('click', this.printNow.bind(this, 'wysiwig'));
   this.printFontMenu = document.getElementById(this.prefix + '-print-font');
   this.printFontMenu.addEventListener('change', this.setPrintFont.bind(this, true));
   this.printFontInput = document.getElementById(this.prefix + '-print-font-inp');
@@ -5331,7 +5345,7 @@ Exolve.prototype.handleKeyDown = function(e) {
   } else if (e.ctrlKey && e.key == 'b') {
     e.stopPropagation();
     e.preventDefault();
-    this.printNow(true);
+    this.printNow('crossword');
   }
 }
 
@@ -6731,23 +6745,42 @@ Exolve.prototype.manageStorage = function(e) {
   }
 }
 
-Exolve.prototype.printNow = function(onlyCrossword) {
-  this.printOnlyCrossword = onlyCrossword;
+/**
+ * mode can be one of: 'page' 'crossword' 'wysiwyg'
+ */
+Exolve.prototype.printNow = function(mode) {
+  if (mode == 'page') {
+    this.printAsIs = false;
+    this.printOnlyCrossword = false;
+  } else if (mode == 'crossword') {
+    this.printAsIs = false;
+    this.printOnlyCrossword = true;
+  } else {
+    /* wysiwyg */
+    this.printAsIs = true;
+    this.printOnlyCrossword = false;
+  }
   window.print();
 }
 
 Exolve.prototype.handleAfterPrint = function() {
   if (this.printingChanges) {
+    this.printAsIs = false;
+    this.printOnlyCrossword = false;
     this.columnarLayout = this.printingChanges.columnarLayout;
-    if (this.printingChanges.moves) {
-      // Undo the moves.
-      for (let i = 0; i < this.printingChanges.moves.length; i++) {
-        const move = this.printingChanges.moves[i];
-        if (move.hasOwnProperty('sibling')) {
-          move.target.insertBefore(move.elem, move.sibling);
-        } else {
-          move.target.insertAdjacentElement('afterbegin', move.elem);
+    if (this.printingChanges.hiddenDisplays) {
+      for (let display in this.printingChanges.hiddenDisplays) {
+        const elts = this.printingChanges.hiddenDisplays[display];
+        for (let elt of elts) {
+          elt.style.display = display;
         }
+      }
+    }
+    if (this.printingChanges.moves) {
+      // Undo the moves in reverse order.
+      for (let i = this.printingChanges.moves.length - 1; i >= 0; i--) {
+        const move = this.printingChanges.moves[i];
+        move.target.insertBefore(move.elem, move.sibling);
       }
     }
     if (this.printingChanges.extras) {
@@ -6851,6 +6884,7 @@ Exolve.prototype.handleBeforePrint = function() {
     'pageYOffset': window.pageYOffset,
     'extras': [],
     'moves': [],
+    'hiddenDisplays': {},
   };
   // Unhighlight current cell/clue (handleAfterPrint() will restore).
   this.deactivator();
@@ -6858,30 +6892,45 @@ Exolve.prototype.handleBeforePrint = function() {
   const settings = this.getPrintSettings();
 
   if (settings.onlyCrossword) {
+    /**
+     * Note: prior to v1.42, the code used to move all body children
+     * into the "hider" element. But this somehow caused problems with
+     * the exolve stylesheet in "widgets". Now we only move non-element
+     * non-script/link nodes. Element nodes directly get their style.display
+     * set to none.
+     */
     const puzSibling = this.frame.nextSibling;
     const puzParent = this.frame.parentNode;
-
-    const hider = document.createElement('div');
-    hider.className = 'xlv-dont-print';
-    const topNodes = [];
-    for (let i = 0; i < document.body.childNodes.length; i++) {
-      topNodes.push(document.body.childNodes[i]);
-    }
-    // topNodes[] is not a live list, unlike d.b.childNodes[]
-    for (let node of topNodes) {
-      if (node.isSameNode(this.frame)) continue;
-      hider.insertBefore(node, null);
-      this.printingChanges.moves.push(
-          {'elem': node, 'target': document.body, 'sibling': null});
-    }
-    document.body.insertAdjacentElement('beforeend', hider);
-    this.printingChanges.extras.push(hider);
-
-    // Exolve frame is moved after siblings, so it can be reinstated wrt an
-    // already reinstated sibling later, if one exists.
     document.body.insertAdjacentElement('afterbegin', this.frame);
     this.printingChanges.moves.push(
         {'elem': this.frame, 'target': puzParent, 'sibling': puzSibling});
+
+    const hider = document.createElement('div');
+    hider.className = 'xlv-dont-print';
+    const topNonEltNodes = [];
+    for (let i = 0; i < document.body.childNodes.length; i++) {
+      const node = document.body.childNodes[i];
+      if (node.nodeType == Node.ELEMENT_NODE) {
+        if (node.nodeName == 'LINK' || node.nodeName == 'SCRIPT') continue;
+        if (node.isSameNode(this.frame)) continue;
+        const display = node.style.display;
+        if (!this.printingChanges.hiddenDisplays[display]) {
+          this.printingChanges.hiddenDisplays[display] = [];
+        }
+        this.printingChanges.hiddenDisplays[display].push(node);
+        node.style.display = 'none';
+        continue;
+      }
+      topNonEltNodes.push({'node': node, 'sibling': node.nextSibling});
+    }
+    // topNonEltNodes[] is not a live list, unlike d.b.childNodes[]
+    for (let nodeSib of topNonEltNodes) {
+      hider.insertBefore(nodeSib.node, null);
+      this.printingChanges.moves.push(
+          {'elem': nodeSib.node, 'target': document.body, 'sibling': nodeSib.sibling});
+    }
+    document.body.insertAdjacentElement('beforeend', hider);
+    this.printingChanges.extras.push(hider);
 
     const customStyles = document.createElement('style');
     customStyles.insertAdjacentHTML('beforeend', `
@@ -6907,52 +6956,58 @@ Exolve.prototype.handleBeforePrint = function() {
     size: ${settings.page};
     margin: ${settings.pageMarginIn}in;
   }
-  body {
-    zoom: 100%;
-    margin: 0;
-  }
-  #${this.prefix}-frame {
-    font-size: ${settings.font};
-    width: 992px;
-  }
-  #${this.prefix}-frame .xlv-preamble {
-    margin: 8px 0 20px;
-  }
-  #${this.prefix}-frame .xlv-clues {
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
-  .xlv-button,
-  .xlv-clear-area,
-  .xlv-controls,
-  .xlv-dont-print,
-  .xlv-postscript,
-  .xlv-saving,
-  .xlv-small-button,
-  .xlv-small-print,
-  .xlv-status {
-    display: none;
-  }
-  #${this.prefix}-frame .xlv-clues-box {
-    max-height: none !important;
-  }
-  #${this.prefix}-frame .xlv-clues,
-  #${this.prefix}-frame .xlv-clues-columnar,
-  #${this.prefix}-frame .xlv-clues-flex {
-    display: block;
-  }
-  #${this.prefix}-frame .xlv-clues-panel {
-    margin-right: 0;
-  }
-  .xlv-coloured-cell, .xlv-clues {
-    color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-  .xlv-print-break {
-    break-after: page;
-    page-break-after: always;
-    break-inside: unset;
-    page-break-inside: unset;
+  @media all {
+    body {
+      zoom: 100%;
+      margin: 0;
+    }
+    #${this.prefix}-frame {
+      width: 992px;
+    }
+    #${this.prefix}-frame .xlv-preamble {
+      margin: 8px 0 20px;
+    }
+    #${this.prefix}-frame .xlv-clues {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    #${this.prefix}-frame div,
+    #${this.prefix}-frame table {
+      color: black;
+      font-size: ${settings.font};
+    }
+    .xlv-button,
+    .xlv-clear-area,
+    .xlv-controls,
+    .xlv-dont-print,
+    .xlv-postscript,
+    .xlv-saving,
+    .xlv-small-button,
+    .xlv-small-print,
+    .xlv-status {
+      display: none;
+    }
+    #${this.prefix}-frame .xlv-clues-box {
+      max-height: none !important;
+    }
+    #${this.prefix}-frame .xlv-clues,
+    #${this.prefix}-frame .xlv-clues-columnar,
+    #${this.prefix}-frame .xlv-clues-flex {
+      display: block;
+    }
+    #${this.prefix}-frame .xlv-clues-panel {
+      margin-right: 0;
+    }
+    .xlv-coloured-cell, .xlv-clues {
+      color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .xlv-print-break {
+      break-after: page;
+      page-break-after: always;
+      break-inside: unset;
+      page-break-inside: unset;
+    }
   }
   `;
   this.frame.appendChild(customStyles);
@@ -6983,7 +7038,7 @@ Exolve.prototype.addPrintedCluesTable = function(elem, width, num) {
   const table = document.createElement('table');
   table.id = this.prefix + '-printed-clues-table-' + num;
   box.appendChild(table);
-  elem.insertAdjacentElement('afterbegin', box);
+  elem.insertAdjacentElement('beforeend', box);
   return table;
 }
 
@@ -7121,21 +7176,22 @@ Exolve.prototype.printTwoColumns = function(settings) {
   }
 
   // Move clue #s [0, best1end) to the first column.
-  for (let c = best1end - 1; c >= 0; c--) {
+  for (let c = 0; c < best1end; c++) {
     const clue = clues[c];
-    let newTable = null;
     if (clue.heading) {
-      printedClues1.insertAdjacentElement('afterbegin', clue.heading);
       this.printingChanges.moves.push(
-          {'target': cluesPanels[clue.p], 'elem': clue.heading});
-      newTable = this.addPrintedCluesTable(printedClues1, COLUMN_WIDTH, extraTableNum++);
+          {'target': cluesPanels[clue.p], 'elem': clue.heading,
+            'sibling': clue.heading.nextSibling});
+      if (printedTable1.children.length > 0) {
+        printedTable1 = this.addPrintedCluesTable(printedClues1,
+            COLUMN_WIDTH, extraTableNum++);
+      }
+      printedTable1.insertAdjacentElement('beforebegin', clue.heading);
     }
-    printedTable1.insertAdjacentElement('afterbegin', clue.tr);
     this.printingChanges.moves.push(
-        {'target': cluesTables[clue.p], 'elem': clue.tr});
-    if (newTable) {
-      printedTable1 = newTable;
-    }
+        {'target': cluesTables[clue.p], 'elem': clue.tr,
+          'sibling': clue.tr.nextSibling});
+    printedTable1.insertAdjacentElement('beforeend', clue.tr);
   }
 
   this.paginate(settings);
@@ -7281,12 +7337,9 @@ Exolve.prototype.printThreeColumns = function(settings) {
     const h1 = clues[i].h;
     for (let j = i + 1; j < clues.length; j++) {
       const h2 = clues[j].h - clues[i].h;
-      if (h2 > h1 + minH) break;
-      if (Math.abs(h1 - h2) > minH) continue;
+      const gap12 = Math.abs(h2 - h1);
       const h3 = h - clues[j].h;
-      let gap = Math.max(h1, h2) + gridPanelH - h3;
-      if (gap > bestGap) break;
-      gap = Math.abs(gap);
+      const gap = gap12 + Math.abs(Math.min(h1, h2) + gridPanelH - h3);
       if (gap < bestGap) {
         bestGap = gap;
         best1end = i + 1;
@@ -7297,27 +7350,29 @@ Exolve.prototype.printThreeColumns = function(settings) {
 
   // Move clue #s [0, best1end) to the first column and
   // [best1end, best2end) to the second column.
-  for (let c = best2end - 1; c >= 0; c--) {
+  for (let c = 0; c < best2end; c++) {
     const clue = clues[c];
-    let newTable = null;
+    let tableDest = (c < best1end) ? printedTable1 : printedTable2;
     if (clue.heading) {
-      const dest = (c < best1end) ? printedClues1 : printedClues2;
-      dest.insertAdjacentElement('afterbegin', clue.heading);
       this.printingChanges.moves.push(
-          {'target': cluesPanels[clue.p], 'elem': clue.heading});
-      newTable = this.addPrintedCluesTable(dest, COLUMN_WIDTH, extraTableNum++);
-    }
-    const dest = (c < best1end) ? printedTable1 : printedTable2;
-    dest.insertAdjacentElement('afterbegin', clue.tr);
-    this.printingChanges.moves.push(
-        {'target': cluesTables[clue.p], 'elem': clue.tr});
-    if (newTable) {
-      if (c < best1end) {
-        printedTable1 = newTable;
-      } else {
-        printedTable2 = newTable;
+          {'target': cluesPanels[clue.p], 'elem': clue.heading,
+           'sibling': clue.heading.nextSibling});
+      if (tableDest.children.length > 0) {
+        const cluesDest = (c < best1end) ? printedClues1 : printedClues2;
+        tableDest = this.addPrintedCluesTable(cluesDest, COLUMN_WIDTH,
+            extraTableNum++);
+        if (c < best1end) {
+          printedTable1 = tableDest;
+        } else {
+          printedTable2 = tableDest;
+        }
       }
+      tableDest.insertAdjacentElement('beforebegin', clue.heading);
     }
+    this.printingChanges.moves.push(
+        {'target': cluesTables[clue.p], 'elem': clue.tr,
+         'sibling': clue.tr.nextSibling});
+    tableDest.insertAdjacentElement('beforeend', clue.tr);
   }
 
   this.paginate(settings);
@@ -7654,17 +7709,21 @@ function createPuzzle() {
   vertical-align: top;
 }
 .xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
-  max-width: 2ch;
   box-sizing: content-box;
-  white-space: nowrap;
-  overflow: visible;
   font-weight: bold;
+  max-width: 2ch;
+  overflow: visible;
   text-align: right;
+  word-break: normal;
+  word-wrap: normal;
+  white-space: nowrap;
 }
 .xlv-invisible {
   color: transparent;
   font-weight: bold;
   text-align: right;
+  word-break: normal;
+  word-wrap: normal;
 }
 .xlv-clue-indent {
   text-indent: -2ch;
