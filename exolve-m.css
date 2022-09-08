@@ -362,6 +362,10 @@ Version: Exolve v1.43 September 7, 2022
   text-align: center;
   text-decoration: none;
 }
+.xlv-frame:focus {
+  border: none;
+  outline: none;
+}
 .xlv-button:hover {
   cursor: pointer;
 }

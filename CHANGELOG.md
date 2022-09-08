@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Unnumbered minor tweak: September 8, 2022
+
+- Chrome has a bug wherein after the first page load, window.print() does not
+  conclude with an 'afterprint' event occasionally. So, just call
+  handleAfterPrint() after calling window.print() as it can be safely called
+  twice.
+- Make the xlv-frame div be able to capture keyboard events with tabindex=-1
+  (this makes it not a part of tab-navigation while still lets it capture
+  keydown events). This is useful for catching Ctrl-B for printing, after
+  clicking anywhere in the puzzle area, not necessarily within a grid cell.
+- Add css rule for .xlv-frame:focus to not get drawn with a border/outline.
+
 ### Version: Exolve v1.43: September 7, 2022
 
 - Create an Exolve.destroy() function, to be used by ExolvePlayer to
