@@ -1,5 +1,21 @@
 # Changelog
 
+### Version: Exolve v1.43: September 7, 2022
+
+- Create an Exolve.destroy() function, to be used by ExolvePlayer to
+  remove window-listeners that would otherwise keep accumulating.
+- Rename the Exolve constructor param "saveState" to "notTemp". When
+  notTemp is false, apart from not saving state, also do not attach
+  window-listeners (for resize/printing). This stops listeners from
+  accumulating in Exet.
+- In 3-column printing, minor tweak: minimize the sum of absolute
+  diffs |diff12| + |diff23| + |diff13|.
+- When printOnlyCrossword or when printAsIs is true for any exolve
+  crossword on the page (matters when there are more than one), make
+  handleBeforePrint() a no-op for all other crosswords on the page.
+- Make print options background be transparent and color be "inherit"
+  so that it looks OK in embedded settings such as blogs too.
+
 ### Version: Exolve v1.42: August 27, 2022
 
 - Several printing fixes/improvements:

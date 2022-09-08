@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.42 August 27, 2022
+### Version: Exolve v1.43 September 7, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1287,7 +1287,7 @@ The list of currently supported options is as follows:
   if the window is resized. The number of columns can only be one of
   the following: 1 (which is the same as what we get without the
   columnar-layout option, when the available width is too small), 2, or 3.
-  As of August 2722, columnar layout is quirky: Chrome supports it best,
+  As of September 2022, columnar layout is quirky: Chrome supports it best,
   but all browsers seem to have some peculiarities.
 - **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
   etc.). You can set this to **inherit** to override Exolve's default of
@@ -2200,8 +2200,13 @@ var exolvePuzzles;
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
- * saveState If false, state is not saved in local storage. Useful for
- *    creating temporary/preview puzzles.
+ * notTemp If false, state is not saved in local storage and some event
+ *    listeners are not created. Useful for creating temporary/preview puzzles.
+ *    Note that if you create a normal (notTemp=true) puzzle and your web page
+ *    is going to destroy it for some reason during its normal course
+ *    (ExolvePlayer does this, for example), then you should call destroy() on
+ *    the puzzle object before removing all references to it. This will remove
+ *    listeners for 'resize' and printing events, for example.
  */
 function Exolve(puzzleText,
                 containerId="",
@@ -2209,7 +2214,7 @@ function Exolve(puzzleText,
                 provideStateUrl=true,
                 visTop=0,
                 maxDim=0,
-                saveState=true) {...}
+                notTemp=true) {...}
 
 /**
  * createExolve(puzzleText) is just a convenient wrapper that looks for

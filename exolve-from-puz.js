@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.42 August 27, 2022
+Version: Exolve v1.43 September 7, 2022
 */
 
 function exolveFromPuzNextNull(buffer, offset) {
@@ -88,7 +88,7 @@ function exolveFromPuz(buffer, fname='') {
   exolve-grid:
 ${exolveGrid}
   exolve-end
-  `, dummyId, null, false);
+  `, dummyId, null, false, 0, 0, false);
 
   dummyContainer.remove();
   delete exolvePuzzles[dummyId];

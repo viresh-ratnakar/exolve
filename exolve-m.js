@@ -69,8 +69,13 @@ var exolvePuzzles;
  *     at the top of the page (normally just 0).
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
- * saveState If false, state is not saved in local storage. Useful for
- *    creating temporary/preview puzzles.
+ * notTemp If false, state is not saved in local storage and some event
+ *    listeners are not created. Useful for creating temporary/preview puzzles.
+ *    Note that if you create a normal (notTemp=true) puzzle and your web page
+ *    is going to destroy it for some reason during its normal course
+ *    (ExolvePlayer does this, for example), then you should call destroy() on
+ *    the puzzle object before removing all references to it. This will remove
+ *    listeners for 'resize' and printing events, for example.
  */
 function Exolve(puzzleSpec,
                 containerId='',
@@ -78,15 +83,15 @@ function Exolve(puzzleSpec,
                 provideStateUrl=true,
                 visTop=0,
                 maxDim=0,
-                saveState=true) {
-  this.VERSION = 'Exolve v1.42 August 27, 2022';
+                notTemp=true) {
+  this.VERSION = 'Exolve v1.43 September 7, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
   this.customizer = customizer;
   this.provideStateUrl = provideStateUrl;
-  this.saveState = saveState;
+  this.notTemp = notTemp;
 
   this.gridWidth = 0;
   this.gridHeight = 0;
@@ -434,8 +439,32 @@ function Exolve(puzzleSpec,
   this.createPuzzle();
 }
 
-// Create the basic HTML structure.
-// Set up globals, version number and user agent in bug link.
+/**
+ * Do clean-up: remove from exolvePuzzles[], remove window listeners.
+ * This only needs to be called if you have a web page from which
+ * you destroy and create new Exolve puzzles repeatedly (such as
+ * ExolvePlayer).
+ */
+Exolve.prototype.destroy = function() {
+  if (this.frame) {
+    this.frame.innerHTML = '';
+    this.frame = null;
+  }
+  if (exolvePuzzles && this.id && exolvePuzzles[this.id]) {
+    delete exolvePuzzles[this.id];
+  }
+  if (this.windowListeners) {
+    for (let e in this.windowListeners) {
+      window.removeEventListener(e, this.windowListeners[e]);
+    }
+    this.windowListeners = {};
+  }
+}
+
+/**
+ * Create the basic HTML structure.
+ * Set up globals, version number and user agent in bug link.
+ */
 Exolve.prototype.init = function() {
   this.parseOverall();
   this.parseRelabel();
@@ -517,7 +546,7 @@ Exolve.prototype.init = function() {
             </div> <!-- xlv-status -->
             <div id="${this.prefix}-saving" class="xlv-wide-box xlv-saving">
               <span id="${this.prefix}-saving-msg">
-              ${this.saveState ? this.textLabels['saving-msg'] : ''}
+              ${this.notTemp ? this.textLabels['saving-msg'] : ''}
               </span>
             </div> <!-- xlv-saving -->
             <div id="${this.prefix}-small-print"
@@ -4195,7 +4224,7 @@ Exolve.prototype.updateAndSaveState = function() {
     state = state + this.STATE_SEP + a.input.value
   }
 
-  if (this.saveState) {
+  if (this.notTemp) {
     try {
       let lsVal = JSON.stringify({
         timestamp: Date.now(),
@@ -5577,10 +5606,15 @@ Exolve.prototype.createListeners = function() {
   document.getElementById(this.prefix + '-preamble').addEventListener(
     'click', boundDeactivator);
   
-  window.addEventListener('resize', this.handleResize.bind(this));
-
-  window.addEventListener('beforeprint', this.handleBeforePrint.bind(this));
-  window.addEventListener('afterprint', this.handleAfterPrint.bind(this));
+  this.windowListeners = {};
+  if (this.notTemp) {
+    this.windowListeners['resize'] = this.handleResize.bind(this);
+    this.windowListeners['beforeprint'] = this.handleBeforePrint.bind(this);
+    this.windowListeners['afterprint'] = this.handleAfterPrint.bind(this);
+    for (let e in this.windowListeners) {
+      window.addEventListener(e, this.windowListeners[e]);
+    }
+  }
 }
 
 Exolve.prototype.recolourCells = function(scale=1) {
@@ -6812,7 +6846,6 @@ Exolve.prototype.getPrintSettings = function() {
   const font = (this.printFontInput ? this.printFontInput.value : '18px') || '18px';
 
   const onlyCrossword = this.printOnlyCrossword || false;
-  this.printOnlyCrossword = false;
   return {
     page: page,
     font: font,
@@ -6827,7 +6860,18 @@ Exolve.prototype.handleBeforePrint = function() {
   if (this.printAsIs) {
     return;
   }
-  this.handleAfterPrint();  // Unnecessary, but can't hurt to be sure.
+  /**
+   * If some other crossword on this same web page is trying to get printed
+   * with printOnlyCrossword=true or printAsIs=true, then bail out.
+   */
+  for (let id in exolvePuzzles) {
+    const other = exolvePuzzles[id];
+    if (typeof other === 'object' && other !== null &&
+        other.id && other.id != this.id &&
+        (other.printOnlyCrossword || other.printAsIs)) {
+      return;
+    }
+  }
 
   this.printingChanges = {
     'columnarLayout': this.columnarLayout,
@@ -6846,7 +6890,7 @@ Exolve.prototype.handleBeforePrint = function() {
 
   if (settings.onlyCrossword) {
     /**
-     * Note: prior to v1.42, the code used to move all body children
+     * Note: prior to v1.43, the code used to move all body children
      * into the "hider" element. But this somehow caused problems with
      * the exolve stylesheet in "widgets". Now we only move non-element
      * non-script/link nodes. Element nodes directly get their style.display
@@ -7292,7 +7336,9 @@ Exolve.prototype.printThreeColumns = function(settings) {
       const h2 = clues[j].h - clues[i].h;
       const gap12 = Math.abs(h2 - h1);
       const h3 = h - clues[j].h;
-      const gap = gap12 + Math.abs(Math.min(h1, h2) + gridPanelH - h3);
+      const gap13 = Math.abs(h1 + gridPanelH - h3);
+      const gap23 = Math.abs(h2 + gridPanelH - h3);
+      const gap = gap12 + gap23 + gap13;
       if (gap < bestGap) {
         bestGap = gap;
         best1end = i + 1;
