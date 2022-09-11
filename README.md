@@ -29,6 +29,11 @@ Yet another option is to embed the Exolve puzzle within arbitrary web pages
 (like blog posts) in a "widget". See the details in the
 [Exolve widget](#exolve-widget) section.
 
+The [Exolve Player](https://exolve.app) web app can be used to play crossword
+files in several formats (including .puz and even just the clues copied from
+a PDF in many cases). An easy-to-remember URL for this web app is
+[exolve.app](https://exolve.app).
+
 Here is a minimal example of the puzzle specification:
 
 ```
