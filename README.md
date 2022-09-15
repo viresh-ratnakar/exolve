@@ -139,6 +139,13 @@ When the solver enters a letter in a square, the cursor automatically jumps to
 the next square for the currently active clue (the next square can be from a
 different clue, when there are linked clues that "cover" multiple clues).
 
+If the solver changes a cell entry from a non-blank letter to a different
+non-blank letter, then that changed letter is highlighted by showing in a
+different colour for a short while. This animation's
+[start/end colours (`overwritten-start` and `overwritten-end`)](#colour-schemes)
+and the [duration (`highlight-overwritten-seconds`)](#exolve-option) can be
+configured.
+
 The solver can press Tab/Shift-Tab to navigate to the next/previous clue in the
 current direction. The solver can use the arrow keys to navigate to the
 next/previous light cells in the direction of the arrow.
@@ -1305,6 +1312,10 @@ The list of currently supported options is as follows:
 - **`hide-inferred-numbers`** If this option is specified, then the software
   does not display any clue numbers that were automatically inferred. Setters
   using non-numeric clue labels may want to specify this option.
+- **`highlight-overwritten-seconds:<s>`** Set the time for which overwritten
+  cell entries (i.e., values changed from non-blank to a different non-blank
+  letter) are highlighted. The parameter `<s>` should be a number >= 0 (seconds).
+  If 0, this highlighting behaviour is turned off. The default is 5 seconds.
 - **`ignore-enum-mismatch`** If this option is specified, then any generated
   warnings about enum-mismatches are suppressed.
 - **`ignore-unclued`** If this option is specified, then any generated warnings
@@ -1351,34 +1362,36 @@ be overriding), and descriptions.
 
 | Option                     | Default value | What gets coloured                |
 |----------------------------|---------------|-----------------------------------|
-| `colour-background`        | black         | The background: blocked squares and bars.|
-| `colour-cell`              | white         | Light squares.                    |
 | `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
 | `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
+| `colour-anno`              | darkgreen     | The text of the annotation.       |
+| `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
+| `colour-background`        | black         | The background: blocked squares and bars.|
+| `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
+| `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
+| `colour-button-text`       | white         | The text in buttons.              |
+| `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
+| `colour-cell`              | white         | Light squares.                    |
+| `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
+| `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
-| `colour-orphan`            | linen         | The background colour of the current clue(s) without known location(s) in the grid.|
+| `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
+| `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
 | `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first square. |
 | `colour-light-label-input` | black         | Same as above, in the square where the solver is typing.|
 | `colour-light-text`        | black         | The typed solution letters in lights.|
 | `colour-light-text-input`  | black         | Same as above, in the square where the solver is typing.|
-| `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
-| `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
-| `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
-| `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
+| `colour-orphan`            | linen         | The background colour of the current clue(s) without known location(s) in the grid.|
+| `colour-overwritten-end`   | #bb00bb       | The end-colour of the animation to highlight overwritten cells.|
+| `colour-overwritten-start` | #ff00ff       | The start-colour of the animation to highlight overwritten cells.|
 | `colour-prefill`           | blue          | Any letters pre-filled with the ! decorator.|
-| `colour-anno`              | darkgreen     | The text of the annotation.       |
-| `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
-| `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
-| `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
 | `colour-separator`         | blue          | The hyphens and dashes in multi-word lights. |
-| `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
-| `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
-| `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
-| `colour-button-text`       | white         | The text in buttons.              |
 | `colour-small-button`      | inherit       | Small buttons in the current clue(s).|
 | `colour-small-button-hover`| lightpink     | Small buttons with mouseover.     |
 | `colour-small-button-text` | darkgreen     | The text in small buttons.        |
+| `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
+| `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
 
 Setting `colour-arrow` and `colour-caret` to the same colour as `colour-input`
 will make them invisible (if so desired).

@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v1.44: September 14, 2022
+
+- If the solver changes a cell entry from a non-blank letter to a different 
+  non-blank letter, then that changed letter is highlighted by showing in a
+  different colour for a short while. This animation's start/end colours
+  (`overwritten-start` and `overwritten-end`) and the duration
+  (`highlight-overwritten-seconds`) can be configured with `exolve-option`.
+- The default duration is 5 seconds. I have tried to keep the animation
+  low-key.
+- Setting `highlight-overwritten-seconds` to 0 will turn this off.
+- This is motivated especially by competetion settings such as IXL where
+  if a solver accidentally types over a cell then a visual indicator can
+  save them from losing points.
+
 ### Version: Unnumbered minor tweak: September 8, 2022
 
 - Chrome has a bug wherein after the first page load, window.print() does not

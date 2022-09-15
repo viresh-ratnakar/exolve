@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.43 September 7, 2022';
+  this.VERSION = 'Exolve v1.44 September 14, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -226,34 +226,36 @@ function Exolve(puzzleSpec,
   this.fontSize = '';
 
   this.colorScheme = {
-    'background': 'black',
-    'cell': 'white',
     'active': 'mistyrose',
     'active-clue': 'mistyrose',
-    'currclue': 'white',
-    'orphan': 'linen',
-    'input': '#ffb6b4',
-    'light-label': 'black',
-    'light-text': 'black',
-    'light-label-input': 'black',
-    'light-text-input': 'black',
+    'anno': 'darkgreen',
+    'arrow': 'white',
+    'background': 'black',
+    'button': '#4caf50',
+    'button-hover': 'darkgreen',
+    'button-text': 'white',
+    'caret': 'gray',
+    'cell': 'white',
     'circle': 'gray',
     'circle-input': 'gray',
-    'caret': 'gray',
-    'arrow': 'white',
-    'prefill': 'blue',
-    'anno': 'darkgreen',
-    'solved': 'dodgerblue',
-    'solution': 'dodgerblue',
+    'currclue': 'white',
     'def-underline': '#3eb0ff',
-    'separator': 'blue',
     'imp-text': 'darkgreen',
-    'button': '#4caf50',
-    'button-text': 'white',
-    'button-hover': 'darkgreen',
+    'input': '#ffb6b4',
+    'light-label': 'black',
+    'light-label-input': 'black',
+    'light-text': 'black',
+    'light-text-input': 'black',
+    'orphan': 'linen',
+    'overwritten-end': '#bb00bb',
+    'overwritten-start': '#ff00ff',
+    'prefill': 'blue',
+    'separator': 'blue',
     'small-button': 'inherit',
-    'small-button-text': 'darkgreen',
     'small-button-hover': 'lightpink',
+    'small-button-text': 'darkgreen',
+    'solution': 'dodgerblue',
+    'solved': 'dodgerblue',
   }
 
   this.nextLine = 0;
@@ -307,6 +309,14 @@ function Exolve(puzzleSpec,
     'tools-link.hover': 'Show/hide tools: manage storage, see list of ' +
         'control keys and scratch pad',
     'tools-msg': `
+       <p>
+       Overwritten letters will briefly be coloured like
+       <b style="color:${this.colorScheme['overwritten-start']}">this</b>
+       (before fading back to 
+       <b style="color:${this.colorScheme['light-text']}">this</b>)
+       just to draw your attention so that you can fix any accidental
+       typing errors.
+       </p>
        Control keys:
        <ul>
          <li><b>Tab/Shift-Tab:</b>
@@ -314,7 +324,7 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction</li>
-         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!</li>
+         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!, <b>Ctrl-b:</b> Print crossword</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless</li>
        </ul>`,
@@ -435,6 +445,7 @@ function Exolve(puzzleSpec,
   this.printIncomplete2Cols = false;
   this.noNinaButton = false;
   this.useWebifi = false;
+  this.hltOverwrittenMillis = 5000;
 
   this.createPuzzle();
 }
@@ -1366,6 +1377,14 @@ Exolve.prototype.parseOption = function(s) {
       }
       this.cluesToRight = true
       continue
+    }
+    if (kv[0] == 'highlight-overwritten-seconds') {
+      const secs = parseFloat(kv[1])
+      if (isNaN(secs) || secs < 0) {
+        this.throwErr('Unexpected val in exolve-option: highlight-overwritten-seconds: ' + kv[1])
+      }
+      this.hltOverwrittenMillis = secs * 1000;
+      continue;
     }
     if (kv[0] == 'offset-left') {
       this.offsetLeft = parseInt(kv[1])
@@ -3755,6 +3774,16 @@ Exolve.prototype.applyStyles = function() {
     #${this.prefix}-frame .xlv-small-button:hover {
       background: ${this.colorScheme['small-button-hover']};
     }
+    @keyframes ${this.prefix}-overwritten-anim {
+      0% {fill: ${this.colorScheme['overwritten-start']}}
+      90% {fill: ${this.colorScheme['overwritten-end']}}
+      95% {fill: ${this.colorScheme['overwritten-start']}}
+      99% {fill: ${this.colorScheme['overwritten-end']}}
+    }
+    #${this.prefix}-frame .xlv-overwritten {
+      animation-duration: ${this.hltOverwrittenMillis}ms;
+      animation-name: ${this.prefix}-overwritten-anim;
+    }
   `;
 }
 
@@ -5496,65 +5525,113 @@ Exolve.prototype.updateActiveCluesState = function() {
   }
 }
 
-Exolve.prototype.handleGridInput = function() {
-  this.usingGnav = true
-  let gridCell = this.currCell()
+/**
+ * Highlight-Recent-Overwrites handling:
+ *
+ * When a grid-cell has an entry that gets *changed*, unless it
+ * has a ".overwritten" field already set, we set it it to the
+ * overwritten letter, and kick off a timer (configurable with
+ * exolve-option highlight-overwritten-seconds). We also set the
+ * overwritten text's CSS class to be xlv-overwritten, which kicks
+ * off a timed animation that changes its color slowly.
+ *
+ * At the end of the timer, the function expireOverwrite() gets called on the
+ * cell, which sets .overwritten to null and removes the xlv-overwritten class.
+ *
+ * If the user types into the cell and restores the overwritten
+ * letter, then expireOverwrite() is called immediately.
+ */
+Exolve.prototype.expireOverwrite = function(gridCell) {
   if (!gridCell) {
-    return
+    return;
+  }
+  if (gridCell.cellText) {
+    gridCell.cellText.classList.remove('xlv-overwritten');
+  }
+  if (gridCell.overwritten) {
+    gridCell.overwritten = null;
+  }
+  if (gridCell.overwrittenT) {
+    clearTimeout(gridCell.overwrittenT);
+    gridCell.overwrittenT = null;
+  }
+}
+
+Exolve.prototype.handleGridInput = function() {
+  this.usingGnav = true;
+  let gridCell = this.currCell();
+  if (!gridCell) {
+    return;
   }
   if (!gridCell.isLight && !gridCell.isDgmless) {
     return;
   }
-  let newInput = this.gridInput.value
-  let currDisplayChar = this.stateToDisplayChar(gridCell.currLetter)
+  let newInput = this.gridInput.value;
+  let currDisplayChar = this.stateToDisplayChar(gridCell.currLetter);
   if (gridCell.currLetter != '0' && gridCell.currLetter != '?' &&
       newInput != currDisplayChar && this.langMaxCharCodes == 1) {
     // The "new" input may be before or after the old input.
-    let index = newInput.indexOf(currDisplayChar)
+    const index = newInput.indexOf(currDisplayChar);
     if (index == 0) {
-      newInput = newInput.substr(1)
+      newInput = newInput.substr(1);
     }
   }
-  let displayChar = newInput.substr(0, this.langMaxCharCodes)
-  let wasSpace = displayChar == ' '
+  let displayChar = newInput.substr(0, this.langMaxCharCodes);
+  let wasSpace = displayChar == ' ';
   if (wasSpace) {
     if (gridCell.isDgmless) {
       // spacebar creates a blocked cell in a diagramless puzzle cell
-      displayChar = this.BLOCK_CHAR
+      displayChar = this.BLOCK_CHAR;
     } else {
-      displayChar = ''
+      displayChar = '';
     }
   } else {
-    displayChar = displayChar.toUpperCase()
+    displayChar = displayChar.toUpperCase();
     if (displayChar && !this.isValidDisplayChar(displayChar)) {
       // restore
       this.gridInput.value = gridCell.prefill ? '' :
-          this.stateToDisplayChar(gridCell.currLetter)
-      return
+          this.stateToDisplayChar(gridCell.currLetter);
+      return;
     }
   }
   if (gridCell.prefill) {
     // Changes disallowed
-    this.gridInput.value = ''
-    this.advanceCursor()
-    return
+    this.gridInput.value = '';
+    this.advanceCursor();
+    return;
   }
-  let stateChar = this.displayToStateChar(displayChar)
-  let oldLetter = gridCell.currLetter
-  gridCell.currLetter = stateChar
-  gridCell.textNode.nodeValue = displayChar
-  this.gridInput.value = displayChar
-  if (oldLetter == '1' || stateChar == '1') {
-    let gridCellSym = this.symCell(this.currRow, this.currCol)
+  const stateChar = this.displayToStateChar(displayChar);
+  const oldLetter = gridCell.currLetter;
+  gridCell.currLetter = stateChar;
+  gridCell.textNode.nodeValue = displayChar;
+  this.gridInput.value = displayChar;
+  if (oldLetter == '1' || stateChar == '1') {;
+    let gridCellSym = this.symCell(this.currRow, this.currCol);
     if (gridCellSym.isDgmless) {
-      let symLetter = (stateChar == '1') ? '1' : '0'
-      let symChar = (stateChar == '1') ? this.BLOCK_CHAR : ''
-      gridCellSym.currLetter = symLetter
-      gridCellSym.textNode.nodeValue = symChar
+      let symLetter = (stateChar == '1') ? '1' : '0';
+      let symChar = (stateChar == '1') ? this.BLOCK_CHAR : '';
+      gridCellSym.currLetter = symLetter;
+      gridCellSym.textNode.nodeValue = symChar;
+    }
+  }
+  if (displayChar != '' && stateChar != '0' &&
+      stateChar != oldLetter && oldLetter != '0' && oldLetter != '?' &&
+      this.hltOverwrittenMillis > 0) {
+    if (!gridCell.overwritten) {
+      /**
+       * We have newly overwritten an existing non-blank entry with a new
+       * non-blank entry.
+       */
+      gridCell.overwritten = oldLetter;
+      gridCell.cellText.classList.add('xlv-overwritten');
+      gridCell.overwrittenT = setTimeout(
+          this.expireOverwrite.bind(this, gridCell), this.hltOverwrittenMillis);
+    } else if (gridCell.overwritten == stateChar) {
+      this.expireOverwrite(gridCell);
     }
   }
 
-  let cluesAffected = []
+  let cluesAffected = [];
   let index = this.getDirClueIndex('A', gridCell.acrossClueLabel);
   if (index && this.clues[index]) {
     cluesAffected.push(index);
@@ -5567,19 +5644,19 @@ Exolve.prototype.handleGridInput = function() {
   if (index && this.clues[index]) {
     cluesAffected.push(index);
   }
-  let otherClues = gridCell.nodirClues
+  let otherClues = gridCell.nodirClues;
   if (otherClues) {
-    cluesAffected = cluesAffected.concat(otherClues)
+    cluesAffected = cluesAffected.concat(otherClues);
   }
   for (ci of cluesAffected) {
-    this.updateClueState(ci, false, null)
+    this.updateClueState(ci, false, null);
   }
 
-  this.updateAndSaveState()
+  this.updateAndSaveState();
 
   if (wasSpace ||
       (this.isValidDisplayChar(displayChar) && this.langMaxCharCodes == 1)) {
-    this.advanceCursor()
+    this.advanceCursor();
   }
 }
 
@@ -6897,7 +6974,7 @@ Exolve.prototype.handleBeforePrint = function() {
 
   if (settings.onlyCrossword) {
     /**
-     * Note: prior to v1.43, the code used to move all body children
+     * Note: prior to v1.44, the code used to move all body children
      * into the "hider" element. But this somehow caused problems with
      * the exolve stylesheet in "widgets". Now we only move non-element
      * non-script/link nodes. Element nodes directly get their style.display
