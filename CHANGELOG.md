@@ -1,5 +1,37 @@
 # Changelog
 
+### Version: Exolve v1.45: September 22, 2022
+
+- Reorganize the line of links under the crossword. It used to be:
+  "Tools, Print, [Webifi], Bug, Exolve on Github". The "Tools" link
+  has been renamed to "Exolve" (it is more general now). The "Bug" link
+  (renamed to "Report Bug") and  the "Exolve on Github" link have been
+  moved inside the panel that open up on clicking on the "Exolve" link.
+- A new link called "Notes" has been added (described below).
+- So the line of links now looks like: "Exolve, Print, Notes, [Webifi]"
+  (shorter than before).
+- Clicking on any of the three Exolve/Print/Notes links opens a panel
+  underneath, *while also closing the previous panel that may have been
+  open there.*
+- Minor tweaks to documentation and UI labels (such as all hover-texts
+  now consistently end in a period or some other punctuation mark.
+- The Notes link lets you add/edit/view clue-specific as well as overall
+  notes for the crossword. These notes are saved in the local
+  storage along with the crossword state.
+- The notes can be copied to the clipboard using the "Copy notes" button.
+  Clicking on the "Email notes" button composes an email draft containing
+  the notes. If the crossword includes contact email addresses (via a new
+  `exolve-email` section) then the draft is addressed to those addresses.
+- The notes can include a few features automatically, if desired (each one
+  can be turned off with a checkbox). These are:
+  - The solving order of the clues.
+  - The solution entered.
+  - The time at which the clue was solved.
+- When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
+  taken to the notes line for that particular clue, where you can edit the
+  note or just read what you may have written. When no clue is selected,
+  typing Ctrl-/ will take you the overall notes section.
+
 ### Version: Exolve v1.44: September 14, 2022
 
 - If the solver changes a cell entry from a non-blank letter to a different 

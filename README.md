@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.43 September 7, 2022
+### Version: Exolve v1.45 September 22, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -193,6 +193,7 @@ and the `exolve-end` line:
 * **`exolve-grid`**
 * `exolve-title`
 * `exolve-setter`
+* `exolve-email`
 * `exolve-id`
 * `exolve-copyright`
 * `exolve-credits`
@@ -408,6 +409,11 @@ The title of the puzzle and the name/pseudonym of the crossword setter. Example:
   exolve-title: My Lovely Crossword
   exolve-setter: Narsi Sus
 ```
+
+## `exolve-email`
+Optional email address (or comma-separated addresses) where solvers can contact
+the crossword creator(s). From the "Notes" panel, you can send your notes to
+this email address.
 
 ## `exolve-id`
 Optionally provide a unique id for this crossword puzzle. This id is used as
@@ -1467,32 +1473,37 @@ Here are all the names of pieces of text that you can relabel:
 | Name             | Default text                         |
 |------------------|--------------------------------------|
 | `clear`          | Clear this                           |
-| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl-q|
+| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl-q.|
 | `clear-all`      | Clear all!                           |
-| `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares. Shortcut: Ctrl-Q|
+| `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares. Shortcut: Ctrl-Q.|
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
-| `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell|
-| `checkcell.hover`| Erase the current cell if it's incorrect |
+| `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell.|
+| `checkcell.hover`| Erase the current cell if it's incorrect. |
 | `check-all`      | Check all!                           |
-| `check-all.hover` | Erase all mistakes. Reveal any available annos if no mistakes|
+| `check-all.hover`| Erase all mistakes. Reveal any available annos if no mistakes.|
+| `copy-notes`     | Copy notes|
+| `copy-notes.hover`| Copy these notes to the clipboard, including any formatting.|
+| `email-notes`    | Email notes|
+| `email-notes.hover`| Compose an email containing these notes as plain text. You can edit the draft before sending.|
+| `email-notes-recipients.hover`|Draft recipient(s): |
 | `reveal`         | Reveal this                          |
-| `revealcell`     | Reveal cell                           |
-| `reveal.hover`   | Reveal highlighted clue/squares. Long-click to reveal the just current cell|
-| `revealcell.hover`| Reveal the solution letter in the current cell |
+| `revealcell`     | Reveal cell                          |
+| `reveal.hover`   | Reveal highlighted clue/squares. Long-click to reveal the just current cell.|
+| `revealcell.hover`| Reveal the solution letter in the current cell. |
 | `show-ninas`     | Show ninas                           |
-| `show-ninas.hover` | Show ninas hidden in the grid/clues |
+| `show-ninas.hover` | Show ninas hidden in the grid/clues.|
 | `hide-ninas`     | Hide ninas                           |
-| `hide-ninas.hover` | Hide ninas shown in the grid/clues |
+| `hide-ninas.hover` | Hide ninas shown in the grid/clues. |
 | `reveal-all`     | Reveal all!                          |
 | `reveal-all.hover` | Reveal all solutions, available annos, answers, notes! |
 | `submit`         | Submit                               |
 | `submit.hover`   | Submit the solution!                 |
 | `setter-by`      | By                                   |
 | `curr-clue-prev` | &lsaquo;                             |
-| `curr-clue-prev.hover` | Previous clue       |
+| `curr-clue-prev.hover` | Previous clue.       |
 | `curr-clue-next` | &rsaquo;                             |
-| `curr-clue-next.hover` | Next clue           |
+| `curr-clue-next.hover` | Next clue.           |
 | `squares-filled` | Squares filled                       |
 | `across-label`   | Across                               |
 | `down-label`     | Down                                 |
@@ -1500,24 +1511,28 @@ Here are all the names of pieces of text that you can relabel:
 | `3d-aw-label`     | Away & Towards                       |
 | `3d-dn-label`     | Down & Up'                           |
 | `nodir-label`    | Other                                |
-| `tools-link`     | Tools                                |
-| `tools-link.hover` | Show/hide tools: manage storage, see list of control keys and scratch pad|
-| `tools-msg`      | Control keys: &lt;ul&gt; &lt;li&gt; &lt;b&gt;Tab/Shift-Tab: [longish list of all control keys]...  &lt;/ul&gt;|
+| `tools-link`     | Exolve                                |
+| `tools-link.hover` | 'Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, access a scratch pad, etc.|
+| `tools-msg`      | [Longish list of all control keys, and more...]|
 | `crossword-id`   | Crossword ID                         |
+| `notes`          | Notes                                |
+| `notes.hover`    | Show/hide notes panel.               |
+| `notes-shortcut` | Note: Ctrl-/ takes you to the current clue's notes (or overall notes).|
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
-| `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed|
+| `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
 | `manage-storage-close` | Close (manage storage)         |
-| `manage-storage-close.hover` | Close the local storage management panel|
+| `manage-storage-close.hover` | Close the local storage management panel.|
 | `exolve-link`    | Exolve on GitHub                     |
-| `report-bug`     | Bug                                  |
+| `exolve-link.hover`| Visit the Exolve open-source repository on GitHub, with a detailed user guide.|
+| `report-bug`     | Report Bug                                  |
 | `webifi`         | Webifi                               |
-| `webifi.hover`   | Show/hide "Webifi", the interactive-fictionesque text/audio interface|
+| `webifi.hover`   | Show/hide "Webifi", the interactive-fictionesque text/audio interface.|
 | `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
 | `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
 | `shuffle`        | Scratch pad: (click here to shuffle) |
-| `shuffle.hover`  | Shuffle selected text (or all text, if none selected)|
+| `shuffle.hover`  | Shuffle selected text (or all text, if none selected).|
 | `across-letter`  | a                                    |
 | `down-letter`    | d                                    |
 | `back-letter`    | b                                    |
@@ -1528,10 +1543,10 @@ Here are all the names of pieces of text that you can relabel:
 | `3d-to`          | to                                   |
 | `3d-dn`          | dn                                   |
 | `3d-up`          | up                                   |
-| `mark-clue.hover` | Click to forcibly mark/unmark as solved <sub>(Only used for clue labels on clues that do not have all their cell-associations known)</sub>|
-| `placeholder.hover` | You can record your solution here before copying to squares |
+| `mark-clue.hover` | Click to forcibly mark/unmark as solved. <sub>(Only used for clue labels on clues that do not have all their cell-associations known)</sub>|
+| `placeholder.hover` | You can record your solution here before copying to squares. |
 | `placeholder-copy` | &#8690; |
-| `placeholder-copy.hover`| Copy into currently highlighted squares |
+| `placeholder-copy.hover`| Copy into currently highlighted squares. |
 | `confirm-clear-all` | Are you sure you want to clear every entry!? |
 | `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!?  (The placeholder entries will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
 | `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries!? |
@@ -1548,10 +1563,10 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
 | `warnings-label` | Please fix or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
-| `warnings.hover` | Issues detected: click &times; to dismiss       |
+| `warnings.hover` | Issues detected: click &times; to dismiss.    |
 | `print` | Print                                                  |
-| `print.hover` | Show/hide settings for printing or creating PDFs |
-| `print-heading` | Settings for printing/PDFs:                    |
+| `print.hover` | Show/hide panel for printing or creating PDFs. |
+| `print-heading` | Print or create a PDF:                    |
 | `print-size` | Page size:                                        |
 | `print-margin` | Margin (inches):                                |
 | `print-font` | Font size:                                        |
@@ -1561,11 +1576,14 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-small` | Small                                       |
 | `print-font-other` | Other                                       |
 | `print-crossword` | Print crossword                              |
-| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl-b) |
+| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl-B). |
 | `print-page` | Print page                                        |
-| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P)      |
+| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
-| `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword |
+| `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
+| `show-notes-seq`| Show clue-solving sequence: |
+| `show-notes-entries`| Show entered solutions: |
+| `show-notes-times`| Show clue-solving times:  |
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.
@@ -1584,7 +1602,7 @@ The above will skip the confirmation step when the solver clicks on "Check all!"
 In this multiline section, you can include arbitrary metadata about the
 puzzle's construction. The Exet crossword construction web app uses this section
 to record some info such as its version and the lexicon it used. The metadata
-can be seen after clicking the Tools button.
+can be seen after clicking the Exolve button.
 
 ## `exolve-force-hyphen-right`, `exolve-force-hyphen-below`, `exolve-force-bar-right`, `exolve-force-bar-below`
 
@@ -1630,6 +1648,44 @@ HTML. Example:
      <li><a href="puzzle-43.html">Next puzzle</a></li>
    </ul>
 ```
+
+## Notes
+
+From the "Notes" menu under the crossword, solvers can jot down clue-specific
+notes and overall notes for the crossword. These notes are saved in the local
+storage along with the crossword state.
+
+The notes can be copied to the clipboard using the "Copy notes" button. This
+copying retains any special formatting (such as bold/italics) that the solver
+may have applied to parts of the notes.
+
+Clicking on the "Email notes" button composes an email draft containing the
+notes. If the crossword includes contact email addresses (via the
+`exolve-email` section) then the draft is addressed to those addresses. The
+email is in plain text and does not retain any HTML formatting (because
+JavaScript does not permit this, for security reasons). While this
+may be good enough for most needs, you can always use the copy-to-clipboard
+feature to paste formatted notes into an email.
+
+The notes can include a few features automatically, if desired (each one
+can be turned off with a checkbox). These are:
+
+- The solving order of the clues. This may be useful info for setters to
+  learn. I also find "how many did I solve in the first pass?" to be a pretty
+  good metric of how difficult a crossword is, and that can be inferred from
+  the solving ordered. This is ON by default.
+- The solution entered. This is ON by default.
+- The time at which the clue was solved. This is OFF by default.
+
+When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
+taken to the notes line for that particular clue, where you can edit the
+note or just read what you may have written. When no clue is selected,
+typing Ctrl-/ will take you the overall notes section.
+
+At this time, I have chosen to keep all the notes confined to the Notes
+section that appears under the crossword. I think surfacing these notes
+in the clue tables and/or in the top clue may make the interface too
+cluttered, but I am open to ideas.
 
 ## Completion event
 
@@ -1677,7 +1733,7 @@ the state is restored in the following preferential order, if possible:
 URL as well as in the local storage, then the user is prompted to ask whether
 they want to override the local storage set with the state in the URL.
 
-Clicking on the "Tools" menu under the crossword grid makes a "Manage local
+Clicking on the "Exolve" menu under the crossword grid makes a "Manage local
 storage" button visible. If you have saved a *lot* of puzzle states, then
 it's possible that you may fill up the local storage in the browser (you'll get
 a warning thereafter when state-saving fails for the first time after opening a

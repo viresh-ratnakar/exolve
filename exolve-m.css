@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.44 September 14, 2022
+Version: Exolve v1.45 September 22, 2022
 */
 
 @media (max-width: 500px) {
@@ -226,7 +226,7 @@ Version: Exolve v1.44 September 14, 2022
   margin: 4px 0 6px 0 !important;
 }
 .xlv-small-print > * {
-  padding: 2px 4px 0 0 !important;
+  padding: 4px 4px 0 0 !important;
 }
 .xlv-credit {
   margin: 4px 0 4px 0;
@@ -417,9 +417,9 @@ Version: Exolve v1.44 September 14, 2022
 }
 .xlv-input,
 .xlv-answer {
-  border: none;
+  border: none !important;
   padding: 0 0 6px 0;
-  outline: none;
+  outline: none !important;
   background-image:
     repeating-linear-gradient(to bottom, transparent, transparent 13px, black 14px);
 }
@@ -482,7 +482,35 @@ Version: Exolve v1.44 September 14, 2022
 .xlv-print-settings div {
   padding: 4px 0 4px 16px;
 }
-.xlv-print-settings * {
+.xlv-toggleable * {
   background-color: transparent;
   color: inherit;
+}
+a.xlv-toggler:active,
+a.xlv-toggler:link,
+a.xlv-toggler:visited {
+  outline: none;
+}
+a.xlv-toggler:hover {
+  text-decoration: underline;
+}
+.xlv-toggleable {
+  margin-top: 6px !important;
+  border-top: 1px solid gray;
+}
+.xlv-toggleable p {
+  margin: 4px 0;
+}
+.xlv-active-toggler {
+  border-bottom: 2px solid lightgray;
+}
+.xlv-notes-contents {
+  border: 1px dotted gray;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px !important;
+  margin: 4px 0 !important;
+}
+.xlv-notes-header {
+  text-align: right;
 }

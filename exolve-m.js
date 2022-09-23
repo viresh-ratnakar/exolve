@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.44 September 14, 2022';
+  this.VERSION = 'Exolve v1.45 September 22, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -141,6 +141,14 @@ function Exolve(puzzleSpec,
 
   this.grid = [];
   this.clues = {};
+  this.title = null;
+  this.setter = null;
+  this.email = null;
+  this.notes = {
+    'clues': {},
+    'solved': {},
+    'counter': 0,
+  };
   this.submitURL = null;
   this.submitKeys = [];
   this.hasDgmlessCells = false;
@@ -267,27 +275,33 @@ function Exolve(puzzleSpec,
   this.textLabels = {
     'clear': 'Clear this',
     'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
-        'from full clues with a second click. Shortcut: Ctrl-q',
+        'from full clues with a second click. Shortcut: Ctrl-q.',
     'clear-all': 'Clear all!',
     'clear-all.hover': 'Clear everything! A second click clears all ' +
-        'placeholder entries in clues without known cells. Shortcut: Ctrl-Q',
+        'placeholder entries in clues without known cells. Shortcut: Ctrl-Q.',
     'check': 'Check this',
     'check.hover': 'Erase mistakes in highlighted cells. Long-click to ' +
-        'check just the current cell',
+        'check just the current cell.',
     'checkcell': 'Check cell',
-    'checkcell.hover': 'Erase the current cell if it\'s incorrect',
+    'checkcell.hover': 'Erase the current cell if it\'s incorrect.',
     'check-all': 'Check all!',
     'check-all.hover': 'Erase all mistakes. Reveal any available annos if ' +
-        'no mistakes',
+        'no mistakes.',
+    'copy-notes': 'Copy notes',
+    'copy-notes.hover': 'Copy these notes to the clipboard, including any formatting.',
+    'email-notes': 'Email notes',
+    'email-notes.hover': 'Compose an email containing these notes as plain text. ' +
+        'You can edit the draft before sending.',
+    'email-notes-recipients.hover': ' Draft recipient(s): ',
     'reveal': 'Reveal this',
     'reveal.hover': 'Reveal highlighted clue/cells. Long-click to reveal ' +
-        'just the current cell',
+        'just the current cell.',
     'revealcell': 'Reveal cell',
-    'revealcell.hover': 'Reveal the solution letter in the current cell',
+    'revealcell.hover': 'Reveal the solution letter in the current cell.',
     'show-ninas': 'Show ninas',
-    'show-ninas.hover': 'Show ninas hidden in the grid/clues',
+    'show-ninas.hover': 'Show ninas hidden in the grid/clues.',
     'hide-ninas': 'Hide ninas',
-    'hide-ninas.hover': 'Hide ninas shown in the grid/clues',
+    'hide-ninas.hover': 'Hide ninas shown in the grid/clues.',
     'reveal-all': 'Reveal all!',
     'reveal-all.hover': 'Reveal all solutions, available annos, answers, ' +
         'notes!',
@@ -295,9 +309,9 @@ function Exolve(puzzleSpec,
     'submit.hover': 'Submit the solution!',
     'setter-by': 'By',
     'curr-clue-prev': '&lsaquo;',
-    'curr-clue-prev.hover': 'Previous clue',
+    'curr-clue-prev.hover': 'Previous clue.',
     'curr-clue-next': '&rsaquo;',
-    'curr-clue-next.hover': 'Next clue',
+    'curr-clue-next.hover': 'Next clue.',
     'squares-filled': 'Squares filled',
     'across-label': 'Across',
     'down-label': 'Down',
@@ -305,46 +319,53 @@ function Exolve(puzzleSpec,
     '3d-aw-label': 'Away & Towards',
     '3d-dn-label': 'Down & Up',
     'nodir-label': 'Other',
-    'tools-link': 'Tools',
-    'tools-link.hover': 'Show/hide tools: manage storage, see list of ' +
-        'control keys and scratch pad',
+    'tools-link': 'Exolve',
+    'tools-link.hover': 'Crossword software: ' +
+        this.VERSION + ': Show/hide panel with info/help and links to report ' +
+        'a bug, manage storage, access a scratch pad, etc.',
     'tools-msg': `
-       <p>
-       Overwritten letters will briefly be coloured like
-       <b style="color:${this.colorScheme['overwritten-start']}">this</b>
-       (before fading back to 
-       <b style="color:${this.colorScheme['light-text']}">this</b>)
-       just to draw your attention so that you can fix any accidental
-       typing errors.
-       </p>
-       Control keys:
+       <p>Control keys:</p>
        <ul>
          <li><b>Tab/Shift-Tab:</b>
-             Jump to the next/previous clue in the current direction</li>
-         <li><b>Enter, Click/Tap:</b> Toggle current direction</li>
+             Jump to the next/previous clue in the current direction.</li>
+         <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
-             Move to the nearest light square in that direction</li>
-         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!, <b>Ctrl-b:</b> Print crossword</li>
+             Move to the nearest light square in that direction.</li>
+         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!, <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to notes.</li>
          <li><b>Spacebar:</b>
-             Place/clear block in the current square if it's diagramless</li>
-       </ul>`,
+             Place/clear block in the current square if it's diagramless.</li>
+       </ul>
+       <p>
+         Overwritten letters will briefly be coloured like
+         <b style="color:${this.colorScheme['overwritten-start']}">this</b>
+         (before fading back to 
+         <b style="color:${this.colorScheme['light-text']}">this</b>)
+         just to draw your attention so that you can fix any accidental
+         typing errors.
+       </p>`,
     'crossword-id': 'Crossword ID',
+    'notes': 'Notes',
+    'notes.hover': 'Show/hide notes panel.',
+    'notes-shortcut': 'Note: Ctrl-/ takes you to the current clue\'s notes ' +
+        '(or overall notes).',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
-        'Delete old saved states to free up local storage space if needed',
+        'Delete old saved states to free up local storage space if needed.',
     'manage-storage-close': 'Close (local storage)',
-    'manage-storage-close.hover': 'Close the local storage management panel',
+    'manage-storage-close.hover': 'Close the local storage management panel.',
     'exolve-link': 'Exolve on GitHub',
-    'report-bug': 'Bug',
+    'exolve-link.hover': 'Visit the Exolve open-source repository on GitHub, with a ' +
+        'detailed user guide.',
+    'report-bug': 'Report Bug',
     'webifi': 'Webifi',
-    'webifi.hover': 'Toggle Webifi, the interactive-fictionesque text/audio interface',
+    'webifi.hover': 'Toggle Webifi, the interactive-fictionesque text/audio interface.',
     'saving-msg': 'Your entries are auto-saved in the browser\'s local ' +
         'storage.',
     'saving-bookmark': 'You can share the state using this link:',
     'saving-url': 'URL',
     'shuffle': 'Scratch pad: (click here to shuffle)',
-    'shuffle.hover': 'Shuffle selected text (or all text, if none selected)',
+    'shuffle.hover': 'Shuffle selected text (or all text, if none selected).',
     'across-letter': 'a',
     'back-letter': 'b',
     'down-letter': 'd',
@@ -355,15 +376,15 @@ function Exolve(puzzleSpec,
     '3d-to': 'to',
     '3d-dn': 'dn',
     '3d-up': 'up',
-    'mark-clue.hover': 'Click to forcibly mark/unmark as solved',
+    'mark-clue.hover': 'Click to forcibly mark/unmark as solved.',
     'curr-clue-prev': '&lsaquo;',
-    'curr-clue-prev.hover': 'Previous clue',
+    'curr-clue-prev.hover': 'Previous clue.',
     'curr-clue-next': '&rsaquo;',
-    'curr-clue-next.hover': 'Next clue',
+    'curr-clue-next.hover': 'Next clue.',
     'placeholder.hover': 'You can record your solution here before copying ' +
-        'to squares',
+        'to squares.',
     'placeholder-copy': '&#8690;',
-    'placeholder-copy.hover': 'Copy into currently highlighted squares',
+    'placeholder-copy.hover': 'Copy into currently highlighted squares.',
     'confirm-clear-all': 'Are you sure you want to clear every entry!?',
     'confirm-clear-all-orphans1': 'Are you sure you want to clear every ' +
         'entry!?  (The placeholder entries will not be cleared. To clear ' +
@@ -386,10 +407,10 @@ function Exolve(puzzleSpec,
     'warnings-label': 'Please fix or use "ignore-unclued" / ' +
         '"ignore-enum-mismatch" <a href="https://github.com/viresh-ratnakar/' +
         'exolve/blob/master/README.md#exolve-option">options</a>:',
-    'warnings.hover': 'Issues detected: click on [&times;] to dismiss',
+    'warnings.hover': 'Issues detected: click on [&times;] to dismiss.',
     'print': 'Print',
-    'print.hover': 'Show/hide settings for printing or creating PDFs',
-    'print-heading': 'Settings for printing/PDFs:',
+    'print.hover': 'Show/hide panel for printing or creating PDFs.',
+    'print-heading': 'Print or create a PDF:',
     'print-size': 'Page size:',
     'print-margin': 'Margin (inches):',
     'print-font': 'Font size:',
@@ -399,11 +420,14 @@ function Exolve(puzzleSpec,
     'print-font-small': 'Small',
     'print-font-other': 'Other',
     'print-crossword': 'Print crossword',
-    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-b)',
+    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-B).',
     'print-page': 'Print page',
-    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p)',
+    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p).',
     'print-page-wysiwyg': 'Print wysiwyg',
-    'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword',
+    'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword.',
+    'show-notes-seq': 'Show clue-solving sequence:',
+    'show-notes-entries': 'Show entered solutions:',
+    'show-notes-times': 'Show clue-solving times:',
   };
 
   /**
@@ -562,15 +586,36 @@ Exolve.prototype.init = function() {
             </div> <!-- xlv-saving -->
             <div id="${this.prefix}-small-print"
                 class="xlv-wide-box xlv-small-print">
-              <div id="${this.prefix}-tools" style="display:none">
-                <div id="${this.prefix}-id" class="xlv-metadata">
+              <a id="${this.prefix}-tools-link" href="" class="xlv-toggler"
+                  title="${this.textLabels['tools-link.hover']}"
+                  >${this.textLabels['tools-link']}</a>
+              <a id="${this.prefix}-print" href="" class="xlv-toggler"
+                  title="${this.textLabels['print.hover']}"
+                  >${this.textLabels['print']}</a>
+              <a id="${this.prefix}-notes" href="" class="xlv-toggler"
+                  title="${this.textLabels['notes.hover']}"
+                  >${this.textLabels['notes']}</a>
+              <a id="${this.prefix}-webifi" href="" class="xlv-toggler"
+                  title="${this.textLabels['webifi.hover']}"
+                  >${this.textLabels['webifi']}</a>
+              <span id="${this.prefix}-copyright"></span>
+              <div id="${this.prefix}-tools" class="xlv-toggleable"
+                  style="display:none">
+                <p id="${this.prefix}-id" class="xlv-metadata">
                   <b>${this.textLabels['crossword-id']}:
                      <span id="${this.prefix}-id-span"><span></b>
-                </div>
-                <div id="${this.prefix}-metadata" class="xlv-metadata">
+                </p>
+                <p id="${this.prefix}-metadata" class="xlv-metadata">
                   ${this.VERSION}
-                </div>
-                <div>
+                  <a id="${this.prefix}-report-bug"
+                    href="https://github.com/viresh-ratnakar/exolve/issues/new"
+                        >${this.textLabels['report-bug']}</a>
+                  <a id="${this.prefix}-exolve-link"
+                    title="${this.textLabels['exolve-link.hover']}"
+                    href="https://github.com/viresh-ratnakar/exolve"
+                      >${this.textLabels['exolve-link']}</a>
+                </p>
+                <p>
                   <button id="${this.prefix}-manage-storage"
                     class="xlv-small-button"
                     title="${this.textLabels['manage-storage.hover']}">
@@ -580,23 +625,25 @@ Exolve.prototype.init = function() {
                     class="xlv-storage-list"
                     style="display:none">
                   </div>
-                </div>
-                <div id="${this.prefix}-tools-msg">
+                </p>
+                <p id="${this.prefix}-tools-msg">
                   ${this.textLabels['tools-msg']}
-                </div>
-                <div>
+                </p>
+                <p>
                   <span id="${this.prefix}-shuffle" class="xlv-shuffle"
                       title="${this.textLabels['shuffle.hover']}"
                       >${this.textLabels['shuffle']}</span>
                   <textarea
                       id="${this.prefix}-scratchpad" class="xlv-scratchpad"
                       spellcheck="false" rows="2"></textarea>
-                </div>
+                </p>
               </div>
               <div id="${this.prefix}-print-settings"
-                  class="xlv-print-settings" style="display:none">
-                ${this.textLabels['print-heading']}
-                <div>
+                  class="xlv-print-settings xlv-toggleable" style="display:none">
+                <p>
+                  <b>${this.textLabels['print-heading']}</b>
+                </p>
+                <p>
                   <div>
                     ${this.textLabels['print-font']}
                     <select name="${this.prefix}-print-font" id="${this.prefix}-print-font">
@@ -646,25 +693,11 @@ Exolve.prototype.init = function() {
                       ${this.textLabels['print-page-wysiwyg']}
                     </button>
                   </div>
-                </div>
+                </p>
               </div>
-              <a id="${this.prefix}-tools-link" href=""
-                  title="${this.textLabels['tools-link.hover']}"
-                  >${this.textLabels['tools-link']}</a>
-              <a id="${this.prefix}-print" href=""
-                  title="${this.textLabels['print.hover']}"
-                  >${this.textLabels['print']}</a>
-              <a id="${this.prefix}-webifi" href=""
-                  title="${this.textLabels['webifi.hover']}"
-                  >${this.textLabels['webifi']}</a>
-              <a id="${this.prefix}-report-bug"
-                href="https://github.com/viresh-ratnakar/exolve/issues/new"
-                    >${this.textLabels['report-bug']}</a>
-              <a id="${this.prefix}-exolve-link"
-                title="${this.VERSION}"
-                href="https://github.com/viresh-ratnakar/exolve"
-                    >${this.textLabels['exolve-link']}</a>
-              <span id="${this.prefix}-copyright"></span>
+              <div id="${this.prefix}-notes-panel"
+                  class="xlv-notes-panel xlv-toggleable" style="display:none">
+              </div>
             </div> <!-- xlv-small-print -->
             <div id="${this.prefix}-questions"
                 class="xlv-wide-box xlv-questions"></div>
@@ -754,7 +787,6 @@ Exolve.prototype.init = function() {
     title.innerHTML = this.title;
   } else {
     title.style.display = 'none';
-    this.title = '';
   }
   let setter = document.getElementById(this.prefix + '-setter');
   if (this.setter) {
@@ -763,7 +795,6 @@ Exolve.prototype.init = function() {
     setter.style.color = this.colorScheme['imp-text'];
   } else {
     setter.style.display = 'none';
-    this.setter = '';
   }
   if (this.copyright) {
     document.getElementById(this.prefix + '-copyright').innerHTML =
@@ -894,10 +925,21 @@ Exolve.prototype.init = function() {
   this.webifiButton = document.getElementById(this.prefix + '-webifi');
   this.webifiButton.style.display = 'none';
 
-  document.getElementById(this.prefix + '-tools-link').addEventListener(
-        'click', this.togglePanel.bind(this, '-tools'));
-  document.getElementById(this.prefix + '-print').addEventListener(
-        'click', this.togglePanel.bind(this, '-print-settings'));
+  /**
+   * Set up toggleable panels.
+   */
+  const toolsToggler = document.getElementById(this.prefix + '-tools-link');
+  const toolsPanel = document.getElementById(this.prefix + '-tools');
+  toolsToggler.addEventListener(
+      'click', this.togglePanel.bind(this, toolsToggler, toolsPanel));
+  const printToggler = document.getElementById(this.prefix + '-print');
+  const printPanel = document.getElementById(this.prefix + '-print-settings');
+  printToggler.addEventListener(
+      'click', this.togglePanel.bind(this, printToggler, printPanel));
+  this.notesToggler = document.getElementById(this.prefix + '-notes');
+  this.notesPanel = document.getElementById(this.prefix + '-notes-panel');
+  this.notesToggler.addEventListener(
+      'click', this.togglePanel.bind(this, this.notesToggler, this.notesPanel));
 
   document.getElementById(this.prefix + '-manage-storage').addEventListener(
     'click', this.manageStorage.bind(this));
@@ -967,6 +1009,8 @@ Exolve.prototype.parseOverall = function() {
       this.title = parsedSec.value.trim()
     } else if (parsedSec.section == 'setter') {
       this.setter = parsedSec.value.trim()
+    } else if (parsedSec.section == 'email') {
+      this.email = parsedSec.value.trim()
     } else if (parsedSec.section == 'copyright') {
       this.copyright = parsedSec.value.trim()
     } else if (parsedSec.section == 'credits') {
@@ -2974,6 +3018,42 @@ Exolve.prototype.getAllCells = function(ci) {
   return cells;
 }
 
+/**
+ * Question-marks in pattern are replaced by cell letters.
+ */
+Exolve.prototype.getCellsEntry = function(cells, pattern='') {
+  if (!pattern) {
+    pattern = '';
+    for (let i = 0; i < cells.length; i++) pattern += '?';
+  }
+  let ppos = 0;
+  let entry = '';
+  for (let i = 0; i < cells.length; i++) {
+    while (ppos < pattern.length && pattern[ppos] != '?') {
+      entry += pattern[ppos++];
+    }
+    if (ppos >= pattern.length) {
+      break;
+    }
+    const cell = cells[i];
+    const gridCell = this.grid[cell[0]][cell[1]];
+    entry += (gridCell.currLetter == '0' ? '?' :
+        this.stateToDisplayChar(gridCell.currLetter));
+    ppos++;
+  }
+  return entry;
+}
+
+Exolve.prototype.getClueEntry = function(ci) {
+  const clue = this.clues[ci];
+  if (!clue || clue.parentClueIndex) {
+    return '';
+  }
+  const cells = this.getAllCells(ci);
+  const pattern = clue.placeholder || '';
+  return this.getCellsEntry(cells, pattern);
+}
+
 Exolve.prototype.setClueSolution = function(ci) {
   let theClue = this.clues[ci]
   if (!theClue || theClue.solution) {
@@ -4255,9 +4335,10 @@ Exolve.prototype.updateAndSaveState = function() {
 
   if (this.notTemp) {
     try {
-      let lsVal = JSON.stringify({
+      const lsVal = JSON.stringify({
         timestamp: Date.now(),
-        state: state
+        state: state,
+        notes: this.notes,
       });
       window.localStorage.setItem(this.stateKey(), lsVal);
     } catch (err) {
@@ -4392,6 +4473,10 @@ Exolve.prototype.restoreState = function() {
       if (foundState) {
         this.log("Found saved state in browser's local storage")
       }
+      if (decoded.notes) {
+        this.notes = decoded.notes;
+        this.refreshNotesPanel();
+      }
     } catch (err) {
       foundState = false;
     }
@@ -4430,9 +4515,9 @@ Exolve.prototype.restoreState = function() {
   }
   for (let ci of this.allClueIndices) {
     // When restoring state, we reveal annos for fully prefilled entries.
-    this.updateClueState(ci, true, null)
+    this.updateClueState(ci, true, null, false /* dont note a fresh solve */);
   }
-  this.updateAndSaveState()
+  this.updateAndSaveState();
 }
 
 Exolve.prototype.addWebifi = function() {
@@ -5337,7 +5422,7 @@ Exolve.prototype.handleKeyUp = function(e) {
   this.handleKeyUpInner(key)
 }
 
-// For tab/shift-tab, ctrl-q, ctrl-Q, ctrl-b
+// For tab/shift-tab, ctrl-q, ctrl-Q, ctrl-B, ctrl-e
 Exolve.prototype.handleKeyDown = function(e) {
   let key = e.which || e.keyCode
   if (key == 9) {
@@ -5353,10 +5438,15 @@ Exolve.prototype.handleKeyDown = function(e) {
     } else {
       this.clearCurr();
     }
-  } else if (e.ctrlKey && e.key == 'b') {
+  } else if (e.ctrlKey && e.key == 'B') {
     e.stopPropagation();
     e.preventDefault();
     this.printNow('crossword');
+  } else if (e.ctrlKey && e.key == '/') {
+    if (this.focusOnNotes()) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
   }
 }
 
@@ -5422,8 +5512,9 @@ Exolve.prototype.clueStateToggler = function(ci, e) {
 // Mark the clue as solved by setting its number's colour, if filled.
 // If annoPrefilled is true and the clue is fully prefilled, reveal its anno.
 // forceSolved can be passed as null or 'solved' or 'unsolved'.
+// logSolved can be true or false.
 Exolve.prototype.updateClueState =
-    function(clueIndex, annoPrefilled, forceSolved) {
+    function(clueIndex, annoPrefilled, forceSolved, logSolved) {
   let cis = this.getLinkedClues(clueIndex)
   if (!cis || cis.length == 0) {
     return
@@ -5458,6 +5549,7 @@ Exolve.prototype.updateClueState =
       numPrefilled += isFullRet[1]
     }
   }
+  const wasSolved = solved;
   if (forceSolved) {
     if (forceSolved == 'solved') {
       solved = true
@@ -5471,6 +5563,7 @@ Exolve.prototype.updateClueState =
   } else if ((clue.anno || clue.dispSol) && clue.annoSpan.style.display == '') {
     solved = true
   } else if (this.allCellsKnown(clueIndex)) {
+    // TODO: fix this when enum is not provided.
     solved = numFilled == clue.enumLen
   }
   if (solved && numFilled == numPrefilled && annoPrefilled &&
@@ -5488,6 +5581,9 @@ Exolve.prototype.updateClueState =
         currLab.setAttributeNS(null, 'class', 'xlv-curr-clue-label' + (cls ? (' ' + cls) : ''));
       }
     }
+  }
+  if (logSolved && (solved != wasSolved)) {
+    this.logClueSolve(clueIndex, solved);
   }
 }
 
@@ -5521,7 +5617,7 @@ Exolve.prototype.updateActiveCluesState = function() {
     }
   }
   for (let ci in clueIndices) {
-    this.updateClueState(ci, false, null)
+    this.updateClueState(ci, false, null, true)
   }
 }
 
@@ -5649,7 +5745,7 @@ Exolve.prototype.handleGridInput = function() {
     cluesAffected = cluesAffected.concat(otherClues);
   }
   for (ci of cluesAffected) {
-    this.updateClueState(ci, false, null);
+    this.updateClueState(ci, false, null, true);
   }
 
   this.updateAndSaveState();
@@ -6204,7 +6300,7 @@ Exolve.prototype.clearCurr = function() {
   }
   this.updateActiveCluesState()
   if (this.currClueIndex) {
-    this.updateClueState(this.currClueIndex, false, 'unsolved')
+    this.updateClueState(this.currClueIndex, false, 'unsolved', true)
   }
   this.updateAndSaveState()
   this.refocus()
@@ -6259,7 +6355,7 @@ Exolve.prototype.clearAll = function(conf=true) {
   this.hideNinas()
 
   for (let ci of this.allClueIndices) {
-    this.updateClueState(ci, false, 'unsolved')
+    this.updateClueState(ci, false, 'unsolved', true)
     if (clearingPls && this.clues[ci].placeholderBlank) {
       this.clues[ci].placeholderBlank.value = ''
     }
@@ -6419,7 +6515,7 @@ Exolve.prototype.checkAll = function(conf=true, erase=true) {
         this.revealClueAnno(ci);
       }
     }
-    this.updateClueState(ci, false, null)
+    this.updateClueState(ci, false, null, true)
   }
   this.updateAndSaveState()
   this.refocus();
@@ -6540,7 +6636,7 @@ Exolve.prototype.revealCurr = function() {
   }
   this.updateActiveCluesState();
   if (this.currClueIndex && !this.cellNotLight) {
-    this.updateClueState(this.currClueIndex, false, 'solved');
+    this.updateClueState(this.currClueIndex, false, 'solved', true);
   }
   this.updateAndSaveState();
   this.refocus();
@@ -6591,7 +6687,7 @@ Exolve.prototype.revealAll = function(conf=true) {
   this.showNinas();
   for (let ci of this.allClueIndices) {
     this.revealClueAnno(ci);
-    this.updateClueState(ci, false, 'solved');
+    this.updateClueState(ci, false, 'solved', true);
   }
   this.updateAndSaveState();
   this.refocus();
@@ -6698,14 +6794,268 @@ Exolve.prototype.displayButtons = function() {
   this.scratchPad.cols = Math.max(30, Math.floor(this.textAreaCols * 3 / 4))
 }
 
-Exolve.prototype.togglePanel = function(panelSuff, e) {
-  const panel = document.getElementById(this.prefix + panelSuff)
-  if (panel.style.display == 'none') {
-    panel.style.display = ''
+Exolve.prototype.togglePanel = function(toggler, toggleable, evt=null) {
+  if (toggleable.style.display == 'none') {
+    if (this.toggleable && this.toggleable != toggleable) {
+      this.toggleable.style.display = 'none';
+      this.toggler.classList.remove('xlv-active-toggler');
+    }
+    if (toggleable == this.notesPanel) {
+      this.refreshNotesPanel();
+    }
+    toggleable.style.display = '';
+    toggler.classList.add('xlv-active-toggler');
+    this.toggleable = toggleable;
+    this.toggler = toggler;
   } else {
-    panel.style.display = 'none'
+    toggleable.style.display = 'none';
+    toggler.classList.remove('xlv-active-toggler');
+    this.toggleable = null;
+    this.toggler = null;
   }
-  e.preventDefault()
+  if (evt) {
+    evt.preventDefault();
+  }
+}
+
+Exolve.prototype.logClueSolve = function(ci, isSolved) {
+  if (!this.notTemp) return;
+  const lastCounter = this.notes.solved[ci] ?
+      (this.notes.solved[ci].counter || 0) : 0;
+  if (lastCounter > 0) {
+    /* Remove this clue from the sequence of solves */
+    for (let ci2 of this.allClueIndices) {
+      if (!this.notes.solved[ci2]) {
+        continue;
+      }
+      if (this.notes.solved[ci2].counter &&
+          this.notes.solved[ci2].counter > lastCounter) {
+        this.notes.solved[ci2].counter--;
+        this.refreshClueNotes(ci2);
+      }
+    }
+    --this.notes.counter;
+    console.assert(this.notes.counter >= 0, this.notes);
+  }
+  if (isSolved) {
+    this.notes.solved[ci] = {
+      counter: ++this.notes.counter,
+      timestamp: Date.now(),
+    };
+  } else {
+    delete this.notes.solved[ci];
+  }
+  this.refreshClueNotes(ci);
+}
+
+Exolve.prototype.focusOnNotes = function() {
+  if (!this.notTemp || !this.notesToggler.offsetParent) {
+    /** The notes button has been hidden */
+    return false;
+  }
+  if (this.toggleable != this.notesPanel) {
+    this.togglePanel(this.notesToggler, this.notesPanel);
+  }
+  const ci = this.clueOrParentIndex(this.currClueIndex);
+  let elt = (ci && this.clues[ci]) ? this.clues[ci].notesInput : null;
+  if (!elt) elt = this.notesInput;
+  if (!elt) {
+    return false;
+  }
+  elt.focus();
+  return true;
+}
+
+Exolve.prototype.saveNotesChanges = function() {
+  this.notes.overall = this.notesInput.innerHTML;
+  for (let ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (!clue || !clue.notesInput) {
+      continue;
+    }
+    this.notes.clues[ci] = clue.notesInput.innerHTML;
+  }
+  this.updateAndSaveState();
+}
+
+Exolve.prototype.refreshClueNotes = function(ci) {
+  const clue = this.clues[ci];
+  if (!clue || !clue.notesInput || !clue.solvedAt) {
+    return;
+  }
+  clueNotes = this.notes.clues[ci] || '';
+  clue.notesInput.innerHTML = clueNotes;
+  let solvedAt = '';
+  const solved = this.notes.solved[ci];
+  if (solved && this.notesSeq.checked) {
+    solvedAt += '#' + solved.counter + '. ';
+  }
+  if (this.notesEntries.checked) {
+    const entry = this.getClueEntry(ci);
+    if (entry && entry.indexOf('?') < 0) {
+      solvedAt += this.getClueEntry(ci) + '. ';
+    }
+  }
+  if (solved && this.notesTimes.checked) {
+    solvedAt += '<span style="font-size:8px !important">' +
+      (new Date(solved.timestamp)).toLocaleString() + '</span>. ';
+  }
+  clue.solvedAt.innerHTML = solvedAt;
+}
+
+Exolve.prototype.refreshNotesPanel = function() {
+  this.notesInput.innerHTML = this.notes.overall || '';
+  for (let ci of this.allClueIndices) {
+    this.refreshClueNotes(ci);
+  }
+}
+
+Exolve.prototype.copyNotesSuccessEnd = function() {
+  this.notesContents.style.opacity = '1';
+}
+
+Exolve.prototype.copyNotesSuccess = function() {
+  this.notesContents.style.opacity = '0.4';
+  setTimeout(this.copyNotesSuccessEnd.bind(this), 300); 
+}
+
+Exolve.prototype.copyNotes = function() {
+  if(typeof ClipboardItem === "undefined") {
+    alert('Sorry, this is not yet supported in your browser!');
+    return;
+  }
+  const type = "text/html";
+  const blob = new Blob([this.notesContents.innerHTML], {type});
+  const data = [new ClipboardItem({[type]: blob})];
+  navigator.clipboard.write(data).then(
+      this.copyNotesSuccess.bind(this),
+      function () {
+        this.log('Somehow failed to copy to the clipboard');
+      });
+}
+
+Exolve.prototype.emailNotes = function() {
+  let url = 'mailto:';
+  if (this.email) {
+    url += this.email.trim();
+  }
+  url += '?';
+  if (this.title) {
+    url += '&subject=' + encodeURIComponent(this.title);
+  }
+  url += '&body=' + encodeURIComponent(this.notesContents.innerText);
+  window.open(url, '_blank');
+}
+
+Exolve.prototype.makeNotesPanel = function() {
+  /**
+   * Note that inline CSS is used in the notes contents area, so that
+   *  formatted text can be copied from it.
+   */
+  let html = `
+  <div class="xlv-notes-header"> 
+    <div>
+      <button id="${this.prefix}-notes-copy"
+          title="${this.textLabels['copy-notes.hover']}"
+          class="xlv-small-button">${this.textLabels['copy-notes']}</button>
+      <button id="${this.prefix}-notes-email"
+          title="${this.textLabels['email-notes.hover']}${this.email ?
+            this.textLabels['email-notes-recipients.hover'] + this.email : ''}"
+          class="xlv-small-button">${this.textLabels['email-notes']}</button>
+    </div>
+    <div>
+      <label for="${this.prefix}-notes-seq">
+        ${this.textLabels['show-notes-seq']}</label>
+      <input id="${this.prefix}-notes-seq" checked=true type="checkbox"></input>
+    </div>
+    <div>
+      <label for="${this.prefix}-notes-entries">
+        ${this.textLabels['show-notes-entries']}</label>
+      <input id="${this.prefix}-notes-entries"
+            checked=true type="checkbox"></input>
+    </div>
+    <div>
+      <label for="${this.prefix}-notes-times">
+        ${this.textLabels['show-notes-times']}</label>
+      <input id="${this.prefix}-notes-times" type="checkbox"></input>
+    </div>
+    <p><i>${this.textLabels['notes-shortcut']}</i></p>
+  </div>
+  <div class="xlv-notes-contents"
+      id="${this.prefix}-notes-contents">
+    <style>
+    .xlv-clue-notes {
+      outline: none;
+      width: 60%;
+    }
+    .xlv-overall-notes {
+      background-image:
+        repeating-linear-gradient(to bottom, transparent, transparent 13px, silver 14px);
+      min-height: 3em;
+      outline: none;
+      width: 95%;
+    }
+    </style>
+    <div contenteditable=true id="${this.prefix}-overall-notes"
+        class="xlv-overall-notes">
+    </div>
+    <div>`;
+  let dir = '';
+  for (let ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (!clue || clue.parentClueIndex) continue;
+    if (clue.dir != dir) {
+      dir = clue.dir;
+      const label =
+        ((dir == 'A' && this.layers3d == 1) ? this.textLabels['across-label'] :
+        ((dir == 'A' && this.layers3d > 1) ? this.textLabels['3d-ac-label'] :
+        ((dir == 'D' && this.layers3d == 1) ? this.textLabels['down-label'] :
+        ((dir == 'D' && this.layers3d > 1) ? this.textLabels['3d-aw-label'] :
+        ((dir == 'Z' && this.layers3d > 1) ? this.textLabels['3d-dn-label'] :
+          this.textLabels['nodir-label'])))));
+      html += `
+      <p><b>${label}</b></p>`
+    }
+    html += `
+      <p style="border-bottom:1px solid lightgray">
+        <b>${clue.label}.</b>
+        <span id="${this.prefix}-clue-solved-at-${ci}">
+        </span>
+        <span contenteditable=true class="xlv-clue-notes"
+            id="${this.prefix}-clue-notes-${ci}">
+        </span>
+      </p>`;
+  }
+  html += '</div></div>';
+  this.notesPanel.innerHTML = html;
+  this.notesContents = document.getElementById(this.prefix + '-notes-contents');
+
+  document.getElementById(this.prefix + '-notes-copy').addEventListener(
+      'click', this.copyNotes.bind(this));
+  document.getElementById(this.prefix + '-notes-email').addEventListener(
+      'click', this.emailNotes.bind(this));
+
+  const settingsHandler = this.refreshNotesPanel.bind(this);
+  this.notesSeq = document.getElementById(
+      this.prefix + '-notes-seq');
+  this.notesSeq.addEventListener('change', settingsHandler);
+  this.notesTimes = document.getElementById(this.prefix + '-notes-times');
+  this.notesTimes.addEventListener('change', settingsHandler);
+  this.notesEntries = document.getElementById(this.prefix + '-notes-entries');
+  this.notesEntries.addEventListener('change', settingsHandler);
+
+  const inputHandler = this.saveNotesChanges.bind(this);
+  this.notesInput = document.getElementById(this.prefix + '-overall-notes');
+  this.notesInput.addEventListener('input', inputHandler);
+  for (let ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (!clue || clue.parentClueIndex) continue;
+    clue.notesInput = document.getElementById(
+        this.prefix + '-clue-notes-' + ci);
+    clue.notesInput.addEventListener('input', inputHandler);
+    clue.solvedAt = document.getElementById(
+        this.prefix + '-clue-solved-at-' + ci);
+  }
 }
 
 Exolve.prototype.deleteStorage = function(id, timestamp) {
@@ -6974,7 +7324,7 @@ Exolve.prototype.handleBeforePrint = function() {
 
   if (settings.onlyCrossword) {
     /**
-     * Note: prior to v1.44, the code used to move all body children
+     * Note: prior to v1.45, the code used to move all body children
      * into the "hider" element. But this somehow caused problems with
      * the exolve stylesheet in "widgets". Now we only move non-element
      * non-script/link nodes. Element nodes directly get their style.display
@@ -7600,6 +7950,7 @@ Exolve.prototype.createPuzzle = function() {
 
   this.displayButtons();
   this.parseAndDisplayPS();
+  this.makeNotesPanel();
   this.setColumnLayout();
 
   this.restoreState();
