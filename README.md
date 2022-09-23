@@ -1673,7 +1673,7 @@ can be turned off with a checkbox). These are:
 - The solving order of the clues. This may be useful info for setters to
   learn. I also find "how many did I solve in the first pass?" to be a pretty
   good metric of how difficult a crossword is, and that can be inferred from
-  the solving ordered. This is ON by default.
+  the solving order. This is ON by default.
 - The solution entered. This is ON by default.
 - The time at which the clue was solved. This is OFF by default.
 
