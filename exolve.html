@@ -131,7 +131,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.45 September 22, 2022';
+  this.VERSION = 'Exolve v1.46 September 23, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -393,8 +393,9 @@ function Exolve(puzzleSpec,
     'crossword-id': 'Crossword ID',
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
-    'notes-shortcut': 'Note: Ctrl-/ takes you to the current clue\'s notes ' +
-        '(or overall notes).',
+    'notes-help': '<li>Ctrl-/ takes you to the current clue\'s notes ' +
+        '(or overall notes).</li><li>Hovering over a ' +
+        'clue\'s notes shows the clue as a tooltip.</li>',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
@@ -5559,78 +5560,86 @@ Exolve.prototype.clueStateToggler = function(ci, e) {
 // Mark the clue as solved by setting its number's colour, if filled.
 // If annoPrefilled is true and the clue is fully prefilled, reveal its anno.
 // forceSolved can be passed as null or 'solved' or 'unsolved'.
-// logSolved can be true or false.
+// logSolved can be true or false. If true, we call logClueSolve() if
+// the clue went from solved-to-unsolved or vice versa or solved-to-solved
+// but with some change.
 Exolve.prototype.updateClueState =
     function(clueIndex, annoPrefilled, forceSolved, logSolved) {
-  let cis = this.getLinkedClues(clueIndex)
+  let cis = this.getLinkedClues(clueIndex);
   if (!cis || cis.length == 0) {
-    return
+    return;
   }
-  clueIndex = cis[0]  // Use parent for a linked child
+  clueIndex = cis[0];  // Use parent for a linked child
   if (!clueIndex) {
-    return
+    return;
   }
-  let clue = this.clues[clueIndex]
+  const clue = this.clues[clueIndex];
   if (!clue) {
-    return
+    return;
   }
-  let solved = false
+  let solved = false;
   if (clue && clue.clueTR && clue.clueTR.className == 'xlv-solved') {
-    solved = true
+    solved = true;
   }
-  let numFilled = 0
-  let numPrefilled = 0
+  let numFilled = 0;
+  let numPrefilled = 0;
   for (let ci of cis) {
     let theClue = this.clues[ci]
     if (!theClue.clueTR) {
-      numFilled = 0
-      break
+      numFilled = 0;
+      break;
     }
-    let isFullRet = this.isFull(ci)
+    let isFullRet = this.isFull(ci);
     if (!isFullRet[0]) {
-      numFilled = 0
-      break
+      numFilled = 0;
+      break;
     }
-    numFilled += isFullRet[1]
+    numFilled += isFullRet[1];
     if (isFullRet[0] == 2) {
-      numPrefilled += isFullRet[1]
+      numPrefilled += isFullRet[1];
     }
   }
-  const wasSolved = solved;
   if (forceSolved) {
     if (forceSolved == 'solved') {
-      solved = true
+      solved = true;
     } else {
-      solved = false
+      solved = false;
       // override for all-prefilled
       if (this.allCellsKnown(clueIndex) && numPrefilled == clue.enumLen) {
-        solved = true
+        solved = true;
       }
     }
   } else if ((clue.anno || clue.dispSol) && clue.annoSpan.style.display == '') {
-    solved = true
+    solved = true;
   } else if (this.allCellsKnown(clueIndex)) {
     // TODO: fix this when enum is not provided.
-    solved = numFilled == clue.enumLen
+    solved = numFilled == clue.enumLen;
   }
   if (solved && numFilled == numPrefilled && annoPrefilled &&
       (clue.anno || clue.dispSol)) {
     this.revealClueAnno(clueIndex);
   }
-  let cls = solved ? 'xlv-solved' : ''
+  let cls = solved ? 'xlv-solved' : '';
   for (let ci of cis) {
     if (this.clues[ci].clueTR) {
       this.clues[ci].clueTR.setAttributeNS(null, 'class', cls);
     }
     if (ci == this.currClueIndex) {
-      let currLab = document.getElementById(this.prefix + '-curr-clue-label')
+      let currLab = document.getElementById(this.prefix + '-curr-clue-label');
       if (currLab) {
-        currLab.setAttributeNS(null, 'class', 'xlv-curr-clue-label' + (cls ? (' ' + cls) : ''));
+        currLab.setAttributeNS(
+            null, 'class', 'xlv-curr-clue-label' + (cls ? (' ' + cls) : ''));
       }
     }
   }
-  if (logSolved && (solved != wasSolved)) {
-    this.logClueSolve(clueIndex, solved);
+  const lastEntry = clue.entry || '';
+  clue.entry = this.getClueEntry(clueIndex);
+  if (logSolved) {
+    const wasFull = lastEntry && (lastEntry.indexOf('?') < 0);
+    const isFull = clue.entry && (clue.entry.indexOf('?') < 0);
+    if ((isFull != wasFull) || (isFull && (clue.entry != lastEntry))) {
+      this.logClueSolve(clueIndex, isFull);
+    }
   }
 }
 
@@ -6865,7 +6874,7 @@ Exolve.prototype.togglePanel = function(toggler, toggleable, evt=null) {
   }
 }
 
-Exolve.prototype.logClueSolve = function(ci, isSolved) {
+Exolve.prototype.logClueSolve = function(ci, isFull) {
   if (!this.notTemp) return;
   const lastCounter = this.notes.solved[ci] ?
       (this.notes.solved[ci].counter || 0) : 0;
@@ -6884,7 +6893,7 @@ Exolve.prototype.logClueSolve = function(ci, isSolved) {
     --this.notes.counter;
     console.assert(this.notes.counter >= 0, this.notes);
   }
-  if (isSolved) {
+  if (isFull) {
     this.notes.solved[ci] = {
       counter: ++this.notes.counter,
       timestamp: Date.now(),
@@ -6938,9 +6947,9 @@ Exolve.prototype.refreshClueNotes = function(ci) {
     solvedAt += '#' + solved.counter + '. ';
   }
   if (this.notesEntries.checked) {
-    const entry = this.getClueEntry(ci);
+    const entry = clue.entry;
     if (entry && entry.indexOf('?') < 0) {
-      solvedAt += this.getClueEntry(ci) + '. ';
+      solvedAt += entry + '. ';
     }
   }
   if (solved && this.notesTimes.checked) {
@@ -7026,7 +7035,7 @@ Exolve.prototype.makeNotesPanel = function() {
         ${this.textLabels['show-notes-times']}</label>
       <input id="${this.prefix}-notes-times" type="checkbox"></input>
     </div>
-    <p><i>${this.textLabels['notes-shortcut']}</i></p>
+    <ul class="xlv-notes-help">${this.textLabels['notes-help']}</ul>
   </div>
   <div class="xlv-notes-contents"
       id="${this.prefix}-notes-contents">
@@ -7063,8 +7072,9 @@ Exolve.prototype.makeNotesPanel = function() {
       html += `
       <p><b>${label}</b></p>`
     }
+    const clueText = clue.clueSpan ? clue.clueSpan.innerText : '';
     html += `
-      <p style="border-bottom:1px solid lightgray">
+      <p style="border-bottom:1px solid lightgray" title="${clueText}">
         <b>${clue.label}.</b>
         <span id="${this.prefix}-clue-solved-at-${ci}">
         </span>
@@ -7371,7 +7381,7 @@ Exolve.prototype.handleBeforePrint = function() {
 
   if (settings.onlyCrossword) {
     /**
-     * Note: prior to v1.45, the code used to move all body children
+     * Note: prior to v1.46, the code used to move all body children
      * into the "hider" element. But this somehow caused problems with
      * the exolve stylesheet in "widgets". Now we only move non-element
      * non-script/link nodes. Element nodes directly get their style.display
@@ -8541,6 +8551,10 @@ a.xlv-toggler:hover {
 }
 .xlv-notes-header {
   text-align: right;
+}
+.xlv-notes-help {
+  padding: 0 0 0 16px !important;
+  text-align: left;
 }
 </style>
 </head>

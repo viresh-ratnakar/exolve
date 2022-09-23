@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.45 September 22, 2022
+### Version: Exolve v1.46 September 23, 2022
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1509,15 +1509,15 @@ Here are all the names of pieces of text that you can relabel:
 | `down-label`     | Down                                 |
 | `3d-ac-label`     | Across & Back                        |
 | `3d-aw-label`     | Away & Towards                       |
-| `3d-dn-label`     | Down & Up'                           |
+| `3d-dn-label`     | Down & Up                           |
 | `nodir-label`    | Other                                |
 | `tools-link`     | Exolve                                |
-| `tools-link.hover` | 'Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, access a scratch pad, etc.|
+| `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, access a scratch pad, etc.|
 | `tools-msg`      | [Longish list of all control keys, and more...]|
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
-| `notes-shortcut` | Note: Ctrl-/ takes you to the current clue's notes (or overall notes).|
+| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes). Hovering over a clue's notes shows the clue as a tooltip.|
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
@@ -1681,6 +1681,8 @@ When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
 taken to the notes line for that particular clue, where you can edit the
 note or just read what you may have written. When no clue is selected,
 typing Ctrl-/ will take you the overall notes section.
+
+Hovering the mouse on a clue's notes shows the clue as a tooltip.
 
 At this time, I have chosen to keep all the notes confined to the Notes
 section that appears under the crossword. I think surfacing these notes

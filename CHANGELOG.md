@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v1.46: September 23, 2022
+
+- Bug fix: need to update the clue entry shown in the Notes panel even
+  when the state goes from solved-to-solved but with a change. Now, just
+  save the previous entry in the clue structure and compare the new one
+  with that.
+- Show the clue as a tooltip when the mouse is hovered over a clue's notes.
+
 ### Version: Exolve v1.45: September 22, 2022
 
 - Reorganize the line of links under the crossword. It used to be:
