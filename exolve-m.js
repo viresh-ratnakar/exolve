@@ -7026,14 +7026,14 @@ Exolve.prototype.makeNotesPanel = function() {
       <p><b>${label}</b></p>`
     }
     html += `
-      <p style="border-bottom:1px solid lightgray">
+      <div style="border-bottom:1px solid lightgray">
         <b>${clue.label}.</b>
         <span id="${this.prefix}-clue-solved-at-${ci}">
         </span>
         <span contenteditable=true class="xlv-clue-notes"
             id="${this.prefix}-clue-notes-${ci}">
         </span>
-      </p>`;
+      </div>`;
   }
   html += '</div></div>';
   this.notesPanel.innerHTML = html;

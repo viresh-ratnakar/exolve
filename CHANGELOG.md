@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.46.2: September 24, 2022
+
+- Change clue-note tag from p to div to make it more compact.
+
 ### Minor Version: Exolve v1.46.1: September 24, 2022
 
 - Set the title of the clue-notes element in JavaScript rather than through
