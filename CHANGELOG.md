@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.46.1: September 24, 2022
+
+- Set the title of the clue-notes element in JavaScript rather than through
+  HTML-parsing of text that may potentially contain double quotes.
+
 ### Version: Exolve v1.46: September 23, 2022
 
 - Bug fix: need to update the clue entry shown in the Notes panel even

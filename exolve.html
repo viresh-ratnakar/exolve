@@ -7072,9 +7072,8 @@ Exolve.prototype.makeNotesPanel = function() {
       html += `
       <p><b>${label}</b></p>`
     }
-    const clueText = clue.clueSpan ? clue.clueSpan.innerText : '';
     html += `
-      <p style="border-bottom:1px solid lightgray" title="${clueText}">
+      <p style="border-bottom:1px solid lightgray">
         <b>${clue.label}.</b>
         <span id="${this.prefix}-clue-solved-at-${ci}">
         </span>
@@ -7112,6 +7111,8 @@ Exolve.prototype.makeNotesPanel = function() {
     clue.notesInput.addEventListener('input', inputHandler);
     clue.solvedAt = document.getElementById(
         this.prefix + '-clue-solved-at-' + ci);
+    clue.notesInput.parentElement.title = (
+        clue.clueSpan ? clue.clueSpan.innerText : '');
   }
 }
 
