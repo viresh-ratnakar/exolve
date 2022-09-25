@@ -1517,7 +1517,7 @@ Here are all the names of pieces of text that you can relabel:
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
-| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes). Hovering over a clue's notes shows the clue as a tooltip.|
+| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
@@ -1681,6 +1681,11 @@ When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
 taken to the notes line for that particular clue, where you can edit the
 note or just read what you may have written. When no clue is selected,
 typing Ctrl-/ will take you the overall notes section.
+
+Similarly, when solving a clue, if you type Ctrl-\* (Ctrl-asterisk) then
+a \* is added to the front of the clue's notes to mark it as a favourite.
+The focus stays on the crossword and does not jump to the notes (unlike
+Ctrl-/).
 
 Hovering the mouse on a clue's notes shows the clue as a tooltip.
 

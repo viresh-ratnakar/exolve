@@ -378,7 +378,9 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction.</li>
-         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!, <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to notes.</li>
+         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!,
+             <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to notes,
+             <b>Ctrl-*:</b> Mark clue as fave in notes, adding a * prefix.</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless.</li>
        </ul>
@@ -394,8 +396,9 @@ function Exolve(puzzleSpec,
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
     'notes-help': '<li>Ctrl-/ takes you to the current clue\'s notes ' +
-        '(or overall notes).</li><li>Hovering over a ' +
-        'clue\'s notes shows the clue as a tooltip.</li>',
+        '(or overall notes).</li><li>Ctrl-* adds a * prefix to the current ' +
+        'clue\'s notes.</li><li>Hovering over a clue\'s notes shows the ' +
+        'clue as a tooltip.</li>',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
@@ -5495,6 +5498,11 @@ Exolve.prototype.handleKeyDown = function(e) {
       e.stopPropagation();
       e.preventDefault();
     }
+  } else if (e.ctrlKey && e.key == '*') {
+    if (this.markAsFave()) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
   }
 }
 
@@ -6904,21 +6912,43 @@ Exolve.prototype.logClueSolve = function(ci, isFull) {
   this.refreshClueNotes(ci);
 }
 
-Exolve.prototype.focusOnNotes = function() {
+Exolve.prototype.getNotesElement = function(defaultToOverall) {
   if (!this.notTemp || !this.notesToggler.offsetParent) {
     /** The notes button has been hidden */
-    return false;
+    return null;
+  }
+  const ci = this.clueOrParentIndex(this.currClueIndex);
+  let elt = (ci && this.clues[ci]) ? this.clues[ci].notesInput : null;
+  if (!elt && defaultToOverall) {
+    elt = this.notesInput;
+  }
+  if (!elt) {
+    return null;
   }
   if (this.toggleable != this.notesPanel) {
     this.togglePanel(this.notesToggler, this.notesPanel);
   }
-  const ci = this.clueOrParentIndex(this.currClueIndex);
-  let elt = (ci && this.clues[ci]) ? this.clues[ci].notesInput : null;
-  if (!elt) elt = this.notesInput;
+  return elt;
+}
+
+Exolve.prototype.focusOnNotes = function() {
+  const elt = this.getNotesElement(true);
   if (!elt) {
     return false;
   }
   elt.focus();
+  return true;
+}
+
+Exolve.prototype.markAsFave = function() {
+  const elt = this.getNotesElement(false);
+  if (!elt) {
+    return false;
+  }
+  if (!elt.innerText.trim().startsWith('*')) {
+    elt.insertAdjacentHTML('afterbegin', '* ');
+    this.saveNotesChanges();
+  }
   return true;
 }
 

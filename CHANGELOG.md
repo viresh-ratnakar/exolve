@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.46.3: September 25, 2022
+
+- Add support for using Ctrl-\* to mark the current clue's notes with a
+  \* prefix (without changing focus).
+
 ### Minor Version: Exolve v1.46.2: September 24, 2022
 
 - Change clue-note tag from p to div to make it more compact.
