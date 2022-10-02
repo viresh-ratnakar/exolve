@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.46.4: October 2, 2022
+
+- Made the clue notes have a substantial min width, so that they can
+  be clicked into.
+
 ### Minor Version: Exolve v1.46.3: September 25, 2022
 
 - Add support for using Ctrl-\* to mark the current clue's notes with a

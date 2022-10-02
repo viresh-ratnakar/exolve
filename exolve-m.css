@@ -504,6 +504,10 @@ a.xlv-toggler:hover {
 .xlv-active-toggler {
   border-bottom: 2px solid lightgray;
 }
+.xlv-clue-notes {
+  display: inline-block;
+  min-width: 10ch;
+}
 .xlv-notes-contents {
   border: 1px dotted gray;
   max-height: 400px;
