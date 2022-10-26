@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.46.5: October 25, 2022
+
+- Bug-fix in exolve-player: A temp exolve puzzle created to figure
+  out clue locations from the grid (when parsing .puz) hangs around,
+  and leads to an ID conflict when the same .puz file is reloaded.
+  Fixed by (a) Using a random temp ID, and (b) Calling .destroy()
+  on the temp puzzle.
+
 ### Minor Version: Exolve v1.46.4: October 2, 2022
 
 - Made the clue notes have a substantial min width, so that they can

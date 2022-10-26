@@ -81,17 +81,17 @@ function exolveFromPuz(buffer, fname='') {
   document.body.appendChild(dummyContainer);
 
   // We use the Exolve code to figure out clue numbering:
-  const exolvePuz = new Exolve(`
+  const tempPuz = new Exolve(`
   exolve-begin
   exolve-width: ${width}
   exolve-height: ${height}
+  exolve-id: ${dummyId}
   exolve-grid:
 ${exolveGrid}
   exolve-end
   `, dummyId, null, false, 0, 0, false);
 
   dummyContainer.remove();
-  delete exolvePuzzles[dummyId];
 
   offset += numCells;
   nextNull = exolveFromPuzNextNull(buffer, offset);
@@ -116,7 +116,7 @@ ${exolveGrid}
   let orderedClueIndices = []
   for (let i = 0; i < height; i++) {
     for (let j = 0; j < width; j++) {
-      let gridCell = exolvePuz.grid[i][j]
+      let gridCell = tempPuz.grid[i][j]
       if (!gridCell.isLight) {
         continue;
       }
@@ -132,7 +132,7 @@ ${exolveGrid}
   let acrossClues = '';
   let downClues = '';
   for (let ci of orderedClueIndices) {
-    let theClue = exolvePuz.clues[ci]
+    let theClue = tempPuz.clues[ci]
     nextNull = exolveFromPuzNextNull(buffer, offset);
     if (theClue.dir == 'A') {
       acrossClues += '    ' + theClue.label + ' ' +
@@ -156,7 +156,7 @@ ${exolveGrid}
       for (let i = 0; i < height; i++) {
         exolveGrid += '    ';
         for (let j = 0; j < width; j++) {
-          exolveGrid += exolvePuz.grid[i][j].solution;
+          exolveGrid += tempPuz.grid[i][j].solution;
           if (buffer[offset++] & 0x80) {
             exolveGrid += '@';
           } else {
@@ -170,6 +170,7 @@ ${exolveGrid}
       offset++;
     }
   }
+  tempPuz.destroy();
 
   if (!fname) {
     fname = 'unknown'
