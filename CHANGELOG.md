@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.47: December 19, 2022
+
+- Allow '/' as a linked-clue-number separator.
+- Make exolveFromText() work in the background using a Worker thread.
+  It can take a lot of time for large grid sizes (such as 23x23). it
+  now communicates its progress and results through postMessage().
+
 ### Minor Version: Exolve v1.46.5: October 25, 2022
 
 - Bug-fix in exolve-player: A temp exolve puzzle created to figure

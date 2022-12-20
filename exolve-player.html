@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.46"/>
-<script src="exolve-m.js?v1.46"></script>
-<script src="exolve-from-ipuz.js?v1.46"></script>
-<script src="exolve-from-puz.js?v1.46"></script>
-<script src="exolve-from-text.js?v1.46"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.47"/>
+<script src="exolve-m.js?v1.47"></script>
+<script src="exolve-from-ipuz.js?v1.47"></script>
+<script src="exolve-from-puz.js?v1.47"></script>
+<script src="exolve-from-text.js?v1.47"></script>
 
 <style>
 .xlvp-wait {
@@ -76,8 +76,11 @@ pre,
   font-weight: bold;
 }
 #xlvp-infer-msg {
+  color: red;
+  display: inline-block;
   font-size: small;
   font-style: italic;
+  margin: 4px 0 0 0;
 }
 #xlvp-multiple-msg {
   margin-top: 16px;
@@ -123,6 +126,7 @@ pre,
         <label for="xlvp-h">Height:</label> <input id="xlvp-h" name="xlvp-h" onchange="xlvpSaveState()" type="text" size="2" maxlength="2" min="3" max="21" value="15"/>
         <button id="xlvp-infer"
           class="xlvp-button" onclick="xlvpOnText()">"Auto-grid": Try to infer the crossword from the above text</button>
+        <br>
         <span id="xlvp-infer-msg"></span>
       </div>
     <div id="xlvp-chooser" class="xlvphscroll">
@@ -190,6 +194,7 @@ pre,
 
 let xlvpFileName = '';
 let xlvpData = '';
+let xlvpFromTextActive = null;
 
 const xlvpFrame = document.getElementById('xlvp-frame');
 const xlvpSrc = document.getElementById('xlvp-src');
@@ -199,6 +204,7 @@ const xlvpText = document.getElementById('xlvp-text');
 const xlvpW = document.getElementById('xlvp-w');
 const xlvpH = document.getElementById('xlvp-h');
 const xlvpInfer = document.getElementById('xlvp-infer');
+const xlvpInferHTML = xlvpInfer.innerHTML;
 const xlvpInferMsg = document.getElementById('xlvp-infer-msg');
 const xlvpChooser = document.getElementById('xlvp-chooser');
 const xlvpChooserStrip = document.getElementById('xlvp-chooser-strip');
@@ -336,8 +342,8 @@ function xlvpSave() {
     '<meta charset="utf-8"/>\n' +
     '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n' +
     '<link rel="stylesheet" type="text/css" ' +
-    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.46"/>\n' +
-    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.46">' +
+    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.47"/>\n' +
+    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.47">' +
     '<\/script>\n' +
     '<\/head>\n' +
     '<body>\n' +
@@ -436,107 +442,116 @@ function xlvpDrag(ev) {
 }
 
 function xlvpOnText() {
+  if (xlvpFromTextActive) {
+    /* Cancel as been clicked */
+    xlvpEndFromTextWorker();
+    return;
+  }
   xlvpShowText(xlvpText.value);
 }
 
+function xlvpEndFromTextWorker() {
+  xlvpInfer.innerHTML = xlvpInferHTML;
+  xlvpInfer.className = 'xlvp-button';
+  xlvpInferMsg.innerHTML = '';
+  if (xlvpFromTextActive) {
+    xlvpFromTextActive.worker.terminate();
+    xlvpFromTextActive = null;
+  }
+}
+
 function xlvpShowText(text, fname='provided text') {
+  if (xlvpFromTextActive) {
+    /* New text data, kill the old worker if active */
+    xlvpEndFromTextWorker();
+  }
+  xlvpInfer.className = 'xlvp-button-working';
+  xlvpInfer.innerHTML = 'Working! [click to cancel]';
+
   const w = xlvpW.value;
   const h = xlvpH.value;
 
-  const workers = [];
-  const matches = [];
-
-  const savedButton = xlvpInfer.innerHTML;
-  xlvpInfer.className = 'xlvp-button-working';
-  xlvpInfer.innerHTML = 'Working!';
-  xlvpInfer.disabled = true;
-
-  const finisher = () => {
-    for (let worker of workers) {
-      clearTimeout(worker);
-    }
-    workers.length = 0;
-    if (matches.length == 0) {
-      alert('Could not parse or infer a ' + xlvpW.value + 'x' +
-            xlvpH.value + ' grid from ' + fname);
-    }
-    xlvpInfer.innerHTML = savedButton;
-    xlvpInfer.disabled = false;
-    xlvpInfer.className = 'xlvp-button';
-    xlvpInferMsg.innerHTML = '';
+  const worker = exolveFromText(w, h, text, fname);
+  if (typeof worker === 'string') {
+    /* There was some error. */
+    const alertMsg = 'Error parsing a ' + w + 'x' + h +
+                     ' grid from ' + fname + ': ' + worker;
+    alert(alertMsg);
+    xlvpEndFromTextWorker();
+    return;
+  }
+  xlvpFromTextActive = {
+    worker: worker,
+    w: w,
+    h: h,
+    text: text,
+    fname: fname,
   };
+  worker.onmessage = (e) => {
+    xlvpHandleFromTextMessage(e.data);
+  };
+}
 
-  const candidates = exolveFromText(w, h, text, fname) || [];
+function xlvpHandleFromTextMessage(message) {
+  if (!xlvpFromTextActive) {
+    return;
+  }
 
-  for (let candidate of candidates) {
-    workers.push(setTimeout(() => {
-      xlvpInferMsg.innerHTML = candidate.name;
-    }, 0));
-    const worker = () => {
-      const results = [];
-      candidate.infer(results);
-      if (results.length == 0) {
-        return;
-      }
-      const dedupe = {};
-      for (let result of results) {
-        gridSpecLines = result.gridSpecLines();
-        if (dedupe[gridSpecLines]) continue;
-        dedupe[gridSpecLines] = true;
-        matches.push({
-          'grid': gridSpecLines,
-          'exolve': result.exolve(),
-        });
-      }
-      if (matches.length == 0) {
-        return;
-      }
-      console.log('Was able to infer ' + matches.length + ' grid(s) with: ' + candidate.name);
-      xlvpDeleteOld();
-      if (matches.length > 1) {
-        let html = '<table><tr>';
-        for (let i = 0; i < matches.length; i++) {
-          html += `<td id="xlvp-chooser-${i}" class="xlvp-chooser-entry"></td>`;
-        }
-        html += '</tr></table>'
-        xlvpChooserStrip.innerHTML = html;
-        for (let i = 0; i < matches.length; i++) {
-          const smallSpecs = `
+  if (message.update) {
+    xlvpInferMsg.innerHTML = message.update;
+    return;
+  }
+
+  const saved = xlvpFromTextActive;
+
+  xlvpEndFromTextWorker();
+
+  const matches = message.results || [];
+  if (matches.length == 0) {
+    alert('Could not parse or infer a ' + saved.w + 'x' + saved.h +
+          ' grid from ' + saved.fname);
+    return;
+  }
+
+  console.log('Was able to infer ' + message.results.length + ' unique grid(s)');
+  xlvpDeleteOld();
+  if (matches.length > 1) {
+    let html = '<table><tr>';
+    for (let i = 0; i < matches.length; i++) {
+      html += `<td id="xlvp-chooser-${i}" class="xlvp-chooser-entry"></td>`;
+    }
+    html += '</tr></table>'
+    xlvpChooserStrip.innerHTML = html;
+    for (let i = 0; i < matches.length; i++) {
+      const smallSpecs = `
   exolve-begin
-    exolve-width: ${w}
-    exolve-height: ${h}
+    exolve-width: ${saved.w}
+    exolve-height: ${saved.h}
     exolve-option: ignore-unclued ignore-enum-mismatch
     exolve-grid:
-      ${matches[i].grid}
+      ${matches[i].gridSpecLines}
   exolve-end`;
-          const smallXlv = new Exolve(smallSpecs, `xlvp-chooser-${i}`, function(puz) {
-            document.getElementById(puz.prefix + '-controls-etc').style.display = 'none';
-            document.getElementById(puz.prefix + '-clear-area').style.display = 'none';
-          }, false, 0, 150, false);
-          const chooser = document.getElementById(`xlvp-chooser-${i}`);
-          chooser.addEventListener('click', () => {
-            xlvpShowExolve(matches[i].exolve, true, false);
-            chooser.classList.add('xlvp-chooser-entry-sel');
-            for (let j = 0; j < matches.length; j++) {
-              if (j == i) {
-                continue;
-              }
-              document.getElementById(`xlvp-chooser-${j}`).className = 'xlvp-chooser-entry';
-            }
-          });
+      const smallXlv = new Exolve(smallSpecs, `xlvp-chooser-${i}`, function(puz) {
+        document.getElementById(puz.prefix + '-controls-etc').style.display = 'none';
+        document.getElementById(puz.prefix + '-clear-area').style.display = 'none';
+      }, false, 0, 150, false);
+      const chooser = document.getElementById(`xlvp-chooser-${i}`);
+      chooser.addEventListener('click', () => {
+        xlvpShowExolve(matches[i].exolve, true, false);
+        chooser.classList.add('xlvp-chooser-entry-sel');
+        for (let j = 0; j < matches.length; j++) {
+          if (j == i) {
+            continue;
+          }
+          document.getElementById(`xlvp-chooser-${j}`).className = 'xlvp-chooser-entry';
         }
-        xlvpChooser.style.display = '';
-      } else {
-        const spec = matches[0].exolve;
-        xlvpShowExolve(spec, true);
-      }
-      finisher();
-    };
-    workers.push(setTimeout(worker, 0));
+      });
+    }
+    xlvpChooser.style.display = '';
+  } else {
+    const spec = matches[0].exolve;
+    xlvpShowExolve(spec, true);
   }
-  setTimeout(finisher, 0);
-
-  return true;
 }
 </script>
 </body>

@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.46 September 23, 2022';
+  this.VERSION = 'Exolve v1.47 December 19, 2022';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2614,18 +2614,19 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
   }
   parse.notLabel = false;
   if (consumeTrailing) {
-    // Look for ,/&/and
-    // For & and "and": only treat them as child indicators if followed by a
+    // Look for ,/&/and/'/'
+    // For &, /, and "and": only treat them as child indicators if followed by a
     // number.
-    commaParts = clueLine.match(/^\s*(?:,|(?:and|&)\s*[1-9])/);
+    commaParts = clueLine.match(/^\s*(?:,|(?:and|&|\/)\s*[1-9])/);
     if (commaParts && commaParts.length == 1) {
       parse.hasChildren = true;
       // Store the separator char in linkSep
       parse.linkSep = commaParts[0].trim();
       let skipLen = commaParts[0].length;
       if (parse.linkSep.startsWith('and') ||
+          parse.linkSep.startsWith('/') ||
           parse.linkSep.startsWith('&')) {
-        parse.linkSep = '&';
+        parse.linkSep = parse.linkSep.startsWith('/') ? '/' : '&';
         skipLen--;  // One digit was in RE.
       }
       parse.skip += skipLen;
@@ -7365,7 +7366,7 @@ Exolve.prototype.handleBeforePrint = function() {
 
   if (settings.onlyCrossword) {
     /**
-     * Note: prior to v1.46, the code used to move all body children
+     * Note: prior to v1.42, the code used to move all body children
      * into the "hider" element. But this somehow caused problems with
      * the exolve stylesheet in "widgets". Now we only move non-element
      * non-script/link nodes. Element nodes directly get their style.display

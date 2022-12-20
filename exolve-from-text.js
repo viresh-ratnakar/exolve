@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.46 September 23, 2022
+Version: Exolve v1.47 December 19, 2022
 */
 
 /**
@@ -38,32 +38,44 @@ Version: Exolve v1.46 September 23, 2022
  * You shouldn't use this code to cheat on a crossword that has been presented
  * diagramlessly :-).
  *
- * Usage:
- *   const cadidates = exolveFromText(w, h, text, filename);
- *   const results = [];
- *   for (let candidate of candidates) {
- *     console.log('Trying ' + candidate.name);
- *     candidate.infer(results);
- *     if (results.length > 0) {
- *       break;
- *     }
- *   }
- *   for (let result of results) {
- *     // Use result.exolve()
- *   }
- *
- * This API is broken up like this because there may be several
- * variations to be tried (chequered variants, symmetries, etc.) which may take
- * a while, so it might be useful to give some UI signals to the user (see
- * usage in exolve-player.html for an example).
- *
- * Each matched grid is returned as an object (in the "results" array) that
- * has functions .gridSpecLines() and .exolve() that return the grid specs
- * and the full exolve specs, respectively.
+ * The function returns a Worker object that does its core computations in
+ * another thread (as these computations may take a long time, especially for
+ * larger grid sizes). The Worker can be aborted at any time by calling its
+ * terminate() function. While active, the Worker will send periodic update
+ * messages to the main thread (with the .update field being a useful update
+ * text to show) and will finally send a message containing a .results array
+ * field. If the grid could not be inferred, the .results array is empty.
  *
  * Usually, only one grid gets matched, but occasionally, multiple grids may
- * match the pattern implied by the clues. They are all returned in the
- * results array.
+ * match the pattern implied by the clues.
+ *
+ * Each matched grid is returned as an object (in the .results array in the
+ * final posted message) that has fields .gridSpecLines and .exolve
+ * that contain the grid specs and the full exolve specs, respectively.
+ *
+ * If there is error in parsing the text, then instead of a Worker, an
+ * error string is returned.
+ *
+ * Usage:
+ *   const worker = exolveFromText(w, h, text, filename);
+ *   if (typeof worker == 'string') {
+ *     alert(worker);
+ *     return;
+ *   }
+ *   worker.onmessage = (e) => {
+ *     if (e.data.update) {
+ *       // Show e.data.update
+ *       return;
+ *     }
+ *     const results = e.data.results;
+ *     if (results.length == 0) {
+ *       // Could not infer a grid.
+ *     } else if (results.length == 1) {
+ *       // Inferred 1 grid, use its full specs from results[0].exolve
+ *     } else {
+ *       // Multiple matches, ask the user to choose.
+ *     }
+ *   }
  *
  * This assumes that the grid is in a standard, blocked, UK-style format:
  *
@@ -167,7 +179,11 @@ exolveFromText = function(w, h, text, fname='') {
       }
     }
   }
-  return exolveFromTextSections(w, h, sections);
+  const ret = exolveFromTextSections(w, h, sections);
+  if (ret.error) {
+    return ret.error;
+  }
+  return exolveFromTextCreateWorker(ret.candidates);
 }
 
 /**
@@ -226,15 +242,190 @@ exolveFromTextAddChild = function(sections, par, child) {
   return true;
 }
 
+/**
+ * Captures a candidate grid skeleton and the lights that need to be
+ * placed in it. The lights array is indexed by the clue number (so
+ * its 0-th entry is unused).
+ */
+function ExolveGridSkeleton(puz, specs) {
+  this.puz = puz;
+  this.specs = specs;
+  this.w = puz.gridWidth;
+  this.h = puz.gridHeight;
+  this.grid = new Array(this.h);
+  for (let r = 0; r < this.h; r++) {
+    this.grid[r] = new Array(this.w);
+  }
+  this.parents = [];
+  /* lights[x]['A'/'D'] (for x = 1,2,..) has the specs for that light */
+  this.lights = [null];
+  this.name = '';
+  this.symName = ExolveGridSymmetryDefault;
+}
+
+ExolveGridSkeleton.prototype.clone = function(newLights=false) {
+  const copy = new ExolveGridSkeleton(this.puz, this.specs);
+  copy.parents = this.parents;
+  copy.name = this.name;
+  copy.symName = this.symName;
+
+  copy.grid = new Array(this.h);
+  for (let r = 0; r < this.h; r++) {
+    copy.grid[r] = this.grid[r].slice();
+  }
+  // expandLinkedGroups() makes shallow copies of some lights[] objects.
+  // But for other cloning, using the same lights is fine.
+  if (newLights) {
+    copy.lights = JSON.parse(JSON.stringify(this.lights));
+  } else {
+    copy.lights = this.lights;
+  }
+  return copy;
+}
+
+ExolveGridSkeleton.prototype.appendWithSyms = function(candidates) {
+  for (let symName in ExolveGridSymmetries) {
+    const candidate = this.clone();
+    candidate.name = this.name + ': ' + symName + ' symmetry';
+    candidate.symName = symName;
+    candidates.push(candidate);
+  }
+  if (this.w == this.h) {
+    for (let symName in ExolveSqGridSymmetries) {
+      const candidate = this.clone();
+      candidate.name = this.name + ': ' + symName + ' symmetry';
+      candidate.symName = symName;
+      candidates.push(candidate);
+    }
+  }
+}
+
+/**
+ * For each linked group, split total length into chunks at word/hyphen
+ * boundaries to infer component lengths. Allow at most one extra chunk,
+ * to keep complexity in check. Handle some special cases too.
+ */
+ExolveGridSkeleton.prototype.expandLinkedGroups = function() {
+  if (this.parents.length < 1) {
+    return [this];
+  }
+  const choices = [];
+  for (let par of this.parents) {
+    const clue = this.lights[par[0]][par[1]].clue;
+    const phParts = clue.placeholder.split(/[ -]/);
+    const grp = par[2];
+    if (grp.length > phParts.length) {
+      /* See if this is still workable as a special case */
+      const special = [];
+      if (grp.length == 2 && phParts.length == 1) {
+        if (clue.placeholder.length == 6) {
+          special.push([3,3])
+        } else if (clue.placeholder.length == 7) {
+          special.push([3,4])
+          special.push([4,3])
+        } else if (clue.placeholder.length == 8) {
+          special.push([3,5])
+          special.push([4,4])
+          special.push([5,3])
+        }
+      } else if (grp.length == 3 && phParts.length == 1 &&
+                 clue.placeholder.length == 9) {
+        special.push([3,3,3])
+      }
+      if (special.length > 0) {
+        choices.push(special);
+        continue;
+      }
+      console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts but enum only has ' + phParts.length);
+      return [];
+    }
+    if (grp.length < phParts.length - 1) {
+      console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts and enum has too many more parts: ' + phParts.length);
+      return [];
+    }
+    const myChoices = [];
+    const phPartsLens = [];
+    for (let phPart of phParts) phPartsLens.push(phPart.length);
+    if (grp.length == phPartsLens.length) {
+      myChoices.push(phPartsLens);
+    } else {
+      console.assert(grp.length == phPartsLens.length - 1, grp.length, phPartsLens.length);
+      /* We'll skip one of the boundaries in each split-choice. */
+      for (let skip = 1; skip < phPartsLens.length; skip++) {
+        const myChoicesEntry = [];
+        for (let i = 0; i < phPartsLens.length; i++) {
+          if (i == skip - 1) {
+            continue;
+          } else if (i == skip) {
+            myChoicesEntry.push(phPartsLens[i - 1] + phPartsLens[i]);
+          } else {
+            myChoicesEntry.push(phPartsLens[i]);
+          }
+        }
+        myChoices.push(myChoicesEntry);
+      }
+    }
+    choices.push(myChoices);
+  }
+  let candidates = [this];
+  for (let i = 0; i < this.parents.length; i++) {
+    const par = this.parents[i];
+    const grp = par[2];
+    const updatedCandidates = [];
+    for (let choice of choices[i]) {
+      let usable = true;
+      for (let l of choice) {
+        if (l < 3) {
+          usable = false;
+          break;
+        }
+      }
+      if (!usable) {
+        continue;
+      }
+      for (let cand of candidates) {
+        const updatedCand = cand.clone(true);
+        for (let j = 0; j < grp.length; j++) {
+          const cci = grp[j];
+          const num = cci.substr(1);
+          const dir = cci.substr(0, 1);
+          const light = updatedCand.lights[num][dir];
+          console.assert(light.len == 0, light);
+          const lightCopy = {
+            label: light.label,
+            dir: light.dir,
+            clue: light.clue,
+            len: choice[j],
+          };
+          updatedCand.lights[num][dir] = lightCopy;
+        }
+        updatedCandidates.push(updatedCand);
+      }
+    }
+    if (updatedCandidates.length < 1) {
+      console.log('No linked group choice available for ' + grp[0]);
+      return [];
+    }
+    candidates = updatedCandidates;
+  }
+  return candidates;
+}
+
+/**
+ * Returns an object containing .candidates (and maybe .error).
+ */
 exolveFromTextSections = function(w, h, sections) {
+  const ret = {
+    candidates: []
+  }
   if (w <= 0 || h <= 0) {
-    console.log('Width and height must both be at least 1');
-    return [];
+    ret.error = 'Width and height must both be at least 1';
+    return ret;
   }
   if (!sections.across || sections.across.length <= 0 ||
       !sections.down || sections.down.length <= 0) {
-    console.log('Text has to contain at least one across clue and one down clue');
-    return [];
+    ret.error = 'Text has to contain at least one across clue and one down clue';
+    return ret;
   }
   let specs = '';
   /**
@@ -312,91 +503,85 @@ ${sections.preamble}`;
           ' as child clue for ' + missingChild[2]);
       return exolveFromTextSections(w, h, sections);
     }
-    console.log('Exolve had fatal errors in parsing clues: ' + err);
     console.log(err.stack);
-    return [];
+    ret.error = 'Exolve had fatal errors in parsing clues: ' + err;
+    return ret;
   }
 
-  const inferrer = new ExolveGridInferrer(puz, specs);
+  const skeleton = new ExolveGridSkeleton(puz, specs);
   if (exolvePuzzles && exolvePuzzles[xlvpid]) {
     delete exolvePuzzles[xlvpid];
   }
   div.remove();
 
-  inferrer.grid = new Array(h);
   for (let r = 0; r < h; r++) {
-    inferrer.grid[r] = new Array(w);
     for (let c = 0; c < w; c++) {
-      inferrer.grid[r][c] = '_';
+      skeleton.grid[r][c] = '_';
     }
   }
   maxwh = Math.max(w, h);
-  inferrer.lights = [null];
-  inferrer.parents = [];
-  inferrer.mapped = [null];
   for (let ci of puz.allClueIndices) {
     let clue = puz.clues[ci];
     let num = parseInt(clue.label);
     if (isNaN(num) || num <= 0) {
-      console.log('Found non-positive-number clue label: ' + clue.label);
-      return [];
+      ret.error = 'Found non-positive-number clue label: ' + clue.label;
+      return ret;
     }
-    if (inferrer.lights.length <= num) {
-      inferrer.lights.length = num + 1;
+    if (skeleton.lights.length <= num) {
+      skeleton.lights.length = num + 1;
     }
-    if (!inferrer.lights[num]) {
-      inferrer.lights[num] = {};
+    if (!skeleton.lights[num]) {
+      skeleton.lights[num] = {};
     }
     if (clue.enumLen == 0 && !clue.parentClueIndex) {
-      console.log(puz);
-      return [];
+      ret.error = 'Found no or zero enum in clue label: ' + clue.label;
+      return ret;
     }
-    inferrer.lights[num][clue.dir] = {
+    skeleton.lights[num][clue.dir] = {
       label: num,
       dir: clue.dir,
       clue: clue,
       len: 0,
     };
   }
-  if (inferrer.lights.length < 2) {
-    console.log('Did not find any clues');
-    return [];
+  if (skeleton.lights.length < 2) {
+    ret.error = 'Did not find any clues';
+    return ret;
   }
 
   let numLights = 0;
-  for (let i = 1; i < inferrer.lights.length; i++) {
-    if (!inferrer.lights[i]) {
-      console.log('Found missing clue ' + i);
-      return [];
+  for (let i = 1; i < skeleton.lights.length; i++) {
+    if (!skeleton.lights[i]) {
+      ret.error = 'Found missing clue ' + i;
+      return ret;
     }
-    if (!('A' in inferrer.lights[i]) && !('D' in inferrer.lights[i])) {
-      console.log('Found a hole at clue ' + i);
-      return [];
+    if (!('A' in skeleton.lights[i]) && !('D' in skeleton.lights[i])) {
+      ret.error = 'Found a hole at clue ' + i;
+      return ret;
     }
     for (let dir of ['A', 'D']) {
-      if (!(dir in inferrer.lights[i])) {
+      if (!(dir in skeleton.lights[i])) {
         continue;
       }
       numLights++;
 
-      const light = inferrer.lights[i][dir];
+      const light = skeleton.lights[i][dir];
       if (light.clue.childrenClueIndices && light.clue.childrenClueIndices.length > 0) {
-        inferrer.parents.push([i, dir]);
+        skeleton.parents.push([i, dir, puz.getLinkedClues(dir + i)]);
       } else if (!light.clue.parentClueIndex) {
         light.len = light.clue.enumLen;
       }
     }
   }
   console.log('There are ' + numLights + ' lights over ' +
-              w + 'x' + h + ' = ' + (w*h) + ' cells.');
+              w + 'x' + h + ' = ' + (w * h) + ' cells.');
 
-  const candidates = [];
-  const inferrers = inferrer.expandLinkedGroups();
+  const skeletons = skeleton.expandLinkedGroups();
 
   for (let rowpar = 0; rowpar < 2; rowpar++) {
     for (let colpar = 0; colpar < 2; colpar++) {
-      for (let inferrer of inferrers) {
-        const candidate = inferrer.clone();
+      for (let skeleton of skeletons) {
+        const candidate = skeleton.clone();
         for (let r = 0; r < h; r++) {
           for (let c = 0; c < w; c++) {
             if (((r % 2) != rowpar) && ((c % 2) != colpar)) {
@@ -404,17 +589,63 @@ ${sections.preamble}`;
             }
           }
         }
-        candidate.name = 'Chequered template ' + rowpar + '' + colpar;
-        candidate.appendWithSyms(candidates);
+        candidate.name = 'Chequered ' + rowpar + '' + colpar;
+        candidate.appendWithSyms(ret.candidates);
       }
     }
   }
-  for (let inferrer of inferrers) {
-    const candidate = inferrer.clone();
-    candidate.name = 'Non-chequered template';
-    candidate.appendWithSyms(candidates);
+  for (let skeleton of skeletons) {
+    const candidate = skeleton.clone();
+    candidate.name = 'Non-chequered';
+    candidate.appendWithSyms(ret.candidates);
   }
-  return candidates;
+  return ret;
+}
+
+exolveFromTextCreateWorker = function(candidates) {
+  let scriptSrc = '';
+  for (let i = 0; i < document.scripts.length; i++) {
+    const src = document.scripts[i].src;
+    if (!src) continue;
+    const srcUrl = new URL(src);
+    if (srcUrl.pathname.endsWith('/exolve-from-text.js')) {
+      scriptSrc = src;
+      break;
+    }
+  }
+  if (!scriptSrc) {
+    return 'Could not find script with src "/exolve-from-text.js"';
+  }
+  const workerCode = `
+    importScripts('${scriptSrc}');
+    onmessage = (e) => {
+      candidates = e.data || null;
+      if (!candidates) {
+        return;
+      }
+      const results = [];
+      for (let skeleton of candidates) {
+        const candidate = new ExolveGridInferrer(skeleton);
+        candidate.infer(results);
+        if (results.length > 0) {
+          break;
+        }
+      }
+      const seen = {};
+      const deduped = [];
+      for (let result of results) {
+        const gridSpecLines = result.gridSpecLines;
+        if (seen[gridSpecLines]) continue;
+        seen[gridSpecLines] = true;
+        deduped.push(result);
+      }
+      postMessage({results: deduped});
+    }
+  `;
+  blob = new Blob([workerCode], {type: "text/javascript" });
+  const worker = new Worker(window.URL.createObjectURL(blob));
+  worker.postMessage(JSON.parse(JSON.stringify(candidates)));
+  return worker;
 }
 
 function ExolveRowCol(h, w, row=0, col=0) {
@@ -453,45 +684,42 @@ ExolveRowCol.prototype.isLessThan = function(other) {
 }
 
 /**
- * Captures a candidate inferred grid. Grid entries with '_' have not
- * been decided at any point.
+ * Captures a partially inferred candidate grid. Grid entries with '_' have not
+ * been decided. The mapped and lights arrays are both indexed by 1-based clue
+ * numbers (i.e., they have an unused element at index 0). The lights array
+ * lists all the lights that need to be mapped, and the mapped array lists the
+ * prefix of the lights that has been mapped so far.
  */
-function ExolveGridInferrer(puz, specs) {
-  this.puz = puz;
-  this.specs = specs;
-  this.w = puz.gridWidth;
-  this.h = puz.gridHeight;
+function ExolveGridInferrer(skeleton) {
+  this.w = skeleton.w;
+  this.h = skeleton.h;
+  this.specs = skeleton.specs;
   /* The 'cursor': the next light will be placed at a cell here onwards */
   this.rowcol = new ExolveRowCol(this.h, this.w);
 
-  this.grid = null;
+  this.grid = skeleton.grid;
   /* lights[x]['A'/'D'] (for x = 1,2,..) has the specs for that light */
-  this.lights = null;
+  this.lights = skeleton.lights;
   /* mapped[x] (for x = 1,2,..) is the cell where label x has been placed */
-  this.mapped = null;
-  this.name = '';
+  this.mapped = [null];
+  this.parents = skeleton.parents;
+  this.name = skeleton.name;
+  this.symName = skeleton.symName;
+  this.sym = ExolveGridSymmetries[this.symName] ||
+             ExolveSqGridSymmetries[this.symName];
 }
 
-ExolveGridInferrer.prototype.clone = function(newLights=false) {
-  const copy = new ExolveGridInferrer(this.puz, this.specs);
+ExolveGridInferrer.prototype.clone = function() {
+  const copy = new ExolveGridInferrer(this);
   copy.rowcol.row = this.rowcol.row;
   copy.rowcol.col = this.rowcol.col;
   copy.mapped = this.mapped.slice();
-  copy.parents = this.parents;
-  copy.sym = this.sym;
-  copy.name = this.name;
 
   copy.grid = new Array(this.h);
   for (let r = 0; r < this.h; r++) {
     copy.grid[r] = this.grid[r].slice();
   }
-  // expandLinkedGroups() makes shallow copies of some lights[] objects.
-  // But for other cloning, using the same lights is fine.
-  if (newLights) {
-    copy.lights = JSON.parse(JSON.stringify(this.lights));
-  } else {
-    copy.lights = this.lights;
-  }
+  copy.progress = this.progress || null;
   return copy;
 }
 
@@ -532,7 +760,7 @@ ExolveGridInferrer.prototype.canStart = function(rc) {
 ExolveGridInferrer.prototype.isViable = function(connectivity=false) {
   for (let par of this.parents) {
     const clue = this.lights[par[0]][par[1]].clue;
-    const grp = this.puz.getLinkedClues('' + par[1] + par[0]);
+    const grp = par[2];
     let tot = 0;
     for (let cci of grp) {
       const light = this.lights[cci.substr(1)][cci.substr(0, 1)];
@@ -556,17 +784,18 @@ ExolveGridInferrer.prototype.isViable = function(connectivity=false) {
 /**
  * Default symmetry is 180 degrees.
  */
-ExolveGridInferrer.prototype.sym = (rc) => new ExolveRowCol(
-    rc.h, rc.w, rc.h - 1 - rc.row, rc.w - 1 - rc.col);
-ExolveGridInferrer.prototype.symListRect = {
-  '180 deg.': ExolveGridInferrer.prototype.sym,
+const ExolveGridSymmetryDefault = '180 deg.';
+
+const ExolveGridSymmetries = {
+  '180 deg.':
+    (rc) => new ExolveRowCol(rc.h, rc.w, rc.h - 1 - rc.row, rc.w - 1 - rc.col),
   'Hor. flip': (rc) => new ExolveRowCol(rc.h, rc.w, rc.row, rc.w - 1 - rc.col),
   'Ver. flip': (rc) => new ExolveRowCol(rc.h, rc.w, rc.h - 1 - rc.row, rc.col),
 };
-ExolveGridInferrer.prototype.symListSq = {
+const ExolveSqGridSymmetries = {
   '90-R deg.': (rc) => new ExolveRowCol(rc.w, rc.h, rc.w - 1 - rc.col, rc.h - 1 - rc.row),
   '90-L deg.': (rc) => new ExolveRowCol(rc.w, rc.h, rc.col, rc.row),
-}
+};
 
 /**
  * Returns a list of rowcols rc2 such that rc-rc2 form a diagonal
@@ -632,116 +861,6 @@ ExolveGridInferrer.prototype.setGrid = function(rc, letter) {
   return true;
 }
 
-/**
- * For each linked group, split total length into chunks at word/hyphen
- * boundaries to infer component lengths. Allow at most one extra chunk,
- * to keep complexity in check. Handle some special cases too.
- */
-ExolveGridInferrer.prototype.expandLinkedGroups = function() {
-  if (this.parents.length < 1) {
-    return [this];
-  }
-  const choices = [];
-  for (let par of this.parents) {
-    const clue = this.lights[par[0]][par[1]].clue;
-    const phParts = clue.placeholder.split(/[ -]/);
-    const grp = this.puz.getLinkedClues('' + par[1] + par[0]);
-    if (grp.length > phParts.length) {
-      /* See if this is still workable as a special case */
-      const special = [];
-      if (grp.length == 2 && phParts.length == 1) {
-        if (clue.placeholder.length == 6) {
-          special.push([3,3])
-        } else if (clue.placeholder.length == 7) {
-          special.push([3,4])
-          special.push([4,3])
-        } else if (clue.placeholder.length == 8) {
-          special.push([3,5])
-          special.push([4,4])
-          special.push([5,3])
-        }
-      } else if (grp.length == 3 && phParts.length == 1 &&
-                 clue.placeholder.length == 9) {
-        special.push([3,3,3])
-      }
-      if (special.length > 0) {
-        choices.push(special);
-        continue;
-      }
-      console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts but enum only has ' + phParts.length);
-      return [];
-    }
-    if (grp.length < phParts.length - 1) {
-      console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts and enum has too many more parts: ' + phParts.length);
-      return [];
-    }
-    const myChoices = [];
-    const phPartsLens = [];
-    for (let phPart of phParts) phPartsLens.push(phPart.length);
-    if (grp.length == phPartsLens.length) {
-      myChoices.push(phPartsLens);
-    } else {
-      console.assert(grp.length == phPartsLens.length - 1, grp.length, phPartsLens.length);
-      /* We'll skip one of the boundaries in each split-choice. */
-      for (let skip = 1; skip < phPartsLens.length; skip++) {
-        const myChoicesEntry = [];
-        for (let i = 0; i < phPartsLens.length; i++) {
-          if (i == skip - 1) {
-            continue;
-          } else if (i == skip) {
-            myChoicesEntry.push(phPartsLens[i - 1] + phPartsLens[i]);
-          } else {
-            myChoicesEntry.push(phPartsLens[i]);
-          }
-        }
-        myChoices.push(myChoicesEntry);
-      }
-    }
-    choices.push(myChoices);
-  }
-  let candidates = [this];
-  for (let i = 0; i < this.parents.length; i++) {
-    const par = this.parents[i];
-    const grp = this.puz.getLinkedClues('' + par[1] + par[0]);
-    const updatedCandidates = [];
-    for (let choice of choices[i]) {
-      let usable = true;
-      for (let l of choice) {
-        if (l < 3) {
-          usable = false;
-          break;
-        }
-      }
-      if (!usable) {
-        continue;
-      }
-      for (let cand of candidates) {
-        const updatedCand = cand.clone(true);
-        for (let j = 0; j < grp.length; j++) {
-          const cci = grp[j];
-          const num = cci.substr(1);
-          const dir = cci.substr(0, 1);
-          const light = updatedCand.lights[num][dir];
-          console.assert(light.len == 0, light);
-          const lightCopy = {
-            label: light.label,
-            dir: light.dir,
-            clue: light.clue,
-            len: choice[j],
-          };
-          updatedCand.lights[num][dir] = lightCopy;
-        }
-        updatedCandidates.push(updatedCand);
-      }
-    }
-    if (updatedCandidates.length < 1) {
-      console.log('No linked group choice available for ' + grp[0]);
-      return [];
-    }
-    candidates = updatedCandidates;
-  }
-  return candidates;
-}
 
 /**
  * Place a light along direction dir at the current this.rowcol cursor, making
@@ -823,20 +942,35 @@ ExolveGridInferrer.prototype.mapLight = function(dir, len, rowcolStart) {
   return mapped;
 }
 
-ExolveGridInferrer.prototype.appendWithSyms = function(candidates) {
-  for (let symName in this.symListRect) {
-    const candidate = this.clone();
-    candidate.name = this.name + ': ' + symName;
-    candidate.sym = this.symListRect[symName];
-    candidates.push(candidate);
+/**
+ * This does a postMessage(0 with an update on the status. We show this status
+ * anchored to every new placement of the first 10 lights. For each such
+ * combination, we show the max # of lights that could be placed (when this
+ * max reaches the total number og lights, we're done).
+ */
+ExolveGridInferrer.prototype.inferShowProgress = function() {
+  const LIGHTS_MAPPED_PREFIX = 10;
+  if (!this.progress) {
+    this.progress = {
+      count: 0,
+      max: LIGHTS_MAPPED_PREFIX,
+    };
   }
-  if (this.w == this.h) {
-    for (let symName in this.symListSq) {
-      const candidate = this.clone();
-      candidate.sym = this.symListSq[symName];
-      candidate.name = this.name + ': ' + symName;
-      candidates.push(candidate);
-    }
+  if (this.mapped.length == LIGHTS_MAPPED_PREFIX) {
+    /* New placement combo for the first few lights */
+    this.progress.count++;
+    this.progress.max = LIGHTS_MAPPED_PREFIX;
+  }
+  if (this.mapped.length >= this.progress.max) {
+    this.progress.max = this.mapped.length;
+    postMessage({
+        update: 'Trying: ' + this.name + ': First ' + LIGHTS_MAPPED_PREFIX +
+                ' lights placement combo #' + this.progress.count +
+                ' extends to ' + this.mapped.length + ' of ' +
+                this.lights.length + ' lights'
+    });
+  } else if (this.mapped.length == 1) {
+    postMessage({update: 'Trying: ' + this.name});
   }
 }
 
@@ -845,6 +979,7 @@ ExolveGridInferrer.prototype.appendWithSyms = function(candidates) {
  * filled grids to results.
  */
 ExolveGridInferrer.prototype.infer = function(results) {
+  this.inferShowProgress();
   if (this.mapped.length == this.lights.length) {
     while (this.rowcol.isValid()) {
       this.setGrid(this.rowcol, '.');
@@ -856,7 +991,7 @@ ExolveGridInferrer.prototype.infer = function(results) {
     if (!this.isViable(true)) {
       return;
     }
-    results.push(this);
+    results.push({gridSpecLines: this.gridSpecLines(), exolve: this.exolve()});
     return;
   }
   const lights = this.lights[this.mapped.length];
