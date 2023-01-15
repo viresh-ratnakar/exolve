@@ -2179,7 +2179,6 @@ inside a DIV that is not displayed, whereas the top frame DIV of the Exolve
 crossword is moved to the beginning of `document.body`.
 
 After printing, Exolve reverts the page rendering to its original state.
-```
 
 ### Browser-specific printing peculiarities
 
