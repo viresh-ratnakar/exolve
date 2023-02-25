@@ -6965,7 +6965,13 @@ Exolve.prototype.copyNotes = function() {
     return;
   }
   const type = "text/html";
+
+  /** Temporarily remove the notebook background */
+  const cls = 'xlv-overall-notes';
+  this.notesInput.classList.remove(cls);
   const blob = new Blob([this.notesContents.innerHTML], {type});
+  this.notesInput.classList.add(cls);
+
   const data = [new ClipboardItem({[type]: blob})];
   navigator.clipboard.write(data).then(
       this.copyNotesSuccess.bind(this),

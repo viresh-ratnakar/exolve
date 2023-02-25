@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.47.1: February 24, 2023
+
+- Remove the "notebook" background temporarily when copying notes
+  as it looks weird when pasted into emails.
+
 ### Version: Exolve v1.47: December 19, 2022
 
 - Allow '/' as a linked-clue-number separator.
