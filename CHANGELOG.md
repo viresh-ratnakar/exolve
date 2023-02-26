@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.47.2: February 26, 2023
+
+- Add support for `exolve-option: override-number-<name>:<value>` to
+  overrride numeric properties that do not have their own dedicated
+  `exolve-option` (such as `GRIDLINE`).
+- Make `exolve-option` parsing be case-sensitive.
+
 ### Version: Exolve v1.47.1: February 24, 2023
 
 - Remove the "notebook" background temporarily when copying notes

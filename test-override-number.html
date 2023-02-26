@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.47"/>
+<script src="exolve-m.js?v1.47"></script>
+
+<script>
+</script>
+
+<title>Test-Override-Number</title>
+
+</head>
+<body>
+<script>
+const specs = `
+exolve-begin
+  exolve-title: Test-Override-Number
+  exolve-option: override-number-GRIDLINE:1.6
+  exolve-width: 5
+  exolve-height: 5
+  exolve-grid:
+    00000
+    0.0.0
+    00000
+    0.0.0
+    00000
+  exolve-prelude:
+    <center>
+    A grid with thick lines!
+    </center>
+  exolve-across:
+    1 TODO (5)
+    4 TODO (5)
+    5 TODO (5)
+  exolve-down:
+    1 TODO (5)
+    2 TODO (5)
+    3 TODO (5)
+exolve-end
+`;
+const crossword = new Exolve(specs);
+
+</script>
+</body>
+</html>

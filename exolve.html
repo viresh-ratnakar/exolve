@@ -107,7 +107,7 @@ var exolvePuzzles;
  *     all the pages on the page). If containerId is empty and there is no
  *     element with id "exolve", the puzzle is created at the end of the
  *     web page.
- * customized is an optional function that will get called after the puzzle
+ * customizer is an optional function that will get called after the puzzle
  *     is set up. The Exolve object will be passed to the function.
  * provideStateUrl should be set to true if you also want to provide a URL
  *     that includes the current state and can be bookmarked or shared. Note
@@ -1404,132 +1404,144 @@ Exolve.prototype.parseSubmit = function(s) {
 }
 
 Exolve.prototype.parseOption = function(s) {
-  let sparts = s.split(' ')
+  let sparts = s.split(' ');
   for (let spart of sparts) {
-    spart = spart.trim().toLowerCase()
+    spart = spart.trim();
     if (spart == "show-cell-level-buttons") {
-      this.showCellLevelButtons = true
-      continue
+      this.showCellLevelButtons = true;
+      continue;
     }
     if (spart == "hide-inferred-numbers") {
-      this.hideInferredNumbers = true
-      continue
+      this.hideInferredNumbers = true;
+      continue;
     }
     if (spart == "hide-copy-placeholder-buttons") {
-      this.hideCopyPlaceholders = true
-      continue
+      this.hideCopyPlaceholders = true;
+      continue;
     }
     if (spart == "no-auto-solution-in-anno") {
-      this.addSolutionToAnno = false
-      continue
+      this.addSolutionToAnno = false;
+      continue;
     }
     if (spart == "columnar-layout") {
-      this.columnarLayout = true
-      continue
+      this.columnarLayout = true;
+      continue;
     }
     if (spart == "clues-at-right-in-two-columns") {
-      this.cluesToRight = true
-      continue
+      this.cluesToRight = true;
+      continue;
     }
     if (spart == "print-incomplete-2cols") {
       this.printIncomplete2Cols = true;
-      continue
+      continue;
     }
     if (spart == "print-completed-3cols") {
       this.printCompleted3Cols = true;
-      continue
+      continue;
     }
     if (spart == "ignore-unclued") {
-      this.ignoreUnclued = true
-      continue
+      this.ignoreUnclued = true;
+      continue;
     }
     if (spart == "ignore-enum-mismatch") {
-      this.ignoreEnumMismatch = true
-      continue
+      this.ignoreEnumMismatch = true;
+      continue;
     }
     if (spart == "no-nina-button" || spart == "no-ninas-button") {
-      this.noNinaButton = true
-      continue
+      this.noNinaButton = true;
+      continue;
     }
     if (spart == "webifi") {
-      this.useWebifi = true
-      continue
+      this.useWebifi = true;
+      continue;
     }
     if (spart == "allow-digits") {
-      spart = 'allow-chars:0123456789'
+      spart = 'allow-chars:0123456789';
       // Fall through to the allow-chars code.
     }
-    const colon = spart.indexOf(':')
+    const colon = spart.indexOf(':');
     if (colon < 0) {
-      this.throwErr('Expected exolve-option: key:value, got: ' + spart)
+      this.throwErr('Expected exolve-option: key:value, got: ' + spart);
     }
-    const kv = [spart.substr(0, colon).trim(), spart.substr(colon + 1).trim()]
+    const kv = [spart.substr(0, colon).trim(), spart.substr(colon + 1).trim()];
     if (kv[0] == 'clues-panel-lines') {
-      this.cluesPanelLines = parseInt(kv[1])
+      this.cluesPanelLines = parseInt(kv[1]);
       if (isNaN(this.cluesPanelLines)) {
         this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' +
-                      kv[1])
+                      kv[1]);
       }
-      this.cluesToRight = true
-      continue
+      this.cluesToRight = true;
+      continue;
     }
     if (kv[0] == 'highlight-overwritten-seconds') {
-      const secs = parseFloat(kv[1])
+      const secs = parseFloat(kv[1]);
       if (isNaN(secs) || secs < 0) {
-        this.throwErr('Unexpected val in exolve-option: highlight-overwritten-seconds: ' + kv[1])
+        this.throwErr('Unexpected val in exolve-option: highlight-overwritten-seconds: ' + kv[1]);
       }
       this.hltOverwrittenMillis = secs * 1000;
       continue;
     }
     if (kv[0] == 'offset-left') {
-      this.offsetLeft = parseInt(kv[1])
+      this.offsetLeft = parseInt(kv[1]);
       if (isNaN(this.offsetLeft)) {
-        this.throwErr('Unexpected val in exolve-option: offset-left: ' + kv[1])
+        this.throwErr('Unexpected val in exolve-option: offset-left: ' + kv[1]);
       }
-      continue
+      continue;
     }
     if (kv[0] == 'offset-top') {
-      this.offsetTop = parseInt(kv[1])
+      this.offsetTop = parseInt(kv[1]);
       if (isNaN(this.offsetTop)) {
-        this.throwErr('Unexpected val in exolve-option: offset-top: ' + kv[1])
+        this.throwErr('Unexpected val in exolve-option: offset-top: ' + kv[1]);
       }
-      continue
+      continue;
     }
     if (kv[0] == 'grid-background') {
-      this.colorScheme['background'] = kv[1]
-      continue
+      this.colorScheme['background'] = kv[1];
+      continue;
     }
     if (kv[0] == 'font-family') {
-      this.fontFamily = kv[1]
-      continue
+      this.fontFamily = kv[1];
+      continue;
     }
     if (kv[0] == 'font-size') {
-      this.fontSize = kv[1]
-      continue
+      this.fontSize = kv[1];
+      continue;
     }
     if (kv[0].substr(0, 6) == 'color-' || kv[0].substr(0, 7) == 'colour-') {
       let key = kv[0].substr(kv[0].indexOf('-') + 1);
       if (!this.colorScheme[key]) {
-        this.throwErr('Unsupported coloring option: ' + kv[0])
+        this.throwErr('Unsupported coloring option: ' + kv[0]);
       }
       if (!this.isColour(kv[1])) {
-        this.throwErr('Invalid colour for ' + key + ': ' + kv[1])
+        this.throwErr('Invalid colour for ' + key + ': ' + kv[1]);
       }
-      this.colorScheme[key] = kv[1]
-      continue
+      this.colorScheme[key] = kv[1];
+      continue;
+    }
+    if (kv[0].substr(0, 16) == 'override-number-') {
+      const key = kv[0].substr(16);
+      if (!this.hasOwnProperty(key)) {
+        this.throwErr('Invalid Exolve property: ' + key);
+      }
+      if (typeof this[key] !== 'number') {
+        this.throwErr('Non-numeric Exolve property: ' + key);
+      }
+      const val = parseFloat(kv[1]);
+      this[key] = val;
+      continue;
     }
     if (kv[0] == 'allow-chars') {
       if (!this.allowChars) this.allowChars = {};
       for (c of kv[1]) {
         if (/\s/.test(c)) continue;
-        this.allowChars[c] = true
+        this.allowChars[c] = true;
         if (this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
-          this.allowChars[this.SPECIAL_STATE_CHARS[c]] = true
+          this.allowChars[this.SPECIAL_STATE_CHARS[c]] = true;
         }
       }
-      continue
+      continue;
     }
-    this.throwErr('Unexpected exolve-option: ' + spart)
+    this.throwErr('Unexpected exolve-option: ' + spart);
   }
 }
 

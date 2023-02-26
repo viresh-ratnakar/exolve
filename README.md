@@ -1271,7 +1271,7 @@ modify the URL to make a direct submission link, like this:
 In this single-line, repeatable section, the setter can specify certain options.
 Multiple, space-separated options may be provided on each exolve-option line.
 For options that need a value (provided after a colon), there should not be
-any leading space after the colon.
+any leading space after the colon. Option names and values are case-sensitive.
 The list of currently supported options is as follows:
 
 - **`allow-chars:<chars>`** If this option is specified, then we allow solvers
@@ -1358,6 +1358,10 @@ The list of currently supported options is as follows:
   crosswords with solutions provided.
 - **`webifi`** Provide a "Webifi" link under the crossword. See the
   [Webifi section](#webifi) for details.
+- **`override-number-<name>:<N>`** An advanced override function that will
+  set the property named `<name>` in the puzzle to the numeric value `<N>`.
+  This can be used to override properties for which there is no explicit
+  dedicated option, such as `GRIDLINE`.
 
 ### Colour schemes
 Using a bunch of `exolve-option: colour-<name>:<c>` (or, of course,
