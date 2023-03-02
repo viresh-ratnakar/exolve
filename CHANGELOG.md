@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.47.3: March 1, 2023
+
+- Add option to skip printing the questions (in crosswords that have
+  them).
+
 ### Version: Exolve v1.47.2: February 26, 2023
 
 - Add support for `exolve-option: override-number-<name>:<value>` to

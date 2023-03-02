@@ -429,6 +429,7 @@ function Exolve(puzzleSpec,
     'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p).',
     'print-page-wysiwyg': 'Print wysiwyg',
     'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword.',
+    'print-questions': 'Print questions:',
     'show-notes-seq': 'Show clue-solving sequence:',
     'show-notes-entries': 'Show entered solutions:',
     'show-notes-times': 'Show clue-solving times:',
@@ -679,6 +680,12 @@ Exolve.prototype.init = function() {
                     <input class="xlv-input" id="${this.prefix}-page-margin"
                       name="${this.prefix}-page-margin" size="5" value="0.5">
                     </input>
+                    <span id="${this.prefix}-print-questions-span">
+                      ${this.textLabels['print-questions']}
+                      <input id="${this.prefix}-print-questions"
+                        checked=true type="checkbox">
+                      </input>
+                    </span>
                   </div>
                   <div>
                     <button id="${this.prefix}-print-crossword"
@@ -925,6 +932,10 @@ Exolve.prototype.init = function() {
   this.printFontInput = document.getElementById(this.prefix + '-print-font-inp');
   this.printFontInput.addEventListener(
       'change', this.setPrintFont.bind(this, false));
+  if (this.questionTexts.length == 0) {
+    const pq = document.getElementById(this.prefix + '-print-questions-span');
+    pq.style.display = 'none';
+  }
 
   this.webifiButton = document.getElementById(this.prefix + '-webifi');
   this.webifiButton.style.display = 'none';
@@ -7339,6 +7350,7 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'ledger') ? 17.0 : 11.0))))))));
   const font = (this.printFontInput ? this.printFontInput.value : '18px') || '18px';
 
+  const pq = document.getElementById(this.prefix + '-print-questions');
   const onlyCrossword = this.printOnlyCrossword || false;
   return {
     page: page,
@@ -7347,6 +7359,7 @@ Exolve.prototype.getPrintSettings = function() {
     pageMarginIn: marginIn,
     pageWidthIn: widthIn,
     pageHeightIn: heightIn,
+    printQuestions: (this.questionTexts.length > 0) && pq.checked,
   };
 }
 
@@ -7441,6 +7454,11 @@ Exolve.prototype.handleBeforePrint = function() {
   this.columnarLayout = false;
   this.setColumnLayout();
 
+  // Hide questions if requested.
+  const maybeHideQuestions = settings.printQuestions ? '' : `
+    .xlv-questions,
+  `;
+
   const customStyles = document.createElement('style');
   customStyles.innerHTML = `
   @page {
@@ -7475,6 +7493,7 @@ Exolve.prototype.handleBeforePrint = function() {
     .xlv-saving,
     .xlv-small-button,
     .xlv-small-print,
+    .xlv-submit,${maybeHideQuestions}
     .xlv-status {
       display: none;
     }

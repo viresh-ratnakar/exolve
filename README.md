@@ -1585,6 +1585,7 @@ Here are all the names of pieces of text that you can relabel:
 | `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
 | `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
+| `print-questions` | Print questions:                             |
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
@@ -2142,6 +2143,9 @@ with the title "Settings for printing/PDFs". This lets you specify:
   not be the actual printed size exactly (because of scaling). However, in
   general, you can increase/decrease the font size setting and the printed
   size will increase/decrease accordingly.
+- Print questions. When the crossword includes questions, a checkbox is shown
+  to let you decide whether to include them in the printing (the option is
+  ignored when printing in wysiwig mode).
 
 Additionally, from this panel, you have three buttons for printing:
 
