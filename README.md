@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.47 December 19, 2022
+### Version: Exolve v1.48 March 7, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1283,17 +1283,10 @@ The list of currently supported options is as follows:
   `|_+@!~*.?`), then to specify it in the grid, you have to prefix it with `&`.
 - **`allow-digits`** If this option is specified, then we allow solvers to enter
   digits in cells.
-- **`clues-at-right-in-two-columns`** If this option is specified, it affects
-  the column layout when the available width is wide enough for exactly two
-  columns (but not three or more). Normally, the clues panels get rendered
-  under the grid in two-column mode (the rationale is that a balanced look is
-  better). If this option in set, then in two-column mode, the clues panels
-  are rendered to the right of the grid. This option is automatically
-  turned on when you use the `clues-panel-lines` option (see below). This option
-  has no effect if the `columnar-layout` option is used.
+- **`clues-at-right-in-two-columns`** Deprecated option that has no effect now
+  as we always try to place he clues to the right if there is space.
 - **`clues-panel-lines:<N>`** Limit the across/down/nodir clues boxes to
-  a maximum of about N lines of text, adding scrollbars if needed. Also
-  implicitly turns on the `clues-at-right-in-two-columns` option.
+  a maximum of about N lines of text, adding scrollbars if needed.
 - **`colour-<name>:<c>` or `color-<name>:<c>`** Set the
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
@@ -1521,7 +1514,7 @@ Here are all the names of pieces of text that you can relabel:
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
-| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
+| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
@@ -1684,8 +1677,9 @@ can be turned off with a checkbox). These are:
 
 When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
 taken to the notes line for that particular clue, where you can edit the
-note or just read what you may have written. When no clue is selected,
-typing Ctrl-/ will take you the overall notes section.
+note or just read what you may have written. When in the notes already, Ctrl-/
+will take you back to your last location in the grid (if any). When no clue is
+selected, typing Ctrl-/ will take you the overall notes section.
 
 Similarly, when solving a clue, if you type Ctrl-\* (Ctrl-asterisk) then
 a \* is added to the front of the clue's notes to mark it as a favourite.
@@ -2072,19 +2066,6 @@ Without the `columnar-layout` option, if the width is enough for three
 columns, then the layout has the two clues panels laid out horizontally to
 the right of the grid. If the width is wide enough for only one column, then
 the layout has the clues panels laid out vertically under the grid.
-
-If the width is wide enough for exactly two columns, then the two clues
-panels get rendered side-by-side, under the grid. This is the choice
-I made, as laying them out to the right of the grid (under one another)
-would typically make a very long second column (especially long if
-all annotations are revealed), compared to the height of the first
-column (that contains the grid).
-
-However, if the `clues-panel-lines` option is used, it's likely that
-the clues panels will not get unduly tall, so in that case, even in
-two-column rendering, we lay out the clues panels to the right of the grid.
-You can also use the `clues-at-right-in-two-columns` option to force
-this kind of rendering in two-column mode.
 
 ## Printing
 

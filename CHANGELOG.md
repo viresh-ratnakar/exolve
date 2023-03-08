@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.48: March 7, 2023
+
+- When already in the Notes section, return to the last cell in
+  the grid if another Ctrl-/ is pressed. Restore scroll position
+  when jumping back to the grid from the notes.
+- Reduce clue-column widths progressively if the display is resized.
+- Make the exolve-option `clues-at-right-in-two-columns be a no-op.
+  We now always behave as if this were true.
+
 ### Version: Exolve v1.47.3: March 1, 2023
 
 - Add option to skip printing the questions (in crosswords that have

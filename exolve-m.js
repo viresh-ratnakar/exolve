@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.47 December 19, 2022';
+  this.VERSION = 'Exolve v1.48 March 7, 2023';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -332,8 +332,9 @@ function Exolve(puzzleSpec,
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction.</li>
          <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!,
-             <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to notes,
-             <b>Ctrl-*:</b> Mark clue as fave in notes, adding a * prefix.</li>
+             <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to/back-from
+             notes, <b>Ctrl-*:</b> Mark clue as fave in notes, adding a *
+             prefix.</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless.</li>
        </ul>
@@ -349,9 +350,9 @@ function Exolve(puzzleSpec,
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
     'notes-help': '<li>Ctrl-/ takes you to the current clue\'s notes ' +
-        '(or overall notes).</li><li>Ctrl-* adds a * prefix to the current ' +
-        'clue\'s notes.</li><li>Hovering over a clue\'s notes shows the ' +
-        'clue as a tooltip.</li>',
+        '(or overall notes) and back (if already there).</li><li>Ctrl-* ' +
+        'adds a * prefix to the current clue\'s notes.</li><li>Hovering ' +
+        'over a clue\'s notes shows the clue as a tooltip.</li>',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
@@ -466,7 +467,6 @@ function Exolve(puzzleSpec,
   this.languageScript = '';
   this.langMaxCharCodes = 1;
   this.columnarLayout = false;
-  this.cluesToRight = false;
   this.ignoreUnclued = false;
   this.ignoreEnumMismatch = false;
   this.showCellLevelButtons = false;
@@ -1392,7 +1392,7 @@ Exolve.prototype.parseOption = function(s) {
       continue;
     }
     if (spart == "clues-at-right-in-two-columns") {
-      this.cluesToRight = true;
+      /* Deprecated, we always try to position clues to the right now. */
       continue;
     }
     if (spart == "print-incomplete-2cols") {
@@ -1434,7 +1434,6 @@ Exolve.prototype.parseOption = function(s) {
         this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' +
                       kv[1]);
       }
-      this.cluesToRight = true;
       continue;
     }
     if (kv[0] == 'highlight-overwritten-seconds') {
@@ -4120,15 +4119,6 @@ Exolve.prototype.displayClues = function() {
     document.getElementById(this.prefix + '-nodir-label').
       insertAdjacentHTML('beforeend', this.nodirHeading);
   }
-  const cbs = document.getElementsByClassName('xlv-clues-box')
-  this.cluesBoxWidth = 0;
-  for (let x = 0; x < cbs.length; x++) {
-    const e = cbs[x]
-    if (e.offsetWidth > this.cluesBoxWidth) {
-      this.cluesBoxWidth = e.offsetWidth;
-    }
-  }
-  this.equalizeClueWidths(this.cluesBoxWidth);
 }
 
 Exolve.prototype.equalizeClueWidths = function(w) {
@@ -4194,12 +4184,27 @@ Exolve.prototype.computeGridSize = function(maxDim) {
 }
 
 Exolve.prototype.setColumnLayout = function() {
+  const xOffset = this.frame.getBoundingClientRect().x;
+  const portWidth = Math.min(this.frame.clientWidth,
+                             this.getViewportWidth() - xOffset);
+  /**
+   * 12 = rt margin of grid panel, 8 = rt margin of clues panel; subtract 20.
+   */
+  const availWidth = portWidth - this.gridPanel.offsetWidth - 20;
+  if (availWidth < 400) {
+    /* Clues in a single column, under grid */
+    this.cluesBoxWidth = this.gridPanel.offsetWidth;
+  } else if (availWidth < 984 && !this.columnarLayout) {
+    /* Clues in two columns to the right of the grid */
+    this.cluesBoxWidth = Math.floor(availWidth / 2) - 12;
+  } else {
+    this.cluesBoxWidth = 480;
+  }
+  this.equalizeClueWidths(this.cluesBoxWidth);
+  this.cluesContainer.style.maxWidth = (2 * (this.cluesBoxWidth + 12)) + 'px';
   if (!this.columnarLayout) {
     this.cluesContainer.className = 'xlv-clues xlv-clues-flex'
     this.gridcluesContainer.className = 'xlv-grid-and-clues-flex'
-    if (this.cluesToRight) {
-      this.cluesContainer.classList.add('xlv-clues-to-right');
-    }
     return;
   }
   const numColumns = Math.floor(this.getViewportWidth() /
@@ -5450,6 +5455,20 @@ Exolve.prototype.handleKeyUp = function(e) {
   this.handleKeyUpInner(key)
 }
 
+Exolve.prototype.muzzleEvent = function(e) {
+  e.stopPropagation();
+  e.preventDefault();
+}
+
+Exolve.prototype.fromNotesToGrid = function() {
+  if (this.savedRow == this.currRow && this.savedCol == this.currCol) {
+    /* Firefox (etc.?) do not scroll back correctly */
+    window.scrollTo(this.savedScrollX || 0, this.savedScrollY || 0);
+  }
+  this.activateCell(this.currRow, this.currCol);
+  this.refocus();
+}
+
 // For tab/shift-tab, ctrl-q, ctrl-Q, ctrl-B, ctrl-e
 Exolve.prototype.handleKeyDown = function(e) {
   let key = e.which || e.keyCode
@@ -5459,26 +5478,26 @@ Exolve.prototype.handleKeyDown = function(e) {
       e.preventDefault()
     }
   } else if (e.ctrlKey && (e.key == 'q' || e.key == 'Q')) {
-    e.stopPropagation();
-    e.preventDefault();
+    this.muzzleEvent(e);
     if (e.key == 'Q') {
       this.clearAll();
     } else {
       this.clearCurr();
     }
   } else if (e.ctrlKey && e.key == 'B') {
-    e.stopPropagation();
-    e.preventDefault();
+    this.muzzleEvent(e);
     this.printNow('crossword');
   } else if (e.ctrlKey && e.key == '/') {
-    if (this.focusOnNotes()) {
-      e.stopPropagation();
-      e.preventDefault();
+    if (this.notesPanel.contains(e.target) &&
+        this.currCellIsValid()) {
+      this.muzzleEvent(e);
+      this.fromNotesToGrid();
+    } else if (this.focusOnNotes()) {
+      this.muzzleEvent(e);
     }
   } else if (e.ctrlKey && e.key == '*') {
     if (this.markAsFave()) {
-      e.stopPropagation();
-      e.preventDefault();
+      this.muzzleEvent(e);
     }
   }
 }
@@ -6913,6 +6932,10 @@ Exolve.prototype.focusOnNotes = function() {
   if (!elt) {
     return false;
   }
+  this.savedScrollX = window.pageXOffset;
+  this.savedScrollY = window.pageYOffset;
+  this.savedRow = this.currRow;
+  this.savedCol = this.currCol;
   elt.focus();
   return true;
 }
@@ -7281,7 +7304,6 @@ Exolve.prototype.handleAfterPrint = function() {
       }
     }
     this.setColumnLayout();
-    this.equalizeClueWidths(this.cluesBoxWidth);
     this.recolourCells();
     this.redisplayNinas();
 
