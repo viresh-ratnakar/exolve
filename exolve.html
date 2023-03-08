@@ -4231,9 +4231,10 @@ Exolve.prototype.computeGridSize = function(maxDim) {
 }
 
 Exolve.prototype.setColumnLayout = function() {
-  const xOffset = this.frame.getBoundingClientRect().x;
-  const portWidth = Math.min(this.frame.clientWidth,
-                             this.getViewportWidth() - xOffset);
+  const frameBox = this.frame.getBoundingClientRect();
+  const xStart = Math.max(frameBox.left, 0);
+  const xEnd = Math.min(frameBox.right, this.getViewportWidth());
+  const portWidth = xEnd - xStart;
   /**
    * 12 = rt margin of grid panel, 8 = rt margin of clues panel; subtract 20.
    */

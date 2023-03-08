@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.48.1: March 8, 2023
+
+- Slight tweak to the available width calculation in resizing clue
+  column widths, for the case of embedded (not full-width) puzzles.
+
 ### Version: Exolve v1.48: March 7, 2023
 
 - When already in the Notes section, return to the last cell in
