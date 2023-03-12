@@ -4186,21 +4186,24 @@ Exolve.prototype.computeGridSize = function(maxDim) {
 Exolve.prototype.setColumnLayout = function() {
   const frameBox = this.frame.getBoundingClientRect();
   const xStart = Math.max(frameBox.left, 0);
-  const xEnd = Math.min(frameBox.right, this.getViewportWidth());
+  const vpWidth = this.getViewportWidth();
+  const xEnd = frameBox.right > 0 ? Math.min(frameBox.right, vpWidth) : vpWidth;
   const portWidth = xEnd - xStart;
+  const gpWidth = this.gridPanel.offsetWidth || 481;
   /**
    * 12 = rt margin of grid panel, 8 = rt margin of clues panel; subtract 20.
    */
-  const availWidth = portWidth - this.gridPanel.offsetWidth - 20;
+  const availWidth = portWidth - gpWidth - 20;
   if (availWidth < 400) {
     /* Clues in a single column, under grid */
-    this.cluesBoxWidth = this.gridPanel.offsetWidth;
+    this.cluesBoxWidth = gpWidth;
   } else if (availWidth < 984 && !this.columnarLayout) {
     /* Clues in two columns to the right of the grid */
     this.cluesBoxWidth = Math.floor(availWidth / 2) - 12;
   } else {
     this.cluesBoxWidth = 480;
   }
+  console.assert(this.cluesBoxWidth > 0, this.cluesBoxWidth);
   this.equalizeClueWidths(this.cluesBoxWidth);
   this.cluesContainer.style.maxWidth = (2 * (this.cluesBoxWidth + 12)) + 'px';
   if (!this.columnarLayout) {
@@ -4208,8 +4211,8 @@ Exolve.prototype.setColumnLayout = function() {
     this.gridcluesContainer.className = 'xlv-grid-and-clues-flex'
     return;
   }
-  const numColumns = Math.floor(this.getViewportWidth() /
-    (15 + Math.max(this.cluesBoxWidth, this.gridPanel.offsetWidth)));
+  const numColumns = Math.floor(
+      vpWidth / (15 + Math.max(this.cluesBoxWidth, gpWidth)));
   if (numColumns == 2) {
     this.cluesContainer.className = 'xlv-clues xlv-clues-columnar'
     this.gridcluesContainer.className = 'xlv-grid-and-clues-2-columnar'

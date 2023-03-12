@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.48.2: March 12, 2023
+
+- If setColumnLayout() is called without the DOM rendering of the
+  puzzle yet done, it gets duped when calculating the clues column
+  width. Fix that by falling back to simply using the viewport
+  width if this.frame's width is found to be 0.
+
 ### Version: Exolve v1.48.1: March 8, 2023
 
 - Slight tweak to the available width calculation in resizing clue
