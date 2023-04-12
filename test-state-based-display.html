@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.48"/>
+<script src="exolve-m.js?v1.48"></script>
+
+<script>
+
+function tweakDisplay(puz) {
+  for (let row = 0; row < puz.gridHeight; row++) {
+    for (let col = 0; col < puz.gridWidth; col++) {
+      const gridCell = puz.grid[row][col];
+      if (!gridCell.isLight) continue;
+
+      /* Add an overlay rectangle for colouring, it it doesn't exist */
+      let cellColour = 'transparent';
+      if (!gridCell.overlay) {
+        gridCell.overlay = puz.makeCellDiv(row, col, cellColour, 1);
+        puz.gridParent.appendChild(gridCell.overlay);
+      }
+      if (gridCell.currLetter == 'X') {
+        cellColour = 'blue';
+      } else if (gridCell.currLetter == 'Y') {
+        cellColour = 'green';
+      }
+      gridCell.overlay.style.backgroundColor = cellColour;
+    }
+  }
+}
+
+function customizeExolve(puz) {
+  puz.updateDisplayAndGetState = (function() {
+    var origHandler = puz.updateDisplayAndGetState;
+    return function() {
+      const ret = origHandler.apply(this);
+      tweakDisplay(this);
+      return ret
+    };
+  })();
+  tweakDisplay(puz);
+}
+
+</script>
+
+<title>Test-State-Based-Display</title>
+
+</head>
+<body>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-title: Test-State-Based-Display
+  exolve-setter: Viresh Ratnakar
+  exolve-width: 5
+  exolve-height: 5
+  exolve-grid:
+    00000
+    0.0.0
+    00000
+    0.0.0
+    00000
+  exolve-prelude:
+    <center>
+    Typing X in any cell will turn it lavender.
+    Typing Y in any cell will turn it lightgreen.
+    </center>
+  exolve-across:
+    1 TODO (5)
+    4 TODO (5)
+    5 TODO (5)
+  exolve-down:
+    1 TODO (5)
+    2 TODO (5)
+    3 TODO (5)
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+</script>
+</body>
+</html>
