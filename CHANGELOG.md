@@ -1,5 +1,12 @@
 # Changelog
 
+### Version: Exolve v1.49: May 10, 2023
+
+- When testing if the current input is a valid letter in a
+  multi-char-letters script such as Devanagari, we need to check *all*
+  the entered letters.
+- Increase max chars per letter to 5 for Devanagari (from 4).
+
 ### Minor Version: Exolve v1.48.3: March 23, 2023
 
 - Do not fire a completion event if there is not .frame Element

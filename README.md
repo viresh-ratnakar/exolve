@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.48 March 7, 2023
+### Version: Exolve v1.49 May 10, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -2173,7 +2173,7 @@ After printing, Exolve reverts the page rendering to its original state.
 
 Brwosers have their own printing layout algorithms that sometimes do not behave
 as expected by Exolve's printing layout algorithm. Here are some known issues as
-of March, 2022.
+of May, 2023.
 
 - Printing settings in Firefox seem especially complex, and Exolve turns off
   the pagination attempts described above if it detects the browser to be

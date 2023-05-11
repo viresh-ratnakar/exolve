@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.48 March 7, 2023';
+  this.VERSION = 'Exolve v1.49 May 10, 2023';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -1517,8 +1517,8 @@ Exolve.prototype.parseLanguage = function(s) {
   this.language = parts[0]
   this.languageScript = parts[1]
   try {
-    this.scriptRE = new RegExp('\\p{Script=' + this.languageScript + '}', 'u')
-    this.scriptLowerCaseRE = new RegExp('\\p{Lowercase}', 'u')
+    this.scriptRE = new RegExp('^\\p{Script=' + this.languageScript + '}+$', 'u')
+    this.scriptLowerCaseRE = new RegExp('^\\p{Lowercase}+$', 'u')
   } catch (err) {
     this.throwErr(
         'Your browser ' +
@@ -1528,7 +1528,7 @@ Exolve.prototype.parseLanguage = function(s) {
   }
   // Hard-code some known scripts requiring langMaxCharCodes
   if (this.languageScript.toLowerCase() == 'devanagari') {
-    this.langMaxCharCodes = 4
+    this.langMaxCharCodes = 5
   }
   if (parts.length > 2) {
     this.langMaxCharCodes = parseInt(parts[2])
