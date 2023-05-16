@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.49 May 10, 2023';
+  this.VERSION = 'Exolve v1.50 May 16, 2023';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -7360,6 +7360,9 @@ Exolve.prototype.getPrintSettings = function() {
     const val = parseFloat(marginStr);
     if (!isNaN(val) && val >= 0.0) marginIn = val;
   }
+  if (pageMarginElt) {
+    pageMarginElt.value = marginIn;
+  }
   const widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
                   ((page == 'A4') ? 210.0/25.4 :
                   ((page == 'A3') ? 297.0/25.4 :
@@ -7918,10 +7921,6 @@ Exolve.prototype.printThreeColumns = function(settings) {
 }
 
 Exolve.prototype.paginate = function(settings) {
-  if (navigator.userAgent.indexOf('Firefox/') >= 0) {
-    // Firefox printing is complicated, give up.
-    return;
-  }
   const outerBox = this.frame.getBoundingClientRect();
   const bodyBox = document.body.getBoundingClientRect();
   if (outerBox.top - bodyBox.top > 5 || outerBox.left - bodyBox.left > 5) {

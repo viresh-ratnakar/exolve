@@ -1,5 +1,13 @@
 # Changelog
 
+### Version: Exolve v1.50: May 16, 2023
+
+- Remove the Firefox-specific code that made pageinate() a no-op—it
+  seems to work OK now.
+- But in Firefox, use settings for the toggle "Shrink to page width"
+  vs "Scale [100]" seem sticky. Add documentation that this should
+  be set to "Shrink to page width."
+
 ### Version: Exolve v1.49: May 10, 2023
 
 - When testing if the current input is a valid letter in a

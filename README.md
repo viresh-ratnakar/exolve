@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.49 May 10, 2023
+### Version: Exolve v1.50 May 16, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -2175,11 +2175,9 @@ Brwosers have their own printing layout algorithms that sometimes do not behave
 as expected by Exolve's printing layout algorithm. Here are some known issues as
 of May, 2023.
 
-- Printing settings in Firefox seem especially complex, and Exolve turns off
-  the pagination attempts described above if it detects the browser to be
-  Firefox. If the printed area seems too small with Firefox, try unchecking the
-  option: "Ignore Scaling and Shrink to Fit Page Width" and set the scale to
-  something like 70%.
+- Printing settings in Firefox seem especially complex. If the printed area
+  overflows with Firefox, try toggling to set the Firefox print setting
+  "Fit to page width" instead of "Scale [100]."
 - In Chrome, if the margin is too high (say, more than 0.7 inches), then some
   content may get clipped.
 
