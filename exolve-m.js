@@ -7173,6 +7173,7 @@ Exolve.prototype.deleteStorage = function(id, timestamp) {
   if (id) {
     window.localStorage.removeItem('xlvstate:' + id);
   } else {
+    const keysToDelete = [];
     for (let idx = 0; idx < window.localStorage.length; idx++) {
       let key = window.localStorage.key(idx)
       if (!key.startsWith('xlvstate:')) {
@@ -7185,8 +7186,11 @@ Exolve.prototype.deleteStorage = function(id, timestamp) {
         continue;
       }
       if (lsVal.timestamp < timestamp) {
-        window.localStorage.removeItem(key);
+        keysToDelete.push(key);
       }
+    }
+    for (let key of keysToDelete) {
+      window.localStorage.removeItem(key);
     }
   }
   this.manageStorage(null);

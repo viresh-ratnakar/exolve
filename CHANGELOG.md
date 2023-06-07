@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.1: June 7, 2023
+
+- Bug fix: When deleting older entries while managing local storage,
+  first collect the entries to be deleted, then delete them. Otherwise
+  we only delete partially, as window.localStorage is a live list.
+
 ### Version: Exolve v1.50: May 16, 2023
 
 - Remove the Firefox-specific code that made pageinate() a no-op—it
