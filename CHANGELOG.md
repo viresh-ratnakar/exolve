@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.2: July 7, 2023
+
+- Make sure that .xlv-small-buton is not displayed when printing
+  (by using a more specific CSS selector).
+
 ### Minor Version: Exolve v1.50.1: June 7, 2023
 
 - Bug fix: When deleting older entries while managing local storage,
