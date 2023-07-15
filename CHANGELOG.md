@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.3: July 15, 2023
+
+- Make exolve-from-puz.js also read the "Notes" section and set it
+  as exolve-preamble if it is nonempty.
+
 ### Minor Version: Exolve v1.50.2: July 7, 2023
 
 - Make sure that .xlv-small-buton is not displayed when printing
