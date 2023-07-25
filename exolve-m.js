@@ -584,11 +584,6 @@ Exolve.prototype.init = function() {
               <span id="${this.prefix}-status-num-filled">0</span>/<span
                     id="${this.prefix}-status-num-total"></span>
             </div> <!-- xlv-status -->
-            <div id="${this.prefix}-saving" class="xlv-wide-box xlv-saving">
-              <span id="${this.prefix}-saving-msg">
-              ${this.notTemp ? this.textLabels['saving-msg'] : ''}
-              </span>
-            </div> <!-- xlv-saving -->
             <div id="${this.prefix}-small-print"
                 class="xlv-wide-box xlv-small-print">
               <a id="${this.prefix}-tools-link" href="" class="xlv-toggler"
@@ -633,6 +628,11 @@ Exolve.prototype.init = function() {
                 </p>
                 <p id="${this.prefix}-tools-msg">
                   ${this.textLabels['tools-msg']}
+                </p>
+                <p id="${this.prefix}-saving" class="xlv-saving">
+                  <span id="${this.prefix}-saving-msg">
+                    ${this.notTemp ? this.textLabels['saving-msg'] : ''}
+                  </span>
                 </p>
                 <p>
                   <span id="${this.prefix}-shuffle" class="xlv-shuffle"

@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.4: July 25, 2023
+
+- Move the "Your entries are auto-saved..." message to appear in
+  the Exolve sub-section, reducing clutter under the crossword.
+
 ### Minor Version: Exolve v1.50.3: July 15, 2023
 
 - Make exolve-from-puz.js also read the "Notes" section and set it
