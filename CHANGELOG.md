@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.5: August 7, 2023
+
+- When there is a copyright message, include it in printing as well.
+
 ### Minor Version: Exolve v1.50.4: July 25, 2023
 
 - Move the "Your entries are auto-saved..." message to appear in
