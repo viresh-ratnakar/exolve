@@ -322,7 +322,7 @@ function Exolve(puzzleSpec,
     'tools-link': 'Exolve',
     'tools-link.hover': 'Crossword software: ' +
         this.VERSION + ': Show/hide panel with info/help and links to report ' +
-        'a bug, manage storage, access a scratch pad, etc.',
+        'a bug, manage storage, etc.',
     'tools-msg': `
        <p>Control keys:</p>
        <ul>
@@ -353,6 +353,8 @@ function Exolve(puzzleSpec,
         '(or overall notes) and back (if already there).</li><li>Ctrl-* ' +
         'adds a * prefix to the current clue\'s notes.</li><li>Hovering ' +
         'over a clue\'s notes shows the clue as a tooltip.</li>',
+    'jotter': 'Jotter',
+    'jotter.hover': 'Show/hide a jotting pad that also lets you try out anagrams.',
     'maker-info': 'Exolve-maker info',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
@@ -369,7 +371,7 @@ function Exolve(puzzleSpec,
         'storage.',
     'saving-bookmark': 'You can share the state using this link:',
     'saving-url': 'URL',
-    'shuffle': 'Scratch pad: (click here to shuffle)',
+    'shuffle': 'Jotting pad: (click here to shuffle)',
     'shuffle.hover': 'Shuffle selected text (or all text, if none selected).',
     'across-letter': 'a',
     'back-letter': 'b',
@@ -595,6 +597,9 @@ Exolve.prototype.init = function() {
               <a id="${this.prefix}-notes" href="" class="xlv-toggler"
                   title="${this.textLabels['notes.hover']}"
                   >${this.textLabels['notes']}</a>
+              <a id="${this.prefix}-jotter" href="" class="xlv-toggler"
+                  title="${this.textLabels['jotter.hover']}"
+                  >${this.textLabels['jotter']}</a>
               <a id="${this.prefix}-webifi" href="" class="xlv-toggler"
                   title="${this.textLabels['webifi.hover']}"
                   >${this.textLabels['webifi']}</a>
@@ -633,14 +638,6 @@ Exolve.prototype.init = function() {
                   <span id="${this.prefix}-saving-msg">
                     ${this.notTemp ? this.textLabels['saving-msg'] : ''}
                   </span>
-                </p>
-                <p>
-                  <span id="${this.prefix}-shuffle" class="xlv-shuffle"
-                      title="${this.textLabels['shuffle.hover']}"
-                      >${this.textLabels['shuffle']}</span>
-                  <textarea
-                      id="${this.prefix}-scratchpad" class="xlv-scratchpad"
-                      spellcheck="false" rows="2"></textarea>
                 </p>
               </div>
               <div id="${this.prefix}-print-settings"
@@ -708,6 +705,17 @@ Exolve.prototype.init = function() {
               </div>
               <div id="${this.prefix}-notes-panel"
                   class="xlv-notes-panel xlv-toggleable" style="display:none">
+              </div>
+              <div id="${this.prefix}-jotter-panel"
+                  class="xlv-toggleable" style="display:none">
+                <p>
+                  <span id="${this.prefix}-shuffle" class="xlv-shuffle"
+                      title="${this.textLabels['shuffle.hover']}"
+                      >${this.textLabels['shuffle']}</span>
+                  <textarea
+                      id="${this.prefix}-scratchpad" class="xlv-scratchpad"
+                      spellcheck="false" rows="2"></textarea>
+                </p>
               </div>
             </div> <!-- xlv-small-print -->
             <div id="${this.prefix}-questions"
@@ -956,6 +964,10 @@ Exolve.prototype.init = function() {
   this.notesPanel = document.getElementById(this.prefix + '-notes-panel');
   this.notesToggler.addEventListener(
       'click', this.togglePanel.bind(this, this.notesToggler, this.notesPanel));
+  this.jotterToggler = document.getElementById(this.prefix + '-jotter');
+  this.jotterPanel = document.getElementById(this.prefix + '-jotter-panel');
+  this.jotterToggler.addEventListener(
+      'click', this.togglePanel.bind(this, this.jotterToggler, this.jotterPanel));
 
   document.getElementById(this.prefix + '-manage-storage').addEventListener(
     'click', this.manageStorage.bind(this));

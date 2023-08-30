@@ -468,6 +468,7 @@ a.xlv-toggler:active,
 a.xlv-toggler:link,
 a.xlv-toggler:visited {
   outline: none;
+  text-decoration: none;
 }
 a.xlv-toggler:hover {
   text-decoration: underline;

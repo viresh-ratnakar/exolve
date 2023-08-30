@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.50.6: August 30, 2023
+
+- Expose the scratch pad (renamed "Jotter") in the main menu.
+- Remove underlines from main menu links (they show up on hovering).
+
 ### Minor Version: Exolve v1.50.5: August 7, 2023
 
 - When there is a copyright message, include it in printing as well.

@@ -1509,12 +1509,14 @@ Here are all the names of pieces of text that you can relabel:
 | `3d-dn-label`     | Down & Up                           |
 | `nodir-label`    | Other                                |
 | `tools-link`     | Exolve                                |
-| `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, access a scratch pad, etc.|
+| `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, etc.|
 | `tools-msg`      | [Longish list of all control keys, and more...]|
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
 | `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
+| `jotter`         | Jotter                                |
+| `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams.|
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
@@ -1528,7 +1530,7 @@ Here are all the names of pieces of text that you can relabel:
 | `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
 | `saving-bookmark`| You can share the state using this link:|
 | `saving-url`     | URL                                  |
-| `shuffle`        | Scratch pad: (click here to shuffle) |
+| `shuffle`        | Jotting pad: (click here to shuffle) |
 | `shuffle.hover`  | Shuffle selected text (or all text, if none selected).|
 | `across-letter`  | a                                    |
 | `down-letter`    | d                                    |
@@ -1692,6 +1694,15 @@ At this time, I have chosen to keep all the notes confined to the Notes
 section that appears under the crossword. I think surfacing these notes
 in the clue tables and/or in the top clue may make the interface too
 cluttered, but I am open to ideas.
+
+## Jotter
+
+Under the crossword, you can see a link to toggle a "Jotter" into view,
+which is a scratch-pad in which you can jot down solution ideas or memos
+to yourself. You can also try out anagrams of the text in the Jotter, by
+clicking on the label that invites you to "click here to shuffle". If you
+have highlighted some text within the jotter, then only that selected
+part will get shuffled.
 
 ## Completion event
 
