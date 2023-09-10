@@ -1,0 +1,183 @@
+<!--
+MIT License
+
+Copyright (c) 2023 Viresh Ratnakar
+
+See the full license notice in exolve-m.js.
+
+Usage:
+
+  Host this file on your web server. Then, you can serve interactively solvable
+  crosswords from crossword files in any of these supported formats:
+
+      Exolve, .puz, .ipuz.
+
+  Let's say you have file named my-puzzle.puz that you are serving from the same
+  directory as this exolve-embedder.html file. Then, this is the URL for the
+  interactive crossword:
+
+      exolve-embedder.html?crossword=my-puzzle.puz
+
+  You can wrap this inside an iframe tag, to embed a crossword in any web page:
+
+  <iframe height="780px" width="100%" allowfullscreen="true"
+      style="border:none; width: 100% !important; position: static;display: block !important; margin: 0 !important;"
+      src="exolve-embedder.html?crossword=my-puzzle.puz">
+  </iframe>
+
+  Any other URL parameters get appended to the Exolve specs. "key=value" becomes the line:
+
+      exolve-key: value
+  
+  For example, you can override the color used in the buttons, as well as the
+  font used in the clues, like this:
+
+      exolve-embedder.html?crossword=my-puzzle.puz&option=color-button:blue font-family:monospace
+
+  There are a *lot* of customizations that can be done like this. See details
+  in the Exolve documentation:
+
+      https://github.com/viresh-ratnakar/exolve#exolve-option
+
+  Every URL parameter value is first decoded (using decodeURIComponent()), including
+  the value of the crossword parameter.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/exolve-m.css"/>
+<script src="https://viresh-ratnakar.github.io/exolve-m.js"></script>
+<script src="https://viresh-ratnakar.github.io/exolve-from-ipuz.js"></script>
+<script src="https://viresh-ratnakar.github.io/exolve-from-puz.js"></script>
+
+<title>Exolve Embedder</title>
+
+</head>
+<body>
+
+<div id="xlv-embedder">
+</div>
+
+<script>
+
+/**
+ * Constructing an ExolveEmbedder object does all the work of
+ * decoding the URL parameters to find a puzzle file and serve it.
+ */
+class ExolveEmbedder {
+  constructor() {
+    this.embedder = document.getElementById('xlv-embedder');
+    const urlParams = new URLSearchParams(window.location.search);
+    this.crossword = '';
+    this.exolveOverrides = '';
+    for (const [key, value] of urlParams) {
+      const decodedValue = decodeURIComponent(value);
+      if (key == 'crossword') {
+        if (this.crossword) {
+          throw new Error('Multiple "crossword=" keys found.');
+        }
+        this.crossword = decodedValue;
+        continue;
+      }
+      this.exolveOverrides += 'exolve-' + key + ': ' + decodedValue + '\n';
+    }
+    if (!this.crossword) {
+      throw new Error('Must specify "?crossword=[puz/ipuz/exolve file]" in the URL.');
+    }
+    const finisher = this.showData.bind(this);
+    fetch(this.crossword, {
+      mode: 'cors',
+      credentials: 'include',
+    }).then(response => response.arrayBuffer())
+      .then(result => {
+        finisher(result);
+    }).catch(error => {
+      throw error;
+    });
+  }
+
+  /**
+   * Returns true if the crossword was successfully shown.
+   */
+  showExolve(specs) {
+    let start = specs.indexOf('exolve-begin')
+    let end = specs.indexOf('exolve-end')
+    if (start < 0 || end < 0 || start >= end) {
+      return false;
+    }
+    while (start > 0 && specs.charAt(start - 1) == ' ') {
+      start--;
+    }
+    const exolveSpecs = specs.substring(start, end) +
+                        this.exolveOverrides + 'exolve-end';
+
+    const notInIframe = (window === window.parent);
+
+    try {
+      const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
+    } catch (err) {
+      this.showMessage(err);
+      return false;
+    }
+    return true;
+  }
+
+  showIpuz(specs) {
+    let start = specs.indexOf('{')
+    let end = specs.lastIndexOf('}')
+    if (start < 0 || end < 0 || start >= end) {
+      return false;
+    }         
+    const ipuzJSON = specs.substring(start, end) + '}';
+    try {
+      const ipuz = JSON.parse(ipuzJSON);
+      const exolve = exolveFromIpuz(ipuz, this.crossword);
+      if (!exolve) {
+        return false;
+      }
+      return this.showExolve(exolve);
+    } catch (err) {
+      console.log(err);
+    }
+    return false;
+  }
+
+  showPuz(buffer) {
+    const exolve = exolveFromPuz(buffer, this.crossword);
+    if (!exolve) {
+      return false;
+    }
+    return this.showExolve(exolve);
+  }
+
+
+  showData(data) {
+    const utf8decoder = new TextDecoder();
+    const text = utf8decoder.decode(data);
+    if (this.showExolve(text)) {
+      return;
+    }
+    if (this.showIpuz(text)) {
+      return;
+    }
+    if (this.showPuz(data)) {
+      return;
+    }
+    this.showMessage('Could not interpret the data in [' + this.crossword + '] as a crossword.');
+  }
+  showMessage(msg) {
+    this.embedder.innerHTML = msg;
+  }
+}
+
+try {
+  const exolveEmbedder = new ExolveEmbedder();
+} catch (err) {
+  document.getElementById('xlv-embedder').innerHTML = err;
+}
+
+</script>
+</body>
+</html>

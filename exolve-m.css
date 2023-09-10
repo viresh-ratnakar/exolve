@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.50 May 16, 2023
+Version: Exolve v1.51 September 9, 2023
 */
 
 @media (max-width: 500px) {
@@ -169,17 +169,6 @@ Version: Exolve v1.50 May 16, 2023
   align-items: flex-start;
   justify-content: space-around;
 }
-.xlv-clues-columnar,
-.xlv-grid-and-clues-2-columnar,
-.xlv-grid-and-clues-3-columnar {
-  display: block;
-}
-.xlv-grid-and-clues-2-columnar {
-  column-count: 2;
-}
-.xlv-grid-and-clues-3-columnar {
-  column-count: 3;
-}
 .xlv-grid-panel {
   break-inside: avoid;
 }
@@ -199,6 +188,10 @@ Version: Exolve v1.50 May 16, 2023
 }
 .xlv-preamble {
   padding: 0;
+}
+.xlv-frame .xlv-preamble table {
+  margin: 0;
+  width: auto;
 }
 .xlv-small-print {
   margin: 4px 0 6px 0 !important;
@@ -459,6 +452,25 @@ Version: Exolve v1.50 May 16, 2023
 }
 .xlv-print-settings div {
   padding: 4px 0 4px 16px;
+}
+.xlv-print-settings input {
+  margin: 0;
+}
+.xlv-qrcode-table {
+  border: 1px solid black;
+  float: right;
+  margin: 0 0 4px 4px;
+  padding: 0;
+}
+.xlv-qrcode-cta {
+  font-family: monospace;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+.xlv-qrcode-panel td {
+  vertical-align: middle;
 }
 .xlv-toggleable * {
   background-color: transparent;

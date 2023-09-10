@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.50 May 16, 2023
+### Version: Exolve v1.51 September 9, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -33,6 +33,10 @@ The [Exolve Player](https://exolve.app) web app can be used to play crossword
 files in several formats (including .puz and even just the clues copied from
 a PDF in many cases). An easy-to-remember URL for this web app is
 [exolve.app](https://exolve.app).
+
+You can also use the file [exolve-embedder.html](exolve-embedder.html) to
+serve .puz and .ipuz files using Exolve. See the details in the
+[Exolve Embedder](#exolve-embedder) section.
 
 Here is a minimal example of the puzzle specification:
 
@@ -1291,15 +1295,9 @@ The list of currently supported options is as follows:
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
-- **`columnar-layout`** If this option is specified, then puzzle is rendered
-  in a newspaper-like columnar layout, using CSS "column"s. The number
-  of columns is determined by the current width of the viewport (we
-  assume that all of it is available to the crossword) and is adjusted
-  if the window is resized. The number of columns can only be one of
-  the following: 1 (which is the same as what we get without the
-  columnar-layout option, when the available width is too small), 2, or 3.
-  As of September 2022, columnar layout is quirky: Chrome supports it best,
-  but all browsers seem to have some peculiarities.
+- **`columnar-layout`** Deprecated. This option was used to create a
+  newspaper-like layout, but it never worked reliably across platforms.
+  You still get nice, "flowing" layouts when printing.
 - **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
   etc.). You can set this to **inherit** to override Exolve's default of
   **serif**.
@@ -1564,8 +1562,8 @@ Here are all the names of pieces of text that you can relabel:
 | `warnings-label` | Please fix or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
 | `warnings.hover` | Issues detected: click &times; to dismiss.    |
 | `print` | Print                                                  |
-| `print.hover` | Show/hide panel for printing or creating PDFs. |
-| `print-heading` | Print or create a PDF:                    |
+| `print.hover` | Show/hide panel for printing or creating PDFs.   |
+| `print-heading` | Print or create a PDF:                         |
 | `print-size` | Page size:                                        |
 | `print-margin` | Margin (inches):                                |
 | `print-font` | Font size:                                        |
@@ -1580,7 +1578,14 @@ Here are all the names of pieces of text that you can relabel:
 | `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
 | `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
-| `print-questions` | Print questions:                             |
+| `print-questions`| Include questions                             |
+| `print-clues-page`| Page break before clues                      |
+| `print-preamble-below`| Preamble below grid                      |
+| `print-qrcode`| Include QR code                                  |
+| `print-qrcode-details`| The QR code (rendered to the right) will be printed to the right of the preamble.|
+| `print-qrcode-cta-label`| Call to action                         |
+| `print-qrcode-cta`| Solve online                                 |
+| `print-qrcode-size`| QR code size:                               |
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
@@ -1787,10 +1792,14 @@ A variant of the above approach is to just use
 [exolve-m.js](exolve-m.js) and [exolve-m.css](exolve-m.css) at all, as they are
 pulled in from a GitHub-hosted website that I maintain.
 
-Finally, if you just use a blogging platform (such as Blogger), or if you just
+If you just use a blogging platform (such as Blogger), or if you just
 want to add crossword puzzles to web pages (that may have other content and may
 be using other scripts/CSS), you also have the "widget" option, detailed in the
 next subsection.
+
+If you have your crossword available as a .puz or .ipuz file, you can convert
+it to the Exolve format using [`exolve-player.html`](#exolve-player.html). Or, you
+can serve it using [`Exolve Embedder`](#exolve-embedder). Or, you
 
 ### Exolve widget
 
@@ -1882,6 +1891,43 @@ For the curious: the "position: sticky" CSS style does not work if any ancestor
 element has "overflow: X" set with X being something other than "visible". For
 some reason, WordPress blog entries are wrapped in an element with
 "overflow: hidden".
+
+### Exolve Embedder
+The file [`exolve-embedder.html`](exolve-embedder.html) can be used to directly
+serve .puz and .ipuz files.
+
+Let's say you have file named my-puzzle.puz that you are serving from the same
+directory as this exolve-embedder.html file. Then, this is the URL for the
+interactive crossword:
+
+```
+  exolve-embedder.html?crossword=my-puzzle.puz
+```
+
+You can wrap this inside an iframe tag, to embed a crossword in any web page:
+
+```
+  <iframe height="780px" width="100%" allowfullscreen="true"
+      style="border:none; width: 100% !important; position: static;display: block !important; margin: 0 !important;"
+      src="exolve-embedder.html?crossword=my-puzzle.puz">
+  </iframe>
+```
+
+Any other URL parameters get appended to the Exolve specs. "key=value" becomes the line:
+
+```
+  exolve-key: value
+```  
+
+For example, you can override the color used in the buttons, as well as the
+font used in the clues, like this:
+
+```
+   exolve-embedder.html?crossword=my-puzzle.puz&option=color-button:blue font-family:monospace
+```
+
+Every URL parameter value is first decoded (using `decodeURIComponent()`), including
+the value of the `crossword` parameter.
 
 ## Customizations
 Beyond changing colours and button texts (which can be done through
@@ -2066,17 +2112,10 @@ description assumes a standard 15x15 grid with Across and Down clues—the
 layout may vary a bit if you have oversized grids, or more clues panels
 (such as `exolve-nodir` clues).
 
-If the `columnar-layout` option is used, then the clues are rendered in
-a newspaper-like manner, possibly starting under the grid, and spilling
-over into all available columns, while trying to keep the heights of
-all columns equal. If you choose this option, and you have clues with
-annotations/solutions available, please note that as the annotations
-get revealed progressively, the clues panel layout may shift around a bit.
-
-Without the `columnar-layout` option, if the width is enough for three
-columns, then the layout has the two clues panels laid out horizontally to
-the right of the grid. If the width is wide enough for only one column, then
-the layout has the clues panels laid out vertically under the grid.
+If the width is enough for three columns, then the layout has the two clues
+panels laid out horizontally to the right of the grid. If the width is wide
+enough for only one column, then the layout has the clues panels laid out
+vertically under the grid.
 
 ## Printing
 
@@ -2089,13 +2128,14 @@ you want to print the "fully revealed" grid (if available), then you can
 re-open the crossword in an incognito window, get it to the state you desire to
 print, and then print.
 
-The printed puzzle is laid out in a newspaper-like multi-column layout (similar
-to what you get with the `columnar-layout` option). You can create PDF files for
-your crosswords by "printing to file" in most browsers.
+You can create PDF files for your crosswords by "printing to file" in most
+browsers.
 
-If not all the puzzle entries have been filled in, then the printing is done in
-three columns, with the grid occupying two columns. This makes the grid a bit
-larger and easier for writing into.
+The printed puzzle is laid out in a newspaper-like multi-column layout
+(except under the "Page break" setting described later). If not all the puzzle
+entries have been filled in, then the printing is done in three columns, with
+the grid occupying two columns. This makes the grid a bit larger and easier
+for writing into.
 
 If all the puzzle entries have been filled in, then the printing is done in
 two columns, with the grid occupying the first column (which makes it slightly
@@ -2104,11 +2144,11 @@ provides annotations and/or explanations that get revealed, then this two-column
 layout is especially useful to limit the printed size.
 
 For most puzzles, this layout should fit within a single page, in Portrait mode,
-for standard page sizes. You can reduce the printing scale manually (in the
-browser's print settings) if it just goes over a single page by a few lines.
+for standard page sizes. You can reduce the font size from the settings menu if
+it just goes over a single page by a few lines.
 
 You can override the column choices for completed (default: 2 columns) and
-incomplete (default: 3 columns) puzzles using the options
+incomplete (default: 3 columns) puzzles using the exolve-options
 `print-completed-3cols` and `print-incomplete-2cols` respectively.
 
 Before printing, any highlighting of the currently active clue is removed,
@@ -2128,8 +2168,8 @@ with the title "Settings for printing/PDFs". This lets you specify:
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.
-- Page margin in inches. Caveat: large margins may lead to some parts getting
-  clipped.
+- Page margin in inches. Caveat: very large margins may lead to some parts
+  getting clipped.
 - Font size (Normal, Large, Extra Large, Small, or specify an arbitrary font
   size). Please note that the specific font size picked, such as "18px" may
   not be the actual printed size exactly (because of scaling). However, in
@@ -2138,6 +2178,17 @@ with the title "Settings for printing/PDFs". This lets you specify:
 - Print questions. When the crossword includes questions, a checkbox is shown
   to let you decide whether to include them in the printing (the option is
   ignored when printing in wysiwig mode).
+- Page break before clues. If you select this option, then the grid gets
+  printed on the first page (as does any preamble or revealed explanations),
+  while the clues get printed on a separate page.
+- Preamble below grid. Set this option to print the preamble below the grid
+  rather than above it.
+- Include QR code. Use this option to include a QR code. The QR code will
+  use the URL of the current web page, but you can override that, and you
+  can also override the call to action, which defaults to "Solve online".
+  The QR code is printed to the right of the preamble. The last three settings
+  work well together.
+
 
 Additionally, from this panel, you have three buttons for printing:
 
@@ -2184,13 +2235,11 @@ After printing, Exolve reverts the page rendering to its original state.
 
 Brwosers have their own printing layout algorithms that sometimes do not behave
 as expected by Exolve's printing layout algorithm. Here are some known issues as
-of May, 2023.
+of September, 2023.
 
 - Printing settings in Firefox seem especially complex. If the printed area
   overflows with Firefox, try toggling to set the Firefox print setting
   "Fit to page width" instead of "Scale [100]."
-- In Chrome, if the margin is too high (say, more than 0.7 inches), then some
-  content may get clipped.
 
 ## Webifi
 
@@ -2304,7 +2353,7 @@ function createExolve(puzzleText, containerId="",
   const customizer = (typeof customizeExolve === 'function') ?
       customizeExolve : null;
   const p = new Exolve(puzzleText, containerId, customizer,
-                     provideStateUrl, visTop, maxDim);
+                       provideStateUrl, visTop, maxDim);
   return p;
 }
 

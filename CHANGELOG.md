@@ -1,5 +1,19 @@
 # Changelog
 
+### Version: Exolve v1.51: September 9, 2023
+
+- Add `exolve-embedder.html`, which is a way to directly serve
+  .puz and .ipuz files.
+- Several new printing features and some printing tweaks:
+  - Option to print a QR code.
+  - Option to print the preamble below the grid.
+  - Option to print the clues on a separate page.
+  - Get smaller-page-widths to print correctly, at least in Chrome,
+    by setting `zoom` to 70% if available printing width is less than or equal
+    to 7 inches.
+  - Deprecate `exolve-option: columnar-layout`: it never worked reliably,
+    and getting rid of it simplified the code.
+
 ### Minor Version: Exolve v1.50.6: August 30, 2023
 
 - Expose the scratch pad (renamed "Jotter") in the main menu.
