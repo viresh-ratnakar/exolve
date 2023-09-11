@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.51.1: September 10, 2023
+
+- Refactor exolve-embedder.html into exolve-embedder.js and a tiny
+  HTML file.
+
 ### Version: Exolve v1.51: September 9, 2023
 
 - Add `exolve-embedder.html`, which is a way to directly serve
