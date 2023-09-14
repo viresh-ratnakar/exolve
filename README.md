@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.51 September 9, 2023
+### Version: Exolve v1.52 September 14, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1365,6 +1365,7 @@ be overriding), and descriptions.
 |----------------------------|---------------|-----------------------------------|
 | `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
 | `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
+| `colour-active-clue-text`  | mistyrose     | The current clue(s) in the clues list get(s) this as font colour.|
 | `colour-anno`              | darkgreen     | The text of the annotation.       |
 | `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
 | `colour-background`        | black         | The background: blocked squares and bars.|
@@ -1376,6 +1377,7 @@ be overriding), and descriptions.
 | `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
 | `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
+| `colour-currclue-text`     | black         | Font colour for the current clue above the grid.|
 | `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
 | `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|

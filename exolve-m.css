@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.51 September 9, 2023
+Version: Exolve v1.52 September 14, 2023
 */
 
 @media (max-width: 500px) {
@@ -17,7 +17,8 @@ Version: Exolve v1.51 September 9, 2023
   font-size: 16px;
   font-family: serif;
   font-weight: 400;
-  line-height: normal;
+  letter-spacing: normal !important;
+  line-height: normal !important;
   box-sizing: border-box;
 }
 .xlv-anno-text,
@@ -125,21 +126,26 @@ Version: Exolve v1.51 September 9, 2023
   fill: rgba(0,0,0,0.0);
 }
 .xlv-frame .xlv-clues table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
+  background-image: none !important;
+  border: none !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
   margin: inherit;
 }
 .xlv-frame .xlv-clues tr {
-  border: none;
+  background-image: none !important;
+  border: none !important;
   break-inside: avoid;
 }
 .xlv-frame .xlv-clues td {
-  border: none;
-  padding: 0 6px 4px 0;
+  background-image: none !important;
+  border: none !important;
+  padding: 0 6px 4px 0 !important;
   vertical-align: top;
+  white-space: normal !important;
 }
 .xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
+  background-image: none !important;
   box-sizing: content-box;
   font-weight: bold;
   max-width: 2ch;
@@ -147,7 +153,7 @@ Version: Exolve v1.51 September 9, 2023
   text-align: right;
   word-break: normal;
   word-wrap: normal;
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 .xlv-invisible {
   color: transparent;
@@ -196,7 +202,7 @@ Version: Exolve v1.51 September 9, 2023
 .xlv-small-print {
   margin: 4px 0 6px 0 !important;
 }
-.xlv-small-print > * {
+.xlv-small-print a {
   padding: 4px 4px 0 0 !important;
 }
 .xlv-credit {
@@ -420,8 +426,13 @@ Version: Exolve v1.51 September 9, 2023
 }
 .xlv-scratchpad {
   border: 1px solid black;
+  font-size: large !important;
   padding: 8px;
+}
+.xlv-textarea {
+  box-sizing: border-box;
   outline: none;
+  width: 100%;
 }
 .xlv-shuffle {
   cursor: pointer;
@@ -452,12 +463,25 @@ Version: Exolve v1.51 September 9, 2023
 }
 .xlv-print-settings div {
   padding: 4px 0 4px 16px;
+  word-wrap: normal;
 }
-.xlv-print-settings input {
+.xlv-small-print input {
+  appearance: auto;
+  border-radius: 0;
   margin: 0;
+  padding: 0;
+  height: auto;
+  width: auto;
+}
+.xlv-print-settings table,
+.xlv-print-settings td {
+  background-image: none !important;
+}
+.xlv-print-settings td {
+  white-space: normal;
 }
 .xlv-qrcode-table {
-  border: 1px solid black;
+  border: 1px solid black !important;
   float: right;
   margin: 0 0 4px 4px;
   padding: 0;
@@ -476,14 +500,15 @@ Version: Exolve v1.51 September 9, 2023
   background-color: transparent;
   color: inherit;
 }
-a.xlv-toggler:active,
-a.xlv-toggler:link,
-a.xlv-toggler:visited {
+a.xlv-link:active,
+a.xlv-link:link,
+a.xlv-link:visited {
+  color: inherit !important;
   outline: none;
   text-decoration: none;
 }
-a.xlv-toggler:hover {
-  text-decoration: underline;
+a.xlv-link:hover {
+  font-weight: bold;
 }
 .xlv-toggleable {
   margin-top: 6px !important;

@@ -1,5 +1,17 @@
 # Changelog
 
+### Version: Exolve v1.52: September 14, 2023
+
+- Add more CSS overrides to fight blog-styling, this time to counter
+  CSS from "ghost" hosting.
+- Set enumLen in clues to be the number of cells if no enum is
+  provided (eg, in American-style crosswords), unless the puzzle
+  has diagramless cells.
+- Add colours explicitly for currclue-text and active-clue-text
+- Set curr-clue-width and control-panel-width to be the same
+  to avoid some jumpy behaviour on small width displays.
+- Tweaks to rendering of answers, scratchpad, links.
+
 ### Minor Version: Exolve v1.51.1: September 10, 2023
 
 - Refactor exolve-embedder.html into exolve-embedder.js and a tiny
