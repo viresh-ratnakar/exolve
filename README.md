@@ -1431,6 +1431,11 @@ explcitily set using an `exolve-option`, then we do not modify it).
 - Colour `imp-text` is set to lightgreen.
 - Colour `small-button-text` is set to lightgreen.
 
+Note that dark mode detection and handling is done when the crossword is
+first rendered. If the user changes the browser theme's dark mode settings,
+then the page would need to be reloaded for the crossword rendering to be
+updated.
+
 ## `exolve-language`
 
 You can create crosswords in pretty much any language apart from English,
