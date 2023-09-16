@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.52 September 14, 2023
+### Version: Exolve v1.53 September 15, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1338,6 +1338,10 @@ The list of currently supported options is as follows:
 - **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   `customizeExolve()`, for example.
+- **`top-clue-clearance:<N>`** Add N pixels space between the top of the grid
+  and the bottom of the clue shown on top. Defaults to 0. You can set this
+  to something like `20`, but note that if the clue text is very long then
+  this setting will get overridden.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   override the default layout choices used for printing puzzles (and creating
   PDFs). By default, a completed puzzle is printed in 2 columns
@@ -1365,7 +1369,6 @@ be overriding), and descriptions.
 |----------------------------|---------------|-----------------------------------|
 | `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
 | `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
-| `colour-active-clue-text`  | mistyrose     | The current clue(s) in the clues list get(s) this as font colour.|
 | `colour-anno`              | darkgreen     | The text of the annotation.       |
 | `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
 | `colour-background`        | black         | The background: blocked squares and bars.|
@@ -1377,7 +1380,6 @@ be overriding), and descriptions.
 | `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
 | `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
-| `colour-currclue-text`     | black         | Font colour for the current clue above the grid.|
 | `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
 | `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
@@ -1408,6 +1410,26 @@ similar to the Guardian's colour scheme (as of May 2020).
   exolve-option: colour-light-text-input:white
   exolve-option: colour-button:#bb3b80 color-button-hover:purple
 ```
+
+### Dark mode
+
+If we detect that the crossword is getting rendered in dark mode, then we make
+a few tweaks to the colours. The detection is based upon whether the average
+value of RGB for the font colour is >= 155.
+
+The tweaks made are to the following colours (exception: if any of them was
+explcitily set using an `exolve-option`, then we do not modify it).
+
+- Colour `currclue` is set to be the background colour of the parent
+  element of the DIV containing the crossword, unless that background
+  colour does not look sufficiently dark (average RGB >= 75), in which
+  case it is set to black. Note that if you're using images to create
+  backgrounds, then this heuristic may not work.
+- Colour `active-clue` is set to #663366.
+- Colour `orphan` is set to #663300.
+- Colour `anno` is set to lightgreen.
+- Colour `imp-text` is set to lightgreen.
+- Colour `small-button-text` is set to lightgreen.
 
 ## `exolve-language`
 

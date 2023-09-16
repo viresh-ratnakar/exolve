@@ -1,5 +1,18 @@
 # Changelog
 
+### Version: Exolve v1.53: September 15, 2023
+
+- Roll back the addition of explicit colours for 'active-clue-text'
+  and 'currclue-text'. Too complex, better to inherit. We do deal
+  better with dark-mode now, anyway.
+- If the text font color is sufficiently bright (>= 200), then
+  we enter dark-mode. We override a few colour choices in dark-mode.
+  But we do not tinker with any colour set explicitly with an exolve-option.
+- Introduce another div inside "curr-clue" called "curr-clue-inner". This
+  now allows us to let the user specify a small amount of pixel clearance
+  between the top of the grid and the bottom of the curr-clue.
+- Allow this clearance to be specified with exolve-option `top-clue-clearance`.
+
 ### Version: Exolve v1.52: September 14, 2023
 
 - Add more CSS overrides to fight blog-styling, this time to counter
