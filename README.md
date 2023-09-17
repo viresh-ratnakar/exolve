@@ -1426,7 +1426,7 @@ value of RGB for the font colour (on the root Exolve DIV element) is >= 155.
 
 The tweaks made are to the following colours:
 
-- Colour `currclue` is set to black (but see "Smart colouring" below.
+- Colour `currclue` is set to black (but see "Smart colouring" below).
 - Colour `active-clue` is set to #663366.
 - Colour `orphan` is set to #663300.
 - Colour `anno` is set to lightgreen.
