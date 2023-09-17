@@ -131,7 +131,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.53 September 15, 2023';
+  this.VERSION = 'Exolve v1.54 September 17, 2023';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -281,7 +281,8 @@ function Exolve(puzzleSpec,
   this.fontFamily = '';
   this.fontSize = '';
 
-  this.colorScheme = {
+  this.smartColoring = true;
+  this.lightColorScheme = {
     'active': 'mistyrose',
     'active-clue': 'mistyrose',
     'anno': 'darkgreen',
@@ -313,10 +314,18 @@ function Exolve(puzzleSpec,
     'solution': 'dodgerblue',
     'solved': 'dodgerblue',
   };
-  /**
-   * We will not dark-mode-override an colors specified with exolve-option.
-   */
-  this.optionedColors = {};
+  this.darkColorScheme = {
+    ...this.lightColorScheme,
+    'currclue': 'black',
+    'active-clue': '#663366',
+    'orphan': '#663300',
+    'anno': 'lightgreen',
+    'imp-text': 'lightgreen',
+    'small-button-hover': '#330066',
+    'small-button-text': 'lightgreen',
+
+  }
+  this.colorScheme = this.lightColorScheme;
 
   this.nextLine = 0;
   this.sectionLines = {};
@@ -918,7 +927,7 @@ Exolve.prototype.init = function() {
     this.frame.style.fontSize = this.fontSize;
   }
 
-  this.maybeUseDarkMode();
+  this.pickColorScheme();
 
   this.titleElt = document.getElementById(this.prefix + '-title');
   if (this.title) {
@@ -1527,6 +1536,10 @@ Exolve.prototype.parseOption = function(s) {
       this.addSolutionToAnno = false;
       continue;
     }
+    if (spart == "no-smart-coloring" || spart == "no-smart-colouring") {
+      this.smartColoring = false;
+      continue;
+    }
     if (spart == "columnar-layout") {
       /* Deprecated. */
       continue;
@@ -1599,7 +1612,7 @@ Exolve.prototype.parseOption = function(s) {
       continue;
     }
     if (kv[0] == 'grid-background') {
-      this.colorScheme['background'] = kv[1];
+      /** Deprecated and ignored. */
       continue;
     }
     if (kv[0] == 'font-family') {
@@ -1619,15 +1632,19 @@ Exolve.prototype.parseOption = function(s) {
       continue;
     }
     if (kv[0].substr(0, 6) == 'color-' || kv[0].substr(0, 7) == 'colour-') {
+      let cs = this.lightColorScheme;
       let key = kv[0].substr(kv[0].indexOf('-') + 1);
-      if (!this.colorScheme[key]) {
+      if (key.startsWith('dark-')) {
+        cs = this.darkColorScheme;
+        key = key.substr(5);
+      }
+      if (!cs[key]) {
         this.throwErr('Unsupported coloring option: ' + kv[0]);
       }
       if (!this.isColour(kv[1])) {
         this.throwErr('Invalid colour for ' + key + ': ' + kv[1]);
       }
-      this.colorScheme[key] = kv[1];
-      this.optionedColors[key] = true;
+      cs[key] = kv[1];
       continue;
     }
     if (kv[0].substr(0, 16) == 'override-number-') {
@@ -4022,34 +4039,20 @@ Exolve.prototype.getSurroundingBG = function() {
   return bg;
 }
 
-Exolve.prototype.maybeUseDarkMode = function() {
+Exolve.prototype.pickColorScheme = function() {
   const fgBrightness = this.brightness(getComputedStyle(this.frame).color);
   if (fgBrightness < 155) {
-    return;
+    this.colorScheme = this.lightColorScheme;
+  } else {
+    this.colorScheme = this.darkColorScheme;
   }
-  if (!this.optionedColors['currclue']) {
+  if (this.smartColoring) {
     const bg = this.getSurroundingBG();
     const bgBrightness = this.brightness(bg);
-    if (bgBrightness < 75) {
+    if ((fgBrightness < 155 && bgBrightness >= 200) ||
+        (fgBrightness >= 155 && bgBrightness < 75)) {
       this.colorScheme['currclue'] = bg;
-    } else {
-      this.colorScheme['currclue'] = 'black';
     }
-  }
-  if (!this.optionedColors['active-clue']) {
-    this.colorScheme['active-clue'] = '#663366';
-  }
-  if (!this.optionedColors['orphan']) {
-    this.colorScheme['orphan'] = '#663300';
-  }
-  if (!this.optionedColors['imp-text']) {
-    this.colorScheme['imp-text'] = 'lightgreen';
-  }
-  if (!this.optionedColors['anno']) {
-    this.colorScheme['anno'] = 'lightgreen';
-  }
-  if (!this.optionedColors['small-button-text']) {
-    this.colorScheme['small-button-text'] = 'lightgreen';
   }
 }
 
@@ -4478,9 +4481,13 @@ Exolve.prototype.fireCompletionEvent = function() {
   this.frame.dispatchEvent(event);
 }
 
-// Return a string encoding the current entries in the whole grid and
-// also set the number of squares that have been filled.
-Exolve.prototype.getGridStateAndNumFilled = function() {
+/**
+ * Return a string encoding the current entries in the whole grid and
+ * also set the number of squares that have been filled.
+ * Unless notifyIfComplete is false, fire a completion event if the
+ * puzzle has just been completed.
+ */
+Exolve.prototype.getGridStateAndNumFilled = function(notifyIfComplete=true) {
   let state = '';
   let numFilled = 0;
   let numCorrect = 0;
@@ -4517,17 +4524,18 @@ Exolve.prototype.getGridStateAndNumFilled = function() {
   this.numCellsFilled = numFilled;
   this.knownCorrect = knownCorrect;
   this.knownIncorrect = knownIncorrect;
-  if (justFinished) {
+  if (justFinished && notifyIfComplete) {
     // Dispatch the event asynchronously, after the display has been updated.
     setTimeout(this.fireCompletionEvent.bind(this), 0);
   }
   return state;
 }
 
-// Update status, ensure answer fields are upper-case (when they have
-// an enum), disable buttons as needed, and return the state.
-Exolve.prototype.updateDisplayAndGetState = function() {
-  let state = this.getGridStateAndNumFilled();
+/** Update status, ensure answer fields are upper-case (when they have
+ * an enum), disable buttons as needed, and return the state.
+ */
+Exolve.prototype.updateDisplayAndGetState = function(notifyIfComplete=true) {
+  let state = this.getGridStateAndNumFilled(notifyIfComplete);
   this.statusNumFilled.innerHTML = this.numCellsFilled
   let ci = this.clueOrParentIndex(this.currClueIndex)
   let revOrphan = this.isOrphanWithReveals(ci)
@@ -4566,9 +4574,11 @@ Exolve.prototype.myStatePart = function(s) {
   return [start, end]
 }
 
-// Call updateDisplayAndGetState() and save state in local storage.
-Exolve.prototype.updateAndSaveState = function() {
-  let state = this.updateDisplayAndGetState()
+/**
+ * Call updateDisplayAndGetState() and save state in local storage.
+ */
+Exolve.prototype.updateAndSaveState = function(notifyIfComplete=true) {
+  let state = this.updateDisplayAndGetState(notifyIfComplete)
   for (let a of this.answersList) {
     state = state + this.STATE_SEP + a.input.value
   }
@@ -4757,7 +4767,7 @@ Exolve.prototype.restoreState = function() {
     // When restoring state, we reveal annos for fully prefilled entries.
     this.updateClueState(ci, true, null, false /* dont note a fresh solve */);
   }
-  this.updateAndSaveState();
+  this.updateAndSaveState(false);  // notifyIfComplete=false
 }
 
 Exolve.prototype.addWebifi = function() {

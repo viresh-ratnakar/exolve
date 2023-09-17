@@ -1,5 +1,16 @@
 # Changelog
 
+### Version: Exolve v1.54: September 17, 2023
+
+- Tweak dark mode code: allow exolve-options to tweak the colour choices used
+  in dark mode, using options like
+  `exolve-option: colour-dark-active-clue:khaki`.
+- Move the code that sets the bg colour of the top clue to be the same as
+  that of the puzzle parent (if sufficiently contrastive). Now this is done
+  even in light mode. Add `exolve-option: no-smart-colouring` to suppress
+  this.
+- Do not fire a completion event when reloading from saved state.
+
 ### Version: Exolve v1.53: September 15, 2023
 
 - Roll back the addition of explicit colours for 'active-clue-text'

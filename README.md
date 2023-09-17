@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.53 September 15, 2023
+### Version: Exolve v1.54 September 17, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1295,6 +1295,8 @@ The list of currently supported options is as follows:
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
+- **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
+  specified, then we do not try ["smart colouring"](#smart-colouring).
 - **`columnar-layout`** Deprecated. This option was used to create a
   newspaper-like layout, but it never worked reliably across platforms.
   You still get nice, "flowing" layouts when printing.
@@ -1303,9 +1305,9 @@ The list of currently supported options is as follows:
   **serif**.
 - **`font-size:<fs>`** Set the font-size CSS value (for clues, preamble,
   etc.). Exolve's default is **16px**.
-- **`grid-background:<c>`** Set the colour of the black cells to &lt;c&gt;,
-  which should be a valid HTML colour name/code. This option is deprecated.
-  Please use color-background (see above).
+- **`grid-background:<c>`** 
+  This option is deprecated and ignored now. Please use color-background
+  (see above).
 - **`hide-inferred-numbers`** If this option is specified, then the software
   does not display any clue numbers that were automatically inferred. Setters
   using non-numeric clue labels may want to specify this option.
@@ -1398,6 +1400,11 @@ be overriding), and descriptions.
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
 
+For each one of the the above options, there is an additional "dark mode"
+option that you can specify by using the prefix `color-dark-` or `colour-dark-`
+instead of `color-`/`colour-`. Dark mode colours are described in the next
+section.
+
 Setting `colour-arrow` and `colour-caret` to the same colour as `colour-input`
 will make them invisible (if so desired).
 
@@ -1411,30 +1418,58 @@ similar to the Guardian's colour scheme (as of May 2020).
   exolve-option: colour-button:#bb3b80 color-button-hover:purple
 ```
 
-### Dark mode
+### Dark and light modes
 
 If we detect that the crossword is getting rendered in dark mode, then we make
 a few tweaks to the colours. The detection is based upon whether the average
-value of RGB for the font colour is >= 155.
+value of RGB for the font colour (on the root Exolve DIV element) is >= 155.
 
-The tweaks made are to the following colours (exception: if any of them was
-explcitily set using an `exolve-option`, then we do not modify it).
+The tweaks made are to the following colours:
 
-- Colour `currclue` is set to be the background colour of the parent
-  element of the DIV containing the crossword, unless that background
-  colour does not look sufficiently dark (average RGB >= 75), in which
-  case it is set to black. Note that if you're using images to create
-  backgrounds, then this heuristic may not work.
+- Colour `currclue` is set to black (but see "Smart colouring" below.
 - Colour `active-clue` is set to #663366.
 - Colour `orphan` is set to #663300.
 - Colour `anno` is set to lightgreen.
 - Colour `imp-text` is set to lightgreen.
 - Colour `small-button-text` is set to lightgreen.
+- Colour `small-button-hover` is set to #330066.
+
+You can override these choices and/or provide dark-mode choices for any
+other colours, using `exolve-option: colour-dark-<name>:<c>`.
 
 Note that dark mode detection and handling is done when the crossword is
 first rendered. If the user changes the browser theme's dark mode settings,
 then the page would need to be reloaded for the crossword rendering to be
 updated.
+
+### Smart colouring
+
+Smart colouring is on by default. Currently, it just affects the colour of
+the background of the top clue, possibly overriding whatever was set in
+`colour-currclue` (the light/dark mode defaults for which are white/black
+respectively).
+
+We try to set the background colour of the top clue to be the same colour
+as the parent element of the root Exolve DIV element, if there is sufficient
+contrast between that colour and the font colour. Here's the heuristic
+algorithm used for doing this:
+```
+  bg = Colour of the background of parent of root element. This is
+       found by going up to higher level parents if the current
+       level's background is transparent. If the result is transparent,
+       then we set bg to white.
+  bgBrightness = Average of RGB values in bg.
+  fgBrightness = Average of RGB values in font colour.
+
+  if ((fgBrightness < 155 && bgBrightness >= 200) ||
+      (fgBrightness >= 155 && bgBrightness < 75)) {
+    this.colorScheme['currclue'] = bg;
+  }
+```
+
+Note that if you're using images to create backgrounds, then this heuristic
+may not work, so, in that case, you should use
+`exolve-option: no-smart-colouring`.
 
 ## `exolve-language`
 

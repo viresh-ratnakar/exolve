@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.53 September 15, 2023
+Version: Exolve v1.54 September 17, 2023
 */
 
 /**
