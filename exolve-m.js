@@ -1585,19 +1585,24 @@ Exolve.prototype.parseOption = function(s) {
       continue;
     }
     if (kv[0].substr(0, 6) == 'color-' || kv[0].substr(0, 7) == 'colour-') {
-      let cs = this.lightColorScheme;
+      let cSchemes = [this.lightColorScheme, this.darkColorScheme];
       let key = kv[0].substr(kv[0].indexOf('-') + 1);
       if (key.startsWith('dark-')) {
-        cs = this.darkColorScheme;
+        cSchemes = [this.darkColorScheme];
         key = key.substr(5);
-      }
-      if (!cs[key]) {
-        this.throwErr('Unsupported coloring option: ' + kv[0]);
+      } else if (key.startsWith('light-')) {
+        cSchemes = [this.lightColorScheme];
+        key = key.substr(6);
       }
       if (!this.isColour(kv[1])) {
         this.throwErr('Invalid colour for ' + key + ': ' + kv[1]);
       }
-      cs[key] = kv[1];
+      for (const cs of cSchemes) {
+        if (!cs[key]) {
+          this.throwErr('Unsupported coloring option: ' + kv[0]);
+        }
+        cs[key] = kv[1];
+      }
       continue;
     }
     if (kv[0].substr(0, 16) == 'override-number-') {

@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.54.1: September 17, 2023
+
+- When exolve-option: color-name:c is specified, override both light/dark
+  mode colors. Override only ligh/dark mode if
+  exolve-option: color-light/dark=name:c is specified.
+
 ### Version: Exolve v1.54: September 17, 2023
 
 - Tweak dark mode code: allow exolve-options to tweak the colour choices used

@@ -1400,10 +1400,11 @@ be overriding), and descriptions.
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
 
-For each one of the the above options, there is an additional "dark mode"
-option that you can specify by using the prefix `color-dark-` or `colour-dark-`
-instead of `color-`/`colour-`. Dark mode colours are described in the next
-section.
+When you set any of the above options, that modification applies to
+both the "light mode" and the "dark mode" (see next section). If you want
+to only modify a color in light mode or in dark mode, then use
+`exolve-option: colour-light-<name><c>` or
+`exolve-option: colour-dark-<name><c>`.
 
 Setting `colour-arrow` and `colour-caret` to the same colour as `colour-input`
 will make them invisible (if so desired).
@@ -1434,8 +1435,12 @@ The tweaks made are to the following colours:
 - Colour `small-button-text` is set to lightgreen.
 - Colour `small-button-hover` is set to #330066.
 
-You can override these choices and/or provide dark-mode choices for any
-other colours, using `exolve-option: colour-dark-<name>:<c>`.
+As mentioned in the previous section, when you override a colour with
+`exolve-option: colour-<name>:<c>`, it gets overridden for both light mode
+and dark mode. If you only want to specify an overriding colour for light
+mode (or dark mode) then use
+`exolve-option: colour-light-<name><c>` (or
+`exolve-option: colour-dark-<name><c>`).
 
 Note that dark mode detection and handling is done when the crossword is
 first rendered. If the user changes the browser theme's dark mode settings,
