@@ -191,10 +191,25 @@ exolveFromText = function(w, h, text, fname='') {
  */
 exolveFromTextClean = function(s) {
   /**
+   * Normalize new-lines.
+   */
+  s = s.replace(/\r[\n]*/g, '\n');
+
+  /**
    * Strip out non-alphanumeric weird characters preceding a number and after
    * some leading space after a newline ("bullets" are often found here).
    */
   s = s.replace(/\n\s+[^\w"',\.\(\)-]*([1-9][0-9]*)/g, '\n $1');
+
+  /**
+   * Remove end-of-line hyphenations.
+   */
+  s = s.replace(/([a-z])-\n\s*([a-z])/g, '$1$2');
+
+  /**
+   * Insert spaces before enums, if missing.
+   */
+  s = s.replace(/([^\s])\(([1-9])/g, '$1 ($2');
 
   /**
    * Insert newlines between clues that got stitched together (a common

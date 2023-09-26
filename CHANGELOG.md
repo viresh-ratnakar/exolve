@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.54.2: September 26, 2023
+
+- Make exolve-from-text.js normalize a couple more common pdf-pasting flaws:
+  remove end-of-line hyphens, and insert missing spaces before enums.
+
 ### Minor Version: Exolve v1.54.1: September 17, 2023
 
 - When exolve-option: color-name:c is specified, override both light/dark
