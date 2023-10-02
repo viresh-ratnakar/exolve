@@ -1650,6 +1650,7 @@ Here are all the names of pieces of text that you can relabel:
 | `print-questions`| Include questions                             |
 | `print-clues-page`| Page break before clues                      |
 | `print-preamble-below`| Preamble below grid                      |
+| `print-inksaver`| Inksaver                                       |
 | `print-qrcode`| Include QR code                                  |
 | `print-qrcode-details`| The QR code (rendered to the right) will be printed to the |
 | `print-qrcode-in-preamble`| right of the preamble |
@@ -2258,6 +2259,8 @@ with the title "Settings for printing/PDFs". This lets you specify:
   while the clues get printed on a separate page.
 - Preamble below grid. Set this option to print the preamble below the grid
   rather than above it.
+- Inksaver. Set this option to print using a chequered pattern instead of black
+  as the background colour for blocks.
 - Include QR code. Use this option to include a QR code. The QR code will
   use the URL of the current web page, but you can override that, and you
   can also override the call to action, which defaults to "Solve online".

@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.54.4: October 2, 2023
+
+- Add an Inksaver option to printing.
+
 ### Minor Version: Exolve v1.54.3: October 1, 2023
 
 - Allow the QR code to be printed at the bottom-right of the whole

@@ -449,6 +449,7 @@ function Exolve(puzzleSpec,
     'print-questions': 'Include questions',
     'print-clues-page': 'Page break before clues',
     'print-preamble-below': 'Preamble below grid',
+    'print-inksaver': 'Inksaver',
     'print-qrcode': 'Include QR code',
     'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the ',
     'print-qrcode-in-preamble': 'right of the preamble',
@@ -719,6 +720,10 @@ Exolve.prototype.init = function() {
                     <input id="${this.prefix}-print-preamble-below" type="checkbox">
                     </input>
                     ${this.textLabels['print-preamble-below']}
+                    &nbsp;
+                    <input id="${this.prefix}-print-inksaver" type="checkbox">
+                    </input>
+                    ${this.textLabels['print-inksaver']}
                   </div>
                   <div>
                     <input id="${this.prefix}-print-qrcode" type="checkbox">
@@ -6058,7 +6063,6 @@ Exolve.prototype.createListeners = function() {
       window.addEventListener(e, this.windowListeners[e]);
     }
   }
-
 }
 
 Exolve.prototype.recolourCells = function(scale=1) {
@@ -7496,6 +7500,9 @@ Exolve.prototype.handleAfterPrint = function() {
   if (this.printingChanges) {
     this.printAsIs = false;
     this.printOnlyCrossword = false;
+    if (this.printingChanges.inksaver) {
+      this.changeBG(this.colorScheme['background']);
+    }
     if (this.printingChanges.hiddenDisplays) {
       for (let display in this.printingChanges.hiddenDisplays) {
         const elts = this.printingChanges.hiddenDisplays[display];
@@ -7608,6 +7615,7 @@ Exolve.prototype.getPrintSettings = function() {
 
   const cluesPage = document.getElementById(this.prefix + '-print-clues-page').checked;
   const preambleBelow = document.getElementById(this.prefix + '-print-preamble-below').checked;
+  const inksaver = document.getElementById(this.prefix + '-print-inksaver').checked;
   const pq = document.getElementById(this.prefix + '-print-questions');
   const onlyCrossword = this.printOnlyCrossword || false;
   return {
@@ -7619,9 +7627,22 @@ Exolve.prototype.getPrintSettings = function() {
     pageHeightIn: heightIn,
     printQuestions: (this.questionTexts.length > 0) && pq.checked,
     preambleBelow: preambleBelow,
+    inksaver: inksaver,
     cluesPage: cluesPage,
     qr: this.qrCheckbox.checked && this.qrImg.complete,
   };
+}
+
+Exolve.prototype.changeBG = function(color) {
+  if (this.layers3d > 1) {
+    for (const g of this.background.children) {
+      for (const rect of g.children) {
+        rect.style.fill = color;
+      }
+    }
+  } else {
+    this.background.style.fill = color;
+  }
 }
 
 Exolve.prototype.handleBeforePrint = function() {
@@ -7649,6 +7670,7 @@ Exolve.prototype.handleBeforePrint = function() {
     extras: [],
     moves: [],
     hiddenDisplays: {},
+    inksaver: false,
   };
   // Unhighlight current cell/clue (handleAfterPrint() will restore).
   this.deactivator();
@@ -7748,6 +7770,20 @@ Exolve.prototype.handleBeforePrint = function() {
     this.printingChanges.moves.push(
         {'elem': this.preambleElt, 'target': par, 'sibling': sib});
     this.printingChanges.extras.push(wideBox);
+  }
+  if (settings.inksaver) {
+    this.printingChanges.inksaver = true;
+    const defs = document.createElementNS(
+        'http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `
+    <pattern id="shading" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect stroke="${this.colorScheme['background']}" fill="none"
+        stroke-width="1" x="0" y="0" width="4" height="4"/>
+    </pattern>
+    `;
+    this.svg.insertAdjacentElement('afterbegin', defs);
+    this.printingChanges.extras.push(defs);
+    this.changeBG('url(#shading)');
   }
 
   // Hide questions if requested.
