@@ -1,5 +1,16 @@
 # Changelog
 
+### Minor Version: Exolve v1.54.3: October 1, 2023
+
+- Allow the QR code to be printed at the bottom-right of the whole
+  puzzle (and make that the default option).
+- Styling tweaks: don't set styles for "table", make a class called
+  "xlv-clues-table" and use that.
+- Change the way darl-mode-only/light-mode-only colour options are
+  specified: colour-light-<name> conflicts with a few already existing
+  light-<name> options. Use "colour-light.<name>" and
+  "colour-dark.<name>" instead.
+
 ### Minor Version: Exolve v1.54.2: September 26, 2023
 
 - Make exolve-from-text.js normalize a couple more common pdf-pasting flaws:

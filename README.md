@@ -150,9 +150,9 @@ different colour for a short while. This animation's
 and the [duration (`highlight-overwritten-seconds`)](#exolve-option) can be
 configured.
 
-The solver can press Tab/Shift-Tab to navigate to the next/previous clue in the
-current direction. The solver can use the arrow keys to navigate to the
-next/previous light cells in the direction of the arrow.
+The solver can press Tab/Shift-Tab to navigate to the next/previous clue. The
+solver can use the arrow keys to navigate to the next/previous light cells in
+the direction of the arrow.
 
 The software tries to keep the current clue visible when scrolling, as long
 as the square with the cursor is visible.
@@ -1403,8 +1403,8 @@ be overriding), and descriptions.
 When you set any of the above options, that modification applies to
 both the "light mode" and the "dark mode" (see next section). If you want
 to only modify a color in light mode or in dark mode, then use
-`exolve-option: colour-light-<name><c>` or
-`exolve-option: colour-dark-<name><c>`.
+`exolve-option: colour-light.<name><c>` or
+`exolve-option: colour-dark.<name><c>`.
 
 Setting `colour-arrow` and `colour-caret` to the same colour as `colour-input`
 will make them invisible (if so desired).
@@ -1439,8 +1439,8 @@ As mentioned in the previous section, when you override a colour with
 `exolve-option: colour-<name>:<c>`, it gets overridden for both light mode
 and dark mode. If you only want to specify an overriding colour for light
 mode (or dark mode) then use
-`exolve-option: colour-light-<name><c>` (or
-`exolve-option: colour-dark-<name><c>`).
+`exolve-option: colour-light.<name><c>` (or
+`exolve-option: colour-dark.<name><c>`).
 
 Note that dark mode detection and handling is done when the crossword is
 first rendered. If the user changes the browser theme's dark mode settings,
@@ -1651,7 +1651,9 @@ Here are all the names of pieces of text that you can relabel:
 | `print-clues-page`| Page break before clues                      |
 | `print-preamble-below`| Preamble below grid                      |
 | `print-qrcode`| Include QR code                                  |
-| `print-qrcode-details`| The QR code (rendered to the right) will be printed to the right of the preamble.|
+| `print-qrcode-details`| The QR code (rendered to the right) will be printed to the |
+| `print-qrcode-in-preamble`| right of the preamble |
+| `print-qrcode-in-botright`| bottom-right of the puzzle |
 | `print-qrcode-cta-label`| Call to action                         |
 | `print-qrcode-cta`| Solve online                                 |
 | `print-qrcode-size`| QR code size:                               |
@@ -2216,6 +2218,10 @@ For most puzzles, this layout should fit within a single page, in Portrait mode,
 for standard page sizes. You can reduce the font size from the settings menu if
 it just goes over a single page by a few lines.
 
+*As of September 2023, at least in Chrome, printing has become buggy when the
+puzzle spills over to a second page. Please reduce font-size if that happens, to
+try to fit the puzzle into a single page.*
+
 You can override the column choices for completed (default: 2 columns) and
 incomplete (default: 3 columns) puzzles using the exolve-options
 `print-completed-3cols` and `print-incomplete-2cols` respectively.
@@ -2255,8 +2261,9 @@ with the title "Settings for printing/PDFs". This lets you specify:
 - Include QR code. Use this option to include a QR code. The QR code will
   use the URL of the current web page, but you can override that, and you
   can also override the call to action, which defaults to "Solve online".
-  The QR code is printed to the right of the preamble. The last three settings
-  work well together.
+  The QR code is printed to the bottom-right of the puzzle or the right of
+  the preamble. When printing the QR code in the preamble, it's usually
+  better to print the preamble below the grid.
 
 
 Additionally, from this panel, you have three buttons for printing:

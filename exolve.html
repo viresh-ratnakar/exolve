@@ -388,7 +388,7 @@ function Exolve(puzzleSpec,
        <p>Control keys:</p>
        <ul>
          <li><b>Tab/Shift-Tab:</b>
-             Jump to the next/previous clue in the current direction.</li>
+             Jump to the next/previous clue.</li>
          <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction.</li>
@@ -497,7 +497,9 @@ function Exolve(puzzleSpec,
     'print-clues-page': 'Page break before clues',
     'print-preamble-below': 'Preamble below grid',
     'print-qrcode': 'Include QR code',
-    'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the right of the preamble.',
+    'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the ',
+    'print-qrcode-in-preamble': 'right of the preamble',
+    'print-qrcode-in-botright': 'bottom-right of the puzzle',
     'print-qrcode-cta-label': 'Call to action',
     'print-qrcode-cta': 'Solve online',
     'print-qrcode-size': 'QR code size:',
@@ -786,13 +788,21 @@ Exolve.prototype.init = function() {
                       </tr>
                       <tr>
                         <td>
+                        <p>
                         ${this.textLabels['print-qrcode-details']}
+                        <select id="${this.prefix}-qrcode-location">
+                          <option value="puzzle">${this.textLabels['print-qrcode-in-botright']}</option>
+                          <option value="preamble">${this.textLabels['print-qrcode-in-preamble']}</option>
+                        </select>.
+                        </p>
+                        <p>
                         ${this.textLabels['print-qrcode-size']}
                         <select id="${this.prefix}-qrcode-size">
                           <option value="96">96</option>
                           <option value="128">128</option>
                           <option value="160">160</option>
-                        </select>
+                        </select>.
+                        </p>
                         </td>
                         <td>
                           <table id="${this.prefix}-qrcode-table"
@@ -864,7 +874,7 @@ Exolve.prototype.init = function() {
                 this.textLabels['across-label']}
             </div>
             <div id="${this.prefix}-across-clues-panel" class="xlv-clues-box">
-              <table id="${this.prefix}-across"></table>
+              <table id="${this.prefix}-across" class="xlv-clues-table"></table>
             </div>
           </div>
           <div class="xlv-clues-panel" style="display:none">
@@ -875,7 +885,7 @@ Exolve.prototype.init = function() {
                 this.textLabels['down-label']}
             </div>
             <div id="${this.prefix}-down-clues-panel" class="xlv-clues-box">
-              <table id="${this.prefix}-down"></table>
+              <table id="${this.prefix}-down" class="xlv-clues-table"></table>
             </div>
           </div>
           <div class="xlv-clues-panel" style="display:none">
@@ -885,7 +895,7 @@ Exolve.prototype.init = function() {
               ${this.textLabels['3d-dn-label']}
             </div>
             <div id="${this.prefix}-z3d-clues-panel" class="xlv-clues-box">
-              <table id="${this.prefix}-z3d"></table>
+              <table id="${this.prefix}-z3d" class="xlv-clues-table"></table>
             </div>
           </div>
           <div class="xlv-clues-panel" style="display:none">
@@ -895,7 +905,7 @@ Exolve.prototype.init = function() {
             </div>
             <div id="${this.prefix}-nodir-clues-panel"
                 class="xlv-clues-box">
-              <table id="${this.prefix}-nodir"></table>
+              <table id="${this.prefix}-nodir" class="xlv-clues-table"></table>
             </div>
           </div>
         </div> <!-- xlv-clues -->
@@ -1086,6 +1096,7 @@ Exolve.prototype.init = function() {
   this.qrPanel = document.getElementById(this.prefix + '-qrcode-panel');
   this.qrData = document.getElementById(this.prefix + '-qrcode-data');
   this.qrSize = document.getElementById(this.prefix + '-qrcode-size');
+  this.qrLocation = document.getElementById(this.prefix + '-qrcode-location');
   const qrRefresher = this.qrRefresher.bind(this);
   this.qrCheckbox.addEventListener('change', qrRefresher);
   this.qrData.value = location.href;
@@ -1634,10 +1645,10 @@ Exolve.prototype.parseOption = function(s) {
     if (kv[0].substr(0, 6) == 'color-' || kv[0].substr(0, 7) == 'colour-') {
       let cSchemes = [this.lightColorScheme, this.darkColorScheme];
       let key = kv[0].substr(kv[0].indexOf('-') + 1);
-      if (key.startsWith('dark-')) {
+      if (key.startsWith('dark.')) {
         cSchemes = [this.darkColorScheme];
         key = key.substr(5);
-      } else if (key.startsWith('light-')) {
+      } else if (key.startsWith('light.')) {
         cSchemes = [this.lightColorScheme];
         key = key.substr(6);
       }
@@ -4209,12 +4220,13 @@ Exolve.prototype.displayClues = function() {
       dir = clueDir
     }
     if (theClue.startNewTable) {
-      let newPanel = document.createElement('div')
+      const newPanel = document.createElement('div')
       newPanel.setAttributeNS(null, 'class',
                               'xlv-clues-box xlv-clues-extra-panel');
-      let newTable = document.createElement('table')
-      newPanel.appendChild(newTable)
-      extraPanels.push(newPanel)
+      const newTable = document.createElement('table')
+      newTable.className = 'xlv-clues-table';
+      newPanel.appendChild(newTable);
+      extraPanels.push(newPanel);
 
       const newPanelInDiv = document.createElement('div')
       newPanelInDiv.setAttributeNS(null, 'class', 'xlv-clues-panel');
@@ -7755,12 +7767,23 @@ Exolve.prototype.handleBeforePrint = function() {
   if (settings.qr) {
     const par = this.qrTable.parentElement;
     const sib = this.qrTable.nextSibling;
-    this.preambleElt.insertAdjacentElement('afterbegin', this.qrTable);
     this.printingChanges.moves.push(
         {'elem': this.qrTable, 'target': par, 'sibling': sib});
-    preambleSizer = `
-      min-height: ${this.qrTable.clientHeight}px;
-    `;
+    const inPreamble = (this.qrLocation.value == 'preamble');
+    let container = this.preambleElt;
+    const qrHeight = this.qrTable.clientHeight + 'px';
+    if (inPreamble) {
+      preambleSizer = `
+        min-height: ${qrHeight};
+      `;
+    } else {
+      container = document.createElement('div');
+      container.classList.add('xlv-clues-panel');
+      container.style.minHeight = qrHeight;
+      this.cluesContainer.insertAdjacentElement('beforeend', container);
+      this.printingChanges.extras.push(container);
+    }
+    container.insertAdjacentElement('afterbegin', this.qrTable);
   }
   if (settings.preambleBelow) {
     const par = this.preambleElt.parentElement;
@@ -7873,6 +7896,7 @@ Exolve.prototype.addPrintedCluesTable = function(elem, width, num) {
   box.className = 'xlv-clues-box';
   box.style.width = width + 'px'
   const table = document.createElement('table');
+  table.className = 'xlv-clues-table';
   table.id = this.prefix + '-printed-clues-table-' + num;
   box.appendChild(table);
   elem.insertAdjacentElement('beforeend', box);
@@ -8552,26 +8576,28 @@ function createPuzzle() {
 .xlv-cell-circle {
   fill: rgba(0,0,0,0.0);
 }
-.xlv-frame .xlv-clues table {
-  background-image: none !important;
+.xlv-frame .xlv-clues-table {
   border: none !important;
   border-collapse: collapse !important;
   border-spacing: 0 !important;
   margin: inherit;
 }
-.xlv-frame .xlv-clues tr {
+.xlv-frame table,
+.xlv-frame td,
+.xlv-frame tr {
   background-image: none !important;
+}
+.xlv-frame .xlv-clues-table tr {
   border: none !important;
   break-inside: avoid;
 }
-.xlv-frame .xlv-clues td {
-  background-image: none !important;
+.xlv-frame .xlv-clues-table td {
   border: none !important;
   padding: 0 6px 4px 0 !important;
   vertical-align: top;
   white-space: normal !important;
 }
-.xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
+.xlv-frame .xlv-clues-table td:first-child:not(.xlv-filler) {
   background-image: none !important;
   box-sizing: content-box;
   font-weight: bold;
@@ -8903,10 +8929,6 @@ function createPuzzle() {
   height: auto;
   width: auto;
 }
-.xlv-print-settings table,
-.xlv-print-settings td {
-  background-image: none !important;
-}
 .xlv-print-settings td {
   white-space: normal;
 }
@@ -8915,6 +8937,7 @@ function createPuzzle() {
   float: right;
   margin: 0 0 4px 4px;
   padding: 0;
+  width: auto !important;
 }
 .xlv-qrcode-cta {
   font-family: monospace;
@@ -8924,6 +8947,7 @@ function createPuzzle() {
   text-align: center;
 }
 .xlv-qrcode-panel td {
+  padding: 0;
   vertical-align: middle;
 }
 .xlv-toggleable * {

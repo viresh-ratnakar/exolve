@@ -125,26 +125,28 @@ Version: Exolve v1.54 September 17, 2023
 .xlv-cell-circle {
   fill: rgba(0,0,0,0.0);
 }
-.xlv-frame .xlv-clues table {
-  background-image: none !important;
+.xlv-frame .xlv-clues-table {
   border: none !important;
   border-collapse: collapse !important;
   border-spacing: 0 !important;
   margin: inherit;
 }
-.xlv-frame .xlv-clues tr {
+.xlv-frame table,
+.xlv-frame td,
+.xlv-frame tr {
   background-image: none !important;
+}
+.xlv-frame .xlv-clues-table tr {
   border: none !important;
   break-inside: avoid;
 }
-.xlv-frame .xlv-clues td {
-  background-image: none !important;
+.xlv-frame .xlv-clues-table td {
   border: none !important;
   padding: 0 6px 4px 0 !important;
   vertical-align: top;
   white-space: normal !important;
 }
-.xlv-frame .xlv-clues td:first-child:not(.xlv-filler) {
+.xlv-frame .xlv-clues-table td:first-child:not(.xlv-filler) {
   background-image: none !important;
   box-sizing: content-box;
   font-weight: bold;
@@ -476,10 +478,6 @@ Version: Exolve v1.54 September 17, 2023
   height: auto;
   width: auto;
 }
-.xlv-print-settings table,
-.xlv-print-settings td {
-  background-image: none !important;
-}
 .xlv-print-settings td {
   white-space: normal;
 }
@@ -488,6 +486,7 @@ Version: Exolve v1.54 September 17, 2023
   float: right;
   margin: 0 0 4px 4px;
   padding: 0;
+  width: auto !important;
 }
 .xlv-qrcode-cta {
   font-family: monospace;
@@ -497,6 +496,7 @@ Version: Exolve v1.54 September 17, 2023
   text-align: center;
 }
 .xlv-qrcode-panel td {
+  padding: 0;
   vertical-align: middle;
 }
 .xlv-toggleable * {
