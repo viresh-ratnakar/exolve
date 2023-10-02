@@ -2259,8 +2259,8 @@ with the title "Settings for printing/PDFs". This lets you specify:
   while the clues get printed on a separate page.
 - Preamble below grid. Set this option to print the preamble below the grid
   rather than above it.
-- Inksaver. Set this option to print using a chequered pattern instead of black
-  as the background colour for blocks.
+- Inksaver. Set this option to print using a chequered pattern instead of a
+  complete fill as the background colour for blocks.
 - Include QR code. Use this option to include a QR code. The QR code will
   use the URL of the current web page, but you can override that, and you
   can also override the call to action, which defaults to "Solve online".
