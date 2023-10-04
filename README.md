@@ -482,19 +482,20 @@ enum (the enum is not strictly required). Example:
     2 Make a mistake (3)
 ```
 
-If the enum indicates multiple words (for example, *(4,3)*), or if the enum
-indicates hyphenated words (for example, *(4-2)*), then the word boundary or
-the hyphen gets displayed in the grid, to help solvers. The software uses the
-following criteria to decide what constitutes the enum part of a clue: a pair
-of opening and closing parentheses, containing only numbers, hyphens, commas,
-apostrophes, and periods, starting with a number. The software also treats a
-pair of parentheses containing the text "words" or "letters" (or any subword
-beginning with "w" or "l", such as "wrds" or "l" or "ltrs") or containing "?"
-with anything before it, as an enum (to allow the setter to specify the enum
-as "(two words)" or "(?)" or "(7, 2w)", for example). Within these special
-cases, in the corner cases of "(7, 2words)" and "(6 letters)", the parsing
-interprets 7 and 6 respectively to be the length of the entry, and will check
-it against the length of the light as with a normal enum.
+If the enum indicates multiple words (for example, *(4,3)* or *(6 7)*), or if
+the enum indicates hyphenated words (for example, *(4-2)*), then the word
+boundary or the hyphen gets displayed in the grid, to help solvers. The
+software uses the following criteria to decide what constitutes the enum part
+of a clue: a pair of opening and closing parentheses, containing only numbers,
+hyphens, commas, apostrophes, spaces, and periods, starting with a number. The
+software also treats a pair of parentheses containing the text "words" or
+"letters" (or any subword beginning with "w" or "l", such as "wrds" or "l" or
+"ltrs") or containing "?" with anything before it, as an enum (to allow the
+setter to specify the enum as "(two words)" or "(?)" or "(7, 2w)", for example).
+Within these special cases, in the corner cases of "(7, 2words)" and
+"(6 letters)", the parsing interprets 7 and 6 respectively to be the length of
+the entry, and will check it against the length of the light as with a normal
+enum.
 
 In the rare case that there are multiple candidate enum parts in a clue, the
 last one is used. However, this can be overridden by explicitly using "[]"

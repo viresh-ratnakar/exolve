@@ -106,7 +106,7 @@ exolveFromText = function(w, h, text, fname='') {
 
   const clueStartRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*/;
   const clueRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*.*\([0-9, '-]+\)/;
-  const childRE = /^\s*\d{1,2}(?!\d)\s*see /i;
+  const childRE = /^\s*\d{1,2}(?!\d)[\s\.:]*see /i;
   const wordsRE = /[a-zA-Z]+/;
   const copyrightRE = /^\s*(copyright|\(c\)|Ⓒ)/i;
   const titleAndSetterRE = /^\s*(.+)\sby\s(.+)/i; 

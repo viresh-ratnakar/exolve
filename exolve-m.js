@@ -2500,7 +2500,7 @@ Exolve.prototype.findEnum = function(clueLine) {
   return candidate;
 }
 
-// Parse an enum like (4) or (4,5), or (5-2,4). Also allow enums like these:
+// Parse an enum like (4) or (4,5), or (5-2,4) or (5 6). Also allow enums like these:
 //   (?), (2 words) (5 letters), (6, 2 wds)
 // Return an object with the following properties:
 // enumLen: set to 0 if the enum is something like (?) or (2 words), else
@@ -2565,7 +2565,8 @@ Exolve.prototype.parseEnum = function(clueLine) {
       parse.placeholder = parse.placeholder + '?';
     }
     parse.enumLen = parse.enumLen + nextPart
-    enumLeft = enumLeft.replace(/\s*\d+\s*/, '');
+    enumLeft = enumLeft.replace(/^\s*\d+/, '');
+    enumLeft = enumLeft.replace(/^\s+(\d)/, ',$1');
     let nextSymbol = enumLeft.substr(0, 1);
     if (nextSymbol == '-') {
       parse.hyphenAfter.push(parse.enumLen - 1);
@@ -2595,9 +2596,9 @@ Exolve.prototype.parseEnum = function(clueLine) {
  * The direction prefix must start at the beginning of s, with this 2-d
  * exception if matchSpecial==true (for parsing linked clue numbers
  * coming from non-exolve text):
- * <n> [a|d|across|down]((, *[0-9])|( [A-Z]))
+ * <n> [a|d|across|down|ac|dn]((, *[0-9])|( [A-Z]))
  */
-Exolve.prototype.parseDir = function(s, matchSpecial) {
+Exolve.prototype.parseDir = function(s, matchSpecial=false) {
   const parse = {dir: '', reversed: false};
   let dirStr = '';
   let skip = 0;
@@ -2633,11 +2634,17 @@ Exolve.prototype.parseDir = function(s, matchSpecial) {
       } else if (lcs.startsWith(' a')) {
         specSkip = 2;
         specDir = 'A';
+      } else if (lcs.startsWith(' ac')) {
+        specSkip = 3;
+        specDir = 'A';
       } else if (lcs.startsWith(' down')) {
         specSkip = 5;
         specDir = 'D';
       } else if (lcs.startsWith(' d')) {
         specSkip = 2;
+        specDir = 'D';
+      } else if (lcs.startsWith(' dn')) {
+        specSkip = 3;
         specDir = 'D';
       }
       if (specSkip > 0) {
@@ -2699,7 +2706,7 @@ Exolve.prototype.parseDir = function(s, matchSpecial) {
 // Parse a clue label from the start of clueLine. The clue label can be
 // specified like:
 //   5 or 5d or 5D or d5 or D5 or [P] or [P]d or [P]D or d[P] or D[P]
-//   or 5down or 5across
+//   or 5down or 5across or 6ac or 6dn
 // The letter part can be a/d/b/u. In 3-D crosswords it has to be one of
 //   ac/ba/to/aw/dn/up (ignoring case).
 // Return an object with the following properties:
@@ -2762,7 +2769,7 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
   clueLine = clueLine.substr(lskip)
 
   if (!parse.dir) {
-    // If isChild=true, then parseDir will also match a space followed by 'a/across/d/down' if there
+    // If isChild=true, then parseDir will also match a space followed by 'a/across/d/down/ac/dn' if there
     // is a number or capital letter afterwards.
     const suffDir = this.parseDir(clueLine, isChild);
     if (suffDir.dir) {

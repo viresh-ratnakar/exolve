@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.54.5: October 3, 2023
+
+- Parse enums like (5 6) too.
+- In exolve-from-text, allow there to be a period or
+  colon after the clue number.
+
 ### Minor Version: Exolve v1.54.4: October 2, 2023
 
 - Add an Inksaver option to printing.
