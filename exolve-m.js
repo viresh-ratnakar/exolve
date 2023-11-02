@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.54 September 17, 2023';
+  this.VERSION = 'Exolve v1.55 November 1, 2023';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -482,6 +482,7 @@ function Exolve(puzzleSpec,
   this.printOnlyCrossword = false;
 
   // Variables set by exolve-option
+  this.extractionSlots = 0;
   this.hideInferredNumbers = false;
   this.cluesPanelLines = -1;
   this.allowChars = null;
@@ -1545,14 +1546,26 @@ Exolve.prototype.parseOption = function(s) {
       spart = 'allow-chars:0123456789';
       // Fall through to the allow-chars code.
     }
+    if (spart == "add-extraction-slots") {
+      spart = 'add-extraction-slots:1';
+    }
     const colon = spart.indexOf(':');
     if (colon < 0) {
       this.throwErr('Expected exolve-option: key:value, got: ' + spart);
     }
     const kv = [spart.substr(0, colon).trim(), spart.substr(colon + 1).trim()];
+
+    if (kv[0] == 'add-extraction-slots') {
+      this.extractionSlots = parseInt(kv[1]);
+      if (isNaN(this.extractionSlots) || this.extractionSlots <= 0) {
+        this.throwErr(
+            'Unexpected val in exolve-option: add-extraction-slots: ' + kv[1]);
+      }
+      continue;
+    }
     if (kv[0] == 'clues-panel-lines') {
       this.cluesPanelLines = parseInt(kv[1]);
-      if (isNaN(this.cluesPanelLines)) {
+      if (isNaN(this.cluesPanelLines) || this.cluesPanelLines <= 0) {
         this.throwErr('Unexpected val in exolve-option: clue-panel-lines: ' +
                       kv[1]);
       }
@@ -4148,52 +4161,51 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
 
 Exolve.prototype.displayClues = function() {
   // Populate clues tables. Check that we have all clues
-  let table = null
-  let dir = ''
-  let extraPanels = []
+  let table = null;
+  let dir = '';
+  let extraPanels = [];
   let revSuff = '';
   for (let clueIndex of this.allClueIndices) {
-    let theClue = this.clues[clueIndex]
+    let theClue = this.clues[clueIndex];
     if (!theClue.clue && !theClue.parentClueIndex) {
-      this.throwErr('Found no clue text nor a parent clue for ' + clueIndex)
+      this.throwErr('Found no clue text nor a parent clue for ' + clueIndex);
     }
-    let clueDir = theClue.clueTableDir ||
-                  theClue.dir
+    let clueDir = theClue.clueTableDir || theClue.dir;
     if (dir != clueDir) {
       if (clueDir == 'A') {
-        table = this.acrossClues
-        this.hasAcrossClues = true
+        table = this.acrossClues;
+        this.hasAcrossClues = true;
         revSuff = (this.layers3d > 1) ? this.textLabels['3d-ba'] :
             this.textLabels['back-letter'];
       } else if (clueDir == 'D') {
-        table = this.downClues
-        this.hasDownClues = true
+        table = this.downClues;
+        this.hasDownClues = true;
         revSuff = (this.layers3d > 1) ? this.textLabels['3d-to'] :
             this.textLabels['up-letter'];
       } else if (clueDir == 'Z') {
-        table = this.z3dClues
-        this.hasZ3dClues = true
+        table = this.z3dClues;
+        this.hasZ3dClues = true;
         revSuff = this.textLabels['3d-up'];
       } else if (clueDir == 'X') {
-        table = this.nodirClues
-        this.hasNodirClues = true
+        table = this.nodirClues;
+        this.hasNodirClues = true;
         revSuff = '';
       } else {
         this.throwErr('Unexpected clue direction ' + clueDir + ' in ' +
-                      clueIndex)
+                      clueIndex);
       }
-      dir = clueDir
+      dir = clueDir;
     }
     if (theClue.startNewTable) {
-      const newPanel = document.createElement('div')
+      const newPanel = document.createElement('div');
       newPanel.setAttributeNS(null, 'class',
                               'xlv-clues-box xlv-clues-extra-panel');
-      const newTable = document.createElement('table')
+      const newTable = document.createElement('table');
       newTable.className = 'xlv-clues-table';
       newPanel.appendChild(newTable);
       extraPanels.push(newPanel);
 
-      const newPanelInDiv = document.createElement('div')
+      const newPanelInDiv = document.createElement('div');
       newPanelInDiv.setAttributeNS(null, 'class', 'xlv-clues-panel');
       newPanelInDiv.insertAdjacentHTML(
         'afterbegin',
@@ -4201,117 +4213,142 @@ Exolve.prototype.displayClues = function() {
           <hr>
           ${theClue.newTableHeading}
         </div>`);
-      newPanelInDiv.appendChild(newPanel)
+      newPanelInDiv.appendChild(newPanel);
 
-      let tableGrandParent = table.parentElement.parentElement
+      let tableGrandParent = table.parentElement.parentElement;
       tableGrandParent.parentElement.insertBefore(
-        newPanelInDiv, tableGrandParent.nextSibling)
-      table = newTable
+          newPanelInDiv, tableGrandParent.nextSibling);
+      table = newTable;
     }
     if (theClue.filler) {
-      let tr = document.createElement('tr')
-      let col = document.createElement('td')
-      col.setAttributeNS(null, 'colspan', '2');
+      const tr = document.createElement('tr');
+      const col = document.createElement('td');
+      const colspan = 2 + (this.extractionSlots ? 1 : 0);
+      col.setAttributeNS(null, 'colspan', '' + colspan);
       col.setAttributeNS(null, 'class', 'xlv-filler');
-      col.innerHTML = theClue.filler
-      tr.appendChild(col)
-      table.appendChild(tr)
+      col.innerHTML = theClue.filler;
+      tr.appendChild(col);
+      table.appendChild(tr);
     }
-    let tr = document.createElement('tr')
-    let col1 = document.createElement('td')
-    col1.innerHTML = theClue.displayLabel
+    const tr = document.createElement('tr');
 
-    let col1Chars = theClue.displayLabel.replace(/&[^;]*;/g, '#')
-    let col1NumChars = [...col1Chars].length
+    if (this.extractionSlots > 0) {
+      const extrCol = document.createElement('td');
+      extrCol.classList.add('xlv-clue-extraction');
+      const extr = document.createElement('input');
+      extr.classList.add('xlv-clue-extraction-slot');
+      const slotsStr = '' + this.extractionSlots;
+      extr.setAttributeNS(null, 'size', slotsStr);
+      extr.setAttributeNS(null, 'type', 'text');
+      extr.style.color = this.colorScheme['imp-text']
+      extr.style.maxWidth = '' + (this.extractionSlots + 1) + 'ch';
+      extr.setAttributeNS(null, 'maxlength', slotsStr);
+      extr.setAttributeNS(null, 'autocomplete', 'off');
+      extr.setAttributeNS(null, 'spellcheck', 'false');
+      extr.addEventListener('click', this.boundListeners['clue-input-click']);
+      extr.addEventListener('input', this.boundListeners['update']);
+      extrCol.appendChild(extr);
+      this.answersList.push({
+        input: extr,
+        isq: false,
+      });
+      tr.appendChild(extrCol);
+    }
+    const labelCol = document.createElement('td');
+    labelCol.innerHTML = theClue.displayLabel;
+    labelCol.classList.add('xlv-clue-label');
+
+    let labelColChars = theClue.displayLabel.replace(/&[^;]*;/g, '#');
+    let labelColNumChars = [...labelColChars].length;
     let indenterHTML = '';
-    const linkSep = col1Chars.substr(1, 2);
+    const linkSep = labelColChars.substr(1, 2);
     if (linkSep == ', ' || linkSep == ' &' ||
-        (revSuff && col1Chars.substr(1, revSuff.length) == revSuff)) {
+        (revSuff && labelColChars.substr(1, revSuff.length) == revSuff)) {
       // Linked clue that begins with a single-letter/digit clue number.
       // Or, reversed single-letter/digit clue.
       // Indent!
-      col1.style.textIndent =
-        this.caseCheck(col1Chars.substr(0, 1)) ? '0.55ch' : '1ch'
+      labelCol.style.textIndent =
+        this.caseCheck(labelColChars.substr(0, 1)) ? '0.55ch' : '1ch';
       indenterHTML = '0';
-      col1NumChars++
+      labelColNumChars++;
     }
     if (!this.allCellsKnown(clueIndex)) {
-      col1.setAttributeNS(null, 'class', 'xlv-clickable')
-      col1.setAttributeNS(null, 'title', this.textLabels['mark-clue.hover'])
-      col1.addEventListener('click',
+      labelCol.classList.add('xlv-clickable');
+      labelCol.setAttributeNS(null, 'title', this.textLabels['mark-clue.hover']);
+      labelCol.addEventListener('click',
                             this.clueStateToggler.bind(this, clueIndex));
     }
-    let col2 = document.createElement('td')
-    if (col1NumChars > 2) {
-      // More than two unicode chars in col1. Need to indent col2.
+    const clueCol = document.createElement('td');
+    if (labelColNumChars > 2) {
+      // More than two unicode chars in labelCol. Need to indent clueCol.
       indenterHTML += theClue.displayLabel;
       const indenter = document.createElement('span');
       indenter.className = 'xlv-invisible';
       indenter.innerHTML = indenterHTML;
-      col2.appendChild(indenter);
-      col2.classList.add('xlv-clue-indent');
+      clueCol.appendChild(indenter);
+      clueCol.classList.add('xlv-clue-indent');
     }
-    let clueSpan = document.createElement('span')
-    this.renderClueSpan(theClue, clueSpan)
-    col2.appendChild(clueSpan)
-    theClue.clueSpan = clueSpan
+    const clueSpan = document.createElement('span');
+    this.renderClueSpan(theClue, clueSpan);
+    clueCol.appendChild(clueSpan);
+    theClue.clueSpan = clueSpan;
 
     if ((theClue.showBlanks || this.isOrphan(clueIndex)) &&
         !theClue.parentClueIndex) {
-      let placeholder = ''
-      let len = this.PLACEHOLDER_BLANK_LEN
+      let placeholder = '';
+      let len = this.PLACEHOLDER_BLANK_LEN;
       if (theClue.placeholder) {
-        placeholder = theClue.placeholder
-        len = placeholder.length
+        placeholder = theClue.placeholder;
+        len = placeholder.length;
       }
       if (theClue.showBlanks && theClue.showBlanks > 1) {
         len = theClue.showBlanks;
       }
       theClue.placeholderBlank =
-          this.addPlaceholderBlank(col2, false, len, placeholder, clueIndex);
+          this.addPlaceholderBlank(clueCol, false, len, placeholder, clueIndex);
       this.answersList.push({
         input: theClue.placeholderBlank,
         isq: false,
       });
     }
-    let annoSpan = document.createElement('span')
+    const annoSpan = document.createElement('span');
     annoSpan.setAttributeNS(null, 'class', 'xlv-anno-text');
-    annoSpan.style.color = this.colorScheme['anno']
+    annoSpan.style.color = this.colorScheme['anno'];
     annoSpan.style.display = 'none';
     if (theClue.anno || theClue.dispSol) {
       annoSpan.innerHTML = ' ' + theClue.dispSol +
-                           '<span>' + theClue.anno + '</span>'
-      this.revelationList.push(annoSpan)
+                           '<span>' + theClue.anno + '</span>';
+      this.revelationList.push(annoSpan);
     }
-    col2.appendChild(annoSpan)
-    theClue.annoSpan = annoSpan
-    tr.appendChild(col1)
-    tr.appendChild(col2)
+    clueCol.appendChild(annoSpan);
+    theClue.annoSpan = annoSpan;
+    tr.appendChild(labelCol);
+    tr.appendChild(clueCol);
     tr.addEventListener('click', this.clueActivator.bind(this, clueIndex));
-    theClue.clueTR = tr
-    table.appendChild(tr)
+    theClue.clueTR = tr;
+    table.appendChild(tr);
   }
   if (this.cluesPanelLines > 0) {
-    const ems = 1.40 * this.cluesPanelLines
-    const emsStyle = '' + ems + 'em'
-    this.acrossPanel.style.maxHeight = emsStyle
-    this.downPanel.style.maxHeight = emsStyle
-    this.nodirPanel.style.maxHeight = emsStyle
+    const ems = 1.40 * this.cluesPanelLines;
+    const emsStyle = '' + ems + 'em';
+    this.acrossPanel.style.maxHeight = emsStyle;
+    this.downPanel.style.maxHeight = emsStyle;
+    this.nodirPanel.style.maxHeight = emsStyle;
     for (let p of extraPanels) {
-      p.style.maxHeight = emsStyle
+      p.style.maxHeight = emsStyle;
     }
   }
   if (this.hasAcrossClues) {
-    this.acrossPanel.parentElement.style.display = ''
+    this.acrossPanel.parentElement.style.display = '';
   }
   if (this.hasDownClues) {
-    this.downPanel.parentElement.style.display = ''
+    this.downPanel.parentElement.style.display = '';
   }
   if (this.hasZ3dClues) {
-    this.z3dPanel.parentElement.style.display = ''
+    this.z3dPanel.parentElement.style.display = '';
   }
   if (this.hasNodirClues) {
-    this.nodirPanel.parentElement.style.display = ''
+    this.nodirPanel.parentElement.style.display = '';
     if (!this.nodirHeading) {
       this.nodirHeading = this.textLabels['nodir-label'];
     }
@@ -5441,7 +5478,7 @@ Exolve.prototype.phBlankCopier = function(clueIndex, e) {
   e.stopPropagation()
 }
 
-Exolve.prototype.phBlankOnClick = function(e) {
+Exolve.prototype.clueInputClick = function(e) {
   e.stopPropagation();
 }
 
@@ -5469,7 +5506,8 @@ Exolve.prototype.addPlaceholderBlank = function(
   incluefill.style.color = this.colorScheme['solution'];
   incluefill.addEventListener('input',
       this.updateOrphanEntry.bind(this, clueIndex, inCurr));
-  incluefill.addEventListener('click', this.phBlankOnClick.bind(this));
+  incluefill.addEventListener('click',
+      this.boundListeners['clue-input-click']);
   if (!this.hideCopyPlaceholders) {
     elt.lastElementChild.lastElementChild.addEventListener(
       'click', this.phBlankCopier.bind(this, clueIndex));
@@ -6036,36 +6074,44 @@ Exolve.prototype.createListeners = function() {
    */
   this.boundListeners = {};
 
-  const keyUpListener = this.handleKeyUp.bind(this);
-  this.boundListeners['key-up'] = keyUpListener;
-  this.gridInput.addEventListener('keyup', keyUpListener);
+  this.boundListeners['clue-input-click'] = this.clueInputClick.bind(this);
+  this.boundListeners['key-up'] = this.handleKeyUp.bind(this);
+  this.boundListeners['update'] = this.updateAndSaveState.bind(this, true);
 
-  // Listen for tab/shift-tab, ctrl-q/Q everywhere in the puzzle area.
-  const keyDownListener = this.handleKeyDown.bind(this);
-  this.boundListeners['key-down'] = keyDownListener;
-  this.frame.addEventListener('keydown', keyDownListener);
+  this.boundListeners['key-down'] = this.handleKeyDown.bind(this);
 
-  const gridInputListener = this.handleGridInput.bind(this);
-  this.boundListeners['grid-input'] = gridInputListener;
-  this.gridInput.addEventListener('input', gridInputListener);
+  this.boundListeners['grid-input'] = this.handleGridInput.bind(this);
 
-  const toggler = this.toggleCurrDirAndActivate.bind(this);
-  this.boundListeners['toggler'] = toggler;
-  this.gridInputWrapper.addEventListener('click', toggler);
+  this.boundListeners['toggler'] = this.toggleCurrDirAndActivate.bind(this);
 
-  const boundDeactivator = this.deactivator.bind(this)
-  this.boundListeners['deactivator'] = boundDeactivator;
-  this.background.addEventListener('click', boundDeactivator);
-  // Clicking on the title/setter/preamble will also unselect the current clue.
-  this.titleElt.addEventListener('click', boundDeactivator);
-  this.setterElt.addEventListener('click', boundDeactivator);
-  this.preambleElt.addEventListener('click', boundDeactivator);
+  this.boundListeners['deactivator'] = this.deactivator.bind(this)
   
   this.windowListeners = {};
   if (this.notTemp) {
     this.windowListeners['resize'] = this.handleResize.bind(this);
     this.windowListeners['beforeprint'] = this.handleBeforePrint.bind(this);
     this.windowListeners['afterprint'] = this.handleAfterPrint.bind(this);
+  }
+}
+
+Exolve.prototype.bindListeners = function() {
+  this.gridInput.addEventListener('keyup', this.boundListeners['key-up']);
+
+  // Listen for tab/shift-tab, ctrl-q/Q everywhere in the puzzle area.
+  this.frame.addEventListener('keydown', this.boundListeners['key-down']);
+
+  this.gridInput.addEventListener('input', this.boundListeners['grid-input']);
+
+  this.gridInputWrapper.addEventListener('click', this.boundListeners['toggler']);
+
+  const boundDeactivator = this.boundListeners['deactivator'];
+  this.background.addEventListener('click', boundDeactivator);
+  // Clicking on the title/setter/preamble will also unselect the current clue.
+  this.titleElt.addEventListener('click', boundDeactivator);
+  this.setterElt.addEventListener('click', boundDeactivator);
+  this.preambleElt.addEventListener('click', boundDeactivator);
+  
+  if (this.notTemp) {
     for (let e in this.windowListeners) {
       window.addEventListener(e, this.windowListeners[e]);
     }
@@ -8380,6 +8426,7 @@ Exolve.prototype.createIdIfNeeded = function() {
 
 Exolve.prototype.createPuzzle = function() {
   this.init()
+  this.createListeners();
 
   this.parseAndDisplayPrelude()
   this.parseAndDisplayExplanations()
@@ -8422,7 +8469,7 @@ Exolve.prototype.createPuzzle = function() {
   this.restoreState();
   this.checkConsistency();
 
-  this.createListeners();
+  this.bindListeners();
 
   this.loadWebifi();
 

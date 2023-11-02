@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.54 September 17, 2023
+### Version: Exolve v1.55 November 1, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -904,6 +904,17 @@ Note also that "Reveal all" does not reveal orphan-clue-to-grid-light
 associations. But, even after "Reveal all," solvers may go through orphan
 clues, clicking "Reveal this" for each.
 
+### Adding "extraction slots" before clues
+
+A common ruse in cryptics is to make each clue somehow yield an extra letter 
+and to make a meta out of those letters. Exolve allows you to add a column
+of "extraction slots" before each clue. Solvers can record letters/numbers
+in these slots (and these are saved in the state too). You can do this
+by specifying `exolve-option: add-extraction-slots`. By default, if you
+specify this option, then a *one*-letter slot is added. But you can specify
+the number of letters in the slot with an optional parameter (e.g.,
+`exolve-option: add-extraction-slots:3`). 
+
 ### Forcing the display of "placeholder blanks"
 
 Placeholder blanks normally get displayed only in front of "orphan" clues whose
@@ -1279,6 +1290,11 @@ For options that need a value (provided after a colon), there should not be
 any leading space after the colon. Option names and values are case-sensitive.
 The list of currently supported options is as follows:
 
+- **`add-extraction-slots[:<chars>]`** Use this to add "extraction slots"
+  prior to each clue, where solvers can record something (such as a letter
+  somehow extracted from each clue). The number of slots can be specified with
+  the optional `<chars>` parameter (default is 1). The recorded entries are
+  saved in the state.
 - **`allow-chars:<chars>`** If this option is specified, then we allow solvers
   to enter any of the characters (which would typically be special characters
   or digits)  listed in `<chars>`. For example, `allow-chars:#!7` will allow the
@@ -1296,8 +1312,6 @@ The list of currently supported options is as follows:
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
-- **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
-  specified, then we do not try ["smart colouring"](#smart-colouring).
 - **`columnar-layout`** Deprecated. This option was used to create a
   newspaper-like layout, but it never worked reliably across platforms.
   You still get nice, "flowing" layouts when printing.
@@ -1309,6 +1323,10 @@ The list of currently supported options is as follows:
 - **`grid-background:<c>`** 
   This option is deprecated and ignored now. Please use color-background
   (see above).
+- **`hide-copy-placeholder-buttons`** This is an option that is only applicable
+  when there are nodir clues without cells explicitly specified. It turns off
+  the display of buttons to copy placeholder texts in those cases (see the
+  subsection below on "Jigsaw puzzle clues").
 - **`hide-inferred-numbers`** If this option is specified, then the software
   does not display any clue numbers that were automatically inferred. Setters
   using non-numeric clue labels may want to specify this option.
@@ -1320,10 +1338,6 @@ The list of currently supported options is as follows:
   warnings about enum-mismatches are suppressed.
 - **`ignore-unclued`** If this option is specified, then any generated warnings
   about missing clues are suppressed.
-- **`hide-copy-placeholder-buttons`** This is an option that is only applicable
-  when there are nodir clues without cells explicitly specified. It turns off
-  the display of buttons to copy placeholder texts in those cases (see the
-  subsection below on "Jigsaw puzzle clues").
   **`no-auto-solution-in-anno`** In a grid with solutions, we automatically
   show the solution next to the clue, when "Reveal all!" or "Reveal this" is
   used. Set this option to disable that. Useful if you want to control
@@ -1335,16 +1349,18 @@ The list of currently supported options is as follows:
   is used, the button does get shown (in case the user wants to hide the ninas,
   say for printing). If at that point, the user does "Hide ninas" or
   "Clear all", then the nina button is hidden again.
+- **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
+  specified, then we do not try ["smart colouring"](#smart-colouring).
 - **`offset-left:<N>`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using `customizeExolve()`, for example.
 - **`offset-top:<N>`** Draw the grid with this much space above and under
   it (N pixels). Useful for drawing additional art around the grid using
   `customizeExolve()`, for example.
-- **`top-clue-clearance:<N>`** Add N pixels space between the top of the grid
-  and the bottom of the clue shown on top. Defaults to 0. You can set this
-  to something like `20`, but note that if the clue text is very long then
-  this setting will get overridden.
+- **`override-number-<name>:<N>`** An advanced override function that will
+  set the property named `<name>` in the puzzle to the numeric value `<N>`.
+  This can be used to override properties for which there is no explicit
+  dedicated option, such as `GRIDLINE`.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   override the default layout choices used for printing puzzles (and creating
   PDFs). By default, a completed puzzle is printed in 2 columns
@@ -1354,12 +1370,12 @@ The list of currently supported options is as follows:
 - **`show-cell-level-buttons`** If this option is specified, then "Check cell"
   and "Reveal cell" buttons are also shown, in an extra row of buttons, for
   crosswords with solutions provided.
+- **`top-clue-clearance:<N>`** Add N pixels space between the top of the grid
+  and the bottom of the clue shown on top. Defaults to 0. You can set this
+  to something like `20`, but note that if the clue text is very long then
+  this setting will get overridden.
 - **`webifi`** Provide a "Webifi" link under the crossword. See the
   [Webifi section](#webifi) for details.
-- **`override-number-<name>:<N>`** An advanced override function that will
-  set the property named `<name>` in the puzzle to the numeric value `<N>`.
-  This can be used to override properties for which there is no explicit
-  dedicated option, such as `GRIDLINE`.
 
 ### Colour schemes
 Using a bunch of `exolve-option: colour-<name>:<c>` (or, of course,

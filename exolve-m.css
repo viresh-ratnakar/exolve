@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.54 September 17, 2023
+Version: Exolve v1.55 November 1, 2023
 */
 
 @media (max-width: 500px) {
@@ -28,6 +28,7 @@ Version: Exolve v1.54 September 17, 2023
 .xlv-answer,
 .xlv-input,
 .xlv-incluefill,
+.xlv-clue-extraction-slot,
 .xlv-scratchpad,
 .xlv-shuffle {
   font-size: 12px !important;
@@ -68,6 +69,7 @@ Version: Exolve v1.54 September 17, 2023
   .xlv-answer,
   .xlv-input,
   .xlv-incluefill,
+  .xlv-clue-extraction-slot,
   .xlv-scratchpad,
   .xlv-shuffle {
     font-size: 8px !important;
@@ -146,7 +148,7 @@ Version: Exolve v1.54 September 17, 2023
   vertical-align: top;
   white-space: normal !important;
 }
-.xlv-frame .xlv-clues-table td:first-child:not(.xlv-filler) {
+.xlv-frame .xlv-clues-table .xlv-clue-label {
   background-image: none !important;
   box-sizing: content-box;
   font-weight: bold;
@@ -405,8 +407,16 @@ Version: Exolve v1.54 September 17, 2023
   background-image:
     repeating-linear-gradient(to bottom, transparent, transparent 13px, black 14px);
 }
+.xlv-clue-extraction-slot {
+  line-height: normal !important;
+  box-sizing: border-box;
+  text-align: center;
+  vertical-align: middle;
+}
+.xlv-clue-extraction-slot,
 .xlv-incluefill {
   border: none;
+  cursor: text;
   padding: 0 0 2px 0px;
   margin: 0 0 0 4px;
   outline: none;

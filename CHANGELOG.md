@@ -1,5 +1,15 @@
 # Changelog
 
+### Version: Exolve v1.55: November 1, 2023
+
+- Add `exolve-option: add-extraction-slots` to add a column of
+  inputs in front of the clues.
+- Minor clean-ups and refactorings.
+
+### Minor Version: Exolve v1.54.6: October 31, 2023
+
+- Add some more error reporting to exolve-embedder.js.
+
 ### Minor Version: Exolve v1.54.5: October 3, 2023
 
 - Parse enums like (5 6) too.

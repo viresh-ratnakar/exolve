@@ -34,11 +34,17 @@ class ExolveEmbedder {
     fetch(this.crossword, {
       mode: 'cors',
       credentials: 'include',
-    }).then(response => response.arrayBuffer())
-      .then(result => {
-        finisher(result);
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error(
+            'Error fetching [' + this.crossword +
+            `], status = ${response.status}`);
+      }
+      return response.arrayBuffer();
+    }).then(result => {
+      finisher(result);
     }).catch(error => {
-      throw error;
+      this.showMessage(error.name + ': ' + error.message);
     });
   }
 
