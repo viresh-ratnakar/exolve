@@ -732,14 +732,14 @@ example get ignored. If you have consecutive periods, they do not get ignored
 ```
 
 ### Some details about clue numbers
-Across and down clue numbers are automatically inferred from the grid, except
-in two cases. The first is when there are diagramless cells and solutions
-have not been provided. The second is in jigsaw-style puzzles, where the setter
-opts to deliberately not provide associations between grid squares and clues,
-by using non-numeric clue labels without providing their grid locations. When
-the solver is entering a value in a light for which the clue association is not
-known, the highlighted "current clue" browsable interface runs through all the
-clues for which all grid cells are not known.
+Across and down clue numbers within the grid are automatically inferred from
+the grid, except in two cases. The first is when there are diagramless cells
+and solutions have not been provided. The second is in jigsaw-style puzzles,
+where the setter opts to deliberately not provide associations between grid
+squares and clues, by using non-numeric clue labels without providing their
+grid locations. When the solver is entering a value in a light for which the
+clue association is not known, the highlighted "current clue" browsable
+interface runs through all the clues for which all grid cells are not known.
 
 Clue numbering can be affected by the following additional factors covered in
 other sections:
