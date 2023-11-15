@@ -1,6 +1,6 @@
 # Changelog
 
-### Version: Exolve v1.55.1: November 14, 2023
+### Minor Version: Exolve v1.55.1: November 14, 2023
 
 - Added support for delete key to erase contents of highlighted cell.
 

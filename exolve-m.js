@@ -350,7 +350,7 @@ function Exolve(puzzleSpec,
              notes, <b>Ctrl-*:</b> Mark clue as fave in notes, adding a *
              prefix.</li>
          <li><b>Delete:</b>
-						 Clear the content sof the current square.</li>
+             Clear the contents of the current square.</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless.</li>
        </ul>
@@ -5644,7 +5644,7 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
     return true
   }
   if (key == 46) { // delete key
-    let gridCell = this.currCell()
+    const gridCell = this.currCell()
     if (gridCell && gridCell.isLight && !gridCell.prefill) {
       this.clearCell(this.currRow, this.currCol)
       this.updateAndSaveState()
