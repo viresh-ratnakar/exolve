@@ -1,5 +1,9 @@
 # Changelog
 
+### Version: Exolve v1.55.1: November 14, 2023
+
+- Added support for delete key to erase contents of highlighted cell.
+
 ### Version: Exolve v1.55: November 1, 2023
 
 - Add `exolve-option: add-extraction-slots` to add a column of
