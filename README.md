@@ -150,6 +150,9 @@ different colour for a short while. This animation's
 and the [duration (`highlight-overwritten-seconds`)](#exolve-option) can be
 configured.
 
+If the solver hits the delete key, it will erase the contents of the current
+square without advancing.
+
 The solver can press Tab/Shift-Tab to navigate to the next/previous clue. The
 solver can use the arrow keys to navigate to the next/previous light cells in
 the direction of the arrow.

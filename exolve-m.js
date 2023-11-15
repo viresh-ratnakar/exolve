@@ -349,6 +349,8 @@ function Exolve(puzzleSpec,
              <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to/back-from
              notes, <b>Ctrl-*:</b> Mark clue as fave in notes, adding a *
              prefix.</li>
+         <li><b>Delete:</b>
+             Clear the contents of the current square.</li>
          <li><b>Spacebar:</b>
              Place/clear block in the current square if it's diagramless.</li>
        </ul>
@@ -5641,6 +5643,14 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
     this.retreatCursorInLight();
     return true
   }
+  if (key == 46) { // delete key
+    const gridCell = this.currCell()
+    if (gridCell && gridCell.isLight && !gridCell.prefill) {
+      this.clearCell(this.currRow, this.currCol)
+      this.updateAndSaveState()
+    }
+    return true
+  }  
   if (key == 13) {
     // Enter
     this.toggleCurrDirAndActivate()
