@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.55 November 1, 2023
+### Version: Exolve v1.56 November 19, 2023
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -38,7 +38,7 @@ You can also use the file [exolve-embedder.html](exolve-embedder.html) to
 serve .puz and .ipuz files using Exolve. See the details in the
 [Exolve Embedder](#exolve-embedder) section.
 
-Here is a minimal example of the puzzle specification:
+Here is an example of the puzzle specification:
 
 ```
 exolve-begin
@@ -46,22 +46,23 @@ exolve-begin
   exolve-height: 5
   exolve-grid:
     HELLO
-    O...L
+    O.A.L
     WORLD
-    L...E
+    L.G.E
     STEER
   exolve-across:
     1 Greeting (5)
-    3 Earth (5)
-    4 Guide (5)
+    4 Earth (5)
+    5 Guide (5)
   exolve-down:
     1 Emits cry (5)
-    2 More ancient (5)
+    2 Big (5)
+    3 More ancient (5)
 exolve-end
 ```
 
 The format is very simple and uses plain text (but the parsing code is
-also simplistic and occasionally not very forgiving, so please go through the
+also occasionally simplistic and not very forgiving, so please go through the
 format documentation). The setter has the option to provide solutions (as in the
 example above), or to just use 0 to indicate a square that needs to be filled
 (i.e., is a part of a "light," in crossword terms).
@@ -353,7 +354,8 @@ As a convenient reference, here again is the complete list of decorators:
 
 If you use a language/Script that uses compound letters made up of multiple
 Unicode characters (for example, Devanagari—see the
-[`exolve-language`](#exolve-language) section), then your _must_ separate grid
+[`exolve-language`](#exolve-language) section), or if you have
+[rebus cells](#rebus-cells), then your _must_ separate grid
 letters (when specifying a grid with solutions) with a space (unless they are
 already separated by a decorator). For example, this will *not* work:
 ```
@@ -387,6 +389,44 @@ have to escape `0` using an `&` prefix if `0` has been allowed in the grid via
 `allow-digits` or `allow-chars`. A technical caveat (for the sake of
 completeness) is that you cannot create a degenerate grid that has all entries
 made up entirely of `0s`.
+
+### Rebus cells
+
+If you want the crossword solution to include some cells that have multiple
+letters (aka "rebus cells"), then you have to use `exolve-option: rebus-cells`
+(and you *have* to separate grid solution entries with spaces as mentioned
+earlier).
+
+For example:
+```
+  exolve-width: 3
+  exolve-height: 3
+  exolve-option: rebus-cells
+  exolve-grid:
+    RAN G E
+     DO . A
+      M E T
+```
+
+If there are rebus cells, then you can enter multiple letters into any
+cell after double-clicking on it, or by pressing down the Shift key while
+entering a letter. If a cell already has previously entered multiple letters,
+then when you come to it again (by clicking on it or auto-advancing from
+an adjacent cell), you will be able to enter multiple letters into it (without
+having to use the Shift key or double-click).
+
+When multiple letters are entered into a cell, the font size of cell text is
+adjusted to try to fit all the letters. If you have some long rebus entries
+that do not fit the default cell size then you should use bigger cells, using
+[`exolve-cell-size`](#exolve-cell-size).
+
+If there are rebus cells, then the across-direction indicator arrow in the
+current cell is placed below the text intsead of to the right of it, to leave
+more space for the text.
+
+You cannot have rebus cells in crosswords that use languages with
+max-char-codes greater than one and in crosswords with diagramless cells (this
+allows us to keep the code simpler).
 
 ### Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
@@ -940,7 +980,25 @@ Examples:
 If you place just one underscore, then the actual displayed size of the blank
 will be determined using the enum. If you place more than one underscore, then
 the displayed size of the blank will equal the number of underscores that you
-have provided.
+have provided. You can have spaces between these underscores just to help you
+count them more easily.
+
+The placeholder blank, when empty, will show (as the light gray "placeholder"
+text that indicates a hint for what the solver needs to enter) the text pattern
+implied by the enum, such as "??? ??-??" for (3, 3-3). You can override this
+placeholfer text by specifying what should get displayed within square brackets,
+right after the last underscore. For example:
+```
+  exolve-down:
+    3 This will have 8 placeholder blanks showing "??? ??" instead of
+      "????" (4) _ _ _ _ _ _ _ _ [??? ??] Some anno.
+    3 For this piece of cake, we customize the placeholder text shown
+      in the placeholder blank to be "EAT ME" instead of "??? ??" (3,2) _[EAT ME]
+```
+
+The length of a placeholder blank (the number of letters that it can hold) will
+be the maximum of the number of underscores and the length of the gray placeholder
+text (from the enum or from the overridden text).
 
 Just like the placeholder blanks that appear in orphan clues, these forced
 placeholder blanks will also be accompanied by "copy-placeholder buttons"
@@ -1364,6 +1422,8 @@ The list of currently supported options is as follows:
   set the property named `<name>` in the puzzle to the numeric value `<N>`.
   This can be used to override properties for which there is no explicit
   dedicated option, such as `GRIDLINE`.
+- **`rebus-cells`** Allow multiple letters to be entered in cells. See
+  [`Rebus cells`](#rebus-cells) for details.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   override the default layout choices used for printing puzzles (and creating
   PDFs). By default, a completed puzzle is printed in 2 columns
@@ -1523,11 +1583,14 @@ form a single compound letter (for example, स्सा in Devanagari is made u
 of four characters). In these situations, you can specify
 &lt;max-char-codes-per-letter&gt; as the limit on how many characters you want
 to allow to go into a composite letter, at most. For Devanagari, the software
-already sets this to 4 (but you can override that if you specify a value
-here). When &lt;max-char-codes-per-letter&gt; is greater than 1, auto-advance is
-disabled, as the software cannot know when a letter being entered in a cell
-is finished—solvers need to use the arrow key or need to click on the next
-cell when they finish typing a letter.
+already sets this to 5 (but you can override that if you specify a value
+here). When &lt;max-char-codes-per-letter&gt; is greater than 1, you can append
+to existing characters within a cell by pressing the Shify key, or by
+double-clicking in the cell. If a cell already has a multi-char letter in
+it, then you can append more characters to it (or delete existing them)
+when you come to it by clicking on it or via auto-advancing from an
+adjacent cell (i.e., the Shift key or double-click are not needed in that
+case).
 
 When you use a language other than English, you may also want to change the
 text displayed in various buttons etc. to that language. You can do that
@@ -1603,7 +1666,8 @@ Here are all the names of pieces of text that you can relabel:
 | `notes.hover`    | Show/hide notes panel.               |
 | `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
 | `jotter`         | Jotter                                |
-| `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams.|
+| `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams and subtractions.|
+| `jotter-text.hover`|You can shuffle letters by clicking above. If you enter something like "Alphabet - betas  =" then it will be replaced by "lpha - s" (subtraction of common letters). |
 | `maker-info`     | Exolve-maker info                    |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
@@ -1800,6 +1864,26 @@ to yourself. You can also try out anagrams of the text in the Jotter, by
 clicking on the label that invites you to "click here to shuffle". If you
 have highlighted some text within the jotter, then only that selected
 part will get shuffled.
+
+The Jotter also let you test anagram candidates by providing a simple
+mechanism to "subtract" a phrase from another phrase. This feature is
+activated when you enter something like this into the scratch-pad:
+```
+Astronomers - moon starers =
+```
+After subtracting the letters in `moon starers` from `Astronomers`
+(case-insensitively, and taking occurrence counts into account),
+nothing is left, and the scratch-pad will get cleared.
+
+If the anagram is not perfect, then the left-over letter sequence
+will be shown in the scratch-pad. For example,
+```
+starting - strength =
+```
+will get replaced by
+```
+ai - eh
+```
 
 ## Completion event
 

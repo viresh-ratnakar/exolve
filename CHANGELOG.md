@@ -1,5 +1,49 @@
 # Changelog
 
+### Version: Exolve v1.56: November 19, 2023
+
+- Add support for "rebus cells"—cells in which the solution may contain multiple
+  letters with `exolve-option: rebus-cells`.
+  - With this option set, pressing Shift while entering a letter lets you place
+    multiple letters into a cell.
+  - Double-clicking on a cell also activates multi-letter entry (useful for
+    phones).
+  - If a cell already has multiple letters, then entering more letters into it
+    is directly possible (without having to press Shift or to double click).
+- Reduce font-size automatically to fit multiple letters in rebus cells..
+- For scripts with multi-char letters (such as Devanagari), enable the entry of
+- Move the right-arrow triangle (and the left-arrow triangle in reversed
+  lights) in the current cell to go under the letters rather than to the right,
+  when rebus-cells are present. This creates more available space for letters.
+  multiple characters via the same Shift/double-click mechanism as used in
+  rebus cells (previously it was always activated, which meant there was never
+  any auto-advancing, which was a bit annoying).
+- Disallow rebus cells if the script has multi-char letters, or if the crossword
+  has diagramless cells (to keep the code simpler).
+
+- Add support for "letter maths" in the Jotter scratchpad. This is a feature
+  that lets the solver test whether a bunch of fodder words can be anagrammed
+  to get the solution they are thinking of, and to see what if any letters
+  might be missing. If you type "Astronomer - moon starer =" into the
+  scratchpad, then it will cleared away as soon as you type the equals sign.
+  If you type "Asterix Obelix Dogmatix - Vitalstatistix =" then it will be
+  replaced by "er Obex Dogmx - Vtst".
+
+- When placeholder blanks are placed after a clue (indicated through one or
+  more underscores just beyond the enum), make the number of blanks be the
+  max of the count of underscores and the placeholder dots-pattern implied by
+  the enum (e.g., "... (3,4)" implies "··· ····").
+- Get rid of any extraneous width in placeholder blanks by applying a
+  max-width style.
+- Allow the placeholder text to be overridden. So, instead of the dots-pattern
+  implied by the enum, you can have any arbitrary text. This overriding text
+  should be specified in square brackets just beyond the underscore(s). E.g.:
+  ```
+    What the sign said (3,2) _ [Munch!?]
+  ```
+- Minor bug-fix: call `updateActiveCluesStatea()` in the Delete-key handler.
+
+
 ### Minor Version: Exolve v1.55.1: November 14, 2023
 
 - Added support for delete key to erase contents of highlighted cell.
