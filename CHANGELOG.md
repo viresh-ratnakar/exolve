@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.1: November 20, 2023
+
+- Make `revealAll()` also return false if the user did not confirm.
+- Like `revealAllHandler()`, create a `clearAllHander()` that calls
+  `clearAll()`, allowing users to override `clearAll` inspite of the bound
+  handler.
+
 ### Version: Exolve v1.56: November 19, 2023
 
 - Add support for "rebus cells"—cells in which the solution may contain multiple
@@ -42,7 +49,6 @@
     What the sign said (3,2) _ [Munch!?]
   ```
 - Minor bug-fix: call `updateActiveCluesStatea()` in the Delete-key handler.
-
 
 ### Minor Version: Exolve v1.55.1: November 14, 2023
 

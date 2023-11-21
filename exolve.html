@@ -1073,7 +1073,7 @@ Exolve.prototype.init = function() {
   this.clearButton.addEventListener('click', this.clearCurr.bind(this));
 
   this.clearAllButton = document.getElementById(this.prefix + '-clear-all');
-  this.clearAllButton.addEventListener('click', this.clearAll.bind(this));
+  this.clearAllButton.addEventListener('click', this.clearAllHandler.bind(this));
 
   this.checkButton = document.getElementById(this.prefix + '-check');
   this.checkButton.addEventListener('mousedown', this.cellLightToggler.bind(
@@ -6881,71 +6881,75 @@ Exolve.prototype.clearCurr = function() {
   this.refocus()
 }
 
+Exolve.prototype.clearAllHandler = function(ev) {
+  this.clearAll();
+}
+
 Exolve.prototype.clearAll = function(conf=true) {
-  let message = this.textLabels['confirm-clear-all']
-  let clearingPls = false
+  let message = this.textLabels['confirm-clear-all'];
+  let clearingPls = false;
   if (this.lastOrphan) {
     if (this.numCellsFilled == this.numCellsPrefilled) {
-      message = this.textLabels['confirm-clear-all-orphans2']
-      clearingPls = true
+      message = this.textLabels['confirm-clear-all-orphans2'];
+      clearingPls = true;
     } else {
-      message = this.textLabels['confirm-clear-all-orphans1']
+      message = this.textLabels['confirm-clear-all-orphans1'];
     }
   }
   if (conf && !this.maybeConfirm(message)) {
-    this.refocus()
-    return false
+    this.refocus();
+    return false;
   }
   const fontSize = this.cellLetterSize('');
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
-      let gridCell = this.grid[row][col]
+      let gridCell = this.grid[row][col];
       if (!gridCell.isLight && !gridCell.isDgmless) {
-        continue
+        continue;
       }
       if (gridCell.prefill) {
-        continue
+        continue;
       }
-      gridCell.currLetter = '0'
-      gridCell.textNode.nodeValue = ''
+      gridCell.currLetter = '0';
+      gridCell.textNode.nodeValue = '';
       if (this.atCurr(row, col)) {
-        this.gridInput.value = ''
+        this.gridInput.value = '';
       }
     }
   }
   this.adjustRebusFonts();
   for (let a of this.answersList) {
     if (a.isq) {
-      a.input.value = ''
+      a.input.value = '';
     } else {
-      break
+      break;
     }
   }
   for (let a of this.revelationList) {
-    a.style.display = 'none'
+    a.style.display = 'none';
   }
   for (let c in this.inClueAnnoReveals) {
     for (let s of this.inClueAnnoReveals[c]) {
-      s.className = ''
+      s.className = '';
     }
   }
-  this.hideNinas()
+  this.hideNinas();
 
   for (let ci of this.allClueIndices) {
-    this.updateClueState(ci, false, 'unsolved', true)
+    this.updateClueState(ci, false, 'unsolved', true);
     if (clearingPls && this.clues[ci].placeholderBlank) {
-      this.clues[ci].placeholderBlank.value = ''
+      this.clues[ci].placeholderBlank.value = '';
     }
   }
   if (clearingPls && this.currClue) {
-    let clueInputs = this.currClue.getElementsByTagName('input')
+    let clueInputs = this.currClue.getElementsByTagName('input');
     if (clueInputs.length == 1) {
-      clueInputs[0].value = ''
+      clueInputs[0].value = '';
     }
   }
-  this.updateAndSaveState()
-  this.refocus()
-  return true
+  this.updateAndSaveState();
+  this.refocus();
+  return true;
 }
 
 Exolve.prototype.cellLightTogglerDone = function(button, text) {
@@ -7230,7 +7234,7 @@ Exolve.prototype.revealAllHandler = function(ev) {
 Exolve.prototype.revealAll = function(conf=true) {
   if (conf && !this.maybeConfirm(this.textLabels['confirm-reveal-all'])) {
     this.refocus();
-    return;
+    return false;
   }
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
@@ -7272,6 +7276,7 @@ Exolve.prototype.revealAll = function(conf=true) {
   }
   this.updateAndSaveState();
   this.refocus();
+  return true;
 }
 
 Exolve.prototype.refocus = function() {
