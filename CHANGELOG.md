@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.2: November 25, 2023
+
+- Make "Your Puzzle Title" be the example title in exolve-m-simple.html
+
 ### Minor Version: Exolve v1.56.1: November 20, 2023
 
 - Make `revealAll()` also return false if the user did not confirm.
