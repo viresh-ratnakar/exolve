@@ -554,3 +554,8 @@ a.xlv-link:hover {
   padding: 0 0 0 16px !important;
   text-align: left;
 }
+@media not print {
+  .xlv-only-print {
+    display: none;
+  }
+}

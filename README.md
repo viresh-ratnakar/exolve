@@ -2337,7 +2337,9 @@ and it is restored after printing.
 If it does not make sense for some chunks of text or some HTML elements to be
 printed (for example, some instructions that only make sense in interactive
 mode), you can enclose them in an HTML element (such as a `DIV` or a `SPAN`)
-that has the class `xlv-dont-print`.
+that has the class `xlv-dont-print`. Similarly, if there some text or some
+HTML element that you want to be shown *only* in the printed version, then
+you can add the class `xlv-only-print` to it.
 
 ### Additional settings for printing
 

@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.3: December 5, 2023
+
+- Add the notion of an `xlv-only-print` class (mirroring the existing
+  `xlv-dont-print` class for any elements that make sense only in the
+  printed version.
+
 ### Minor Version: Exolve v1.56.2: November 25, 2023
 
 - Make "Your Puzzle Title" be the example title in exolve-m-simple.html
