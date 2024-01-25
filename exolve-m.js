@@ -2563,7 +2563,7 @@ Exolve.prototype.findEnum = function(clueLine) {
       numeric = false;
       // Look for the strings 'words'/'letters' or subwords, or ?, in parens.
       enumLocation = cluePart.search(
-          /\([^)]*(w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?|\?)[^)a-z]*\)/i);
+          /\(([^)]*\s(w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?)[^)a-z]*|\s*\?\s*)\)/i);
     }
     if (enumLocation < 0) {
       break;

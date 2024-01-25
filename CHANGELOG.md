@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.4: January 24, 2024
+
+- When parsing enums like "(one word)", we were allowing arbirary words
+  ending in "w" inside the parens. Fix that (to some extent).
+
 ### Minor Version: Exolve v1.56.3: December 5, 2023
 
 - Add the notion of an `xlv-only-print` class (mirroring the existing
