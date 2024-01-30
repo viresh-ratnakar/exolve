@@ -1344,6 +1344,46 @@ modify the URL to make a direct submission link, like this:
   exolve-submit: https://docs.google.com/forms/d/e/1FAIpQLSeezqRzI7N77Huk8_TYwAB40wp2E6HgQaOsNPMc1KgJp-7O8Q/formResponse?submit=SUBMIT entry.411104056 entry.464339112 entry.861079418 entry.1052922113
 ```
 
+### Automatically scoring submitted solutions in Google Forms
+
+- Link the form to a spreadsheet (there is an option under "Responses").
+
+- Open the spreadsheet and click on `Extensions > Apps Script`.
+
+- Delete all the skeletal, pre-populated `function myFunction() ..` code lines
+  and replace them with the following lines of code:
+
+```
+  function SCORE(solution) {
+    const expected = 'REPLACE..ME';
+    var matched = 0;
+    for (var i = 0; i < expected.length; i++) {
+      if (i >= solution.length) {
+        break;
+      }
+      if (expected.charAt(i) == solution.charAt(i) &&
+          expected.charAt(i) != '.') {
+        matched++;
+      }
+    }
+    return matched;
+  }
+```
+
+- Change the `REPLACE..ME` text to be the solution string for the crossword. You
+  can submit an all-correct entry to see what this should be (essentially, all
+  the letters strung together, row-by-row, with a "." for every black cell. So,
+  for a 15x15 grid, there should be 225 letters + periods in this string.
+
+- Save the project and deploy it, giving it a name. [See these instructions if you
+  run into any
+  problems](https://developers.google.com/apps-script/guides/sheets/functions).
+
+- Now, add a column to the spreadsheet beyond the last column. Give it the heading
+  "Score". Use the formula `=SCORE(A2)` in the second row, and then extend the
+  formula to all the rows. This column will now show the number of correct letters
+  for each submission.
+
 ## `exolve-option`
 In this single-line, repeatable section, the setter can specify certain options.
 Multiple, space-separated options may be provided on each exolve-option line.
