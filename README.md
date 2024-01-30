@@ -1380,7 +1380,7 @@ modify the URL to make a direct submission link, like this:
   problems](https://developers.google.com/apps-script/guides/sheets/functions).
 
 - Now, add a column to the spreadsheet beyond the last column. Give it the heading
-  "Score". Use the formula `=SCORE(A2)` in the second row, and then extend the
+  "Score". Use the formula `=SCORE(B2)` in the second row, and then extend the
   formula to all the rows. This column will now show the number of correct letters
   for each submission.
 
