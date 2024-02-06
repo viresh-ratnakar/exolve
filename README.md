@@ -80,7 +80,9 @@ them to see examples of usage of most Exolve features.
 The basic control is to click on a square and enter a letter in it. If a square
 is a part of both an across clue and a down clue, then clicking on that square
 while it is the current square (or pressing the Enter key) will toggle the
-active direction.
+active direction (unless the shift key is also pressed with a click, in which
+case no directon-toggling will happen, which is useful when navigating back
+to the grid from some other input element).
 
 The control buttons (*Clear this*, *Clear all!*, *Check this*, *Check all!*,
 *Reveal this*, and *Reveal all!*) work as suggested by their names ("this"

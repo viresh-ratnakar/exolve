@@ -5656,10 +5656,12 @@ Exolve.prototype.toggleCurrDir = function() {
   this.currDir = newDir
 }
 
-Exolve.prototype.toggleCurrDirAndActivate = function() {
-  this.usingGnav = true
-  this.toggleCurrDir()
-  this.activateCell(this.currRow, this.currCol)
+Exolve.prototype.toggleCurrDirAndActivate = function(e) {
+  this.usingGnav = true;
+  if (e && !e.shiftKey) {
+    this.toggleCurrDir();
+  }
+  this.activateCell(this.currRow, this.currCol);
 }
 
 // Handle navigation keys. Used by a listener, and also used to auto-advance

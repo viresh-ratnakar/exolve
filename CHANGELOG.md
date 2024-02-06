@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.5: February 5, 2024
+
+- If Shift-click is used on a grid cell, do not toggle direction. This is
+  useful to come back to the grid from some other input element (such as
+  Jotter or Notes).
+
 ### Minor Version: Exolve v1.56.4: January 24, 2024
 
 - When parsing enums like "(one word)", we were allowing arbirary words
