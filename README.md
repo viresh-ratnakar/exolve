@@ -1627,7 +1627,7 @@ of four characters). In these situations, you can specify
 to allow to go into a composite letter, at most. For Devanagari, the software
 already sets this to 5 (but you can override that if you specify a value
 here). When &lt;max-char-codes-per-letter&gt; is greater than 1, you can append
-to existing characters within a cell by pressing the Shify key, or by
+to existing characters within a cell by pressing the Shift key, or by
 double-clicking in the cell. If a cell already has a multi-char letter in
 it, then you can append more characters to it (or delete existing them)
 when you come to it by clicking on it or via auto-advancing from an
