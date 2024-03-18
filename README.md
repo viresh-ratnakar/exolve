@@ -988,7 +988,7 @@ count them more easily.
 The placeholder blank, when empty, will show (as the light gray "placeholder"
 text that indicates a hint for what the solver needs to enter) the text pattern
 implied by the enum, such as "??? ??-??" for (3, 3-3). You can override this
-placeholfer text by specifying what should get displayed within square brackets,
+placeholder text by specifying what should get displayed within square brackets,
 right after the last underscore. For example:
 ```
   exolve-down:
@@ -1633,6 +1633,17 @@ it, then you can append more characters to it (or delete existing them)
 when you come to it by clicking on it or via auto-advancing from an
 adjacent cell (i.e., the Shift key or double-click are not needed in that
 case).
+
+You may also want to provide
+[placeholder blanks](#forcing-the-display-of-placeholder-blanks)
+for languages such as Hindi that have compound letters. Exolve recognizes
+multi-character letters separated by spaces within placeholders. So,
+if you have a 3-letter clue, and the placehilder text contains
+"उ स्ता द"
+then copying this into a 3-letter entry will place 
+"उ" in the first cell,
+"स्ता" in the second cell, and
+"द" in the third cell.
 
 When you use a language other than English, you may also want to change the
 text displayed in various buttons etc. to that language. You can do that

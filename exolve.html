@@ -2004,7 +2004,7 @@ Exolve.prototype.checkConsistency = function() {
 }
 
 Exolve.prototype.caseCheck = function(c) {
-  if (c.length > 1 && this.hasRebusCells) {
+  if (c.length > 1 && (this.hasRebusCells || this.langMaxCharCodes > 1)) {
     for (const letter of c) {
       if (!this.caseCheck(letter)) {
         return false;
@@ -5477,32 +5477,36 @@ Exolve.prototype.cnavTo = function(activeClueIndex, grabFocus=true) {
 Exolve.prototype.copyPlaceholderBlank = function(clueIndex) {
   if (this.hideCopyPlaceholders || this.activeCells.length < 1 ||
       !clueIndex || !this.clues[clueIndex] || !this.clues[clueIndex].clueTR) {
-    return
+    return;
   }
   const inp = this.clues[clueIndex].placeholderBlank;
   if (!inp) {
-    return
+    return;
   }
-  let entry = inp.value
-  let letters = ''
-  for (let i = 0; i < entry.length; i++) {
-    let letter = entry[i]
+  const entry = inp.value;
+  let splitter = '';
+  if (this.langMaxCharCodes > 1 && entry.indexOf(' ') >= 0) {
+    splitter = ' ';
+  }
+  const letters = [];
+  const candLetters = entry.split(splitter);
+  for (const letter of candLetters) {
     if (!this.caseCheck(letter)) {
       if (!this.allowChars || !this.allowChars[letter]) {
         continue;
       }
     }
-    letters = letters + letter
+    letters.push(letter);
   }
   if (letters.length < 1) {
-    return
+    return;
   }
   if (letters.length != this.activeCells.length) {
-    let msg = this.textLabels['confirm-mismatched-copy']
+    const msg = this.textLabels['confirm-mismatched-copy'];
     if (msg &&
         !this.maybeConfirm(msg + ' ' + letters.length +
                            ':' + this.activeCells.length)) {
-      return
+      return;
     }
   }
   let index = 0
@@ -5512,36 +5516,36 @@ Exolve.prototype.copyPlaceholderBlank = function(clueIndex) {
     if (index >= this.activeCells.length) {
       break;
     }
-    let x = this.activeCells[index++]
-    row = x[0]
-    col = x[1]
-    let gridCell = this.grid[row][col]
+    const x = this.activeCells[index++];
+    row = x[0];
+    col = x[1];
+    const gridCell = this.grid[row][col];
     if (gridCell.prefill) {
-      continue
+      continue;
     }
-    let letter = letters[i]
-    let oldLetter = gridCell.currLetter
+    const letter = letters[i];
+    const oldLetter = gridCell.currLetter;
     if (oldLetter != letter) {
-      gridCell.currLetter = letter
-      let revealedChar = this.stateToDisplayChar(letter)
-      gridCell.textNode.nodeValue = revealedChar
+      gridCell.currLetter = letter;
+      const revealedChar = this.stateToDisplayChar(letter);
+      gridCell.textNode.nodeValue = revealedChar;
       if (this.atCurr(row, col)) {
-        this.gridInput.value = revealedChar
+        this.gridInput.value = revealedChar;
       }
     }
   }
   this.adjustRebusFonts();
   if (index < this.activeCells.length) {
     // Advance to the next square.
-    let x = this.activeCells[index]
-    row = x[0]
-    col = x[1]
+    const x = this.activeCells[index];
+    row = x[0];
+    col = x[1];
   }
   if (row >= 0 && col >= 0) {
-    this.activateCell(row, col)
+    this.activateCell(row, col);
   }
-  this.updateActiveCluesState()
-  this.updateAndSaveState()
+  this.updateActiveCluesState();
+  this.updateAndSaveState();
 }
 
 // inCurr is set to true when this is called oninput in the currClue strip

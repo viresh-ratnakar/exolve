@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.6: March 18, 2024
+
+- Allow placeholder text to contain multi-character letters separated
+  by spaces (for languages such as Hindi).
+
 ### Minor Version: Exolve v1.56.5: February 5, 2024
 
 - If Shift-click is used on a grid cell, do not toggle direction. This is
