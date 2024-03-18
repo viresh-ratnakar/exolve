@@ -1638,7 +1638,7 @@ You may also want to provide
 [placeholder blanks](#forcing-the-display-of-placeholder-blanks)
 for languages such as Hindi that have compound letters. Exolve recognizes
 multi-character letters separated by spaces within placeholders. So,
-if you have a 3-letter clue, and the placehilder text contains
+if you have a 3-letter clue, and the placeholder text contains
 "उ स्ता द"
 then copying this into a 3-letter entry will place 
 "उ" in the first cell,
