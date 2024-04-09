@@ -2928,7 +2928,7 @@ Exolve.prototype.parseCCCC = function(s) {
     ret.isLight = true;
     return ret;
   }
-  const elts = document.getElementsByClassName(s2);
+  const elts = this.frame.getElementsByClassName(s2);
   if (elts && elts.length > 0) {
     ret.cls = s2;
     return ret;
@@ -4437,7 +4437,7 @@ Exolve.prototype.displayClues = function() {
 Exolve.prototype.equalizeClueWidths = function(w) {
   // Make all xlv-clues-box divs have the same width w.
   if (w > 0) {
-    const cbs = document.getElementsByClassName('xlv-clues-box')
+    const cbs = this.frame.getElementsByClassName('xlv-clues-box')
     for (let x = 0; x < cbs.length; x++) {
       cbs[x].style.width = w + 'px'
     }
@@ -6636,7 +6636,7 @@ Exolve.prototype.redisplayNinas = function(scale=1) {
     for (let cccc of nina.list) {
       if (cccc.cls) {
         // span-class-specified nina
-        const elts = document.getElementsByClassName(cccc.cls);
+        const elts = this.frame.getElementsByClassName(cccc.cls);
         if (!elts || elts.length == 0) {
           console.log('Nina ' + cccc.str + ' is not a cell/clue ' +
                       'location nor a class with html tags');

@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.56.7: April 9, 2024
+
+- Call getElementsByClassName() only on the current puzzle element, instead
+  of calling on document, as that's buggy when multiple puzzles might be
+  present (for example, in Exet when showing a preview for selecting a
+  previous revision).
+
 ### Minor Version: Exolve v1.56.6: March 18, 2024
 
 - Allow placeholder text to contain multi-character letters separated
