@@ -1,5 +1,14 @@
 # Changelog
 
+### Version: Exolve v1.57: May 1, 2024
+
+- Allow one or more hints to be added to any clue. The hints can be
+  progressively revealed when a clue is the current clue above the grid,
+  by clicking on a lightbulb that shows up if there are any unrevealed
+  hints left.
+- Clicking on the hints dismisses them.
+- The styling can be customized through exolve-relabel and exolve-colour.
+
 ### Minor Version: Exolve v1.56.7: April 9, 2024
 
 - Call getElementsByClassName() only on the current puzzle element, instead

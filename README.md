@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.56 November 19, 2023
+### Version: Exolve v1.57 May 1, 2024
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -585,6 +585,31 @@ using `exolve-option: ignore-unclued` and/or
 done if there are any nodir clues, and checking for mismatched enums is
 not done if there are any diagramless cells.
 
+### Hints
+
+You can include hints in clues (in some clues or in all clues). This is done
+by providing a sequence of lines immediately under the clue, each one carrying
+the prefix, `Hint:` (case-insensitive). Each hint can include HTML formatting.
+Example:
+```
+  exolve-across:
+  1 Some clue without a hint (9)
+  5 A clue with two hints (5)
+    Hint: The <i>first</i> hint!
+    Hint: The second hint is noticeably longer.
+  6 A clue with one snarky hint (6)
+    Hint: Try using your brain for a change?
+```
+
+Note that these hints are completely independent of the post-reveal annotation
+desribed below (if present). When hints are available for the current clue, and
+not all hints have yet been shown, a lightbulb icon is shown at the end of the
+clue (above the grid only, not in the clues table). Clicking on this icon will
+reveal the next hint. Clicking on any hint will hide all the hints once again.
+
+Exolve does not save state about how many hints were shown for various clues, so
+if you reload the puzzle then all hints restart in the not-shown state.
+
 ### Annotations
 In a grid with solutions provided, the setter may include annotations for
 explaining how a clue works or for providing hints. Any text located after the
@@ -718,8 +743,8 @@ column and 31st row.
 
 ### Filler lines between clues
 Any line in a clues section (i.e., in
-`exolve-across`/`exolve-down`/`exolve-nodir`) that cannot be parsed as a clue
-is treated as a filler line. It is simply displayed in that position in the
+`exolve-across`/`exolve-down`/`exolve-nodir`) that cannot be parsed as a clue or
+hint is treated as a filler line. It is simply displayed in that position in the
 list of clues. It is an error to place a filler line after the last clue in a
 clues section. Filler lines can be used to demarcate sections within clues, if
 needed. Example:
@@ -1493,7 +1518,7 @@ be overriding), and descriptions.
 |----------------------------|---------------|-----------------------------------|
 | `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
 | `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
-| `colour-anno`              | darkgreen     | The text of the annotation.       |
+| `colour-anno`              | darkgreen     | The text of the annotations.       |
 | `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
 | `colour-background`        | black         | The background: blocked squares and bars.|
 | `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
@@ -1505,6 +1530,8 @@ be overriding), and descriptions.
 | `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
 | `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
+| `colour-hint`              | dodgerblue    | The text of the hints.       |
+| `colour-hint-bulb`         | dodgerblue    | The text of the hint icon (only relevant if you override the default icon, which is a lightbulb, with text). |
 | `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
 | `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
 | `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first square. |
@@ -1697,6 +1724,10 @@ Here are all the names of pieces of text that you can relabel:
 | `hide-ninas.hover` | Hide ninas shown in the grid/clues. |
 | `reveal-all`     | Reveal all!                          |
 | `reveal-all.hover` | Reveal all solutions, available annos, answers, notes! |
+| `hint-bulb.hover`| Click to see a hint. |
+| `hint.hover`| Click to hide hints. |
+| `hint`           | Hint |
+| `hint-bulb`      | &#128161; |
 | `submit`         | Submit                               |
 | `submit.hover`   | Submit the solution!                 |
 | `setter-by`      | By                                   |
