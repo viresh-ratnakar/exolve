@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.57.1: May 2, 2024
+
+- On Firefox, innerText can create spurious newlines as `\n<br>` in
+  the HTML becomes `\n\n`. This created weird looking text from
+  'Email notes'. Fixed by replacing consecutinve newlines with a single
+  one, in the 'Email notes' code.
+
 ### Version: Exolve v1.57: May 1, 2024
 
 - Allow one or more hints to be added to any clue. The hints can be

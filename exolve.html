@@ -7737,7 +7737,9 @@ Exolve.prototype.emailNotes = function() {
   if (this.title) {
     url += '&subject=' + encodeURIComponent(this.title);
   }
-  url += '&body=' + encodeURIComponent(this.notesContents.innerText);
+  /** On Firefox, innerText maps '\n<br>' to '\n'\n', fix that: */
+  const notesText = this.notesContents.innerText.replace(/\n\n/g, '\n');
+  url += '&body=' + encodeURIComponent(notesText);
   window.open(url, '_blank');
 }
 
