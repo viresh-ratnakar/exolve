@@ -1,5 +1,11 @@
 # Changelog
 
+
+### Minor Version: Exolve v1.57.2: May 4, 2024
+
+- Make xlv-small-button use css width 'inherit', to override
+  weird default button styling in some blogs.
+
 ### Minor Version: Exolve v1.57.1: May 2, 2024
 
 - On Firefox, innerText can create spurious newlines as `\n<br>` in

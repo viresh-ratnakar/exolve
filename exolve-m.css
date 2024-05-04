@@ -371,6 +371,7 @@ Version: Exolve v1.57 May 1, 2024
   text-align: center;
   text-decoration: none;
   text-shadow: none;
+  width: inherit;
 }
 .xlv-small-button:hover {
   cursor: pointer;
