@@ -345,6 +345,7 @@ Version: Exolve v1.57 May 1, 2024
   outline: none;
   text-align: center;
   text-decoration: none;
+  width: inherit;
 }
 .xlv-frame:focus {
   border: none;

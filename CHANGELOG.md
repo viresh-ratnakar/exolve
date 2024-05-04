@@ -1,6 +1,11 @@
 # Changelog
 
 
+### Minor Version: Exolve v1.57.3: May 4, 2024
+
+- Same as 1.57.2, but for xlv-button: use css width 'inherit', to
+  override weird default button styling in some blogs.
+
 ### Minor Version: Exolve v1.57.2: May 4, 2024
 
 - Make xlv-small-button use css width 'inherit', to override
