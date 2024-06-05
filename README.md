@@ -1757,9 +1757,12 @@ Here are all the names of pieces of text that you can relabel:
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
 | `manage-storage-close` | Close (manage storage)         |
 | `manage-storage-close.hover` | Close the local storage management panel.|
-| `exolve-link`    | Exolve on GitHub                     |
+| `exolve-link`    | Exolve-on-GitHub                     |
 | `exolve-link.hover`| Visit the Exolve open-source repository on GitHub, with a detailed user guide.|
-| `report-bug`     | Report Bug                                  |
+| `report-bug`     | Report-Bug                                  |
+| `report-bug.hover`| Report a bug on the GitHub page for Exolve |
+| `exolve-exet-etc`| Community |
+| `exolve-exet-etc.hover`| Exolve-Exet-Etc: a Google Group to get release updates, discuss usage and features for Exolve, Exet, etc.|
 | `webifi`         | Webifi                               |
 | `webifi.hover`   | Show/hide "Webifi", the interactive-fictionesque text/audio interface.|
 | `saving-msg`     | Your entries are auto-saved in the browser's local storage.|
@@ -2649,4 +2652,9 @@ readers have asked for an online interactive solver. Can we use your code?**
 
 Yes. The software is free, and is released under the rather permissive MIT
 License.
+
+**Is there a user community group where I can ask questions or propose and
+discuss ideas?**
+
+Yes. ["Exolve-Exet-Etc"](https://groups.google.com/g/exolve-exet-etc)
 

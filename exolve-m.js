@@ -397,10 +397,13 @@ function Exolve(puzzleSpec,
         'Delete old saved states to free up local storage space if needed.',
     'manage-storage-close': 'Close (local storage)',
     'manage-storage-close.hover': 'Close the local storage management panel.',
-    'exolve-link': 'Exolve on GitHub',
+    'exolve-link': 'Exolve-on-GitHub',
     'exolve-link.hover': 'Visit the Exolve open-source repository on GitHub, with a ' +
         'detailed user guide.',
-    'report-bug': 'Report Bug',
+    'report-bug': 'Report-Bug',
+    'report-bug.hover': 'Report a bug on the GitHub page for Exolve',
+    'exolve-exet-etc': 'Community',
+    'exolve-exet-etc.hover': 'Exolve-Exet-Etc: a Google Group to get release updates, discuss usage and features for Exolve, Exet, etc.',
     'webifi': 'Webifi',
     'webifi.hover': 'Toggle Webifi, the interactive-fictionesque text/audio interface.',
     'saving-msg': 'Your entries are auto-saved in the browser\'s local ' +
@@ -664,12 +667,17 @@ Exolve.prototype.init = function() {
                 <p id="${this.prefix}-metadata" class="xlv-metadata">
                   ${this.VERSION}
                   <a id="${this.prefix}-report-bug" class="xlv-link"
+                    title="${this.textLabels['report-bug.hover']}"
                     href="https://github.com/viresh-ratnakar/exolve/issues/new"
                         >${this.textLabels['report-bug']}</a>
                   <a id="${this.prefix}-exolve-link" class="xlv-link"
                     title="${this.textLabels['exolve-link.hover']}"
                     href="https://github.com/viresh-ratnakar/exolve"
                       >${this.textLabels['exolve-link']}</a>
+                  <a id="${this.prefix}-community-link" class="xlv-link"
+                    title="${this.textLabels['exolve-exet-etc.hover']}"
+                    href="https://groups.google.com/g/exolve-exet-etc"
+                      >${this.textLabels['exolve-exet-etc']}</a>
                 </p>
                 <p>
                   <button id="${this.prefix}-manage-storage"

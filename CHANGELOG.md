@@ -1,6 +1,15 @@
 # Changelog
 
 
+### Minor Version: Exolve v1.57.4: June 4, 2024
+
+- Add links to the new discussion group
+  ["Exolve-Exet-Etc"](https://groups.google.com/g/exolve-exet-etc)
+  to the documentation as well as the Exolve info panel.
+- Change these link anchors to be hyphenated: "Report-bug" and
+  "Exolve-on-GitHub" to improve readability. Add hover-text for
+  "Report-bug".
+
 ### Minor Version: Exolve v1.57.3: May 4, 2024
 
 - Same as 1.57.2, but for xlv-button: use css width 'inherit', to
