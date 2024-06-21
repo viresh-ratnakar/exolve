@@ -1,5 +1,8 @@
 # Changelog
 
+### Minor Version: Exolve v1.57.5: June 21, 2024
+
+- Replace the deprecated googlecharts QR-code web service with quickchart.io.
 
 ### Minor Version: Exolve v1.57.4: June 4, 2024
 

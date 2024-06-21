@@ -8069,8 +8069,7 @@ Exolve.prototype.qrRefresher = function() {
   this.qrPanel.style.display = '';
   const payload = encodeURI(this.qrData.value.trim());
   const dim = this.qrSize.value;
-  const qrAPI = "https://chart.googleapis.com/chart?cht=qr" +
-                "&chs=" + dim + "x" + dim + "&chl=" + payload;
+  const qrAPI = "https://quickchart.io/qr?size=" + dim + "&text=" + payload;
   this.qrImg.setAttributeNS(null, 'width', dim);
   this.qrImg.setAttributeNS(null, 'height', dim);
   this.qrImg.setAttributeNS(null, 'src', qrAPI);
