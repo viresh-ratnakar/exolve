@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.57 May 1, 2024';
+  this.VERSION = 'Exolve v1.58 July 10, 2024';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -458,7 +458,12 @@ function Exolve(puzzleSpec,
     'print.hover': 'Show/hide panel for printing or creating PDFs.',
     'print-heading': 'Print or create a PDF:',
     'print-size': 'Page size:',
-    'print-margin': 'Margin (inches):',
+    'print-only-grid': 'Only grid',
+    'print-only-clues': 'Only clues',
+    'print-all': 'Grid and clues',
+    'print-margin': 'Margin (inches, up to 4 numbers):',
+    'print-margin.hover': 'The numbers are in inches, and are for top, right, bottom, ' +
+                          'left. Missing numbers are taken from symmetry or last available values.',
     'print-font': 'Font size:',
     'print-font-normal': 'Normal',
     'print-font-large': 'Large',
@@ -471,16 +476,25 @@ function Exolve(puzzleSpec,
     'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p).',
     'print-page-wysiwyg': 'Print wysiwyg',
     'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword.',
-    'print-questions': 'Include questions',
-    'print-clues-page': 'Page break before clues',
-    'print-preamble-below': 'Preamble below grid',
+
+    'print-title': 'Title',
+    'print-setter': 'Setter',
+    'print-preamble': 'Preamble',
+    'print-explanations': 'Explanations',
+    'print-copyright': 'Copyright',
+    'print-questions': 'Questions',
+    'print-header': 'Extra header',
+    'print-header.hover': 'Any HTML you provide here will be inserted in the beginning of the puzzle frame before printing',
+    'print-footer': 'Extra footer',
+    'print-footer.hover': 'Any HTML you provide here will be inserted at the end of the puzzle frame before printing',
+
     'print-inksaver': 'Inksaver',
     'print-qrcode': 'Include QR code',
     'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the ',
-    'print-qrcode-in-preamble': 'right of the preamble',
-    'print-qrcode-in-botright': 'bottom-right of the puzzle',
+    'print-qrcode-in-botleft': 'bottom-left of the page',
+    'print-qrcode-in-botright': 'bottom-right of the page',
     'print-qrcode-cta-label': 'Call to action',
-    'print-qrcode-cta': 'Solve online',
+    'print-qrcode-cta': 'Online version',
     'print-qrcode-size': 'QR code size:',
     'show-notes-seq': 'Show clue-solving sequence:',
     'show-notes-entries': 'Show entered solutions:',
@@ -703,6 +717,14 @@ Exolve.prototype.init = function() {
                   class="xlv-print-settings xlv-toggleable" style="display:none">
                 <p>
                   <b>${this.textLabels['print-heading']}</b>
+                  <select name="${this.prefix}-print-scope" id="${this.prefix}-print-scope">
+                    <option value="all">${this.textLabels['print-all']}</option>
+                    <option value="only-grid">${this.textLabels['print-only-grid']}</option>
+                    <option value="only-clues">${this.textLabels['print-only-clues']}</option>
+                  </select>
+                  <input id="${this.prefix}-print-inksaver" type="checkbox">
+                  </input>
+                  ${this.textLabels['print-inksaver']}
                 </p>
                 <p>
                   <div>
@@ -732,30 +754,74 @@ Exolve.prototype.init = function() {
                       <option value="ledger">Ledger: 11in x 17in</option>
                     </select>
                   </div>
-                  <div>
+                  <div title="${this.textLabels['print-margin.hover']}">
                     ${this.textLabels['print-margin']}
-                    <input class="xlv-input" id="${this.prefix}-page-margin"
-                      name="${this.prefix}-page-margin" size="5" value="0.5">
+                    <input class="xlv-input" id="${this.prefix}-page-margins"
+                      name="${this.prefix}-page-margins" size="25" value="0.5 0.5 0.5 0.5">
                     </input>
-                    <span id="${this.prefix}-print-questions-span">
-                      <input id="${this.prefix}-print-questions"
-                        checked=true type="checkbox">
-                      </input>
-                      ${this.textLabels['print-questions']}
-                    </span>
                   </div>
                   <div>
-                    <input id="${this.prefix}-print-clues-page" type="checkbox">
+                    Include if visible:
+                    <table>
+                    <tr>
+                    <td>
+                    <input id="${this.prefix}-print-title"
+                      checked=true type="checkbox">
                     </input>
-                    ${this.textLabels['print-clues-page']}
-                    &nbsp;
-                    <input id="${this.prefix}-print-preamble-below" type="checkbox">
+                    ${this.textLabels['print-title']}
+                    </td>
+                    <td>
+                    <input id="${this.prefix}-print-setter"
+                      checked=true type="checkbox">
                     </input>
-                    ${this.textLabels['print-preamble-below']}
-                    &nbsp;
-                    <input id="${this.prefix}-print-inksaver" type="checkbox">
+                    ${this.textLabels['print-setter']}
+                    </td>
+                    <td>
+                    <input id="${this.prefix}-print-preamble"
+                      checked=true type="checkbox">
                     </input>
-                    ${this.textLabels['print-inksaver']}
+                    ${this.textLabels['print-preamble']}
+                    </td>
+                    </tr>
+                    <tr>
+                    <td>
+                    <input id="${this.prefix}-print-explanations"
+                      checked=true type="checkbox">
+                    </input>
+                    ${this.textLabels['print-explanations']}
+                    </td>
+                    <td>
+                    <input id="${this.prefix}-print-copyright"
+                      checked=true type="checkbox">
+                    </input>
+                    ${this.textLabels['print-copyright']}
+                    </td>
+                    <td>
+                    <input id="${this.prefix}-print-questions"
+                      checked=true type="checkbox">
+                    </input>
+                    ${this.textLabels['print-questions']}
+                    </td>
+                    </tr>
+                    </table>
+                  </div>
+                  <div>
+                    <table>
+                    <tr>
+                      <td title="${this.textLabels['print-header.hover']}">
+                        ${this.textLabels['print-header']}:<br>
+                        <textarea id="${this.prefix}-print-header"
+                          name="${this.prefix}-print-header" rows="2">
+                        </textarea>
+                      </td>
+                      <td title="${this.textLabels['print-footer.hover']}">
+                        ${this.textLabels['print-footer']}:<br>
+                        <textarea id="${this.prefix}-print-footer"
+                          name="${this.prefix}-print-footer" rows="2">
+                        </textarea>
+                      </td>
+                    </tr>
+                    </table>
                   </div>
                   <div>
                     <input id="${this.prefix}-print-qrcode" type="checkbox">
@@ -781,8 +847,8 @@ Exolve.prototype.init = function() {
                         <p>
                         ${this.textLabels['print-qrcode-details']}
                         <select id="${this.prefix}-qrcode-location">
-                          <option value="puzzle">${this.textLabels['print-qrcode-in-botright']}</option>
-                          <option value="preamble">${this.textLabels['print-qrcode-in-preamble']}</option>
+                          <option value="bottom-right">${this.textLabels['print-qrcode-in-botright']}</option>
+                          <option value="bottom-left">${this.textLabels['print-qrcode-in-botleft']}</option>
                         </select>.
                         </p>
                         <p>
@@ -1082,10 +1148,6 @@ Exolve.prototype.init = function() {
   this.printFontInput = document.getElementById(this.prefix + '-print-font-inp');
   this.printFontInput.addEventListener(
       'change', this.setPrintFont.bind(this, false));
-  if (this.questionTexts.length == 0) {
-    const pq = document.getElementById(this.prefix + '-print-questions-span');
-    pq.style.display = 'none';
-  }
   this.qrImg = document.getElementById(this.prefix + '-qrcode');
   this.qrTable = document.getElementById(this.prefix + '-qrcode-table');
   this.qrCTAInput = document.getElementById(this.prefix + '-qrcode-cta-input');
@@ -8031,19 +8093,22 @@ Exolve.prototype.qrRefresher = function() {
 
 Exolve.prototype.getPrintSettings = function() {
   const pageSizeElt = document.getElementById(this.prefix + '-page-size');
-  const pageMarginElt = document.getElementById(this.prefix + '-page-margin');
+  const pageMarginsElt = document.getElementById(this.prefix + '-page-margins');
+
+  const margins = [0, 0, 0, 0];
+  const marginStrs = pageMarginsElt.value.trim().split(/\s+/);
+  for (let i = 0; i < 4; i++) {
+    if (i >= marginStrs.length) break;
+    const val = parseFloat(marginStrs[i]);
+    if (!isNaN(val) && val >= 0.0) margins[i] = val;
+  }
+  for (i = marginStrs.length; i < 4; i++) {
+    if ((i - 2) >= 0) margins[i] = margins[i - 2];
+    else if ((i - 1) >= 0) margins[i] = margins[i - 1];
+  }
 
   const page = (pageSizeElt ? pageSizeElt.value : 'letter') || 'letter';
 
-  let marginIn = 0.5;
-  const marginStr = pageMarginElt ? pageMarginElt.value : '';
-  if (marginStr) {
-    const val = parseFloat(marginStr);
-    if (!isNaN(val) && val >= 0.0) marginIn = val;
-  }
-  if (pageMarginElt) {
-    pageMarginElt.value = marginIn;
-  }
   const widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
                   ((page == '6in 9in') ? 6.0 :
                   ((page == 'A4') ? 210.0/25.4 :
@@ -8063,22 +8128,34 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'ledger') ? 17.0 : 11.0)))))))));
   const font = (this.printFontInput ? this.printFontInput.value : '18px') || '18px';
 
-  const cluesPage = document.getElementById(this.prefix + '-print-clues-page').checked;
-  const preambleBelow = document.getElementById(this.prefix + '-print-preamble-below').checked;
+  const scope = document.getElementById(this.prefix + '-print-scope').value;
   const inksaver = document.getElementById(this.prefix + '-print-inksaver').checked;
-  const pq = document.getElementById(this.prefix + '-print-questions');
+  const pTitle = document.getElementById(this.prefix + '-print-title');
+  const pSetter = document.getElementById(this.prefix + '-print-setter');
+  const pPreamble = document.getElementById(this.prefix + '-print-preamble');
+  const pExplanations = document.getElementById(this.prefix + '-print-explanations');
+  const pCopyright = document.getElementById(this.prefix + '-print-copyright');
+  const pQuestions = document.getElementById(this.prefix + '-print-questions');
+  const pHeader = document.getElementById(this.prefix + '-print-header');
+  const pFooter = document.getElementById(this.prefix + '-print-footer');
   const onlyCrossword = this.printOnlyCrossword || false;
   return {
+    scope: scope,
     page: page,
     font: font,
     onlyCrossword: onlyCrossword,
-    pageMarginIn: marginIn,
+    margins: margins,
     pageWidthIn: widthIn,
     pageHeightIn: heightIn,
-    printQuestions: (this.questionTexts.length > 0) && pq.checked,
-    preambleBelow: preambleBelow,
+    title: pTitle.checked,
+    setter: pSetter.checked,
+    preamble: pPreamble.checked,
+    explanations: pExplanations.checked,
+    copyright: pCopyright.checked,
+    questions: pQuestions.checked,
     inksaver: inksaver,
-    cluesPage: cluesPage,
+    header: pHeader.value.trim(),
+    footer: pFooter.value.trim(),
     qr: this.qrCheckbox.checked && this.qrImg.complete,
   };
 }
@@ -8093,6 +8170,15 @@ Exolve.prototype.changeBG = function(color) {
   } else {
     this.background.style.fill = color;
   }
+}
+
+Exolve.prototype.hideEltBeforePrint = function(elt) {
+  const display = elt.style.display;
+  if (!this.printingChanges.hiddenDisplays[display]) {
+      this.printingChanges.hiddenDisplays[display] = [];
+  }
+  this.printingChanges.hiddenDisplays[display].push(elt);
+  elt.style.display = 'none';
 }
 
 Exolve.prototype.handleBeforePrint = function() {
@@ -8127,6 +8213,14 @@ Exolve.prototype.handleBeforePrint = function() {
 
   const settings = this.getPrintSettings();
 
+  /**
+   * When onlyClues is true, we do not print the grid, and we print
+   * the clues in two columns, one for Across and one for Down + any other.
+   */
+  const onlyClues = (settings.scope == 'only-clues');
+  const onlyGrid = (settings.scope == 'only-grid');
+  const allInScope = (settings.scope == 'all');
+
   if (settings.onlyCrossword) {
     /**
      * Note: prior to v1.42, the code used to move all body children
@@ -8140,13 +8234,6 @@ Exolve.prototype.handleBeforePrint = function() {
     document.body.insertAdjacentElement('afterbegin', this.frame);
     this.printingChanges.moves.push(
         {'elem': this.frame, 'target': puzParent, 'sibling': puzSibling});
-    if (this.copyright) {
-      const par = this.copyrightElt.parentElement;
-      const sibling = this.copyrightElt.nextSibling;
-      this.controlsEtc.insertAdjacentElement('afterbegin', this.copyrightElt);
-      this.printingChanges.moves.push(
-          {'elem': this.copyrightElt, 'target': par, 'sibling': sibling});
-    }
 
     const hider = document.createElement('div');
     hider.className = 'xlv-dont-print';
@@ -8156,12 +8243,7 @@ Exolve.prototype.handleBeforePrint = function() {
       if (node.nodeType == Node.ELEMENT_NODE) {
         if (node.nodeName == 'LINK' || node.nodeName == 'SCRIPT') continue;
         if (node.isSameNode(this.frame)) continue;
-        const display = node.style.display;
-        if (!this.printingChanges.hiddenDisplays[display]) {
-          this.printingChanges.hiddenDisplays[display] = [];
-        }
-        this.printingChanges.hiddenDisplays[display].push(node);
-        node.style.display = 'none';
+        this.hideEltBeforePrint(node);
         continue;
       }
       topNonEltNodes.push({'node': node, 'sibling': node.nextSibling});
@@ -8184,42 +8266,75 @@ Exolve.prototype.handleBeforePrint = function() {
       position: absolute;
       left: 0;
       top: 0;
-    }`);
+    }
+    `);
     this.frame.appendChild(customStyles);
     this.printingChanges.extras.push(customStyles);
   }
-  let preambleSizer = '';
+
+  if (this.copyright) {
+    const par = this.copyrightElt.parentElement;
+    const sibling = this.copyrightElt.nextSibling;
+    const moveTo = onlyGrid ? this.gridParent : this.controlsEtc;
+    moveTo.insertAdjacentElement('afterbegin', this.copyrightElt);
+    this.printingChanges.moves.push(
+        {'elem': this.copyrightElt, 'target': par, 'sibling': sibling});
+  }
+
+  if (settings.header) {
+    const header = document.createElement('div');
+    header.innerHTML = settings.header;
+    this.frame.insertAdjacentElement('afterbegin', header);
+    this.printingChanges.extras.push(header);
+  }
+  if (settings.footer) {
+    const footer = document.createElement('div');
+    footer.innerHTML = settings.footer;
+    this.frame.insertAdjacentElement('beforeend', footer);
+    this.printingChanges.extras.push(footer);
+  }
+  if (!settings.title) {
+    this.hideEltBeforePrint(this.titleElt);
+  }
+  if (!settings.setter) {
+    this.hideEltBeforePrint(this.setterElt);
+  }
+  if (!settings.preamble) {
+    this.hideEltBeforePrint(this.preambleElt);
+  }
+  if (!settings.explanations) {
+    this.hideEltBeforePrint(this.explanations);
+  }
+  if (!settings.copyright) {
+    this.hideEltBeforePrint(this.copyrightElt);
+  }
+  if (!settings.questions) {
+    this.hideEltBeforePrint(this.questions);
+  }
+  if (onlyGrid) {
+    this.hideEltBeforePrint(this.cluesContainer);
+  } else if (onlyClues) {
+    this.hideEltBeforePrint(this.gridParent);
+  }
+
   if (settings.qr) {
     const par = this.qrTable.parentElement;
     const sib = this.qrTable.nextSibling;
     this.printingChanges.moves.push(
         {'elem': this.qrTable, 'target': par, 'sibling': sib});
-    const inPreamble = (this.qrLocation.value == 'preamble');
-    let container = this.preambleElt;
     const qrHeight = this.qrTable.clientHeight + 'px';
-    if (inPreamble) {
-      preambleSizer = `
-        min-height: ${qrHeight};
-      `;
-    } else {
-      container = document.createElement('div');
-      container.classList.add('xlv-clues-panel');
-      container.style.minHeight = qrHeight;
-      this.cluesContainer.insertAdjacentElement('beforeend', container);
-      this.printingChanges.extras.push(container);
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    if (this.qrLocation.value == 'bottom-right') {
+      container.style.right = 0;
+    } else if (this.qrLocation.value == 'bottom-left') {
+      container.style.left = 0;
     }
+    container.style.bottom = 0;
+    container.style.minHeight = qrHeight;
+    this.frame.insertAdjacentElement('beforeend', container);
+    this.printingChanges.extras.push(container);
     container.insertAdjacentElement('afterbegin', this.qrTable);
-  }
-  if (settings.preambleBelow) {
-    const par = this.preambleElt.parentElement;
-    const sib = this.preambleElt.nextSibling;
-    const wideBox = document.createElement('div');
-    wideBox.className = 'xlv-wide-box';
-    wideBox.appendChild(this.preambleElt);
-    this.explanations.insertAdjacentElement('beforebegin', wideBox);
-    this.printingChanges.moves.push(
-        {'elem': this.preambleElt, 'target': par, 'sibling': sib});
-    this.printingChanges.extras.push(wideBox);
   }
   if (settings.inksaver) {
     this.printingChanges.inksaver = true;
@@ -8236,13 +8351,9 @@ Exolve.prototype.handleBeforePrint = function() {
     this.changeBG('url(#shading)');
   }
 
-  // Hide questions if requested.
-  const maybeHideQuestions = settings.printQuestions ? '' : `
-    .xlv-questions,
-  `;
-
   let zoomPerc = 100;
-  const pageIn = settings.pageWidthIn - (2 * settings.pageMarginIn);
+  const pageIn = settings.pageWidthIn -
+    (settings.margins[1] + settings.margins[3]);
   if (pageIn <= 7) {
     /* Without this, Chrome does not fit page correctly. */
     zoomPerc = 70;
@@ -8252,7 +8363,7 @@ Exolve.prototype.handleBeforePrint = function() {
   customStyles.innerHTML = `
   @page {
     size: ${settings.page};
-    margin: ${settings.pageMarginIn}in;
+    margin: ${settings.margins[0]}in ${settings.margins[1]}in ${settings.margins[2]}in ${settings.margins[3]}in;
   }
   @media all {
     body {
@@ -8263,7 +8374,7 @@ Exolve.prototype.handleBeforePrint = function() {
       width: 992px;
     }
     #${this.prefix}-frame .xlv-preamble {
-      margin: 8px 0 20px;${preambleSizer}
+      margin: 8px 0 20px;
     }
     #${this.prefix}-frame .xlv-clues {
       padding-bottom: 0;
@@ -8283,7 +8394,7 @@ Exolve.prototype.handleBeforePrint = function() {
     .xlv-small-button,
     .xlv-frame .xlv-small-button,
     .xlv-small-print,
-    .xlv-submit,${maybeHideQuestions}
+    .xlv-submit,
     .xlv-status {
       display: none;
     }
@@ -8308,22 +8419,19 @@ Exolve.prototype.handleBeforePrint = function() {
   this.frame.appendChild(customStyles);
   this.printingChanges.extras.push(customStyles);
 
-  if (settings.cluesPage) {
-    this.printSeparateCluesPage(settings);
-    return;
-  }
-
   let threeColumns = false;
   if (this.numCellsToFill == this.numCellsFilled) {
-    if (this.printCompleted3Cols) {
+    if (this.printCompleted3Cols && allInScope) {
       threeColumns = true;
     }
   } else {
-    if (!this.printIncomplete2Cols) {
+    if (!this.printIncomplete2Cols && allInScope) {
       threeColumns = true;
     }
   }
-  if (threeColumns) {
+  if (onlyGrid) {
+    this.printOnlyGrid(settings);
+  } else if (threeColumns) {
     this.printThreeColumns(settings);
   } else {
     this.printTwoColumns(settings);
@@ -8342,45 +8450,44 @@ Exolve.prototype.addPrintedCluesTable = function(elem, width, num) {
   return table;
 }
 
-Exolve.prototype.printSeparateCluesPage = function(settings) {
-  const COLUMN_WIDTH = 488;
-  const COLUMN_SEP = 16;
-  console.assert(COLUMN_SEP + (2 * COLUMN_WIDTH) == 992);
+Exolve.prototype.printOnlyGrid = function(settings) {
+  const GRID_WIDTH = 1.5 * 488;
 
   const svgWidth = this.boxWidth + (2 * this.offsetLeft)
   const svgHeight = this.boxHeight + (2 * this.offsetTop)
-  const goodGridDim = 992;
-  const scale = goodGridDim / svgWidth;
+  const goodGridDim = GRID_WIDTH;
+  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scaledW = svgWidth * scale;
   const scaledH = svgHeight * scale;
+
+  const bPos = this.frame.getBoundingClientRect();
+  const left = 0.5 * (scale - 1) * svgWidth;
 
   const customStyles = document.createElement('style');
   customStyles.innerHTML = `
-  #${this.prefix}-grid-parent-centerer {
-    text-align: left;
-    height: ${'' + scaledH + 'px'};
+  #${this.prefix}-grid-panel {
+    width: 100%;
   }
-  #${this.prefix}-grid {
-    transform: scale(${scale});
+  #${this.prefix}-grid-parent {
+    transform: translate(-${left}px,0) scale(${scale});
     transform-origin: top left;
   }
-  #${this.prefix}-frame .xlv-preamble,
-  #${this.prefix}-frame .xlv-wide-box {
-    width: 992px;
+  #${this.prefix}-grid-parent-centerer {
+    height: ${'' + scaledH + 'px'};
+    text-align: center;
   }
-  #${this.prefix}-frame .xlv-grid-panel {
-    margin: 0;
+  #${this.prefix}-frame .xlv-questions,
+  #${this.prefix}-frame .xlv-explanations {
+    width: ${bPos.width}px;
   }
-  #${this.prefix}-frame .xlv-grid-and-clues-flex {
-    display: block;
+  #${this.prefix}-frame .xlv-copyright {
+    position: absolute;
+    right: 0;
+    bottom: -16px;
   }
   `;
   this.frame.appendChild(customStyles);
   this.printingChanges.extras.push(customStyles);
-
-  this.recolourCells(scale);
-  this.redisplayNinas(scale)
-  this.setColumnLayout(COLUMN_WIDTH);
-  this.paginate(settings);
 }
 
 Exolve.prototype.printTwoColumns = function(settings) {
@@ -8388,21 +8495,23 @@ Exolve.prototype.printTwoColumns = function(settings) {
   const COLUMN_SEP = 16;
   console.assert(COLUMN_SEP + (2 * COLUMN_WIDTH) == 992);
 
+  const onlyClues = (settings.scope == 'only-clues');
+
   const svgWidth = this.boxWidth + (2 * this.offsetLeft)
   const svgHeight = this.boxHeight + (2 * this.offsetTop)
   const goodGridDim = COLUMN_WIDTH;
   const scale = Math.min(1.75, goodGridDim / svgWidth);
-  const scaledH = svgHeight * scale;
+  const scaledH = onlyClues ? 0 : (svgHeight * scale);
 
   const customStyles = document.createElement('style');
   customStyles.innerHTML = `
-  #${this.prefix}-grid-parent-centerer {
-    text-align: left;
-    height: ${'' + scaledH + 'px'};
-  }
   #${this.prefix}-grid {
     transform: scale(${scale});
     transform-origin: top left;
+  }
+  #${this.prefix}-grid-parent-centerer {
+    text-align: left;
+    height: ${'' + scaledH + 'px'};
   }
   #${this.prefix}-frame .xlv-wide-box {
     width: ${COLUMN_WIDTH}px;
@@ -8413,6 +8522,7 @@ Exolve.prototype.printTwoColumns = function(settings) {
   }
   `;
   this.frame.appendChild(customStyles);
+  this.printingChanges.extras.push(customStyles);
 
   const controlsEtcH = this.controlsEtc.clientHeight;
 
@@ -8420,7 +8530,7 @@ Exolve.prototype.printTwoColumns = function(settings) {
   // grid layout. We'll then measure clue row heights and balance
   // them across 2 columns.
   const customStyles2 = document.createElement('style');
-  customStyles2.innerHTML = `
+  let customStyles2HTML = `
   #${this.prefix}-frame .xlv-grid-and-clues-flex {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -8442,13 +8552,15 @@ Exolve.prototype.printTwoColumns = function(settings) {
     grid-column-end: 3;
   }
   #${this.prefix}-printed-clues-1 {
-    grid-row-start: 2;
+    grid-row-start: ${onlyClues ? 1 : 2};
     grid-row-end: 3;
     grid-column-start: 1;
     grid-column-end: 2;
   }
   `;
+  customStyles2.innerHTML = customStyles2HTML;
   this.frame.appendChild(customStyles2);
+  this.printingChanges.extras.push(customStyles2);
 
   this.recolourCells(scale);
   this.redisplayNinas(scale)
@@ -8464,7 +8576,7 @@ Exolve.prototype.printTwoColumns = function(settings) {
   this.gridcluesContainer.appendChild(printedClues1);
 
   this.equalizeClueWidths(COLUMN_WIDTH);
-  this.printingChanges.extras.push(printedClues1, customStyles, customStyles2);
+  this.printingChanges.extras.push(printedClues1);
 
   const cluesPanels = this.frame.getElementsByClassName('xlv-clues-panel');
   const cluesTables = [];
@@ -8472,6 +8584,7 @@ Exolve.prototype.printTwoColumns = function(settings) {
 
   let minH = 1000;
   let h = 0;
+  let firstDownClue = -1;
   for (let p = 0; p < cluesPanels.length; p++) {
     const cluesPanel = cluesPanels[p];
     cluesTables.push(null);
@@ -8483,6 +8596,10 @@ Exolve.prototype.printTwoColumns = function(settings) {
     const cluesTable = cluesPanel.children[1].firstElementChild;
     cluesTables[p] = cluesTable;
     const clueTRs = cluesTable.getElementsByTagName("tr");
+
+    if (this.hasDownClues && cluesTable == this.downClues) {
+      firstDownClue = clues.length;
+    }
 
     for (let c = 0; c < clueTRs.length; c++) {
       const clue = {
@@ -8517,6 +8634,11 @@ Exolve.prototype.printTwoColumns = function(settings) {
     }
   }
 
+  if (onlyClues && firstDownClue >= 0) {
+    /* Forget balancing, move Down clues to top */
+    best1end = firstDownClue;
+  }
+
   // Move clue #s [0, best1end) to the first column.
   for (let c = 0; c < best1end; c++) {
     const clue = clues[c];
@@ -8535,10 +8657,23 @@ Exolve.prototype.printTwoColumns = function(settings) {
           'sibling': clue.tr.nextSibling});
     printedTable1.insertAdjacentElement('beforeend', clue.tr);
   }
+
+  // Hide emptied clue panels.
+  for (let p = 0; p < cluesPanels.length; p++) {
+    const cluesTable = cluesTables[p];
+    if (!cluesTable) continue;
+    const clueTRs = cluesTable.getElementsByTagName("tr");
+    if (clueTRs.length > 0) continue;
+    this.hideEltBeforePrint(cluesPanels[p]);
+  }
+
   this.paginate(settings);
 }
 
 Exolve.prototype.printThreeColumns = function(settings) {
+  /**
+   * Note that this is never used when only-{grid,clues} options are set.
+   */
   const COLUMN_WIDTH = 320;
   const COLUMN_SEP = 16;
   console.assert((2 * COLUMN_SEP) + (3 * COLUMN_WIDTH) == 992);
@@ -8718,6 +8853,16 @@ Exolve.prototype.printThreeColumns = function(settings) {
          'sibling': clue.tr.nextSibling});
     tableDest.insertAdjacentElement('beforeend', clue.tr);
   }
+
+  // Hide emptied clue panels.
+  for (let p = 0; p < cluesPanels.length; p++) {
+    const cluesTable = cluesTables[p];
+    if (!cluesTable) continue;
+    const clueTRs = cluesTable.getElementsByTagName("tr");
+    if (clueTRs.length > 0) continue;
+    this.hideEltBeforePrint(cluesPanels[p]);
+  }
+
   this.paginate(settings);
 }
 
@@ -8730,10 +8875,11 @@ Exolve.prototype.paginate = function(settings) {
   }
 
   let whRatio = 1.0;
-  const margin2 = 2 * settings.pageMarginIn;
-  if (settings.pageWidthIn > margin2 && settings.pageHeightIn > margin2) {
-    whRatio = ((settings.pageWidthIn - margin2) /
-               (settings.pageHeightIn - margin2));
+  const marginV = settings.margins[0] + settings.margins[2];
+  const marginH = settings.margins[1] + settings.margins[3];
+  if (settings.pageWidthIn > marginH && settings.pageHeightIn > marginV) {
+    whRatio = ((settings.pageWidthIn - marginH) /
+               (settings.pageHeightIn - marginV));
   }
 
   const pageHeight = Math.floor(outerBox.width / whRatio);
@@ -8745,13 +8891,6 @@ Exolve.prototype.paginate = function(settings) {
     breaker.className = 'xlv-print-break';
     return breaker;
   };
-
-  if (settings.cluesPage) {
-    const breaker = getBreaker();
-    this.cluesContainer.insertAdjacentElement('beforebegin', breaker);
-    this.printingChanges.extras.push(breaker);
-    return;
-  }
 
   /**
    * Figure out which clues to insert page-breaks before.

@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.57 May 1, 2024
+### Version: Exolve v1.58 July 10, 2024
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1805,7 +1805,11 @@ Here are all the names of pieces of text that you can relabel:
 | `print.hover` | Show/hide panel for printing or creating PDFs.   |
 | `print-heading` | Print or create a PDF:                         |
 | `print-size` | Page size:                                        |
-| `print-margin` | Margin (inches):                                |
+| `print-only-grid`| Only grid                                     |
+| `print-only-clues`| Only clues                                   |
+| `print-all`| Grid and clues                                      |
+| `print-margin`| Margin (inches, up to 4 numbers)                 |
+| `print-margin.hover`| The numbers are in inches, and are for top, right, bottom, left. Missing numbers are taken from symmetry or last available values. |
 | `print-font` | Font size:                                        |
 | `print-font-normal` | Normal                                     |
 | `print-font-large` | Large                                       |
@@ -1818,13 +1822,20 @@ Here are all the names of pieces of text that you can relabel:
 | `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
 | `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
-| `print-questions`| Include questions                             |
-| `print-clues-page`| Page break before clues                      |
-| `print-preamble-below`| Preamble below grid                      |
+| `print-title` | Title                                            |
+| `print-setter` | Setter                                          |
+| `print-preamble` | Preamble                                      |
+| `print-explanations` | Explanations                              |
+| `print-copyright` | Copyright                                    |
+| `print-questions` | Questions                                    |
+| `print-header` | Extra header                                    |
+| `print-header.hover` | Any HTML you provide here will be inserted in the beginning of the puzzle frame before printing |
+| `print-footer` | Extra footer                                    |
+| `print-footer.hover` | Any HTML you provide here will be inserted at the end of the puzzle frame before printing |
 | `print-inksaver`| Inksaver                                       |
 | `print-qrcode`| Include QR code                                  |
 | `print-qrcode-details`| The QR code (rendered to the right) will be printed to the |
-| `print-qrcode-in-preamble`| right of the preamble |
+| `print-qrcode-in-botleft`| bottom-left of the puzzle |
 | `print-qrcode-in-botright`| bottom-right of the puzzle |
 | `print-qrcode-cta-label`| Call to action                         |
 | `print-qrcode-cta`| Solve online                                 |
@@ -2437,30 +2448,30 @@ with the title "Settings for printing/PDFs". This lets you specify:
   pick the same page size in the printer's settings that open up when you
   print, if you use a paper size that's not the current choice in the printer's
   settings.
-- Page margin in inches. Caveat: very large margins may lead to some parts
-  getting clipped.
+- Page margins in inches. Caveat: very large margins may lead to some parts
+  getting clipped. You can now specify up to four numbers (all in inches),
+  for the top/right/bottom/left margins, respectively. Missing values will
+  be copied from their symmetric counterparts, and if that's missing too, then
+  from the last available value.
 - Font size (Normal, Large, Extra Large, Small, or specify an arbitrary font
   size). Please note that the specific font size picked, such as "18px" may
   not be the actual printed size exactly (because of scaling). However, in
   general, you can increase/decrease the font size setting and the printed
   size will increase/decrease accordingly.
-- Print questions. When the crossword includes questions, a checkbox is shown
-  to let you decide whether to include them in the printing (the option is
-  ignored when printing in wysiwig mode).
-- Page break before clues. If you select this option, then the grid gets
-  printed on the first page (as does any preamble or revealed explanations),
-  while the clues get printed on a separate page.
-- Preamble below grid. Set this option to print the preamble below the grid
-  rather than above it.
+- You can choose to print just the grid or just the clues (instead of the
+  default, grid as well as clues). Nuance: in the "only clues" mode, we
+  always just use two columns (not three, even if the crossword is unsolved),
+  we do not balance the heights of clue lists, and we split columns just before
+  the Down clues start.
+- You can selectively exclude any of these from printing: title, setter,
+  preamble, explanations, copyright, questions. These exclusion settings are
+  ignored when printing in wysiwig mode.
 - Inksaver. Set this option to print using a chequered pattern instead of a
   complete fill as the background colour for blocks.
 - Include QR code. Use this option to include a QR code. The QR code will
   use the URL of the current web page, but you can override that, and you
   can also override the call to action, which defaults to "Solve online".
-  The QR code is printed to the bottom-right of the puzzle or the right of
-  the preamble. When printing the QR code in the preamble, it's usually
-  better to print the preamble below the grid.
-
+  The QR code is printed to the bottom-right of the puzzle or the bottom-left.
 
 Additionally, from this panel, you have three buttons for printing:
 

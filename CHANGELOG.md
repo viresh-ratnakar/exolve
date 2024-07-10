@@ -1,5 +1,38 @@
 # Changelog
 
+### Version: Exolve v1.58: July 10, 2024
+
+- Several changes to printing and printing options. Add a prominent
+  menu in the print settings that lets you print:
+  - Grid and clues
+  - Only grid
+  - Only clues
+  My motivation is to create PDFs that I can stitch together to create
+  a book of crosswords, but hopefully others will find other uses as well.
+- A couple of printing options go away. I do not think anyone used them:
+  printing a page-break agter the grid (never really wored on most
+  platforms), and printing the preamble below the grid.
+- The "Inksaver" printing option moves up to go to the top line in the
+  printing panel.
+- Instead of specifying just a single common margin, you can now specify
+  four numbers (all in inches), for the top/right/bottom/left margins,
+  respectively. You can also specify just 1 or 2 or 3 numbers (missing
+  values will be copied from their symmetric counterparts, and if that's
+  missing too, then from the last available value).
+- Add options to selectively exclude any of these elements from printing:
+  title, setter, preamble, explanations, copyright, questions.
+- Add textarea inputs to allow specifying a header and/or a footer. These
+  can be arbitrary HTML snippets. They get stuffed inside DIVs at the beginning
+  and end, respectively.
+- Make QR-code location choices be "bottom-right of the page" and
+  "bottom-left of the page." (killing the "to the right of the preamble"
+  option).
+- Bug-fix: if a clue panel is completely emptied out during printing
+  (because of balancing heights), then hide it, so that it does not add
+  a vertical margin.
+- In "only-grid" mode, print the copyright string under the grid, to
+  the right.
+
 ### Minor Version: Exolve v1.57.5: June 21, 2024
 
 - Replace the deprecated googlecharts QR-code web service with quickchart.io.
