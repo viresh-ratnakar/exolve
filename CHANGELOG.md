@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.1: July 15, 2024
+
+- Add a printing option to convert URLs in the Explanations section
+  to QR codes. The option is only shown if there are any links in
+  the Explanations section.
+
 ### Version: Exolve v1.58: July 10, 2024
 
 - Several changes to printing and printing options. Add a prominent

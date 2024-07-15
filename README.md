@@ -1833,13 +1833,14 @@ Here are all the names of pieces of text that you can relabel:
 | `print-footer` | Extra footer                                    |
 | `print-footer.hover` | Any HTML you provide here will be inserted at the end of the puzzle frame before printing |
 | `print-inksaver`| Inksaver                                       |
-| `print-qrcode`| Include QR code                                  |
+| `print-qrcode`| Add QR code for this puzzle's URL            |
 | `print-qrcode-details`| The QR code (rendered to the right) will be printed to the |
 | `print-qrcode-in-botleft`| bottom-left of the puzzle |
 | `print-qrcode-in-botright`| bottom-right of the puzzle |
 | `print-qrcode-cta-label`| Call to action                         |
 | `print-qrcode-cta`| Solve online                                 |
 | `print-qrcode-size`| QR code size:                               |
+| `print-urls-as-qrcodes`| Convert Explanations URLs to QR codes   |
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |

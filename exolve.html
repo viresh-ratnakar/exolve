@@ -536,7 +536,8 @@ function Exolve(puzzleSpec,
     'print-footer.hover': 'Any HTML you provide here will be inserted at the end of the puzzle frame before printing',
 
     'print-inksaver': 'Inksaver',
-    'print-qrcode': 'Include QR code',
+    'print-urls-as-qrcodes': 'Convert Explanations URLs to QR codes',
+    'print-qrcode': 'Add QR code for this puzzle\'s URL',
     'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the ',
     'print-qrcode-in-botleft': 'bottom-left of the page',
     'print-qrcode-in-botright': 'bottom-right of the page',
@@ -922,6 +923,16 @@ Exolve.prototype.init = function() {
                       </table>
                     </div>
                   </div>
+                  <div id="${this.prefix}-print-urls-as-qrcodes-div"
+                      style="display:none">
+                    <input id="${this.prefix}-print-urls-as-qrcodes" type="checkbox">
+                    </input>
+                    ${this.textLabels['print-urls-as-qrcodes']}
+                    <div id="${this.prefix}-url-qrcodes-panel" style="display:none">
+                      <table id="${this.prefix}-url-qrcodes-table">
+                      </table>
+                    </div>
+                  </div>
                   <div>
                     <button id="${this.prefix}-print-crossword"
                         class="xlv-small-button"
@@ -1210,6 +1221,13 @@ Exolve.prototype.init = function() {
   this.qrData.addEventListener('change', qrRefresher);
   this.qrSize.addEventListener('change', qrRefresher);
   this.qrCTAInput.addEventListener('change', qrRefresher);
+
+  this.qrUrlsDiv = document.getElementById(this.prefix + '-print-urls-as-qrcodes-div');
+  this.qrUrlsCheckbox = document.getElementById(this.prefix + '-print-urls-as-qrcodes');
+  this.qrUrlsPanel = document.getElementById(this.prefix + '-url-qrcodes-panel');
+  const qrUrlsRefresher = this.qrUrlsRefresher.bind(this);
+  this.qrUrlsCheckbox.addEventListener('change', qrUrlsRefresher);
+  this.qrUrlsTable = document.getElementById(this.prefix + '-url-qrcodes-table');
 
   this.webifiButton = document.getElementById(this.prefix + '-webifi');
   this.webifiButton.style.display = 'none';
@@ -1913,6 +1931,10 @@ Exolve.prototype.parseAndDisplayExplanations = function() {
     return;
   }
   this.explanations.innerHTML = explnText;
+  const links = this.explanations.getElementsByTagName('a');
+  if (links.length > 0) {
+    this.qrUrlsDiv.style.display = "";
+  }
   this.revelationList.push(this.explanations);
 }
 
@@ -8083,6 +8105,9 @@ Exolve.prototype.handleAfterPrint = function() {
         extra.remove();
       }
     }
+    if (this.printingChanges.explnHtml) {
+      this.explanations.innerHTML = this.printingChanges.explnHtml;
+    }
     this.setColumnLayout();
     this.recolourCells();
     this.redisplayNinas();
@@ -8123,19 +8148,85 @@ Exolve.prototype.setPrintFont = function(fromMenu) {
   }
 }
 
+/**
+ * Given an img elelemt, make it point to a QR code for the
+ * given URL. Set the size (width, height) of the image to
+ * dim
+ */
+Exolve.prototype.makeQRCodeImg = function(img, url, dim) {
+  const payload = encodeURI(url.trim());
+  const qrAPI = "https://quickchart.io/qr?size=" + dim + "&text=" + payload;
+  img.setAttributeNS(null, 'width', dim);
+  img.setAttributeNS(null, 'height', dim);
+  img.setAttributeNS(null, 'src', qrAPI);
+}
+
 Exolve.prototype.qrRefresher = function() {
   if (!this.qrCheckbox.checked) {
     this.qrPanel.style.display = 'none';
     return;
   }
   this.qrPanel.style.display = '';
-  const payload = encodeURI(this.qrData.value.trim());
-  const dim = this.qrSize.value;
-  const qrAPI = "https://quickchart.io/qr?size=" + dim + "&text=" + payload;
-  this.qrImg.setAttributeNS(null, 'width', dim);
-  this.qrImg.setAttributeNS(null, 'height', dim);
-  this.qrImg.setAttributeNS(null, 'src', qrAPI);
+  this.makeQRCodeImg(this.qrImg, this.qrData.value, this.qrSize.value);
   this.qrCTA.innerHTML = this.qrCTAInput.value;
+}
+
+Exolve.prototype.qrUrlImgsReady = function() {
+  if (!this.qrUrlImgs || this.qrUrlImgs.length == 0) {
+    return false;
+  }
+  for (const img of this.qrUrlImgs) {
+    if (!img.complete) return false;
+  }
+  return true;
+}
+
+Exolve.prototype.qrUrlsRefresher = function() {
+  if (!this.qrUrlsCheckbox.checked) {
+    this.qrUrlsPanel.style.display = 'none';
+    return;
+  }
+  if (!this.qrUrlImgs) {
+    this.qrUrlImgs = [];
+    const links = this.explanations.getElementsByTagName('a');
+    if (links.length > 0) {
+      const linksTR = document.createElement('tr');
+      this.qrUrlsTable.appendChild(linksTR);
+      for (let i = 0; i < links.length; i++) {
+        const iPlus1 = i + 1;
+        const linkName = 'Link-' + iPlus1;
+        const link = links[i];
+        const href = link.href;
+        const img = document.createElement('img');
+        this.makeQRCodeImg(img, href, 96);
+        const td = document.createElement('td');
+        td.insertAdjacentElement('beforeend', img);
+        td.insertAdjacentHTML('beforeend', '<br><center>' + linkName + '</center>');
+        linksTR.insertAdjacentElement('beforeend', td);
+        this.qrUrlImgs.push(img);
+      }
+    }
+  }
+  this.qrUrlsPanel.style.display = '';
+}
+
+Exolve.prototype.makeQRsInExplanations = function() {
+  if (!this.qrUrlImgs || this.qrUrlImgs.length == 0) {
+    return;
+  }
+  const links = this.explanations.getElementsByTagName('a');
+  for (let i = 0; i < links.length; i++) {
+    const iPlus1 = i + 1;
+    const linkName = 'Link-' + iPlus1;
+    const link = links[i];
+    link.insertAdjacentHTML('afterend', `<sup>${linkName}</sup>`);
+  }
+  this.explanations.insertAdjacentHTML('beforeend', '<b>Links</b><br>');
+  const par = this.qrUrlsTable.parentElement;
+  const sib = this.qrUrlsTable.nextSibling;
+  this.printingChanges.moves.push(
+      {'elem': this.qrUrlsTable, 'target': par, 'sibling': sib});
+  this.explanations.insertAdjacentElement('beforeend', this.qrUrlsTable);
 }
 
 Exolve.prototype.getPrintSettings = function() {
@@ -8204,6 +8295,7 @@ Exolve.prototype.getPrintSettings = function() {
     header: pHeader.value.trim(),
     footer: pFooter.value.trim(),
     qr: this.qrCheckbox.checked && this.qrImg.complete,
+    qrUrls: this.qrUrlsCheckbox.checked && this.qrUrlImgsReady(),
   };
 }
 
@@ -8254,6 +8346,7 @@ Exolve.prototype.handleBeforePrint = function() {
     moves: [],
     hiddenDisplays: {},
     inksaver: false,
+    explnHtml: null,
   };
   // Unhighlight current cell/clue (handleAfterPrint() will restore).
   this.deactivator();
@@ -8382,6 +8475,10 @@ Exolve.prototype.handleBeforePrint = function() {
     this.frame.insertAdjacentElement('beforeend', container);
     this.printingChanges.extras.push(container);
     container.insertAdjacentElement('afterbegin', this.qrTable);
+  }
+  if (settings.explanations && settings.qrUrls) {
+    this.printingChanges.explnHtml = this.explanations.innerHTML;
+    this.makeQRsInExplanations();
   }
   if (settings.inksaver) {
     this.printingChanges.inksaver = true;
