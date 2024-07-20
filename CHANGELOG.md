@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.3: July 20, 2024
+
+- Add a "force-grid-scale" print setting.
+
 ### Minor Version: Exolve v1.58.2: July 19, 2024
 
 - Rename "urls-as-qrcodes\*" and "urls-to-qrcodes\*" to "url-qrcodes\*"

@@ -1805,6 +1805,8 @@ Here are all the names of pieces of text that you can relabel:
 | `print.hover` | Show/hide panel for printing or creating PDFs.   |
 | `print-heading` | Print or create a PDF:                         |
 | `print-size` | Page size:                                        |
+| `print-grid-scale` | Force grid scale to:                        |
+| `print-grid-scale.hover` | Instead of figuring out a good grid-scale factor (from width/height/etc.), force it to this value. |
 | `print-only-grid`| Only grid                                     |
 | `print-only-clues`| Only clues                                   |
 | `print-all`| Grid and clues                                      |

@@ -487,6 +487,8 @@ function Exolve(puzzleSpec,
     'print-header.hover': 'Any HTML you provide here will be inserted in the beginning of the puzzle frame before printing',
     'print-footer': 'Extra footer',
     'print-footer.hover': 'Any HTML you provide here will be inserted at the end of the puzzle frame before printing',
+    'print-grid-scale': 'Force grid scale to:',
+    'print-grid-scale.hover': 'Instead of figuring out a good grid-scale factor (from width/height/etc.), force it to this value.',
 
     'print-inksaver': 'Inksaver',
     'print-url-qrcodes': 'Convert Explanations URLs to QR codes',
@@ -821,6 +823,14 @@ Exolve.prototype.init = function() {
                         <textarea id="${this.prefix}-print-footer"
                           name="${this.prefix}-print-footer" rows="2">
                         </textarea>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" title="${this.textLabels['print-grid-scale.hover']}">
+                        ${this.textLabels['print-grid-scale']}
+                        <input class="xlv-input" id="${this.prefix}-print-grid-scale"
+                          name="${this.prefix}-grid-scale" size="5" value="">
+                        </input>
                       </td>
                     </tr>
                     </table>
@@ -8233,6 +8243,7 @@ Exolve.prototype.getPrintSettings = function() {
   const pQuestions = document.getElementById(this.prefix + '-print-questions');
   const pHeader = document.getElementById(this.prefix + '-print-header');
   const pFooter = document.getElementById(this.prefix + '-print-footer');
+  const pGridScale = document.getElementById(this.prefix + '-print-grid-scale');
   const onlyCrossword = this.printOnlyCrossword || false;
   return {
     scope: scope,
@@ -8242,6 +8253,7 @@ Exolve.prototype.getPrintSettings = function() {
     margins: margins,
     pageWidthIn: widthIn,
     pageHeightIn: heightIn,
+    gridScale: pGridScale.value,
     title: pTitle.checked,
     setter: pSetter.checked,
     preamble: pPreamble.checked,
@@ -8557,7 +8569,8 @@ Exolve.prototype.printOnlyGrid = function(settings) {
   const svgWidth = this.boxWidth + (2 * this.offsetLeft)
   const svgHeight = this.boxHeight + (2 * this.offsetTop)
   const goodGridDim = GRID_WIDTH;
-  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scale = settings.gridScale ? settings.gridScale :
+      Math.min(1.75, goodGridDim / svgWidth);
   const scaledW = svgWidth * scale;
   const scaledH = svgHeight * scale;
 
@@ -8601,7 +8614,8 @@ Exolve.prototype.printTwoColumns = function(settings) {
   const svgWidth = this.boxWidth + (2 * this.offsetLeft)
   const svgHeight = this.boxHeight + (2 * this.offsetTop)
   const goodGridDim = COLUMN_WIDTH;
-  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scale = settings.gridScale ? settings.gridScale :
+      Math.min(1.75, goodGridDim / svgWidth);
   const scaledH = onlyClues ? 0 : (svgHeight * scale);
 
   const customStyles = document.createElement('style');
@@ -8782,7 +8796,8 @@ Exolve.prototype.printThreeColumns = function(settings) {
   const svgWidth = this.boxWidth + (2 * this.offsetLeft)
   const svgHeight = this.boxHeight + (2 * this.offsetTop)
   const goodGridDim = COLUMN_SEP + 2 * COLUMN_WIDTH;
-  const scale = Math.min(1.75, goodGridDim / svgWidth);
+  const scale = settings.gridScale ? settings.gridScale :
+      Math.min(1.75, goodGridDim / svgWidth);
   const scaledH = svgHeight * scale;
 
   const customStyles = document.createElement('style');
