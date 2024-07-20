@@ -1840,7 +1840,8 @@ Here are all the names of pieces of text that you can relabel:
 | `print-qrcode-cta-label`| Call to action                         |
 | `print-qrcode-cta`| Solve online                                 |
 | `print-qrcode-size`| QR code size:                               |
-| `print-urls-as-qrcodes`| Convert Explanations URLs to QR codes   |
+| `print-url-qrcodes`| Convert Explanations URLs to QR codes   |
+| `print-url-qrcodes-heading`| Links             |
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |

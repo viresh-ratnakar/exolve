@@ -528,6 +528,9 @@ Version: Exolve v1.58 July 10, 2024
   padding: 0;
   vertical-align: middle;
 }
+.xlv-url-qrcodes-table td {
+  padding-left: 2em;
+}
 .xlv-toggleable * {
   background-color: transparent;
   color: inherit;

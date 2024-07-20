@@ -536,7 +536,8 @@ function Exolve(puzzleSpec,
     'print-footer.hover': 'Any HTML you provide here will be inserted at the end of the puzzle frame before printing',
 
     'print-inksaver': 'Inksaver',
-    'print-urls-as-qrcodes': 'Convert Explanations URLs to QR codes',
+    'print-url-qrcodes': 'Convert Explanations URLs to QR codes',
+    'print-url-qrcodes-heading': 'Links',
     'print-qrcode': 'Add QR code for this puzzle\'s URL',
     'print-qrcode-details': 'The QR code (rendered to the right) will be printed to the ',
     'print-qrcode-in-botleft': 'bottom-left of the page',
@@ -923,13 +924,14 @@ Exolve.prototype.init = function() {
                       </table>
                     </div>
                   </div>
-                  <div id="${this.prefix}-print-urls-as-qrcodes-div"
+                  <div id="${this.prefix}-print-url-qrcodes-div"
                       style="display:none">
-                    <input id="${this.prefix}-print-urls-as-qrcodes" type="checkbox">
+                    <input id="${this.prefix}-print-url-qrcodes" type="checkbox">
                     </input>
-                    ${this.textLabels['print-urls-as-qrcodes']}
+                    ${this.textLabels['print-url-qrcodes']}
                     <div id="${this.prefix}-url-qrcodes-panel" style="display:none">
-                      <table id="${this.prefix}-url-qrcodes-table">
+                      <table id="${this.prefix}-url-qrcodes-table"
+                          class="xlv-url-qrcodes-table">
                       </table>
                     </div>
                   </div>
@@ -1222,8 +1224,8 @@ Exolve.prototype.init = function() {
   this.qrSize.addEventListener('change', qrRefresher);
   this.qrCTAInput.addEventListener('change', qrRefresher);
 
-  this.qrUrlsDiv = document.getElementById(this.prefix + '-print-urls-as-qrcodes-div');
-  this.qrUrlsCheckbox = document.getElementById(this.prefix + '-print-urls-as-qrcodes');
+  this.qrUrlsDiv = document.getElementById(this.prefix + '-print-url-qrcodes-div');
+  this.qrUrlsCheckbox = document.getElementById(this.prefix + '-print-url-qrcodes');
   this.qrUrlsPanel = document.getElementById(this.prefix + '-url-qrcodes-panel');
   const qrUrlsRefresher = this.qrUrlsRefresher.bind(this);
   this.qrUrlsCheckbox.addEventListener('change', qrUrlsRefresher);
@@ -8221,7 +8223,9 @@ Exolve.prototype.makeQRsInExplanations = function() {
     const link = links[i];
     link.insertAdjacentHTML('afterend', `<sup>${linkName}</sup>`);
   }
-  this.explanations.insertAdjacentHTML('beforeend', '<b>Links</b><br>');
+  this.explanations.insertAdjacentHTML(
+      'beforeend',
+      `<b>${this.textLabels['print-url-qrcodes-heading']}</b><br>`);
   const par = this.qrUrlsTable.parentElement;
   const sib = this.qrUrlsTable.nextSibling;
   this.printingChanges.moves.push(
@@ -9701,6 +9705,9 @@ function createPuzzle() {
 .xlv-qrcode-panel td {
   padding: 0;
   vertical-align: middle;
+}
+.xlv-url-qrcodes-table td {
+  padding-left: 2em;
 }
 .xlv-toggleable * {
   background-color: transparent;

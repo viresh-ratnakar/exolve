@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.2: July 19, 2024
+
+- Rename "urls-as-qrcodes\*" and "urls-to-qrcodes\*" to "url-qrcodes\*"
+- Make the url-qrcodes heading "Links" customizable.
+- Add more left-padding for url-qrcode images.
+
 ### Minor Version: Exolve v1.58.1: July 15, 2024
 
 - Add a printing option to convert URLs in the Explanations section
