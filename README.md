@@ -1485,7 +1485,7 @@ The list of currently supported options is as follows:
   "Clear all", then the nina button is hidden again.
 - **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
   specified, then we do not try ["smart colouring"](#smart-colouring).
-  **`colour-only-cell-bottom`** or **`color-only-cell-bottom`** If this option
+- **`colour-only-cell-bottom`** or **`color-only-cell-bottom`** If this option
   is specified, then for cell colouring (for cells that have exolve-colour
   specified or for cells that are parts of ninas), we do not colour the
   whole cell; instead, we just colour a bar at the bottom of the cell. This
