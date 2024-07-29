@@ -1,5 +1,15 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.4: July 29, 2024
+
+- Add `exolve-option: colour-only-cell-bottom`. This is applicable to
+  cells coloured with both `exolve-colour` and `exolve-nina`. It makes
+  exolve colour only a bar at the bottom of the cell, instead of colouring
+  the whole cell. This option can be useful for creating print-outs, as
+  overlaid colours tend to blur the printed text in the cell. This option
+  is ignored in 3d, for now (a bit too much more trig needs to be thought
+  through :-)).
+
 ### Minor Version: Exolve v1.58.3: July 20, 2024
 
 - Add a "force-grid-scale" print setting.

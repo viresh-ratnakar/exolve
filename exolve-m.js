@@ -545,6 +545,7 @@ function Exolve(puzzleSpec,
   this.noNinaButton = false;
   this.useWebifi = false;
   this.hltOverwrittenMillis = 5000;
+  this.colourOnlyCellBottom = false;
 
   this.createPuzzle();
 }
@@ -1677,6 +1678,11 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "no-nina-button" || spart == "no-ninas-button") {
       this.noNinaButton = true;
+      continue;
+    }
+    if (spart == "colour-only-cell-bottom" ||
+        spart == "color-only-cell-bottom") {
+      this.colourOnlyCellBottom = true;
       continue;
     }
     if (spart == "webifi") {
@@ -6824,17 +6830,22 @@ Exolve.prototype.addCellText = function(row, col, text,
 
 Exolve.prototype.makeCellDiv = function(row, col, colour, scale=1) {
   const gridCell = this.grid[row][col];
-  const cellLeft = gridCell.cellLeft * scale;
-  const cellTop = gridCell.cellTop * scale;
+
+  const asBar = this.colourOnlyCellBottom && (this.layers3d == 1);
+  const rectTop = gridCell.cellTop + (asBar ? (this.cellH * 7 / 10) : 0);
+  const rectLeft = gridCell.cellLeft + (asBar ? 2 : 0);
+  const rectH = (asBar ? ((this.cellH * 3 / 10) - 2) : this.cellH);
+  const rectW = (asBar ? (this.cellW - 4) : this.cellW);
 
   const rect = document.createElement('div');
   rect.style.backgroundColor = colour;
   rect.setAttributeNS(null, 'class', 'xlv-coloured-cell');
 
-  rect.style.left =  '' +  cellLeft + 'px';
-  rect.style.top = '' + cellTop + 'px';
-  rect.style.width = '' + (this.cellW * scale) + 'px';
-  rect.style.height = '' + (this.cellH * scale) + 'px';
+  rect.style.left =  '' + (rectLeft * scale) + 'px';
+  rect.style.top = '' + (rectTop * scale) + 'px';
+  rect.style.width = '' + (rectW * scale) + 'px';
+  rect.style.height = '' + (rectH * scale) + 'px';
+
   if (this.layers3d > 1) {
     rect.style.transformOrigin = 'top left';
     rect.style.transform =

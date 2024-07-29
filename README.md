@@ -1245,6 +1245,9 @@ Note that the colour that you specify will get shown transparently overlaid over
 the normal cell colour (white, unless changed with `exolve-option:colour-cell`)
 as well as over the active cell colour.
 
+The colouring can be forced to be limited to a bar at the bottom of the cell,
+using `exolve-option: colour-only-cell-bottom`.
+
 You can also have ninas that involve arbitrary letters/words from within the
 text of the clues or the prelude. This involves a little bit of HTML.
 Just enclose the text that you want to highlight as a nina in a "span" tag,
@@ -1282,6 +1285,9 @@ can be any valid
 Note that the colour that you specify will get shown transparently overlaid over
 the normal cell colour (white, unless changed with `exolve-option:colour-cell`)
 as well as over the active cell colour.
+
+The colouring can be forced to be limited to a bar at the bottom of the cell,
+using `exolve-option: colour-only-cell-bottom`.
 
 ## `exolve-question`
 Often, the setter might have hidden additional information for the solver to
@@ -1479,6 +1485,12 @@ The list of currently supported options is as follows:
   "Clear all", then the nina button is hidden again.
 - **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
   specified, then we do not try ["smart colouring"](#smart-colouring).
+  **`colour-only-cell-bottom`** or **`color-only-cell-bottom`** If this option
+  is specified, then for cell colouring (for cells that have exolve-colour
+  specified or for cells that are parts of ninas), we do not colour the
+  whole cell; instead, we just colour a bar at the bottom of the cell. This
+  can be useful for printing too, as colouring the whole cell tends to blur
+  the text in it when printing). This option is ignored in 3-d (for now).
 - **`offset-left:<N>`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using `customizeExolve()`, for example.
