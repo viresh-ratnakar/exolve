@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.5: August 1, 2024
+
+- Tweak to the colour-only-cell-bottom option: remove the small 2 pixel
+  gap around the bar, and increase its opacity slighlty.
+- Update version numbers in test files.
+
 ### Minor Version: Exolve v1.58.4: July 29, 2024
 
 - Add `exolve-option: colour-only-cell-bottom`. This is applicable to

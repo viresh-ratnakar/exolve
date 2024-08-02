@@ -6880,9 +6880,9 @@ Exolve.prototype.makeCellDiv = function(row, col, colour, scale=1) {
 
   const asBar = this.colourOnlyCellBottom && (this.layers3d == 1);
   const rectTop = gridCell.cellTop + (asBar ? (this.cellH * 7 / 10) : 0);
-  const rectLeft = gridCell.cellLeft + (asBar ? 2 : 0);
-  const rectH = (asBar ? ((this.cellH * 3 / 10) - 2) : this.cellH);
-  const rectW = (asBar ? (this.cellW - 4) : this.cellW);
+  const rectLeft = gridCell.cellLeft;
+  const rectH = (asBar ? (this.cellH * 3 / 10) : this.cellH);
+  const rectW = this.cellW;
 
   const rect = document.createElement('div');
   rect.style.backgroundColor = colour;
@@ -6892,6 +6892,9 @@ Exolve.prototype.makeCellDiv = function(row, col, colour, scale=1) {
   rect.style.top = '' + (rectTop * scale) + 'px';
   rect.style.width = '' + (rectW * scale) + 'px';
   rect.style.height = '' + (rectH * scale) + 'px';
+  if (asBar) {
+    rect.style.opacity = 0.4;
+  }
 
   if (this.layers3d > 1) {
     rect.style.transformOrigin = 'top left';
