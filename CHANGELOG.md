@@ -1,5 +1,15 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.6: September 9, 2024
+
+- Deal with a clue-parsing corner case: Eg.:
+```
+Across
+...
+26, 26 Some clue (5,5)
+```
+  Here, the second 26 now correctly gets interpreted as 26D.
+
 ### Minor Version: Exolve v1.58.5: August 1, 2024
 
 - Tweak to the colour-only-cell-bottom option: remove the small 2 pixel

@@ -3252,8 +3252,30 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   clueLine = clueLine.substr(clueLabelParse.skip);
   clue.linkSep = clueLabelParse.linkSep || '';
   clue.children = [];
+  /**
+   * Corner case: a child clue might omit direction if there's a prior child
+   * or parent clue with the same number in this very group.
+   */
+  const usedDirs = {};
+  if (dir && clue.label) {
+    usedDirs[clue.label] = dir;
+  }
   while (clueLabelParse.hasChildren) {
     clueLabelParse = this.parseClueLabel(clueLine, true, true /* isChild */);
+    if (!clueLabelParse.dir && clueLabelParse.label &&
+        this.layers3d == 1 &&
+        usedDirs.hasOwnProperty(clueLabelParse.label)) {
+      const usedDir = usedDirs[clueLabelParse.label];
+      if (usedDir == 'A') {
+        clueLabelParse.dir = 'D';
+      } else if (usedDir == 'D') {
+        clueLabelParse.dir = 'A';
+      }
+    }
+    if (clueLabelParse.dir &&
+        !usedDirs.hasOwnProperty(clueLabelParse.label)) {
+      usedDirs[clueLabelParse.label] = clueLabelParse.dir;
+    }
     clue.children.push(clueLabelParse);
     clueLine = clueLine.substr(clueLabelParse.skip);
   }
