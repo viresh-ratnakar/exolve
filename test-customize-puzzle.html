@@ -64,6 +64,11 @@ function customizeExolve(p) {
     'p.clearAll',
     'p.parseState',
     'p.updateClueState',
+    'p.deactivateCurrCell',
+    'p.activateCell',
+    'p.gnavToInner',
+    'p.cnavTo',
+    'p.cnavToInner',
   ]
   for (let f of expectedFunctions) {
     eval('console.log("func ' + f + ' = " + (' + f + '!= null))')
@@ -102,6 +107,22 @@ function customizeExolve(p) {
   }
   p.background.setAttributeNS(null, 'fill', 'green');
   p.background.style.fill = 'green';
+
+  /**
+   * Override cnavtoInner(), which is a method with parameters.
+   * We call the original method, and log some details, for
+   * illustration.
+   */
+  p.cnavToInner = (function() {
+    var origFn = p.cnavToInner;
+    return function() {
+      origFn.apply(this, arguments);
+      const ci = arguments[0];
+      console.log('cnavToInner() called on clue index: ' + ci +
+                  '. The clue object is:');
+      console.log(this.clues[ci]);
+    };
+  })();
 }
 </script>
 
