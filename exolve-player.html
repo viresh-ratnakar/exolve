@@ -315,6 +315,24 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
 
   try {
     xlvpPuz = new Exolve(data, 'xlvp-frame', null, false);
+    /**
+     * If there are warnings, then when they are dismissed, we update and save
+     * xlvData to add the options to persist ignoring them.
+     */
+    if (xlvpPuz.optionsForWarningFixes.length > 0) {
+      const b = document.getElementById(xlvpPuz.prefix + '-dismiss-warnings')
+      b.title = 'Click to dismiss warnings persistently (appropriate options ' +
+                'will be added to Exolve specs for this crossword)';
+      b.addEventListener('click', (evt) => { 
+        const end = xlvpData.indexOf('exolve-end');
+        console.assert(end >= 0);
+        const noWarningsSpecs = xlvpData.substring(0, end) +
+                                'exolve-option: ' +
+                                xlvpPuz.optionsForWarningFixes.join(' ') +
+                                '\nexolve-end'; 
+        xlvpShowExolve(noWarningsSpecs, converted, hideChooser);
+      });
+    }
   } catch (err) {
     console.log(err);
     console.log('new Exolve() failed');
@@ -534,7 +552,6 @@ function xlvpHandleFromTextMessage(message) {
   exolve-begin
     exolve-width: ${saved.w}
     exolve-height: ${saved.h}
-    exolve-option: ignore-unclued ignore-enum-mismatch
     exolve-grid:
       ${matches[i].gridSpecLines}
   exolve-end`;

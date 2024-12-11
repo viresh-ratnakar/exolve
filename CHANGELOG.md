@@ -1,5 +1,26 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.7: December 11, 2024
+
+- 'Check this' and 'Check all!' used to behave like 'Reveal this' and
+  'Reveal all!' respectively if they found no mistakes: they would reveal
+  any clue annos available. This was not intuitive and could be an unnecessary
+  spoiler. Removed this behaviour (solvers can always click explicity on
+  'Reveal this' and 'Reveal all!' if they want to).
+- When showing a warning (mismatched enum or missing clue, currently), save
+  the options that can be used to get rid of these warnings, in a Exolve
+  member array (optionsForWarningFixes).
+- In exolve-player, do not just always use options to ignore warnings. Show
+  the warnings by default. For the "dismiss" X button, override the hover-text
+  to say this:
+    - Click to dismiss warnings persistently (appropriate options
+      will be added to Exolve specs for this crossword)
+  And if the user does click to dismiss, then save the needed options in
+  the Exolve specs so that the warning do not reappear the next time the user
+  reloads. If the user copies specs from the player, these options to ignore
+  will or won't be there in the specs depending on whether the user has not
+  dismissed or dismissed the warning.
+
 ### Minor Version: Exolve v1.58.6: September 9, 2024
 
 - Deal with a clue-parsing corner case: Eg.:

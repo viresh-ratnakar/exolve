@@ -121,11 +121,9 @@ If the setter has provided annotations by appending annotations at the end of
 some clues, then these annotations get shown when the solver clicks
 "Reveal all!". Clue-specific annotations get revealed/hidden with
 "Reveal/Clear this" buttons (unless the clue only has diagramless cells).
-Additionally, "Check this" and "Check all!" behave like "Reveal this" and
-"Reveal all!" respectively, if they find no mistakes. In a puzzle in which
-solutions are not provided, the "Reveal this" button will still get shown if
-there are any clues for which annotations are present (these annotations may be
-full solutions or just hints, possibly).
+In a puzzle in which solutions are not provided, the "Reveal this" button will
+still get shown if there are any clues for which annotations are present (these
+annotations may be full solutions or just hints, possibly).
 
 If the setter has provided the location of one or more ninas (through
 [`exolve-nina`](#exolve-nina) sections), then an additional button control,
@@ -1811,7 +1809,7 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-id` | Delete puzzle state for puzzle id |
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
-| `warnings-label` | Please fix or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
+| `warnings-label` | Please fix, or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
 | `warnings.hover` | Issues detected: click &times; to dismiss.    |
 | `print` | Print                                                  |
 | `print.hover` | Show/hide panel for printing or creating PDFs.   |

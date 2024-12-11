@@ -109,6 +109,12 @@ function Exolve(puzzleSpec,
   this.credits = [];
   this.questionTexts = [];
 
+  /**
+   * exolve-options that will fix any warnings that get triggered
+   * for this puzzle.
+   */
+  this.optionsForWarningFixes = [];
+
   this.NINA_COLORS = [
     'blue',
     'green',
@@ -450,7 +456,7 @@ function Exolve(puzzleSpec,
     'confirm-delete-older': 'Delete all puzzle states saved before',
     'confirm-state-override': 'Do you want to override the state saved in ' +
         'this device with the state found in the URL?',
-    'warnings-label': 'Please fix or use "ignore-unclued" / ' +
+    'warnings-label': 'Please fix, or use "ignore-unclued" / ' +
         '"ignore-enum-mismatch" <a href="https://github.com/viresh-ratnakar/' +
         'exolve/blob/master/README.md#exolve-option">options</a>:',
     'warnings.hover': 'Issues detected: click on [&times;] to dismiss.',
@@ -1973,7 +1979,7 @@ Exolve.prototype.dismissWarnings = function() {
   }
 }
 
-Exolve.prototype.showWarning = function(warning) {
+Exolve.prototype.showWarning = function(warning, opt) {
   let w = document.getElementById(this.prefix + '-warnings')
   if (!w) {
     const e = document.getElementById(this.prefix + '-errors')
@@ -1997,10 +2003,15 @@ Exolve.prototype.showWarning = function(warning) {
   }
   w.insertAdjacentHTML('beforeend', `
       <li>${warning}</li>`);
+  if (!this.optionsForWarningFixes.includes(opt)) {
+    this.optionsForWarningFixes.push(opt);
+  }
 }
 
-// Run some checks for serious problems with grid dimensions, etc. If found,
-// abort with error.
+/**
+ * Run some checks for serious problems with grid dimensions, etc. If found,
+ * abort with error.
+ */
 Exolve.prototype.checkConsistency = function() {
   if (this.gridWidth < 1 || this.gridWidth > this.MAX_GRID_SIZE ||
       this.gridHeight < 1 || this.gridHeight > this.MAX_GRID_SIZE) {
@@ -2057,12 +2068,13 @@ Exolve.prototype.checkConsistency = function() {
     if (!this.ignoreEnumMismatch && !this.hasDgmlessCells &&
         clue.enumLen > 0 && lightLen > 0 && clue.enumLen != lightLen &&
         (!cells.endsOnStart || clue.enumLen != lightLen + 1)) {
-      this.showWarning(cname + ": enum asks for " + clue.enumLen +
-          " cells, but the grid shows " + lightLen + " cells");
+      this.showWarning(cname + ': enum asks for ' + clue.enumLen +
+          ' cells, but the grid shows ' + lightLen + ' cells',
+          'ignore-enum-mismatch');
     }
   }
   if (!this.hasNodirClues && !this.ignoreUnclued && noClueList) {
-    this.showWarning("No clue(s) provided for: " + noClueList);
+    this.showWarning('No clue(s) provided for: ' + noClueList, 'ignore-unclued');
   }
   if (this.hasRebusCells && (this.langMaxCharCodes > 1)) {
     this.throwErr(
@@ -6332,7 +6344,7 @@ Exolve.prototype.checkMultiLetterMode = function(entry) {
   const mCol = this.multiLetterCellCol;
   /**
    * If multi-letter-mode gets enabled for reasons other than the last
-   * dobule-click, or if that double-click was in some other cell, then clear
+   * double-click, or if that double-click was in some other cell, then clear
    * away that double-click's state.
    */
   this.multiLetterCellRow = -1;
@@ -7236,33 +7248,8 @@ Exolve.prototype.checkCurr = function() {
     }
   }
   this.adjustRebusFonts();
-  let neededAllCorrectNum = -1  // revealCurr() will not get triggered
-  if (resetActiveCells) {
-    if (this.activeCells.length > 0) {
-      neededAllCorrectNum = this.activeCells.length
-    }
-    activeCells = []
-  } else if (this.currClueIndex) {
-    let ci = this.clueOrParentIndex(this.currClueIndex)
-    let theClue = this.clues[ci]
-    if (!this.isOrphan(ci) && this.allCellsKnown(ci)) {
-      neededAllCorrectNum = theClue.enumLen
-    } else if (this.activeCells.length > 0 && this.szCellsToOrphan > 0) {
-      let orphanClueForCells =
-          this.cellsToOrphan[JSON.stringify(this.activeCells)];
-      if (orphanClueForCells &&
-          this.clues[orphanClueForCells].cellsOfOrphan.length ==
-            this.activeCells.length) {
-        neededAllCorrectNum = this.activeCells.length
-      }
-    }
-  }
-  if (allCorrectNum == neededAllCorrectNum) {
-    this.revealCurr()  // calls updateAndSaveState()
-  } else {
-    this.updateActiveCluesState()
-    this.updateAndSaveState()
-  }
+  this.updateActiveCluesState()
+  this.updateAndSaveState()
   this.refocus()
   this.cellNotLight = false;
 }
@@ -7273,48 +7260,32 @@ Exolve.prototype.checkAllHandler = function(ev) {
 
 Exolve.prototype.checkAll = function(conf=true, erase=true) {
   if (conf && !this.maybeConfirm(this.textLabels['confirm-check-all'])) {
-    this.refocus()
-    return false
+    this.refocus();
+    return false;
   }
-  let allCorrect = true
+  let allCorrect = true;
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
-      let gridCell = this.grid[row][col]
+      const gridCell = this.grid[row][col];
       if (!gridCell.isLight && !gridCell.isDgmless) {
-        continue
+        continue;
       }
       if (gridCell.currLetter == gridCell.solution) {
-        continue
+        continue;
       }
-      allCorrect = false
-      if (!erase) continue
-      gridCell.currLetter = '0'
-      gridCell.textNode.nodeValue = ''
+      allCorrect = false;
+      if (!erase) continue;
+      gridCell.currLetter = '0';
+      gridCell.textNode.nodeValue = '';
       if (this.atCurr(row, col)) {
-        this.gridInput.value = ''
+        this.gridInput.value = '';
       }
     }
   }
   for (let ci of this.allClueIndices) {
-    const cells = this.getAllCells(ci);
-    if (cells && cells.length > 0) {
-      let clueCorrect = true;
-      for (let x of cells) {
-        let row = x[0]
-        let col = x[1]
-        let gridCell = this.grid[row][col]
-        if (gridCell.currLetter != gridCell.solution) {
-          clueCorrect = false;
-          break;
-        }
-      }
-      if (clueCorrect) {
-        this.revealClueAnno(ci);
-      }
-    }
-    this.updateClueState(ci, false, null, true)
+    this.updateClueState(ci, false, null, true);
   }
-  this.updateAndSaveState()
+  this.updateAndSaveState();
   this.refocus();
   return allCorrect;
 }
