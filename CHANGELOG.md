@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.58.8: December 16, 2024
+
+- Fix the Enter keyboard shortcut to switch directions.
+
 ### Minor Version: Exolve v1.58.7: December 11, 2024
 
 - 'Check this' and 'Check all!' used to behave like 'Reveal this' and

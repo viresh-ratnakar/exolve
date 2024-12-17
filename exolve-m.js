@@ -5921,7 +5921,7 @@ Exolve.prototype.toggleCurrDir = function() {
 
 Exolve.prototype.toggleCurrDirAndActivate = function(e) {
   this.usingGnav = true;
-  if (e && !e.shiftKey) {
+  if (!(e && e.shiftKey)) {
     this.toggleCurrDir();
   }
   this.activateCell(this.currRow, this.currCol);
