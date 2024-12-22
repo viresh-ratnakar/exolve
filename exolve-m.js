@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.58 July 10, 2024';
+  this.VERSION = 'Exolve v1.59 December 22, 2024';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -214,6 +214,15 @@ function Exolve(puzzleSpec,
   this.multiLetterCellRow = -1;
   this.multiLetterCellCol = -1;
   this.lastKeyHadShift = false;
+
+  /**
+   * If exolve-alternatives groups are present, this object captures the
+   * alternative groups. The altsSpecs array is used during the first
+   * parse to remember all the exolve-alternatives lines (need to know
+   * dimensions and grid structure before they can be parsed and checked).
+   */
+  this.alts = null;
+  this.altsSpecs = [];
 
   this.numCellsToFill = 0;
   this.numCellsFilled = 0;
@@ -374,7 +383,7 @@ function Exolve(puzzleSpec,
          <li><b>Delete:</b>
              Clear the contents of the current square.</li>
          <li><b>Spacebar:</b>
-             Place/clear block in the current square if it's diagramless.</li>
+             Place block in the current square if it's diagramless.</li>
          <li><b>Double-click or Shift+Letter:</b>
              If the puzzle has rebus cells, this is the way to enter
              multiple letters into a single cell.</li>
@@ -387,6 +396,12 @@ function Exolve(puzzleSpec,
          just to draw your attention so that you can fix any accidental
          typing errors.
        </p>`,
+    'alts.hover': 'This is an alternative solution to the clue. Clicking on it ' +
+        'will set any currently visible letters in it to this variant. If ' +
+        'the setter has created an alternative solution group with more than one ' +
+        'cell (group numbers are shown in superscripts of solution variants) ' +
+        'then clicking will set all revealed visible letters in the group to ' +
+        'reflect this variant. ',
     'crossword-id': 'Crossword ID',
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
@@ -1341,6 +1356,8 @@ Exolve.prototype.parseOverall = function() {
       this.parseOption(parsedSec.value)
     } else if (parsedSec.section == 'language') {
       this.parseLanguage(parsedSec.value)
+    } else if (parsedSec.section == 'alternatives') {
+      this.altsSpecs.push(parsedSec.value)
     }
     parsedSec = nextParsedSec;
   }
@@ -1844,6 +1861,101 @@ Exolve.prototype.parseLanguage = function(s) {
   }
 }
 
+/**
+ * Must be called after clues/grid have been passed and clue-parent-child
+ * relationships are known. If there are any exolve-alternatives lines in
+ * this.altsSpecs, then parses them, setting this.alts and also setting
+ * clue.altsGroups where applicable.
+ */
+Exolve.prototype.parseAlternatives = function() {
+  if (this.altsSpecs.length == 0) {
+    return;
+  }
+  if (this.hasUnsolvedCells || this.hasDgmlessCells) {
+    this.throwErr('exolve-alternatives cannot be used when there are cells ' +
+                  'without solutions or diagramless cells');
+  }
+  this.alts = {
+    groupToCells: [],
+    cellToAlt: new Map(),
+    activeGroups: new Set(),
+  };
+  for (const alts of this.altsSpecs) {
+    const pieces = alts.split(/\s+/);
+    if (pieces.length == 0) continue;
+    const cells = [];
+    for (const piece of pieces) {
+      const cellAndLetter = piece.split(':');
+      if (cellAndLetter.length != 2) {
+        this.throwErr('exolve-alternatives: cannot parse ' + piece +
+                      ' as cell:letter');
+      }
+      const cell = this.parseCellLocation(cellAndLetter[0]);
+      if (!cell) {
+        this.throwErr('exolve-alternatives: cannot parse cell from ' + piece +
+                      ' (as cell:letter)');
+      }
+      const gridCell = this.grid[cell[0]][cell[1]];
+      if (!gridCell.isLight) {
+        this.throwErr('exolve-alternatives: cell in ' + piece +
+                      ' (as cell:letter) is not a light cell');
+      }
+      if (gridCell.prefill) {
+        this.throwErr('exolve-alternatives: cell listed in ' + piece + ' (as ' +
+                      'cell:letter) has a prefilled value');
+      }
+      const letter = cellAndLetter[1];
+      if (!this.caseCheck(letter)) {
+        this.throwErr('exolve-alternatives: cannot parse letter from ' + piece +
+                      ' (as cell:letter)');
+      }
+      if (letter == gridCell.solution) {
+        this.throwErr('exolve-alternatives: letter in ' + piece +
+                      ' (as cell:letter) is already the default solution');
+      }
+      const cellKey = JSON.stringify(cell);
+      if (this.alts.cellToAlt.has(cellKey)) {
+        this.throwErr('exolve-alternatives: cell in ' + piece + ' (as ' +
+                      'cell:letter) is already in another exolve-alternatives');
+      }
+      this.alts.cellToAlt.set(cellKey, {
+        group: this.alts.groupToCells.length,
+        letter: letter
+      });
+      cells.push(cell);
+    }
+    this.alts.groupToCells.push(cells);
+  }
+  if (this.alts.groupToCells.length == 0) {
+    console.log('No valid exolve-alternatives specs were found');
+    this.alts = null;
+    return;
+  }
+  /** Set altsGroups in clues when applicable */
+  for (const ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (clue.parentClueIndex) {
+      continue;
+    }
+    const cells = this.getAllCells(ci);
+    const groups = new Set;
+    for (const cell of cells) {
+      const cellKey = JSON.stringify(cell);
+      if (!this.alts.cellToAlt.has(cellKey)) continue;
+      const cellAlt = this.alts.cellToAlt.get(cellKey);
+      groups.add(cellAlt.group);
+    }
+    if (groups.size > 0) {
+      if (groups.size > 3) {
+        this.throwErr('exolve-alternatives: number of groups in clue ' +
+                      this.clueLabelDisp(clue) + ' (' + groups.size +
+                      ') is too high (can be at most 3)');
+      }
+      clue.altsGroups = Array.from(groups);
+    }
+  }
+}
+
 Exolve.prototype.extractSectionLines = function(start, end) {
   /**
    * Grab any text after the exolve-*: marker, which is at index start-1.
@@ -2053,7 +2165,7 @@ Exolve.prototype.checkConsistency = function() {
     }
   }
   let noClueList = ''
-  for (let ci of Object.keys(this.clues)) {
+  for (const ci of Object.keys(this.clues)) {
     const clue = this.clues[ci];
     const cname = this.clueLabelDisp(clue);
     if (clue.parentClueIndex) {
@@ -2121,34 +2233,46 @@ Exolve.prototype.caseCheck = function(c) {
  */
 Exolve.prototype.isValidDisplayChar = function(c) {
   if (this.caseCheck(c)) {
-    return true
+    return true;
   }
   if (c == this.BLOCK_CHAR) {
-    return true
+    return true;
   }
   if (this.allowChars && this.allowChars[c]) {
-    return true
+    return true;
   }
-  return false
+  if (this.hasRebusCells && c.length > 1) {
+    for (const letter of c) {
+      if (!this.isValidDisplayChar(letter)) return false;
+    }
+    return true;
+  }
+  return false;
 }
 Exolve.prototype.isValidStateChar = function(c) {
   if (this.caseCheck(c)) {
-    return true
+    return true;
   }
   if (this.allowChars && this.allowChars[c] &&
       !this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
-    return true
+    return true;
   }
   if (c == '0') {
-    return true
+    return true;
   }
   if (this.hasDgmlessCells && c == '1') {
-    return true
+    return true;
   }
-  return false
+  if (this.hasRebusCells && c.length > 1) {
+    for (const letter of c) {
+      if (!this.isValidStateChar(letter)) return false;
+    }
+    return true;
+  }
+  return false;
 }
 Exolve.prototype.isValidGridChar = function(c) {
-  return this.isValidStateChar(c) || c == '?'
+  return this.isValidStateChar(c) || c == '?';
 }
 
 Exolve.prototype.stateToDisplayChar = function(c) {
@@ -2178,15 +2302,15 @@ Exolve.prototype.displayToStateChar = function(c) {
   if (this.SPECIAL_STATE_CHARS.hasOwnProperty(c)) {
     return this.SPECIAL_STATE_CHARS[c];
   }
-  if (!this.isValidDisplayChar(c)) {
-    return '0';
-  }
   if (this.hasRebusCells && c.length > 1) {
     let out = '';
     for (const letter of c) {
       out += this.displayToStateChar(letter);
     }
     return out;
+  }
+  if (!this.isValidDisplayChar(c)) {
+    return '0';
   }
   return c;
 }
@@ -2244,104 +2368,112 @@ Exolve.prototype.parseGrid = function() {
     this.throwErr('Not the right number of lines (' + this.gridHeight +
                   ') in or missing exolve-grid section');
   }
-  this.grid = new Array(this.gridHeight)
+  this.grid = new Array(this.gridHeight);
   for (let i = 0; i < this.gridHeight; i++) {
-    this.grid[i] = new Array(this.gridWidth)
-    let gridLine = this.specLines[i + gridFirstLine].trim().toUpperCase()
+    this.grid[i] = new Array(this.gridWidth);
+    let gridLine = this.specLines[i + gridFirstLine].trim().toUpperCase();
     if (!this.multiLetter) {
-      gridLine = gridLine.replace(/\s/g, '')
+      gridLine = gridLine.replace(/\s/g, '');
     } else {
-      gridLine = gridLine.replace(/\s+/g, ' ')
+      gridLine = gridLine.replace(/\s+/g, ' ');
     }
-    let gridLineIndex = 0
+    let gridLineIndex = 0;
     for (let j = 0; j < this.gridWidth; j++) {
       if (gridLineIndex >= gridLine.length) {
-        let errmsg = 'Too few letters in the grid at row,col: ' + i + ',' + j
+        let errmsg = 'Too few letters in the grid at row,col: ' + i + ',' + j;
         if (this.multiLetter) {
           errmsg = errmsg + '. Note that grid letters must be separated by ' +
             'spaces or decorators for languages that have compound characters ' +
             'or if there are rebus cells';
         }
-        this.throwErr(errmsg)
+        this.throwErr(errmsg);
       }
-      let letter = gridLine.charAt(gridLineIndex++)
-      let escaped = false
+      let letter = gridLine.charAt(gridLineIndex++);
+      let escaped = false;
       if (letter == '&') {
-        letter = gridLine.charAt(gridLineIndex++)
-        escaped = true
+        letter = gridLine.charAt(gridLineIndex++);
+        escaped = true;
       }
-      if (this.multiLetter && letter != '.' && letter != '0') {
-        let next = gridLineIndex
-        while (next < gridLine.length &&
-               !reNextChar.test(gridLine.charAt(next))) {
-          next++
+      if (this.multiLetter && (escaped || (letter != '.' && letter != '0'))) {
+        let next = gridLineIndex;
+        while (next < gridLine.length) {
+          let nextChar = gridLine.charAt(next);
+          if (nextChar == '&' && (next + 1 < gridLine.length)) {
+            next++;
+            letter += gridLine.charAt(next);
+            next++;
+          } else if (!reNextChar.test(nextChar)) {
+            letter += nextChar;
+            next++;
+          } else {
+            break;
+          }
         }
-        letter = letter + gridLine.substring(gridLineIndex, next).trim()
-        gridLineIndex = next
+        gridLineIndex = next;
       }
-      this.grid[i][j] = this.newGridCell(i, j, letter, escaped)
-      let gridCell = this.grid[i][j]
+      this.grid[i][j] = this.newGridCell(i, j, letter, escaped);
+      let gridCell = this.grid[i][j];
       // Deal with . and 0 and 1 in second pass
-      let thisChar = ''
+      let thisChar = '';
       while (gridLineIndex < gridLine.length &&
              (thisChar = gridLine.charAt(gridLineIndex)) &&
              reDecorators.test(thisChar)) {
         if (thisChar == '|') {
-          gridCell.hasBarAfter = true
+          gridCell.hasBarAfter = true;
         } else if (thisChar == '_') {
-          gridCell.hasBarUnder = true
+          gridCell.hasBarUnder = true;
         } else if (thisChar == '+') {
-          gridCell.hasBarAfter = true
-          gridCell.hasBarUnder = true
+          gridCell.hasBarAfter = true;
+          gridCell.hasBarUnder = true;
         } else if (thisChar == '@') {
-          gridCell.hasCircle = true
+          gridCell.hasCircle = true;
         } else if (thisChar == '*') {
-          gridCell.isDgmless = true
+          gridCell.isDgmless = true;
         } else if (thisChar == '!') {
-          gridCell.prefill = true
+          gridCell.prefill = true;
         } else if (thisChar == '~') {
-          gridCell.skipNum = true
+          gridCell.skipNum = true;
         } else if (thisChar == ' ') {
         } else {
           this.throwErr('Should not happen! thisChar = ' + thisChar);
         }
-        gridLineIndex++
+        gridLineIndex++;
       }
       if (gridCell.isLight && gridCell.solution != '0' && !gridCell.prefill) {
-        allEntriesAre0s = false
+        allEntriesAre0s = false;
       }
     }
   }
   // We use two passes to be able to detect if 0 means blank cell or digit 0.
   for (let i = 0; i < this.gridHeight; i++) {
     for (let j = 0; j < this.gridWidth; j++) {
-      let gridCell = this.grid[i][j]
+      let gridCell = this.grid[i][j];
       if (gridCell.isLight) {
-        let saved = gridCell.solution
+        let saved = gridCell.solution;
         if (gridCell.solution == '0') {
           if (allEntriesAre0s && !gridCell.prefill) {
-            this.hasUnsolvedCells = true
+            this.hasUnsolvedCells = true;
           } else {
-            gridCell.solution = this.SPECIAL_STATE_CHARS['0']
+            gridCell.solution = this.SPECIAL_STATE_CHARS['0'];
           }
         }
         if (!this.isValidGridChar(gridCell.solution)) {
-          this.throwErr('Invalid grid entry[' + i + '][' + j + ']: ' + saved)
+          this.throwErr('Invalid grid entry[' + i + '][' + j + ']: ' + saved);
         }
       }
       if (gridCell.isDgmless && gridCell.solution == '.') {
-        gridCell.solution = '1'
+        gridCell.solution = '1';
       }
       if (gridCell.prefill && !gridCell.isLight) {
-        this.throwErr('Pre-filled cell (' + i + ',' + j + ') not in a light: ')
+        this.throwErr('Pre-filled cell (' + i + ',' + j + ') not in a light: ');
       }
       if (gridCell.isDgmless) {
-        this.hasDgmlessCells = true
+        this.hasDgmlessCells = true;
       }
     }
   }
   if (this.hasDgmlessCells) {
-    this.hideCopyPlaceholders = true
+    this.hideCopyPlaceholders = true;
   }
   if (this.layers3d > 1) {
     // 3-d crossword. Mark layer boundaries with bars.
@@ -3426,30 +3558,24 @@ Exolve.prototype.getAllCells = function(ci) {
   return cells;
 }
 
-/**
- * Question-marks in pattern are replaced by cell letters.
- */
-Exolve.prototype.getCellsEntry = function(cells, pattern='') {
-  if (!pattern) {
-    pattern = '';
-    for (let i = 0; i < cells.length; i++) pattern += '?';
-  }
-  let ppos = 0;
-  let entry = '';
-  for (let i = 0; i < cells.length; i++) {
-    while (ppos < pattern.length && pattern[ppos] != '?') {
-      entry += pattern[ppos++];
+Exolve.prototype.punctuateEntry = function(solution, placeholder) {
+  if (!placeholder) return solution;
+  let s = ''
+  let index = 0;
+  for (let i = 0; i < placeholder.length; i++) {
+    if (placeholder.charAt(i) == '?') {
+      if (index >= solution.length) {
+        return solution;
+      }
+      s = s + solution.charAt(index++);
+    } else {
+      s = s + placeholder.charAt(i);
     }
-    if (ppos >= pattern.length) {
-      break;
-    }
-    const cell = cells[i];
-    const gridCell = this.grid[cell[0]][cell[1]];
-    entry += (gridCell.currLetter == '0' ? '?' :
-        this.stateToDisplayChar(gridCell.currLetter));
-    ppos++;
   }
-  return entry;
+  if (index < solution.length) {
+    s = s + solution.substr(index);
+  }
+  return s;
 }
 
 Exolve.prototype.getClueEntry = function(ci) {
@@ -3458,50 +3584,45 @@ Exolve.prototype.getClueEntry = function(ci) {
     return '';
   }
   const cells = this.getAllCells(ci);
+  let entry = '';
+  for (const cell of cells) {
+    const gridCell = this.grid[cell[0]][cell[1]];
+    entry += (gridCell.currLetter == '0' ? '?' :
+             this.stateToDisplayChar(gridCell.currLetter));
+  }
   const pattern = clue.placeholder || '';
-  return this.getCellsEntry(cells, pattern);
+  return this.punctuateEntry(entry, pattern);
 }
 
+// TODO: can the normal case be simplified?
 Exolve.prototype.setClueSolution = function(ci) {
-  let theClue = this.clues[ci]
+  const theClue = this.clues[ci];
   if (!theClue || theClue.solution) {
     return;
   }
-  let cells = this.getAllCells(ci);
+  const cells = this.getAllCells(ci);
   if (cells.length == 0) {
     return;
   }
-  let solution = '';
-  for (let cell of cells) {
-    let sol = this.grid[cell[0]][cell[1]].solution
-    let c = (sol == '?' ? '?' : this.stateToDisplayChar(sol))
-    if (!c) {
-      return
-    }
-    solution = solution + c;
-  }
-  if (!solution) {
+  const solutions = this.getClueSolutionsWithAlts(ci);
+  if (!solutions || solutions.length == 0) {
     return;
   }
-  if (theClue.placeholder) {
-    let s = ''
-    let index = 0;
-    for (let i = 0; i < theClue.placeholder.length; i++) {
-      if (theClue.placeholder.charAt(i) == '?') {
-        if (index >= solution.length) {
-          return;
-        }
-        s = s + solution.charAt(index++);
-      } else {
-        s = s + theClue.placeholder.charAt(i)
-      }
+  const decoratedSolutions = [];
+  for (const sg of solutions) {
+    let solution = this.punctuateEntry(sg.solution, theClue.placeholder);
+    if (sg.dispGroups.length > 0) {
+      solution += '<sup>' + sg.dispGroups.join(',') + '</sup>';
     }
-    if (index < solution.length) {
-      s = s + solution.substr(index)
+    if (theClue.altsGroups) {
+      solution =
+        `<span class="xlv-clickable" title="${this.textLabels['alts.hover']}"
+           onclick="exolvePuzzles['${this.id}'].forceAlts([${
+           theClue.altsGroups.join(',')}], ${sg.bits})">${solution}</span>`;
     }
-    solution = s;
+    decoratedSolutions.push(solution);
   }
-  theClue.solution = solution;
+  theClue.solution = decoratedSolutions.join(', ');
 }
 
 Exolve.prototype.parseAnno = function(anno, clueIndex) {
@@ -4837,6 +4958,7 @@ Exolve.prototype.getGridStateAndNumFilled = function(notifyIfComplete=true) {
   let state = '';
   let numFilled = 0;
   let numCorrect = 0;
+  this.updateAltsActive();
   for (let i = 0; i < this.gridHeight; i++) {
     for (let j = 0; j < this.gridWidth; j++) {
       let gridCell = this.grid[i][j];
@@ -4852,7 +4974,9 @@ Exolve.prototype.getGridStateAndNumFilled = function(notifyIfComplete=true) {
         }
         if (stateLetter != '0') {
           numFilled++;
-          if (stateLetter == gridCell.solution) numCorrect++;
+          if (this.getSolutionActive([i,j]) == stateLetter) {
+            numCorrect++;
+          }
         }
       } else {
         state = state + '.';
@@ -5110,7 +5234,7 @@ Exolve.prototype.restoreState = function() {
     }
   } catch (e) {
   }
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     // When restoring state, we reveal annos for fully prefilled entries.
     this.updateClueState(ci, true, null, false /* dont note a fresh solve */);
   }
@@ -5346,7 +5470,7 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
     if (!this.clues[activeClueIndex]) {
       activeClueIndex = ''
       if (this.offNumClueIndices[activeClueLabel]) {
-        for (let ci of this.offNumClueIndices[activeClueLabel]) {
+        for (const ci of this.offNumClueIndices[activeClueLabel]) {
           if (ci.charAt(0) == 'X' ||
               ci.charAt(0) == activeClueIndex.charAt(0)) {
             activeClueIndex = ci
@@ -5631,7 +5755,7 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
     }
   }
   this.currClueInner.style.background = this.colorScheme['currclue'];
-  this.updateClueState(parentIndex, false, null)
+  this.updateClueState(parentIndex, false, null, false)
   this.currClue.style.display = '';
   this.resizeCurrClueAndControls();
   return gnav;
@@ -5919,6 +6043,11 @@ Exolve.prototype.toggleCurrDir = function() {
   this.currDir = newDir
 }
 
+/**
+ * This can be called with a click event e, or with no argument
+ * at all. In case of a click event, we only toggle if the shift
+ * modifier is absent.
+ */
 Exolve.prototype.toggleCurrDirAndActivate = function(e) {
   this.usingGnav = true;
   if (!(e && e.shiftKey)) {
@@ -5927,8 +6056,10 @@ Exolve.prototype.toggleCurrDirAndActivate = function(e) {
   this.activateCell(this.currRow, this.currCol);
 }
 
-// Handle navigation keys. Used by a listener, and also used to auto-advance
-// after a cell is filled. Returns false only if a tab input was actually used.
+/**
+ * Handle navigation keys. Used by a listener, and also used to auto-advance
+ * after a cell is filled. Returns false only if a tab input was actually used.
+ */
 Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
   if (key == 9 && !shift) {
     // tab
@@ -6189,8 +6320,8 @@ Exolve.prototype.updateClueState =
   }
   let numFilled = 0;
   let numPrefilled = 0;
-  for (let ci of cis) {
-    let theClue = this.clues[ci]
+  for (const ci of cis) {
+    const theClue = this.clues[ci]
     if (!theClue.clueTR) {
       numFilled = 0;
       break;
@@ -6225,7 +6356,7 @@ Exolve.prototype.updateClueState =
     this.revealClueAnno(clueIndex);
   }
   let cls = solved ? 'xlv-solved' : '';
-  for (let ci of cis) {
+  for (const ci of cis) {
     if (this.clues[ci].clueTR) {
       this.clues[ci].clueTR.setAttributeNS(null, 'class', cls);
     }
@@ -6253,7 +6384,7 @@ Exolve.prototype.updateActiveCluesState = function() {
   let clueIndices = {}
   if (this.currClueIndex) {
     let lci = this.getLinkedClues(this.currClueIndex)
-    for (let ci of lci) {
+    for (const ci of lci) {
       clueIndices[ci] = true
     }
   }
@@ -6272,7 +6403,7 @@ Exolve.prototype.updateActiveCluesState = function() {
       clueIndices[ci] = true
     }
     if (gridCell.nodirClues) {
-      for (let ci of gridCell.nodirClues) {
+      for (const ci of gridCell.nodirClues) {
         clueIndices[ci] = true
       }
     }
@@ -7043,7 +7174,7 @@ Exolve.prototype.clearCurr = function() {
     clueIndices = this.getLinkedClues(this.currClueIndex)
   }
   const currClues = {}
-  for (let ci of clueIndices) {
+  for (const ci of clueIndices) {
     currClues[ci] = true
   }
   for (let clueIndex in currClues) {
@@ -7161,7 +7292,7 @@ Exolve.prototype.clearAll = function(conf=true) {
   }
   this.hideNinas();
 
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     this.updateClueState(ci, false, 'unsolved', true);
     if (clearingPls && this.clues[ci].placeholderBlank) {
       this.clues[ci].placeholderBlank.value = '';
@@ -7176,6 +7307,151 @@ Exolve.prototype.clearAll = function(conf=true) {
   this.updateAndSaveState();
   this.refocus();
   return true;
+}
+
+/**
+ * If there are alternative solutions, then this uses the current state
+ * of the filled grid to determine which exolve-alternatives groups
+ * are currently in use, and sets this.alts.activeGroups to be this set.
+ */
+Exolve.prototype.updateAltsActive = function() {
+  if (!this.alts) {
+    return;
+  }
+  this.alts.activeGroups.clear();
+  for (const [cellKey, cellAlt] of this.alts.cellToAlt) {
+    const cell = JSON.parse(cellKey);
+    const gridCell = this.grid[cell[0]][cell[1]];
+    if (gridCell.currLetter == cellAlt.letter) {
+      this.alts.activeGroups.add(cellAlt.group);
+    }
+  }
+}
+
+/**
+ * Forces the currently active set of exolve-alternatives groups to be the
+ * modified by looking at the passed groups array and inclusionBits (bit #i
+ * determines whether the group at that index is forced in or out).
+ *
+ * Only for all clues for which anno is visible (because the user has hit
+ * "Reveal this/all"), and within them, only for all cells that currently
+ * have a letter entry, changes the letter to what's needed by the newly
+ * crafted active alternatives groups, if applicable. This is used as the
+ * click handler for the revealed list of alternative solutions within a clue.
+ */
+Exolve.prototype.forceAlts = function(groups, inclusionBits) {
+  if (!this.alts) {
+    return;
+  }
+  this.updateAltsActive();
+  let bit = 1;
+  for (const g of groups) {
+    if (bit & inclusionBits) {
+      this.alts.activeGroups.add(g);
+    } else {
+      this.alts.activeGroups.delete(g);
+    }
+    bit = bit << 1;
+  }
+  for (const ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (!clue || clue.parentClueIndex || !clue.annoSpan ||
+        clue.annoSpan.style.display != '') {
+      continue;
+    }
+    const cells = this.getAllCells(ci);
+    for (const cell of cells) {
+      const solution = this.getSolutionActive(cell);
+      if (!solution) continue;
+      const r = cell[0];
+      const c = cell[1];
+      const gridCell = this.grid[r][c];
+      if (!gridCell.currLetter || gridCell.currLetter == solution) {
+        continue;
+      }
+      gridCell.currLetter = solution;
+      const revealedChar = this.stateToDisplayChar(solution);
+      gridCell.textNode.nodeValue = revealedChar;
+      if (this.atCurr(r, c)) {
+        this.gridInput.value = revealedChar;
+      }
+    }
+    this.updateClueState(ci, false, null, true);
+  }
+  this.adjustRebusFonts();
+  this.updateAndSaveState();
+  this.refocus();
+}
+
+/**
+ * Returns an array of objects that look like:
+ * {
+ *   solution: '...',
+ *   dispGroups: [...], (1-based group numbers)
+ *   bits: <bitmask>,
+ * }
+ */
+Exolve.prototype.getClueSolutionsWithAlts = function(ci) {
+  const clue = this.clues[ci];
+  if (!clue || clue.parentClueIndex) {
+    return null;
+  }
+  const cells = this.getAllCells(ci);
+  const maxBits = clue.altsGroups ? (1 << clue.altsGroups.length) : 1;
+  const results = [];
+  for (let bits = 0; bits < maxBits; bits++) {
+    const result = {
+      solution: '',
+      dispGroups: [],
+      bits: bits,
+    };
+    if (clue.altsGroups) {
+      console.assert(this.alts);
+      /**
+       * Temporarily set activeGroups to be only the groups implied by bits.
+       */
+      this.alts.activeGroups.clear();
+      let bit = 1;
+      for (const g of clue.altsGroups) {
+        if (bit & bits) {
+          this.alts.activeGroups.add(g);
+          result.dispGroups.push(g + 1);
+        }
+        bit = bit << 1;
+      }
+      result.dispGroups.sort();
+    }
+    for (const cell of cells) {
+      const s = this.getSolutionActive(cell);
+      if (!s) return null;
+      result.solution += (s == '?') ? '?' : this.stateToDisplayChar(s);
+    }
+    results.push(result);
+  }
+  return results;
+}
+
+/**
+ * Call getSolutionActive() only for a valid light cell and only when there is a
+ * solution. The solution returned is the one consistent with any currently
+ * active alternatives choices, if any (from this.alts.activeGroups, set
+ * forcibly or via this.updateAltsActive()).
+ */
+Exolve.prototype.getSolutionActive = function(cell) {
+  const gridCell = this.grid[cell[0]][cell[1]];
+  const defSol = gridCell.solution;
+  if (!this.alts) {
+    return defSol;
+  }
+  const cellKey = JSON.stringify(cell);
+  if (!this.alts.cellToAlt.has(cellKey)) {
+    return defSol;
+  }
+  const cellAlt = this.alts.cellToAlt.get(cellKey);
+  if (this.alts.activeGroups.has(cellAlt.group)) {
+    return cellAlt.letter;
+  }
+  return defSol;
 }
 
 Exolve.prototype.cellLightTogglerDone = function(button, text) {
@@ -7221,12 +7497,13 @@ Exolve.prototype.checkCurr = function() {
   }
   let allCorrectNum = 0
   const fontSize = this.cellLetterSize('');
+  this.updateAltsActive();
   for (let x of this.activeCells) {
     let row = x[0]
     let col = x[1]
     let gridCell = this.grid[row][col]
-    let oldLetter = gridCell.currLetter
-    if (oldLetter == gridCell.solution) {
+    const oldLetter = gridCell.currLetter
+    if (this.getSolutionActive(x) == oldLetter) {
       allCorrectNum++
       continue
     }
@@ -7246,6 +7523,7 @@ Exolve.prototype.checkCurr = function() {
         gridSymCell.textNode.nodeValue = ''
       }
     }
+    this.updateAltsActive();
   }
   this.adjustRebusFonts();
   this.updateActiveCluesState()
@@ -7264,13 +7542,14 @@ Exolve.prototype.checkAll = function(conf=true, erase=true) {
     return false;
   }
   let allCorrect = true;
+  this.updateAltsActive();
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
       const gridCell = this.grid[row][col];
       if (!gridCell.isLight && !gridCell.isDgmless) {
         continue;
       }
-      if (gridCell.currLetter == gridCell.solution) {
+      if (this.getSolutionActive([row,col]) == gridCell.currLetter) {
         continue;
       }
       allCorrect = false;
@@ -7280,9 +7559,10 @@ Exolve.prototype.checkAll = function(conf=true, erase=true) {
       if (this.atCurr(row, col)) {
         this.gridInput.value = '';
       }
+      this.updateAltsActive();
     }
   }
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     this.updateClueState(ci, false, null, true);
   }
   this.updateAndSaveState();
@@ -7372,34 +7652,38 @@ Exolve.prototype.revealCurr = function() {
       }
     }
   }
+  this.updateAltsActive();
   for (let x of this.activeCells) {
-    let row = x[0]
-    let col = x[1]
+    const row = x[0];
+    const col = x[1];
     if (this.cellNotLight && !this.atCurr(row, col)) {
-      continue
+      continue;
     }
-    let gridCell = this.grid[row][col]
+    const gridCell = this.grid[row][col];
     if (gridCell.prefill) {
-      continue
+      continue;
     }
-    let oldLetter = gridCell.currLetter;
-    let letter = gridCell.solution;
-    if (letter && oldLetter != letter && letter != '0' && letter != '?') {
+    const oldLetter = gridCell.currLetter;
+    const letter = this.getSolutionActive(x);
+    if (letter && letter != '0' && letter != '?' &&
+        this.getSolutionActive(x) != oldLetter) {
       gridCell.currLetter = letter;
-      let revealedChar = this.stateToDisplayChar(letter);
+      const revealedChar = this.stateToDisplayChar(letter);
       gridCell.textNode.nodeValue = revealedChar;
       if (this.atCurr(row, col)) {
         this.gridInput.value = revealedChar;
       }
+      this.updateAltsActive();
     }
     if (oldLetter == '1' || letter == '1') {
-      let gridSymCell = this.symCell(row, col);
+      const gridSymCell = this.symCell(row, col);
       if (gridSymCell.isDgmless) {
-        let symLetter = (letter == '1') ? '1' : '0';
-        let symChar = (letter == '1') ? this.BLOCK_CHAR : '';
+        const symLetter = (letter == '1') ? '1' : '0';
+        const symChar = (letter == '1') ? this.BLOCK_CHAR : '';
         gridSymCell.currLetter = symLetter;
         gridSymCell.textNode.nodeValue = symChar;
       }
+      this.updateAltsActive();
     }
   }
   this.adjustRebusFonts();
@@ -7421,6 +7705,7 @@ Exolve.prototype.revealAll = function(conf=true) {
     this.refocus();
     return false;
   }
+  this.updateAltsActive();
   for (let row = 0; row < this.gridHeight; row++) {
     for (let col = 0; col < this.gridWidth; col++) {
       let gridCell = this.grid[row][col];
@@ -7430,13 +7715,16 @@ Exolve.prototype.revealAll = function(conf=true) {
       if (gridCell.prefill) {
         continue;
       }
-      if (gridCell.currLetter != gridCell.solution) {
-        gridCell.currLetter = gridCell.solution;
-        let revealedChar = this.stateToDisplayChar(gridCell.solution);
+      const cell = [row, col];
+      const solution = this.getSolutionActive(cell);
+      if (solution && solution != gridCell.currLetter) {
+        gridCell.currLetter = solution;
+        const revealedChar = this.stateToDisplayChar(solution);
         gridCell.textNode.nodeValue = revealedChar;
         if (this.atCurr(row, col)) {
           this.gridInput.value = revealedChar;
         }
+        this.updateAltsActive();
       }
     }
   }
@@ -7455,7 +7743,7 @@ Exolve.prototype.revealAll = function(conf=true) {
     }
   }
   this.showNinas();
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     this.revealClueAnno(ci);
     this.updateClueState(ci, false, 'solved', true);
   }
@@ -7720,7 +8008,7 @@ Exolve.prototype.markAsFave = function() {
 
 Exolve.prototype.saveNotesChanges = function() {
   this.notes.overall = this.notesInput.innerHTML;
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     const clue = this.clues[ci];
     if (!clue || !clue.notesInput) {
       continue;
@@ -7757,7 +8045,7 @@ Exolve.prototype.refreshClueNotes = function(ci) {
 
 Exolve.prototype.refreshNotesPanel = function() {
   this.notesInput.innerHTML = this.notes.overall || '';
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     this.refreshClueNotes(ci);
   }
 }
@@ -7861,7 +8149,7 @@ Exolve.prototype.makeNotesPanel = function() {
     </div>
     <div>`;
   let dir = '';
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     const clue = this.clues[ci];
     if (!clue || clue.parentClueIndex) continue;
     if (clue.dir != dir) {
@@ -7907,7 +8195,7 @@ Exolve.prototype.makeNotesPanel = function() {
   const inputHandler = this.saveNotesChanges.bind(this);
   this.notesInput = document.getElementById(this.prefix + '-overall-notes');
   this.notesInput.addEventListener('input', inputHandler);
-  for (let ci of this.allClueIndices) {
+  for (const ci of this.allClueIndices) {
     const clue = this.clues[ci];
     if (!clue || clue.parentClueIndex) continue;
     clue.notesInput = document.getElementById(
@@ -9065,7 +9353,7 @@ Exolve.prototype.createIdIfNeeded = function() {
       }
       idHashFodders.push(rowstr);
     }
-    for (let ci of this.allClueIndices) {
+    for (const ci of this.allClueIndices) {
       const clue = this.clues[ci];
       let label = ci;
       if (clue.childrenClueIndices && clue.childrenClueIndices.length > 0) {
@@ -9096,11 +9384,14 @@ Exolve.prototype.createPuzzle = function() {
   this.parseClueLists()
 
   this.processClueChildren()
+
+  this.parseAlternatives();
+
+  this.createIdIfNeeded();
+
   this.finalClueTweaks()
   this.setWordEndsAndHyphens();
   this.setUpGnav()
-
-  this.createIdIfNeeded();
 
   this.applyStyles()
 

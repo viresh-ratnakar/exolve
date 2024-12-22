@@ -10,11 +10,11 @@ See the full license notice in exolve-m.js.
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.58"/>
-<script src="exolve-m.js?v1.58"></script>
-<script src="exolve-from-ipuz.js?v1.58"></script>
-<script src="exolve-from-puz.js?v1.58"></script>
-<script src="exolve-from-text.js?v1.58"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.59"/>
+<script src="exolve-m.js?v1.59"></script>
+<script src="exolve-from-ipuz.js?v1.59"></script>
+<script src="exolve-from-puz.js?v1.59"></script>
+<script src="exolve-from-text.js?v1.59"></script>
 
 <style>
 .xlvp-wait {
@@ -322,7 +322,7 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
     if (xlvpPuz.optionsForWarningFixes.length > 0) {
       const b = document.getElementById(xlvpPuz.prefix + '-dismiss-warnings')
       b.title = 'Click to dismiss warnings persistently (appropriate options ' +
-                'will be added to Exolve specs for this crossword)';
+                'will be added to the Exolve specs for this crossword)';
       b.addEventListener('click', (evt) => { 
         const end = xlvpData.indexOf('exolve-end');
         console.assert(end >= 0);
@@ -367,8 +367,8 @@ function xlvpSave() {
     '<meta charset="utf-8"/>\n' +
     '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n' +
     '<link rel="stylesheet" type="text/css" ' +
-    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.58"/>\n' +
-    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.58">' +
+    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.59"/>\n' +
+    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.59">' +
     '<\/script>\n' +
     '<\/head>\n' +
     '<body>\n' +

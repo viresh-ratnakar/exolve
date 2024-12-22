@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.58 July 10, 2024
+### Version: Exolve v1.59 December 22, 2024
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -427,6 +427,76 @@ more space for the text.
 You cannot have rebus cells in crosswords that use languages with
 max-char-codes greater than one and in crosswords with diagramless cells (this
 allows us to keep the code simpler).
+
+### Alternative letters
+
+Sometimes you would want to permit alternative spellings of some words. You
+can do that by using one or more `exolve-alternatives` sections. Each such
+single-line section has one or more space-separated entries that specify
+alternative letters for specific cells (identified using the
+[extended chessboard notation](#extended-chessboard-notation)). Example:
+```
+  exolve-width: 7
+  exolve-height: 3
+  exolve-grid:
+    OXIDISE
+    U.....V
+    REALISE
+  exolve-alternatives: r1c6:Z
+  exolve-alternatives: r3c6:Z
+```
+
+Both S and Z will be allowed by "Check this" and "Check all!", in
+OXIDISE/OXIDIZE (1a) and REALISE/REALIZE (3a). Similarly, "Reveal this" and
+"Reveal all!" will not change any letter that the solver might have entered in
+a cell, if it's listed as an alternative for that cell.
+
+If an exolve-alternatives section has more than one cell, then it is treated
+as an all-or-nothing group. For example, we can add this line to the above:
+```
+  exolve-alternatives: r2c1:A r2c7:Y
+```
+Here, there is an alternative solution to the puzzle in which 1d is OAR _and_
+2d is EYE. This can be used to craft puzzles that might have
+two (or more!) distinct solutions, such as this
+[famous example](https://viresh-ratnakar.github.io/test-farrell-quantum.html)
+by Jeremiah Farrell.
+
+We disallow specifying the same cell in more than one `exolve-alternatives`
+section. The reason is to avoid the possibility of puzzles where the solver
+may reach a dead-end conflict in choices from two groups. Dealing with such
+conflicts would have required adding code complexity as well as user interface
+complexity.
+
+The above way of specifying alternatives, with the non-duplicated-cell
+constraint just described, means that you cannot specify more than one
+alternative for a cell. We think that's reasonable, but if someone comes
+up with an interesting puzzle in which more than one alternative is warranted
+for some cell, please let us know and we can consider supporting that scenario.
+
+Revealed in-clue solutions will include all possible solutions for a clue.
+The solutions where some `exolve-alternatives` groups are used will be
+shown with a superscript that is a comma-separated list of all group numbers
+used in crafting that alternative. For example, 1a will show "OXIDISE,
+OXIDIZE<sup>2</sup>", and 3a will show "REALISE, REALIZE<sup>1</sup>". The
+revealed in-clue solutions also show the following help-text when hovered
+over:
+
+> This is an alternative solution to the clue. Clicking on it
+> will set any currently visible letters in it to this variant. If
+> the setter has created an alternative solution group with more than one
+> cell (group numbers are shown in superscripts of solution variants)
+> then clicking will set all revealed visible letters in the group to
+> reflect this variant.
+
+As described in the above help-text, clicking on any variant will set
+all currently visible revealed cells to the values implied by the
+alternatives groups used in that variant.
+
+We disallow using `exolve-alternatives` when there ar diagramless cells or
+when any cell does not have a solution. We disallow more than 3 distinct groups
+of alternatives within any single clue (as it's an unlikely scenario and the
+listing of all possible solutions would be too long).
 
 ### Some details about diagramless cells
 Note that "diagramlessness" only hides from the solver whether a square is
@@ -1742,24 +1812,25 @@ Here are all the names of pieces of text that you can relabel:
 | `submit.hover`   | Submit the solution!                 |
 | `setter-by`      | By                                   |
 | `curr-clue-prev` | &lsaquo;                             |
-| `curr-clue-prev.hover` | Previous clue.       |
+| `curr-clue-prev.hover` | Previous clue.                 |
 | `curr-clue-next` | &rsaquo;                             |
-| `curr-clue-next.hover` | Next clue.           |
+| `curr-clue-next.hover` | Next clue.                     |
 | `squares-filled` | Squares filled                       |
 | `across-label`   | Across                               |
 | `down-label`     | Down                                 |
-| `3d-ac-label`     | Across & Back                        |
-| `3d-aw-label`     | Away & Towards                       |
+| `3d-ac-label`     | Across & Back                       |
+| `3d-aw-label`     | Away & Towards                      |
 | `3d-dn-label`     | Down & Up                           |
 | `nodir-label`    | Other                                |
-| `tools-link`     | Exolve                                |
+| `tools-link`     | Exolve                               |
 | `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, etc.|
 | `tools-msg`      | [Longish list of all control keys, and more...]|
+| `alts.hover`     | This is an alternative solution to the clue. Clicking on it will set any currently visible letters in it to this variant. If the setter has created an alternative solution group with more than one cell (group numbers are shown in superscripts of solution variants) then clicking will set all revealed visible letters in the group to reflect this variant.|
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
 | `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
-| `jotter`         | Jotter                                |
+| `jotter`         | Jotter                               |
 | `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams and subtractions.|
 | `jotter-text.hover`|You can shuffle letters by clicking above. If you enter something like "Alphabet - betas  =" then it will be replaced by "lpha - s" (subtraction of common letters). |
 | `maker-info`     | Exolve-maker info                    |

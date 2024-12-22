@@ -1,5 +1,29 @@
 # Changelog
 
+### Version: Exolve v1.59: December 22, 2024
+
+- Add support for alternative solutions:
+- `exolve-alternatives: <cell>:<letter>` says that `<letter>` is an
+  alternative solution for the cell identified by `<cell>`.
+- We disallow specifying the same cell in more than one `exolve-alternatives`
+  section. The reason is to avoid the possibility of puzzles where the solver
+  may reach a dead-end conflict in choices from two groups. Dealing with such
+  conflicts would have required adding code complexity as well as user interface
+  complexity.
+- The above way of specifying alternatives means that you cannot specify more
+  than one alternative for a cell.
+- Revealed in-clue solutions will include all possible solutions for a clue.
+  The solutions where some `exolve-alternatives` groups are used will be
+  shown with a superscript that is a comma-separated list of all group numbers
+  used in crafting that alternative.
+- We disallow using `exolve-alternatives` when there ar diagramless cells or
+  when any cell does not have a solution. We disallow more than 3 distinct groups
+  of alternatives within any single clue.
+- Bug-fix: rebus cells were not working with digits or special chars.
+- Fix documentation for Spacebar semantics in diagramless cells. It does *not*
+  toggle the addition of a block, it only adds (deletion can be done with
+  backspace/delete key).
+
 ### Minor Version: Exolve v1.58.8: December 16, 2024
 
 - Fix the Enter keyboard shortcut to switch directions.

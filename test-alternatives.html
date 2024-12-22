@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.58"/>
+<script src="exolve-m.js?v1.58"></script>
+
+<title>Test-Alternatives</title>
+
+</head>
+<body>
+<script>
+createExolve(`
+======REPLACE WITH YOUR PUZZLE BELOW======
+
+exolve-begin
+  exolve-title: Test Alternatives
+  exolve-preamble:
+    This example shows two ways in which exolve-alternatives can be used.
+    <ul>
+    <li>exolve-alternatives: r1c6:Z</li>
+    <li>exolve-alternatives: r3c6:Z</li>
+    <li>exolve-alternatives: r2c1:A r2c7:Y</li>
+    <li>exolve-alternatives: r4c4:O</li>
+    <li>exolve-alternatives: r3c3:Y</li>
+    </ul>
+    The first two 'exolve-alternatives' lines offer alternative spellings
+    (OXIDIZE and REALIZE) that can be independently and freely used. The
+    next 'exolve-alternatives' line contains <i>two</i> cells. When there
+    is more than one cell in an alternatives group, then they must
+    all use the alternatives offered (or none of them should use the
+    alternatives).
+  exolve-width: 7
+  exolve-height: 5
+  exolve-grid:
+    PRESENT
+    ...A...
+    OXIDISE
+    U.....V
+    REALISE
+  exolve-alternatives: r1c6:Z
+  exolve-alternatives: r3c6:Z
+  exolve-alternatives: r2c1:A r2c7:Y
+  exolve-alternatives: r4c4:O
+  exolve-alternatives: r3c3:Y
+  exolve-across:
+    1 See 2
+    3 Burn (7)
+    5 Figure out (7)
+  exolve-down:
+    2,1 Unhappy OR soil and here (3, 7)
+    3 Belonging to us OR rower (3)
+    4 The night before OR watcher (3)
+exolve-end
+
+======REPLACE WITH YOUR PUZZLE ABOVE======
+`);
+</script>
+</body>
+</html>
