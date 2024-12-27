@@ -3578,23 +3578,26 @@ Exolve.prototype.punctuateEntry = function(solution, placeholder) {
   return s;
 }
 
-Exolve.prototype.getClueEntry = function(ci) {
-  const clue = this.clues[ci];
-  if (!clue || clue.parentClueIndex) {
-    return '';
-  }
-  const cells = this.getAllCells(ci);
+Exolve.prototype.getCellsEntry = function(cells, pattern) {
   let entry = '';
   for (const cell of cells) {
     const gridCell = this.grid[cell[0]][cell[1]];
     entry += (gridCell.currLetter == '0' ? '?' :
              this.stateToDisplayChar(gridCell.currLetter));
   }
-  const pattern = clue.placeholder || '';
   return this.punctuateEntry(entry, pattern);
 }
 
-// TODO: can the normal case be simplified?
+Exolve.prototype.getClueEntry = function(ci) {
+  const clue = this.clues[ci];
+  if (!clue || clue.parentClueIndex) {
+    return '';
+  }
+  const cells = this.getAllCells(ci);
+  const pattern = clue.placeholder || '';
+  return this.getCellsEntry(cells, pattern);
+}
+
 Exolve.prototype.setClueSolution = function(ci) {
   const theClue = this.clues[ci];
   if (!theClue || theClue.solution) {

@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.59.1: December 26, 2024
+
+- Re-add the getCellsEntry() function that was deleted by the last
+  version (it is used by Webifi).
+- Add getCellsEntry() to the list of expected functions in the test.
+
 ### Version: Exolve v1.59: December 22, 2024
 
 - Add support for alternative solutions:
