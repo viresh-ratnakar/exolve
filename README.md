@@ -244,12 +244,12 @@ be present in most puzzles.
 
 Any line (or trailing part of a line) that begins with a "# " is treated
 as a comment and is ignored. A "#" with an end-of-line after it is also treated
-as a comment. Note that a "#" with a non-space character after it is NOT treated
-as a somment (this is so because we may have HTML colour names such as #FF00FF
-in `exolve-colour` sections, and we may have clues in which their grid-location
-is indicated in the #xN
-notation—[see this section](#extended-chessboard-notation)). I did not use
-"//" as the comment marker as it is used in URLs.
+as a comment. Note that a "#" with a non-space character after or before it is
+NOT treated as a comment. This is so because we may have things like "#1" or
+"Phone#" in clues, or "#" in URLs, or HTML colour names such as #FF00FF in
+`exolve-colour` sections, or we may have clues in which their grid-location is
+indicated in the #xN notation—[see this section](#extended-chessboard-notation).
+I did not use "//" as the comment marker as it is used in URLs.
 
 Any text appearing before `exolve-begin` or after `exolve-end` is ingored.
 

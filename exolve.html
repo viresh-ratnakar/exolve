@@ -1328,9 +1328,13 @@ Exolve.prototype.parseOverall = function() {
   let rawLines = this.puzzleText.trim().split('\n');
   for (let rawLine of rawLines) {
     let cIndex = rawLine.indexOf('#');
-    // A # followed by a non-space/non-eol character is not a comment marker.
+    /**
+     * A # followed by a non-space/non-eol character is not a comment marker.
+     * A # preceded by a non-space (+ non-start) is also not a comment marker.
+     */
     while (cIndex >= 0 && cIndex + 1 < rawLine.length &&
-           rawLine.charAt(cIndex + 1) != ' ') {
+           ((rawLine.charAt(cIndex + 1) != ' ') ||
+             (cIndex > 0 && rawLine.charAt(cIndex - 1) != ' '))){
       cIndex = rawLine.indexOf('#', cIndex + 1);
     }
     if (cIndex >= 0) {

@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.59.2: December 30, 2024
+
+- When parsing, if "#" is preceded by a non-space char, then do not
+  treat it as a comment marker. Update test-15x15-unsolved.html to
+  have examples of when # is and isn't treated as a comment marker.
+
 ### Minor Version: Exolve v1.59.1: December 26, 2024
 
 - Re-add the getCellsEntry() function that was deleted by the last
