@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.59.3: January 8, 2025
+
+- Add some more fields to the list of expected ones, as we want
+  to make sure that these fields are always present in Exolve
+  puzzle structures.
+
 ### Minor Version: Exolve v1.59.2: December 30, 2024
 
 - When parsing, if "#" is preceded by a non-space char, then do not

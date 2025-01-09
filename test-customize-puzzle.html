@@ -16,10 +16,19 @@ function customizeExolve(p) {
   p.activateCell(0,0)
 
   p.background.setAttributeNS(null, 'fill', 'red')
+  let testClue = p.clues['A1'];
   let expectedVars = [
     'p.currRow',
     'p.currCol',
     'p.currClueIndex',
+    'p.grid',
+    'p.grid[0][0]',
+    'p.grid[0][0].isLight',
+    'p.grid[0][0].currLetter',
+    'p.clues',
+    'testClue',
+    'testClue.clue',
+    'testClue.displayLabel',
     'p.gridInput',
     'p.gridWidth',
     'p.gridHeight',
@@ -34,6 +43,8 @@ function customizeExolve(p) {
     'p.questions',
     'p.answersList',
     'p.id',
+    'p.setter',
+    'p.title',
     'p.clearAllButton',
     'p.clearButton',
     'p.submitButton',
