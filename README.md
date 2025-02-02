@@ -228,19 +228,23 @@ and the `exolve-end` line:
 * `exolve-force-bar-right`
 * `exolve-force-bar-below`
 * `exolve-cell-size`
+* `exolve-cell-decorator`
 * `exolve-postscript`
+* `exolve-tiled-grid`
 
 Each section has the section name (`exolve-something`), followed by a colon.
 Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
-`exolve-across`, `exolve-down`, `exolve-nodir`, `exolve-explanations`, and
-`exolve-postscript` sections, all other sections occupy a single line (some can
-be repeated though). For such single-line sections, the "value" of the section
-is the text following the colon on the same line.
+`exolve-tiled-grid`, `exolve-across`, `exolve-down`, `exolve-nodir`,
+`exolve-explanations`, and `exolve-postscript` sections, all other sections
+occupy a single line (some can be repeated though). For such single-line
+sections, the "value" of the section is the text following the colon on the
+same line.
 
 The bolded sections, namely, `exolve-width`, `exolve-height`, and
-`exolve-grid` are required. The other sections are optional, but
-`exolve-across`, `exolve-down`, `exolve-title`, `exolve-setter` should probably
-be present in most puzzles.
+`exolve-grid` are required (exception: an `exolve-tiled-grid` section may be used
+instead of an `exolve-grid` section). The other sections are optional, but
+`exolve-across`, `exolve-down`, (or `exolve-nodir`), `exolve-title`, `exolve-setter`
+should probably be present in most puzzles.
 
 Any line (or trailing part of a line) that begins with a "# " is treated
 as a comment and is ignored. A "#" with an end-of-line after it is also treated
@@ -367,6 +371,13 @@ This will work:
   exolve-grid:
      से ह त
 ```
+
+You can place arbitrary SVG elements in selected cells. See the
+[`exolve-cell-decorator`](#exolve-cell-decorator) section.
+
+You can also create grids with arbitary geometries of cells (such as hexagonal
+cells), using an [`exolve-tiled-grid`](#exolve-tiled-grid) section, presented
+later.
 
 ### Digits and special characters
 
@@ -1980,6 +1991,28 @@ can create rectangular cells that are not squares too) using
 The first parameter is the cell width and the second parameter is the cell
 height. Both values must be at least 10.
 
+## `exolve-cell-decorator`
+
+You can add arbitary shapes and patterns to selected cells, using
+`exolve-cell-decorator` lines. Each such line specifies a list of cell locations
+(in the [extended chessboard notation](#extended-chessboard-notation))
+followed by one or more SVG elements. The SVG elements should assume they are
+centered at (0,0) and have the cell boundaries at a distance of 15.5 from them
+in all four directions (as per the default cell size of 31, which can be
+overridden with an `exolve-cell-size` section). Exolve renders a replica
+of the SVG element(s) at each cell listed.
+
+For example, the following will create a line at the bottom right of
+each cell in the bottom row, and a small circle at the top of each cell in
+the last column:
+
+```
+exolve-width: 4
+exolve-height: 4
+exolve TODO
+...
+```
+
 ## `exolve-postscript`
 If this section is provided, it gets rendered under the whole puzzle. Like
 `exolve-preamble`, this is also a multiline section and can include arbitrary
@@ -1992,6 +2025,86 @@ HTML. Example:
      <li><a href="puzzle-43.html">Next puzzle</a></li>
    </ul>
 ```
+
+## `exolve-tiled-grid`
+This section should be used *instead* of an `exolve-grid` section, if you
+want to create a non-standard shape of cells (e.g., hexagonal, triangular,
+etc.).
+
+The basic idea is that in a tiled grid with dimensions W &times; H, there are
+W &times; H *potential* locations of cells. Not every location will have a cell.
+The geometry of the cell constrains how you can tile the grid, and that dictates
+where the cells are located. For example, consider this grid with diamond-shaped
+cells.
+
+```
+/\/\/\
+\/\/\/
+ \/\/
+  \/
+```
+
+For this grid, W = 5, H = 3. Note that the width is 5 (not 3) to account for all
+possible cell locations, using a fine-grained grid that is aligned with the
+centers of all cell rows and columns. Only the following locations have cells in
+them:
+
+- r3c1, r3c3, r3c5, 
+- r2c2, r2c4,
+- r1c3.
+
+For tiled grids, Exolve assumes that all the cells start out disconnected from
+each other. That is, it does not take into account the complexities of the
+connections implied by the cell geometries and bars/blocks (we describe how to
+place bars/blocks shortly). All lights in a puzzle with a tiled grid *have* to
+be specified using the `exolve-nodir` section. A complete example can be seen
+in [`test-tiled-grid.html`](test-tiled-grid.html).
+
+Within the `exolve-tiled-grid` section, you can define one or more cell shapes.
+A cell shape definition needs a name, an SVG element (that creates the shape)
+and the coordinates of where the cell label (if there is one) is placed. The
+SVG spec should define the cell shape using any standard SVG primitives,
+assuming the cell is centered at (0,0) in the SVG coordinate system. Exolve
+takes care of rendering the cell shape at the center of every cell identified
+as a cell location. Note that there is an implicit square "base cell" defined
+by the rectilinear W &times; H grid structure, but actual cell shapes can spill
+outside that base cell area. It is your responsibilty to create a reasonable,
+non-overlapping tiling using cell shapes.
+
+A cell-shape specification (you would typically need just one) looks like this:
+
+```
+    cell-shape: name labelX labelY svg-specs
+```
+
+The (labelX, labelY) coordinates identify the center of where the cell label
+would be displayed. Everything after labelY is taken as SVG specs (it can be
+more than one element). Please do not include an `id` attribute in any of the
+SVG elements.
+
+Here's an example of how you would define diamond-shaped cells, to create a
+tiled grid like the one sketched above.
+
+```
+  exolve-tiled-grid:
+    cell-shape: diamond 0 11 <polygon points="-15.5,0 0,15.5 15.5,0 0,-15.5">
+```
+
+Note that in specifying the SVG element, you have to keep in mind that the base
+cell has default dimensions of 31 &times; 31 (which you can override with
+an `exolve-cell-size` section). So, your cell specification should define
+a shape centered at (0,0) that has the "base cell boundary" at a distance of
+15.5 away (up, down, left, and right).
+
+TODO
+
+Please note that the following sections *cannot* be used in a puzzle that has
+an `exolve-tiled-grid`:
+- `exolve-grid`
+- `exolve-force*`
+- `exolve-3d*`
+- `exolve-across`
+- `exolve-down`
 
 ## Notes
 
@@ -2420,8 +2533,46 @@ The plain text can optionally include a title, a byline, a copyright line, and
 a preamble, before the 'Across' line that marks the beginning of the clues. The
 parsing code for these sections is *very* naive and may make mistakes.
 
-This functionality is only supported for standard, blocked, UK-style crossword
-grids. Here are the constraints under which this works:
+Clue solutions in square brackets (and possibly annotations) can be present
+in the text after the clue enums. For example:
+
+```
+7 This clue's solution is so-so (2-2) [SO-SO] Wasn't very cryptic, was it?
+```
+
+However, this is unlikely to be found for non-Exolve-formatted puzzles. We
+support a simple mechanism to augment clue texts with solutions, like this:
+
+```
+  Across solution[s][:]
+  1 ...
+  2 ...
+  ...
+  Down solution[s][:]
+  1 ...
+  5 ...
+  ...
+```
+
+The above format is case-insensitive. It can only appear after the clues.
+Similarly, annotations may be supplied in separate sections that look like this:
+
+```
+  Across annotation[s][:]
+  1 ...
+  2 ...
+  ...
+  Down annotation[s][:]
+  1 ...
+  5 ...
+  ...
+```
+
+This section too, has to occur only after the clues. It can appear before or
+after the Solutions section.
+
+This "grid inference" functionality is only supported for standard, blocked,
+UK-style crossword grids. Here are the constraints under which this works:
 - The grid is symmetric
 - Every 4x4 area has at least one black cell.
 - No light is shorter than 3 letters.

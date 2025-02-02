@@ -1,0 +1,23 @@
+Across
+1 ... (5)
+4 ... (5)
+5 ... (5)
+Down
+1 ... (5)
+2 ... (5)
+3 ... (5)
+Across annotation:
+1. anno for 1a.
+4 Annotation for 4 across
+Across solutions
+1 FORMS
+4. NOISE
+5 . SPENT
+Down solution:
+1 FINDS
+2. RAISE
+3   .SWEET
+Down annotations
+3 This is the anno for Sweet
+2. anno for raiSE
+1.   1d's silly anno.

@@ -4056,6 +4056,66 @@ Exolve.prototype.processClueChildren = function() {
   }
 }
 
+/**
+ * Set solution letters in grid from solutions provided for the clue, if any,
+ * in case the clues are the only places where the solutions are provided.
+ */
+Exolve.prototype.clueSolutionsToGridSolutions = function() {
+  if (!this.hasUnsolvedCells) {
+    return;
+  }
+  if (this.multiLetter) {
+    /** Give up */
+    return;
+  }
+  let didCopy = false;
+  for (const ci of this.allClueIndices) {
+    const clue = this.clues[ci];
+    if (clue.parentClueIndex) continue;
+    if (!clue.solution) continue;
+    const cells = this.getAllCells(ci);
+    if (cells.length == 0) continue;
+    const letters = [];
+    for (const c of clue.solution) {
+      const sc = this.displayToStateChar(c);
+      if (this.isValidStateChar(c)) {
+        letters.push(c);
+      }
+    }
+    if (letters.length == 0) continue;
+    if (cells.length != letters.length) {
+      console.log('Ignoring solution letters from ' + ci + ' as #cells ' +
+                  cells.length + ' != #letters ' + letters.length);
+      continue;
+    }
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      const gridCell = this.grid[cell[0]][cell[1]];
+      if (gridCell.solution &&
+          gridCell.solution != '0' && gridCell.solution != '?') {
+        continue;
+      }
+      gridCell.solution = letters[i];
+      didCopy = true;
+    }
+  }
+  if (!didCopy) {
+    return;
+  }
+  this.hasUnsolvedCells = false;
+  for (let i = 0; i < this.gridHeight; i++) {
+    for (let j = 0; j < this.gridWidth; j++) {
+      const gridCell = this.grid[i][j];
+      if (gridCell.isLight && !gridCell.prefill &&
+          (!gridCell.solution ||
+           gridCell.solution == '0' || gridCell.solution == '?')) {
+        this.hasUnsolvedCells = true;
+        break;
+      }
+    }
+  }
+}
+
 Exolve.prototype.roughlyStartsWith = function(s, prefix) {
   const punct = /[\s'.,-]*/gi
   let normS = s.trim().replace(/<[^>]*>/gi, '').replace(
@@ -7428,11 +7488,14 @@ Exolve.prototype.getClueSolutionsWithAlts = function(ci) {
       }
       result.dispGroups.sort();
     }
+    let haveSol = false;
     for (const cell of cells) {
       const s = this.getSolutionActive(cell);
-      if (!s) return null;
-      result.solution += (s == '?') ? '?' : this.stateToDisplayChar(s);
+      result.solution += (!s || s == '0' || s == '?') ? '?' :
+        this.stateToDisplayChar(s);
+      if (s && s != '0') haveSol = true;
     }
+    if (!haveSol) return null;
     results.push(result);
   }
   return results;
@@ -9391,6 +9454,7 @@ Exolve.prototype.createPuzzle = function() {
   this.parseClueLists()
 
   this.processClueChildren()
+  this.clueSolutionsToGridSolutions();
 
   this.parseAlternatives();
 

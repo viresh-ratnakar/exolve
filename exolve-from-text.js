@@ -97,10 +97,14 @@ exolveFromText = function(w, h, text, fname='') {
     copyright: '',
     across: [],
     down: [],
+    acSols: [],
+    dnSols: [],
+    acAnnos: [],
+    dnAnnos: [],
     file: fname || '[provided text]',
   };
   let seenClues = false;
-  let inDown = false;
+  let seenDown = false;
 
   const lines = exolveFromTextClean(text).split('\n');
 
@@ -111,15 +115,44 @@ exolveFromText = function(w, h, text, fname='') {
   const copyrightRE = /^\s*(copyright|\(c\)|Ⓒ)/i;
   const titleAndSetterRE = /^\s*(.+)\sby\s(.+)/i; 
   const bylineRE = /^\s*(?:(?:set\sby)|(?:by))[^a-zA-Z0-9]*\s([a-zA-Z0-9].+)/i; 
+
   const acrossRE = /^[^a-zA-Z0-9]*across[^a-zA-Z0-9]*$/i;
   const downRE = /^[^a-zA-Z0-9]*down[^a-zA-Z0-9]*$/i; 
+
+  const acSolsRE = /^[^a-zA-Z0-9]*across\s+solutions?[^a-zA-Z0-9]*$/i;
+  const dnSolsRE = /^[^a-zA-Z0-9]*down\s+solutions?[^a-zA-Z0-9]*$/i; 
+  const acAnnosRE = /^[^a-zA-Z0-9]*across\s+annotations?[^a-zA-Z0-9]*$/i;
+  const dnAnnosRE = /^[^a-zA-Z0-9]*down\s+annotations?[^a-zA-Z0-9]*$/i; 
+
+  let solannoArray = null;
 
   let joinedLine = '';
   for (let rawLine of lines) {
     let line = rawLine.replace(/\s/g, ' ').replace(/\s+/g, ' ').trim();
+    if (seenDown) {
+      if (acSolsRE.test(line)) {
+        solannoArray = sections.acSols;
+        continue;
+      } else if (dnSolsRE.test(line)) {
+        solannoArray = sections.dnSols;
+        continue;
+      } else if (acAnnosRE.test(line)) {
+        solannoArray = sections.acAnnos;
+        continue;
+      } else if (dnAnnosRE.test(line)) {
+        solannoArray = sections.dnAnnos;
+        continue;
+      }
+    }
+    if (solannoArray) {
+      if (line) {
+        solannoArray.push(line);
+      }
+      continue;
+    }
     if (seenClues) {
-      if (!inDown && downRE.test(line)) {
-        inDown = true;
+      if (!seenDown && downRE.test(line)) {
+        seenDown = true;
         joinedLine = '';
         continue;
       }
@@ -132,7 +165,7 @@ exolveFromText = function(w, h, text, fname='') {
             console.log('Ignored potential clue start: ' + joinedLine);
           }
         }
-        if (!inDown) sections.across.push(line.trim());
+        if (!seenDown) sections.across.push(line.trim());
         else sections.down.push(line.trim());
         joinedLine = '';
       } else if (clueStartRE.test(line)) {
@@ -140,7 +173,7 @@ exolveFromText = function(w, h, text, fname='') {
       } else {
         joinedLine = joinedLine + ' ' + line;
         if (clueRE.test(joinedLine) || childRE.test(joinedLine)) {
-          if (!inDown) sections.across.push(joinedLine.trim());
+          if (!seenDown) sections.across.push(joinedLine.trim());
           else sections.down.push(joinedLine.trim());
           joinedLine = '';
         }
@@ -477,21 +510,22 @@ exolveFromTextSections = function(w, h, sections) {
     exolve-preamble:
 ${sections.preamble}`;
   }
-  specs += `
+
+  let clueSpecLines = `
     exolve-across:`;
   for (let acrossClue of sections.across) {
-  specs += `
+    clueSpecLines += `
       ${acrossClue}`;
   }
-  specs += `
+  clueSpecLines += `
     exolve-down:`;
   for (let downClue of sections.down) {
-  specs += `
+    clueSpecLines += `
       ${downClue}`;
   }
-  specs += `
+
+  let gridSpecLines = `
     exolve-grid:`;
-  let gridSpecLines = '';
   for (let r = 0; r < h; r++) {
     let rowSpec = '';
     for (let c = 0; c < w; c++) {
@@ -501,7 +535,7 @@ ${sections.preamble}`;
       ${rowSpec}`;
   }
 
-  const tempSpecs = specs + gridSpecLines + `
+  const tempSpecs = specs + clueSpecLines + gridSpecLines + `
     exolve-option: ignore-unclued ignore-enum-mismatch
     exolve-id: ${xlvpid}
   exolve-end`;
@@ -522,6 +556,58 @@ ${sections.preamble}`;
     ret.error = 'Exolve had fatal errors in parsing clues: ' + err;
     return ret;
   }
+
+  if (sections.acSols.length > 0 || sections.dnSols.length > 0 ||
+      sections.acAnnos.length > 0 || sections.dnAnnos.length > 0) {
+    const lineRE = /^\s*(\d+)\s*\.?\s*(.+)$/;
+    const lineParser = (line) => {
+      const matches = lineRE.exec(line);
+      if (!matches || matches.length != 3) {
+        console.log('Ignoring solution/annotation line: ' + line);
+        return null;
+      }
+      return [matches[1], matches[2]];
+    }
+    for (const dir of ['A', 'D']) {
+      const arrays = (dir == 'A') ? {
+        sols: sections.acSols,
+        annos: sections.acAnnos,
+      } : {
+        sols: sections.dnSols,
+        annos: sections.dnAnnos,
+      }
+      for (const sa in arrays) {
+        const arr = arrays[sa];
+        for (const line of arr) {
+          const numAndText = lineParser(line);
+          if (!numAndText) continue;
+          const ci = dir + numAndText[0];
+          if (!puz.clues.hasOwnProperty(ci)) {
+            console.log(sa + ' line has invalid index: ' + ci);
+            continue;
+          }
+          const clue = puz.clues[ci];
+          const anno = (sa == 'sols') ?
+              '[' + numAndText[1] + ']' : numAndText[1];
+          if (clue.anno) clue.anno += ' ';
+          clue.anno += anno;
+        }
+      }
+    }
+    let acClues = '';
+    let dnClues = '';
+    for (const ci of puz.allClueIndices) {
+      const clue = puz.clues[ci];
+      const fullClue = '\n' + clue.label + ' ' + clue.clue + (
+          clue.anno ? ' ' + clue.anno : '');
+      if (clue.dir == 'A') acClues += fullClue;
+      else dnClues += fullClue;
+    }
+    clueSpecLines = `
+    exolve-across:${acClues}
+    exolve-down:${dnClues}`;
+  }
+  specs += clueSpecLines;
 
   const skeleton = new ExolveGridSkeleton(puz, specs);
   if (exolvePuzzles && exolvePuzzles[xlvpid]) {
@@ -1091,7 +1177,8 @@ ExolveGridInferrer.prototype.isConnected = function() {
  * hasn't yet been determined, it is made diagramless.
  */
 ExolveGridInferrer.prototype.gridSpecLines = function() {
-  let lines = ''
+  let lines = `
+    exolve-grid:`;
   for (let r = 0; r < this.h; r++) {
     let rowLine = '';
     for (let c = 0; c < this.w; c++) {

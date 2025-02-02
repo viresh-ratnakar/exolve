@@ -1,5 +1,30 @@
 # Changelog
 
+### Minor Version: Exolve v1.59.4: January 29, 2025
+
+- If in-clue solutions are provided, but not in-grid, then try to copy
+  the in-clue solutions to the grid.
+- Use the above in `exolve-from-text.js` to enable auto-inferring grids
+  *with* solutions if any clue text past the enum contain the solution
+  in square brackets.
+- Add a simple mechanism to augment clue texts (parsed by `exolve-from-text.js`
+  with sections containing solutions (instead of Exolve's square-brackets
+  convention, which may get tedious to create):
+```
+  Across solution[s][:]
+  1 ...
+  ...
+  Down solution[s][:]
+  1 ...
+  ...
+```
+- The above format is case-insensitive. The word "solution" must appear
+  either as a standalone-heading, or as part of the "Across/Down solution"
+  heading.
+- Similarly, annotations can be provided using similar sections (just replace
+  "solution" above with "annotation". Theses solutions/annotations sections
+  can only appear after the clues.
+
 ### Minor Version: Exolve v1.59.3: January 8, 2025
 
 - Add some more fields to the list of expected ones, as we want
