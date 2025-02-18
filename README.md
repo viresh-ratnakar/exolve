@@ -2030,7 +2030,7 @@ will take care of rendering the decorator at each cell where it is placed.
 The cell decorators created like this are implicitly numbered 1, 2, ... (in
 the order in which they are listed). They can be applied to arbitrary cells
 within the `exolve-grid` section, by suffixing the cell's specs with
-`{k1,k2,...}`, withi `k1`, `k2`, etc., being the decorator numbers for the
+`{k1,k2,...}`, with `k1`, `k2`, etc., being the decorator numbers for the
 decorators to be added to the cell.
 
 For example, the following will create a dash at the bottom right of
@@ -2136,7 +2136,7 @@ using `exolve-option: override-number-GRIDLINE:0`.
 
 Please do not include an `id` or `fill` attributes in any shaped-cell element.
 
-Inside the `exolve-grid` section, as seen above, a cell cen be marked has
+Inside the `exolve-grid` section, as seen above, a cell can be marked as
 having the shaped-cell numbered `k`, by adding the suffix, `[k]`. Normally,
 there would be just one shape (numbered "1"), but one can imagine more
 complex tilings with multiple shapes.
