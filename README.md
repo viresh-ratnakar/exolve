@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.59 December 22, 2024
+### Version: Exolve v1.60 February 18, 2025
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -156,7 +156,10 @@ square without advancing.
 
 The solver can press Tab/Shift-Tab to navigate to the next/previous clue. The
 solver can use the arrow keys to navigate to the next/previous light cells in
-the direction of the arrow.
+the direction of the arrow. If there is no light cell anywhere further in the
+direction of the arrow, but there is a light cell immediately diagonally in
+that direction to one side, then the cursor moves there (this is intuitively
+helpful in tiled grids created using `exolve-shaped-cell`).
 
 The software tries to keep the current clue visible when scrolling, as long
 as the square with the cursor is visible.
@@ -228,7 +231,11 @@ and the `exolve-end` line:
 * `exolve-force-bar-right`
 * `exolve-force-bar-below`
 * `exolve-cell-size`
+* `exolve-grid-spacing`
+* `exolve-grid-bounds`
+* `exolve-cell-decorator`
 * `exolve-postscript`
+* `exolve-shaped-cell`
 
 Each section has the section name (`exolve-something`), followed by a colon.
 Other than the `exolve-preamble`/`exolve-prelude`, `exolve-grid`,
@@ -353,6 +360,12 @@ As a convenient reference, here again is the complete list of decorators:
 | `!`       | Is prefilled.                      |
 | `~`       | Skips normal numbering             |
 
+Apart from these standard decorators, you can also create arbitrary SVG based
+decorators (see [`exolve-cell-decorator`](#exolve-cell-decorator). A cell
+can be decorated with the kth (k = 1, 2, ...) `exolve-cell-decorator`by suffixing
+its entry in the grid with `{k}` (or comma-separated lists of numbers, like
+`{k1,k2,...}`).
+
 If you use a language/Script that uses compound letters made up of multiple
 Unicode characters (for example, Devanagari—see the
 [`exolve-language`](#exolve-language) section), or if you have
@@ -369,13 +382,16 @@ This will work:
      से ह त
 ```
 
+You can also create grids with arbitary geometries of cells (such as hexagonal
+cells), using [`exolve-shaped-cell`](#exolve-shaped-cell), described later.
+
 ### Digits and special characters
 
 Normally, only the letters of the alphabet (A-Z, or script-specific) can be
 used in solution letters. However using [`exolve-option`](#exolve-option)
 `allow-digits` or `allow-chars:<chars>`, you may allow some non-alphabetic
 characters. If any of these characters is also a decorator or has a special
-meaning in grid specifications (i.e., is one of `|_+@!~*.?`), then it should
+meaning in grid specifications (i.e., is one of `|_+@!~*.?{[`), then it should
 be prefixed with `&` in the grid specifications. If `&` itself needs to be used
 in the grid, then it too should be prefixed with an `&`. For example:
 ```
@@ -1981,6 +1997,81 @@ can create rectangular cells that are not squares too) using
 The first parameter is the cell width and the second parameter is the cell
 height. Both values must be at least 10.
 
+## `exolve-grid-spacing`
+
+Normally, the horizontal spacing between grid cells is `cellW + GRIDLINE`
+and he vertical spacing is `cellH + GRIDLINE`. You can override these as
+follows:
+```
+  exolve-grid-spacing: 15.5 15.5
+```
+
+You would typically do this only when using non-standard cell shapes with
+[`exolve-shaped-cell`](#exolve-shaped-cell).
+
+## `exolve-grid-bounds`
+
+Normally, the horizontal and vertical extents of the grid can be computed
+using width, height, and cell dimensions/spacing. However, if you're using
+[`exolve-shaped-cell`](#exolve-shaped-cell) *and* are placing some cells
+individually by specifying `[<shape-index>,x,y]` in `exolve-grid`, then
+you need to specify the overall bounds of the grid using this section as
+the default calculations may not yield the correct bounds.
+```
+  exolve-grid-bounds: 400 320
+```
+
+## `exolve-cell-decorator`
+
+You can create arbitary shapes and patterns to add to selected light cells,
+using `exolve-cell-decorator` lines. Each such line specifies one or more SVG
+elements, that assume the cells's top-left coordinates are (0,0). Exolve
+will take care of rendering the decorator at each cell where it is placed.
+The cell decorators created like this are implicitly numbered 1, 2, ... (in
+the order in which they are listed). They can be applied to arbitrary cells
+within the `exolve-grid` section, by suffixing the cell's specs with
+`{k1,k2,...}`, withi `k1`, `k2`, etc., being the decorator numbers for the
+decorators to be added to the cell.
+
+For example, the following will create a dash at the bottom right of
+each cell in the bottom row, and a small circle at the top of each cell in
+the last column:
+
+```
+exolve-width: 4
+exolve-height: 4
+exolve-cell-decorator: <line stroke="blue" x1="20" y1="28" x2="26" y2="28">
+exolve-cell-decorator: <circle cx="15.5" cy="4" r="2.5">
+exolve-grid:
+  0    0    0    0{2}
+  0    .    .    0{2}
+  0{1} 0{1} 0{1} 0{1,2}
+```
+
+Note that a cell normally has dimensions of `cellW (31)` by `cellH (31)`.
+
+While such decorators can be used in any grid, they are especially useful
+when you want to create grids that contain non-standard-shaped cells created
+using `exolve-shaped-cell`. Because, for such cells, you need to place any
+separator bars explicitly, and `exolve-cell-decorator` is the mechanism
+for doing that. You can see a complete example in
+[`test-shaped-cells.html`](test-shaped-cells.html).
+
+The decorator is made clickable by default—i.e., clicking on it would activate
+the light cell it belongs to. If you want to make a decorator non-clickable,
+perhaps because you want to create a long shape that spans multiple cells,
+then just add the prefix `non-clickable`, like this:
+```
+exolve-cell-decorator: non-clickable <line stroke="red" x1="20" y1="28" x2="26" y2="28">
+```
+
+The grid is rendered in raster order (row-wise, and within each row,
+column-wise). This means that decorators in cells occurring later in the
+order should be used, when you have decorators that need to overflow into
+adjoining cells (otherwise the overlap will get hidden). See the long green
+vertical lines in the example in
+[`test-cell-decorators.html`](test-cell-decorators.html).
+
 ## `exolve-postscript`
 If this section is provided, it gets rendered under the whole puzzle. Like
 `exolve-preamble`, this is also a multiline section and can include arbitrary
@@ -1993,6 +2084,75 @@ HTML. Example:
      <li><a href="puzzle-43.html">Next puzzle</a></li>
    </ul>
 ```
+
+## `exolve-shaped-cell`
+This can be used to create a non-standard cell shape (e.g., hexagonal,
+triangular, circular, etc.).
+
+A shaped cell is assumed to be disconnected from all its neighbours. So, a
+shaped cell can only be made a part of a `nodir` light. This is done because
+connectivity is too complex when arbitrary shapes are tiled together.
+
+For example, consider this grid with diamond-shaped cells.
+
+```
+/\/\/\
+\/\/\/
+ \/\/
+  \/
+```
+
+To create this grid, we use W = 5, H = 3. Note that the width is 5 (not 3) to
+account for all possible cell locations, using a fine-grained grid that allows
+the diamonds in odd rows to be not aligned vertically with the diamonds in even
+rows. We override grid spacing with `exolve-grid-spacing` to enable the above
+tiling.  We also suppress the appearance of grid lines by setting the background
+to be transparent.
+
+```
+  exolve-width: 5
+  exolve-height: 3
+  exolve-option: color-background:transparent
+  exolve-grid-spacing: 16 16
+  exolve-shaped-cell: 5 20 <polygon points="15.5,-0.5 31.5,15.5 15.5,31.5 -0.5,15.5" stroke="black">
+  exolve-grid:
+    H[1] .    A[1] .    D[1]
+    .    I[1] .    M[1] .
+    .    .    S[1] .    .
+```
+
+A shaped-cell definition needs to specify x and y coordinates of the baseline
+where the cell label should be placed (if that cell is the first cell in a nodir
+light), followed by a fillable SVG element specified using HTML (one of circle,
+ellipse, path, polygon, polyline, rect, text, textPath, tref, or tspan). The SVG
+specs should define the cell shape assuming the cell's top-left corner is at
+(0,0). Exolve takes care of rendering the cell shape at every cell identified as
+a cell location. Note that in specifying the
+SVG element, you have to keep in mind that the base cell has default dimensions
+of 31 &times; 31 (which you can override with an `exolve-cell-size` section) and
+is preceded by and followed by a 1-pixel-thick grid line that has the background
+colour. It is generally convenient to eliminate the grid line in such grids,
+using `exolve-option: override-number-GRIDLINE:0`.
+
+Please do not include an `id` or `fill` attributes in any shaped-cell element.
+
+Inside the `exolve-grid` section, as seen above, a cell cen be marked has
+having the shaped-cell numbered `k`, by adding the suffix, `[k]`. Normally,
+there would be just one shape (numbered "1"), but one can imagine more
+complex tilings with multiple shapes.
+
+You can also change the location of a shaped cell to any arbitrary SVG x,y
+location, by adding the coordinates within the square brackets, like this:
+`[1,20,30]`. If you place cells like this, then Exolve's computations of the
+overall grid extent in pixels is likely to be off. Please use
+[`exolve-grid-bounds`](#exolve-grid-bounds) to specify the grid's horizontal
+and vertical spans in such cases.
+
+You can see the above example as well as a couple more examples, in
+[`test-shaped-cells.html`](test-shaped-cells.html).
+
+We disallow shaped-cells in 3d-grids and when diagramless cells are present, to
+limit code complexity.
 
 ## Notes
 

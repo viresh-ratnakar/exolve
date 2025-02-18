@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.58"/>
+<script src="exolve-m.js?v1.58"></script>
+
+</head>
+<body>
+<script>
+createExolve(`
+exolve-begin
+  exolve-title: Diamonds
+  exolve-width: 5
+  exolve-height: 3
+  exolve-option: color-background:transparent
+  exolve-grid-spacing: 16 16
+  exolve-shaped-cell: 5 20 <polygon points="15.5,-0.5 31.5,15.5 15.5,31.5 -0.5,15.5" stroke="black">
+  exolve-grid:
+    H[1] .    A[1] .    D[1]
+    .    I[1] .    M[1] .
+    .    .    S[1] .    .
+  exolve-nodir: Across:
+    #r3c1 #r3c3 #r3c5 [1] Ate (3)
+    #r2c2 #r2c4 [4] Text (2)
+    ---Down:
+    #r3c3 #r1c3 [2] In place of (2)
+    ---South-Easterly:
+    #r3c1 #r2c2 #r1c3 [1] Belonging to the man (3)
+    #r3c3 #r2c4 [2] In the morning (2)
+    ---South-Westerly:
+    #r3c3 #r2c2 [2] LLMs? (2)
+    #r3c5 #r2c4 #r1c3 [3] Private texts (3)
+exolve-end
+`);
+</script>
+
+<div id="p2"></div>
+<script>
+createExolve(`
+exolve-begin
+  exolve-title: Hexagons
+  exolve-id: test-hex-grid
+  exolve-option: override-number-GRIDLINE:0 offset-top:10 offset-left:10
+  exolve-cell-size: 36 31.177
+  exolve-grid-spacing: 27 15.5885
+  exolve-width: 3
+  exolve-height: 5
+  exolve-option: color-background:transparent
+  exolve-shaped-cell: 5 20 <polygon points="9,0 27,0 36,15.5885 27,31.177 9,31.177 0,15.5885" stroke="gray" stroke-width="1">
+  exolve-cell-decorator: <line x1="9" y1="0" x2="27" y2="0" stroke="black" stroke-width="2"> # 1:top-line
+  exolve-cell-decorator: <line x1="27" y1="0" x2="36" y2="15.5885" stroke="black" stroke-width="2"> # 2:ne-line
+  exolve-cell-decorator: <line x1="36" y1="15.5885" x2="27" y2="31.177" stroke="black" stroke-width="2"> # 3:se-line
+  exolve-cell-decorator: <line x1="27" y1="31.177" x2="9" y2="31.177" stroke="black" stroke-width="2"> # 4:bot-line
+  exolve-cell-decorator: <line x1="9" y1="31.177" x2="0" y2="15.5885" stroke="black" stroke-width="2"> # 5:sw-line
+  exolve-cell-decorator: <line x1="0" y1="15.5885" x2="9" y2="0" stroke="black" stroke-width="2"> # 6:sw-line
+  exolve-grid:
+    B[1]{1,2,5,6} .         R[1]{1,2,3,6}
+    .             A[1]{1,4} .
+    O[1]{5,6}     .         A[1]{2,3}
+    .             O[1]{1,4}   .
+    B[1]{3,4,5,6} .         H[1]{2,3,4,5}
+  exolve-nodir: Down:
+    #r5c1 #r3c1 #r1c1 [1] Go up and down (3)
+    #r5c3 #r3c3 #r1c3 [2] A cheerful shout (3)
+    ---Risers:
+    #r3c1 #r4c2 #r5c3 [3] Rowing agent (3)
+    #r1c1 #r2c2 #r3c3 [4] Snake (3)
+    ---Fallers:
+    #r5c1 #r4c2 #r3c3 [1] Sheep's sound (3)
+    #r3c1 #r2c2 #r1c3 [3] Cry of delight (3)
+exolve-end
+`, 'p2');
+</script>
+
+<div id="p3"></div>
+<script>
+createExolve(`
+exolve-begin
+  exolve-title: Circles placed individually
+  exolve-id: test-circles
+  exolve-option: override-number-GRIDLINE:0
+  exolve-cell-size: 40 40
+  exolve-grid-bounds: 200 300
+  exolve-width: 7
+  exolve-height: 1
+  exolve-option: color-background:transparent
+  exolve-shaped-cell: 5 20 <circle cx="20" cy="20" r="18" stroke="blue" stroke-width="1">
+  exolve-grid:
+    0[1,0,0] 0[1,50,50] 0[1,50,100] 0[1,50,150] 0[1,100,150] 0[1,150,200] 0[1,150,250]
+  exolve-nodir: Zigzag
+    #r1c1 #r1c2 #r1c3 #r1c4 #r1c5 #r1c6 #r1c7 [A] Some 7-letter word (7) 
+exolve-end
+`, 'p3');
+</script>
+
+</body>
+</html>

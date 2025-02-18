@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.58"/>
+<script src="exolve-m.js?v1.58"></script>
+
+<title>Test-Cell-Decorators</title>
+
+</head>
+<body>
+
+<script>
+createExolve(`
+exolve-begin
+  exolve-width: 3
+  exolve-height: 3
+  exolve-cell-decorator: non-clickable <line stroke="red" x1="20" y1="27" x2="25" y2="27">
+  exolve-cell-decorator: <line stroke="blue" x1="20" y1="27" x2="25" y2="27">
+  exolve-cell-decorator: <circle cx="15.5" cy="4" r="2.5">
+  exolve-cell-decorator: non-clickable <line stroke="green" stroke-width="4" x1="0" y1="15" x2="0" y2="-45"> # long line
+  exolve-grid:
+    0    0{4}     0
+    0    0{1,2}   0{1,2,3}
+    0{4} 0{1,3}   0{2,4}
+  exolve-option: ignore-unclued
+exolve-end
+`);
+</script>
+
+</body>
+</html>

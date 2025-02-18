@@ -1,5 +1,32 @@
 # Changelog
 
+### Version: Exolve v1.60: February 18, 2025
+
+- Add support for non-standard cell shapes via `exolve-shaped-cell`, which
+  specifies the cell shape using SVG and also indicates where the cell label
+  (if any) should be placed. In the grid, a cell can be marked to have
+  shape #k (k = 1, 2, ...) by suffixing it with `[k]`. It can also be moved
+  to a desired `(x,y)` instead of its implied position, by using the suffix
+  `[k,x,y]`. Shaped cells are assumed to be disconnected from all their
+  neighbours and can only be included in `nodir` lights.
+- Shaped cells typically need to be marked with bars/lines/curves to "block
+  them off" in certain directions. We add the notion of `exolve-cell-decorator`
+  that can be used to add arbitrary SVG decoration to any cell. The decorator
+  is specified by listing one or more SVG element specs, optionally prefixed
+  by the word "non-clickable" if the separator does not naturally belong to
+  the cell it is in (and hence clicking it should not activate that cell).
+- In the grid, a cell can be marked to contain separators numbered k1, k2, ..
+  (1-based) by suffixing it with `{k1,k2,...}`.
+- To help with arrow-key-navigation in grids with shaped cells, we add this
+  small tweak: if there is no light cell in the direction of the arrow, but
+  there is a light cell immediately diagonally (on either side), then we
+  navigate to that cell.
+- Add `exolve-grid-spacing` and `exolve-grid-bounds` to help with creating
+  grids with shaped cells. Overriding spacings is useful for shapes such
+  as diamonds and hexagons. Overriding bounds is useful when cells are
+  placed arbitrarily (not along a grid).
+- Update README.md with details on all the above.
+
 ### Minor Version: Exolve v1.59.4: January 29, 2025
 
 - If in-clue solutions are provided, but not in-grid, then try to copy
