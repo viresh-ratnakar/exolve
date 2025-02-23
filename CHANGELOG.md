@@ -1,5 +1,36 @@
 # Changelog
 
+### Version: Exolve v1.61: February 22, 2025
+
+- Allow parameters in cell-decorators, so that we can vary a decorator
+  depending upon which cell it is in. The mechanism is to allow `$1`,
+  `$2`, etc. to be present anywhere in the SVG specs for a decorator. In
+  the `exolve-grid` section, when a decorator is placed in a cell, values
+  are supplied for the parameters, using colon-prefixed suffixes. E.g.:
+```
+  exolve-cell-decorator: <text x="2" y="15" style="color:$1">$2</text>
+  exolve-grid:
+    0{1:green:*} . ...
+```
+- Spaces get stripped from parameter values. Parameter values cannot
+  contain any of `:` or ','.
+- If the dollar symbol itself is needed in the SVG specs, it needs to be
+  indicated using `$0`.
+- Bug fix: `addCellText()` was using the next cell to compute some
+  coordinates, but this doesn't work with non-standard grid-spacing. Fixed.
+  Also updated the documentation to say that parameterized
+  `exolve-cell-decorator` is the preferred way to add text decorations to cells.
+- exolve-from-text.js: Found published grids in the wild that contain
+  the 2x2-all-white-cells pattern that I was rejecting outright. Modify
+  the algo to first try with such 2x2s ruled out, but if that fails, then
+  try everything again, allowing the 2x2. Also relax maxToBlacken to 6
+  from 5. Finally, add a sorter to sort the results if there are multiple
+  results, using some heuristics (loweset num-unchecked-pairs +
+  max-horiz-black-span + max-vert-black-span + num2x2Whiteo).
+- In exolve-player.html, delete old Exolve puzzles for multiple-matching
+  choices inferred from text.
+- Add a test for autogrid that contains a 2x2-all-white block.
+
 ### Version: Exolve v1.60: February 18, 2025
 
 - Add support for non-standard cell shapes via `exolve-shaped-cell`, which

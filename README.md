@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.60 February 18, 2025
+### Version: Exolve v1.61 February 22, 2025
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -2072,6 +2072,25 @@ adjoining cells (otherwise the overlap will get hidden). See the long green
 vertical lines in the example in
 [`test-cell-decorators.html`](test-cell-decorators.html).
 
+You can also add cell-specific parameters to cell decorators. Basically, you
+can use markers like `$1` (`$2`, etc.) anywhere in the `exolve-cell-decorator`
+specs. And then, in the `exolve-grid` entry for a cell that's decorated with
+a parameterized decorator, you can specify values for the parameters by
+appending the decorator number with `:val` (or `:val1:val2` if there are
+multiple parameters). The only constraint is that the parameters cannot include
+spaces (as all spaces get stripped off when parsing lines within `exolve-grid`)
+and cannot include colons or commas. If you need to have the dollar symbol
+itself within a decorator, then use `$0`. Here's an example:
+
+```
+exolve-cell-decorator: <line stroke="$1" x1="20" y1="28" x2="26" y2="28">
+exolve-cell-decorator: <text x="5" y="14.1">$1$0</text>
+exolve-grid:
+  0        0         0        0{2:42}
+  0        .         .        0{2:!!}
+  0{1:red} 0{1:blue} 0{1:red} 0{1:blue,2:*}
+```
+
 ## `exolve-postscript`
 If this section is provided, it gets rendered under the whole puzzle. Like
 `exolve-preamble`, this is also a multiline section and can include arbitrary
@@ -2515,6 +2534,10 @@ all HTML IDs and class names were made distinctive by having them use the
 making future backwards-incompatible changes unnecessary.
 
 ### Customized additional text within cells
+NOTE: A more general mechanism than `addCellText()` (with greater flexibility,
+control) for adding text to cells is now available via
+[`exolve-cell-decorator`](#exolve-cell-decorator) with parameters.
+
 Exolve provides you with a JavaScript API that you can call from
 `customizeExolve()` that lets you add arbitrary text within any cell. The
 function to call is:
@@ -2622,7 +2645,6 @@ after the Solutions section.
 This "grid inference" functionality is only supported for standard, blocked,
 UK-style crossword grids. Here are the constraints under which this works:
 - The grid is symmetric
-- Every 4x4 area has at least one black cell.
 - No light is shorter than 3 letters.
 - Enums are provided for all clues. The only exception is child clues
   in linked groups.
@@ -2632,6 +2654,8 @@ UK-style crossword grids. Here are the constraints under which this works:
   entry is supported (compared to the number of linked clues).
 - There aren't very long strips of consecutive blackened squares.
 
+We first look for the coomon case where every 4x4 area has at least one black
+cell. If that fails, then we re-try, without this constraint.
 
 ### .pdf
 While it is tempting to add support for reading crosswords out of PDFs, it is
