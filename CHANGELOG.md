@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.61.3: March 10, 2025
+
+- Continued bug-fix: when a clue has placeholder blanks that were added
+  with underscores, allow the blanks to be cleared with a second click
+  on clear-all.
+
 ### Minor Version: Exolve v1.61.2: March 10, 2025
 
 - Continued bug-fix: when a cell to be activated is not the part of

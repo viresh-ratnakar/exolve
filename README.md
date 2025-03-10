@@ -1799,7 +1799,7 @@ Here are all the names of pieces of text that you can relabel:
 | `clear`          | Clear this                           |
 | `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl-q.|
 | `clear-all`      | Clear all!                           |
-| `clear-all.hover` | Clear everything! A second click clears all placeholder entries in clues without known squares. Shortcut: Ctrl-Q.|
+| `clear-all.hover` | Clear everything! A second click clears any placeholder entries in clues. Shortcut: Ctrl-Q.|
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
 | `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell.|
@@ -1883,8 +1883,8 @@ Here are all the names of pieces of text that you can relabel:
 | `placeholder-copy` | &#8690; |
 | `placeholder-copy.hover`| Copy into currently highlighted squares. |
 | `confirm-clear-all` | Are you sure you want to clear every entry!? |
-| `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!?  (The placeholder entries will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
-| `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries!? |
+| `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!? (Placeholder entries in clues will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
+| `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries in clues!? |
 | `confirm-clear-all` | Are you sure you want to clear every entry!? |
 | `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!?  (The placeholder entries will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
 | `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries!? |

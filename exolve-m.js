@@ -193,6 +193,7 @@ function Exolve(puzzleSpec,
   this.hasDownClues = false;
   this.hasZ3dClues = false;
   this.hasNodirClues = false;
+  this.hasPlaceholders = false;
   this.reversals = {};
   this.usedReversals = {};
   // Clues labeled non-numerically (like [A] a clue...) use this to create a
@@ -336,8 +337,8 @@ function Exolve(puzzleSpec,
     'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
         'from full clues with a second click. Shortcut: Ctrl-q.',
     'clear-all': 'Clear all!',
-    'clear-all.hover': 'Clear everything! A second click clears all ' +
-        'placeholder entries in clues without known cells. Shortcut: Ctrl-Q.',
+    'clear-all.hover': 'Clear everything! A second click clears any ' +
+        'placeholder entries in clues. Shortcut: Ctrl-Q.',
     'check': 'Check this',
     'check.hover': 'Erase mistakes in highlighted cells. Long-click to ' +
         'check just the current cell.',
@@ -473,10 +474,10 @@ function Exolve(puzzleSpec,
     'placeholder-copy.hover': 'Copy into currently highlighted squares.',
     'confirm-clear-all': 'Are you sure you want to clear every entry!?',
     'confirm-clear-all-orphans1': 'Are you sure you want to clear every ' +
-        'entry!?  (The placeholder entries will not be cleared. To clear ' +
+        'entry!?  (Placeholder entries in clues will not be cleared. To clear ' +
         'the placeholders, click on clear-all again after clearing the grid.)',
     'confirm-clear-all-orphans2': 'Are you sure you want to clear every ' +
-        'entry including all the placeholder entries!?',
+        'entry including all the placeholder entries in clues!?',
     'confirm-check-all': 'Are you sure you want to clear mistakes everywhere!?',
     'confirm-mismatched-copy': 'Are you sure you want to do this mismatched ' +
         'copy (#letters-from : #squares-to)? ',
@@ -4001,6 +4002,9 @@ Exolve.prototype.parseClueLists = function() {
     if (filler) {
       this.throwErr('Filler line should not be at the end: ' + filler);
     }
+    if (clue.showBlanks) {
+      this.hasPlaceholders = true;
+    }
   }
   if (firstClueIndex && lastClueIndex) {
     this.clues[firstClueIndex].prev = lastClueIndex;
@@ -4011,6 +4015,9 @@ Exolve.prototype.parseClueLists = function() {
       this.lastOrphan = clueIndex;
       break;
     }
+  }
+  if (this.lastOrphan) {
+    this.hasPlaceholders = true;
   }
 }
 
@@ -7559,7 +7566,7 @@ Exolve.prototype.clearAllHandler = function(ev) {
 Exolve.prototype.clearAll = function(conf=true) {
   let message = this.textLabels['confirm-clear-all'];
   let clearingPls = false;
-  if (this.lastOrphan) {
+  if (this.hasPlaceholders) {
     if (this.numCellsFilled == this.numCellsPrefilled) {
       message = this.textLabels['confirm-clear-all-orphans2'];
       clearingPls = true;
