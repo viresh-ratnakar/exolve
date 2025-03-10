@@ -1,5 +1,14 @@
 # Changelog
 
+### Minor Version: Exolve v1.61.1: March 10, 2025
+
+- Bug fixes for nodir corner cases: If a nodir clue specifies some
+  cell multiple times, the code wasn't handling it well.
+- grid[][].nodirClues[] array is now de-duped.
+- When toggling direction upon landing on a cell, if that cell has
+  no clues, then set dir to 'A' rather than the last nodir clue active.
+- If there is only one cell in a clue, don't treat it as a snake.
+
 ### Version: Exolve v1.61: February 22, 2025
 
 - Allow parameters in cell-decorators, so that we can vary a decorator

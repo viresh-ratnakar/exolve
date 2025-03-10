@@ -2853,15 +2853,17 @@ Exolve.prototype.setCellLightMemberships = function(clue) {
   if (!clue || !clue.cells || clue.cells.length == 0) {
     return;
   }
-  let prev = []
+  let prev = [];
   for (let c of clue.cells) {
-    let gridCell = this.grid[c[0]][c[1]]
+    let gridCell = this.grid[c[0]][c[1]];
     let navDir = clue.dir;
     if (navDir == 'X') {
       if (!gridCell.nodirClues) {
         gridCell.nodirClues = [];
       }
-      gridCell.nodirClues.push(clue.index);
+      if (!gridCell.nodirClues.includes(clue.index)) {
+        gridCell.nodirClues.push(clue.index);
+      }
       navDir = clue.index;
     } else if (navDir == 'A') {
       gridCell.acrossClueLabel = clue.label;
@@ -2880,7 +2882,7 @@ Exolve.prototype.setCellLightMemberships = function(clue) {
         dir: navDir
       }
     }
-    prev = c
+    prev = c;
   }
 }
 
@@ -5724,13 +5726,13 @@ Exolve.prototype.resizeCurrClueAndControls = function() {
 }
 
 Exolve.prototype.gnavToInner = function(cell, dir) {
-  this.currRow = cell[0]
-  this.currCol = cell[1]
-  this.currDir = dir
+  this.currRow = cell[0];
+  this.currCol = cell[1];
+  this.currDir = dir;
 
-  let gridCell = this.currCell()
+  const gridCell = this.currCell();
   if (!gridCell || (!gridCell.isLight && !gridCell.isDgmless)) {
-    return null
+    return null;
   }
 
   this.gridInputWrapper.style.left = '' + gridCell.cellLeft + 'px'
@@ -5831,7 +5833,8 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
         }
       }
     }
-    if (last && last[0] == this.activeCells[0][0] &&
+    if (this.activeCells.length > 1 && last &&
+        last[0] == this.activeCells[0][0] &&
         last[1] == this.activeCells[0][1]) {
       // Snake!
       this.activeCells.pop();
@@ -5879,7 +5882,7 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
       this.skew3d + ` translate(${gridCell.offset3d}px)`;
   }
 
-  return activeClueIndex
+  return activeClueIndex;
 }
 
 Exolve.prototype.activateCell = function(row, col) {
@@ -6084,7 +6087,7 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
 // The current gnav position is diagramless or does not have a known
 // clue in the current direction.
 Exolve.prototype.gnavIsClueless = function() {
-  let gridCell = this.currCell()
+  const gridCell = this.currCell()
   if (!gridCell) {
     return false
   }
@@ -6328,39 +6331,41 @@ Exolve.prototype.dirCmp = function(d1, d2) {
 
 Exolve.prototype.toggleCurrDir = function() {
   // toggle direction
-  let gridCell = this.currCell()
+  const gridCell = this.currCell();
   if (!gridCell) {
-    return
+    this.currDir = 'A';
+    return;
   }
   let choices = []
   if (gridCell.acrossClueLabel || gridCell.succA || gridCell.predA) {
-    choices.push('A')
+    choices.push('A');
   }
   if (gridCell.downClueLabel || gridCell.succD || gridCell.predD) {
-    choices.push('D')
+    choices.push('D');
   }
   if (gridCell.z3dClueLabel || gridCell.succZ || gridCell.predZ) {
-    choices.push('Z')
+    choices.push('Z');
   }
   if (gridCell.nodirClues) {
     choices = choices.concat(gridCell.nodirClues)
   }
   if (choices.length < 1) {
-    return
+    this.currDir = 'A';
+    return;
   }
-  choices.sort(this.dirCmp.bind(this))
-  let i = 0
+  choices.sort(this.dirCmp.bind(this));
+  let i = 0;
   while (i < choices.length && this.currDir != choices[i]) {
     i++;
   }
   if (i >= choices.length) {
-    i = -1
+    i = -1;
   }
-  let newDir = choices[(i + 1) % choices.length]
+  const newDir = choices[(i + 1) % choices.length];
   if (this.currDir == newDir) {
-    return
+    return;
   }
-  this.currDir = newDir
+  this.currDir = newDir;
 }
 
 /**
@@ -6404,11 +6409,11 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
   if (key == 9 && !shift) {
     // tab
     if (this.usingGnav) {
-      let gridCell = this.currCell()
+      const gridCell = this.currCell()
       if (!gridCell || !this.currDir) {
         return false
       }
-      let gnav = gridCell['next' + this.currDir]
+      const gnav = gridCell['next' + this.currDir]
       if (!gnav) {
         return false
       }
@@ -6425,11 +6430,11 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
   } else if (key == 9 && shift) {
     // shift-tab
     if (this.usingGnav) {
-      let gridCell = this.currCell()
+      const gridCell = this.currCell()
       if (!gridCell || !this.currDir) {
         return false
       }
-      let gnav = gridCell['prev' + this.currDir]
+      const gnav = gridCell['prev' + this.currDir]
       if (!gnav) {
         return false
       }
@@ -6450,7 +6455,7 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
 
   this.usingGnav = true
   if (key == 8) {
-    let gridCell = this.currCell()
+    const gridCell = this.currCell()
     if (gridCell.currLetter != '0' && gridCell.currLetter != '?' &&
         !gridCell.prefill) {
       return true
