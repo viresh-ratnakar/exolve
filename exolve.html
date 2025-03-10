@@ -1765,17 +1765,17 @@ Exolve.prototype.parseShapedCellSpec = function(s, start, cell) {
 }
 
 Exolve.prototype.answerListener = function(answer, forceUpper) {
-  this.deactivateCurrCell()
-  this.deactivateCurrClue()
-  this.usingGnav = false
-  let cursor = answer.selectionStart
+  this.deactivateCurrCell();
+  this.deactivateCurrClue();
+  this.usingGnav = false;
+  let cursor = answer.selectionStart;
   if (forceUpper) {
-    answer.value = answer.value.toUpperCase().trimLeft()
+    answer.value = answer.value.toUpperCase().trimLeft();
   } else {
-    answer.value = answer.value.trimLeft()
+    answer.value = answer.value.trimLeft();
   }
-  answer.selectionEnd = cursor
-  this.updateAndSaveState()
+  answer.selectionEnd = cursor;
+  this.updateAndSaveState();
 }
 
 // Parse a questionTexts and create the question elements for (which include
@@ -5887,20 +5887,20 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
 
 Exolve.prototype.activateCell = function(row, col) {
   this.deactivateCurrCell();
-  let clue = this.gnavToInner([row, col], this.currDir)
+  const clue = this.gnavToInner([row, col], this.currDir);
+  this.deactivateCurrClue();
   if (clue) {
-    this.deactivateCurrClue();
-    this.cnavToInner(clue)
+    this.cnavToInner(clue);
   }
-  this.updateDisplayAndGetState()
+  this.updateDisplayAndGetState();
 }
 
 Exolve.prototype.cellActivator = function(row, col) {
-  this.usingGnav = true
+  this.usingGnav = true;
   this.activateCell(row, col);
 }
 Exolve.prototype.clueActivator = function(ci) {
-  this.usingGnav = false
+  this.usingGnav = false;
   this.cnavTo(ci);
 }
 
@@ -6937,9 +6937,9 @@ Exolve.prototype.handleGridInput = function() {
 }
 
 Exolve.prototype.deactivator = function() {
-  this.deactivateCurrCell()
-  this.deactivateCurrClue()
-  this.usingGnav = false
+  this.deactivateCurrCell();
+  this.deactivateCurrClue();
+  this.usingGnav = false;
 }
 
 Exolve.prototype.createListeners = function() {

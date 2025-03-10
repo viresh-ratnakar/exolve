@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.61.2: March 10, 2025
+
+- Continued bug-fix: when a cell to be activated is not the part of
+  any clue, also deactivate the last clue shown.
+
 ### Minor Version: Exolve v1.61.1: March 10, 2025
 
 - Bug fixes for nodir corner cases: If a nodir clue specifies some
