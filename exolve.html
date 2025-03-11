@@ -7973,53 +7973,58 @@ Exolve.prototype.revealCell = function() {
 
 Exolve.prototype.revealCurr = function() {
   if (this.cellLightToggleTimer) {
-    clearTimeout(this.cellLightToggleTimer)
-    this.cellLightToggleTimer = null
+    clearTimeout(this.cellLightToggleTimer);
+    this.cellLightToggleTimer = null;
   }
-  this.revealButton.innerHTML = this.textLabels['reveal']
+  this.revealButton.innerHTML = this.textLabels['reveal'];
   // If active cells are present and usingGnav, we reveal only those (the
   // current clue might be pointing to a random orphan).
-  let clueIndexForAnnoReveal = null
-  let addCellsFromOrphanClue = null
+  let clueIndexForAnnoReveal = null;
+  let addCellsFromOrphanClue = null;
   if (this.usingGnav && this.activeCells.length > 0 && !this.cellNotLight) {
     if (this.currClueIndex && !this.isOrphan(this.currClueIndex)) {
-      clueIndexForAnnoReveal = this.currClueIndex
+      clueIndexForAnnoReveal = this.currClueIndex;
     }
     if (this.currClueIndex && this.activeCells.length > 1 &&
         (this.isOrphan(this.currClueIndex) ||
          !this.allCellsKnown(this.currClueIndex)) &&
         this.szCellsToOrphan > 0) {
-      let orphanClueForCells =
+      const orphanClueForCells =
           this.cellsToOrphan[JSON.stringify(this.activeCells)];
       if (orphanClueForCells) {
         this.deactivateCurrClue();
-        this.cnavToInner(orphanClueForCells)
-        clueIndexForAnnoReveal = orphanClueForCells
-        addCellsFromOrphanClue = this.clues[orphanClueForCells]
+        this.cnavToInner(orphanClueForCells);
+        clueIndexForAnnoReveal = orphanClueForCells;
+        addCellsFromOrphanClue = this.clues[orphanClueForCells];
       }
     }
   } else if (this.currClueIndex && !this.cellNotLight) {
-    clueIndexForAnnoReveal = this.currClueIndex
-    let parentClueIndex =
-      this.clues[this.currClueIndex].parentClueIndex || this.currClueIndex
+    clueIndexForAnnoReveal = this.currClueIndex;
+    const parentClueIndex =
+      this.clues[this.currClueIndex].parentClueIndex || this.currClueIndex;
     if (this.isOrphanWithReveals(parentClueIndex)) {
       this.deactivateCurrCell();
-      addCellsFromOrphanClue = this.clues[parentClueIndex]
     }
   }
   if (clueIndexForAnnoReveal) {
-    this.revealClueAnno(clueIndexForAnnoReveal)
+    if (!addCellsFromOrphanClue) {
+      const clue = this.clues[clueIndexForAnnoReveal];
+      if (clue.cellsOfOrphan) {
+        addCellsFromOrphanClue = clue;
+      }
+    }
+    this.revealClueAnno(clueIndexForAnnoReveal);
   }
   if (addCellsFromOrphanClue) {
-    let activeCellsSet = {}
+    const activeCellsSet = {};
     for (let rowcol of this.activeCells) {
-      activeCellsSet[JSON.stringify(rowcol)] = true
+      activeCellsSet[JSON.stringify(rowcol)] = true;
     }
     for (let rowcol of addCellsFromOrphanClue.cellsOfOrphan) {
-      let gridCell = this.grid[rowcol[0]][rowcol[1]]
+      const gridCell = this.grid[rowcol[0]][rowcol[1]];
       if (!activeCellsSet[JSON.stringify(rowcol)]) {
-        gridCell.cellRect.style.fill = this.colorScheme['active']
-        this.activeCells.push(rowcol)
+        gridCell.cellRect.style.fill = this.colorScheme['active'];
+        this.activeCells.push(rowcol);
       }
     }
   }

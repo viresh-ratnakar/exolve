@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.61.4: March 10, 2025
+
+- If a clue has cells revealed in square brackets, then also reveal
+  the contents of those cells when "Reveal this" is clicked for that
+  clue (even if the clue-to-cell mapping is otherwise not shown).
+
 ### Minor Version: Exolve v1.61.3: March 10, 2025
 
 - Continued bug-fix: when a clue has placeholder blanks that were added
