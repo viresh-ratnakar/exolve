@@ -4433,6 +4433,9 @@ Exolve.prototype.cmpGnavSpans = function(s1, s2) {
   } else if (d1 > d2) {
     return 1
   }
+  if (s1.hasOwnProperty('index') && s2.hasOwnProperty('index')) {
+    return s1.index - s2.index;
+  }
   const c1 = s1.cells.length > 0 ?
     s1.cells[s1.reversed ? s1.cells.length - 1 : 0] : [s1, s1]
   const c2 = s2.cells.length > 0 ?
@@ -4580,19 +4583,25 @@ Exolve.prototype.setUpGnav = function() {
     }
   }
 
-  for (let ci in this.clues) {
+  for (const ci in this.clues) {
     const clue = this.clues[ci];
     if (clue.cells.length == 0) {
-      continue
+      continue;
     }
     if (cluesAlreadySpanned[ci]) {
-      continue
+      continue;
     }
-    let dir = (ci.charAt(0) == 'X') ? ci : ci.charAt(0)
+    const isNodir = (ci.charAt(0) == 'X');
+    const dir = isNodir ? ci : ci.charAt(0);
     const span = {
       cells: clue.cells,
       dir: dir,
     };
+    const indexPart = ci.substr(isNodir ? 2 : 1);
+    const index = parseInt(indexPart);
+    if (!isNaN(index)) {
+      span.index = index;
+    }
     if (clue.reversed) {
       span.reversed = true;
     }
@@ -6366,66 +6375,63 @@ Exolve.prototype.arrowNav = function(rincr, cincr, shouldLoop) {
  * after a cell is filled. Returns false only if a tab input was actually used.
  */
 Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
+  const gridCell = this.currCell();
   if (key == 9 && !shift) {
     // tab
     if (this.usingGnav) {
-      const gridCell = this.currCell()
       if (!gridCell || !this.currDir) {
-        return false
+        return false;
       }
-      const gnav = gridCell['next' + this.currDir]
+      const gnav = gridCell['next' + this.currDir];
       if (!gnav) {
-        return false
+        return false;
       }
-      this.currDir = gnav.dir
-      this.activateCell(gnav.cell[0], gnav.cell[1])
+      this.currDir = gnav.dir;
+      this.activateCell(gnav.cell[0], gnav.cell[1]);
     } else {
       if (!this.currClueIndex || !this.clues[this.currClueIndex] ||
           !this.clues[this.currClueIndex].next) {
-        return false
+        return false;
       }
-      this.cnavTo(this.clues[this.currClueIndex].next)
+      this.cnavTo(this.clues[this.currClueIndex].next);
     }
     return true
   } else if (key == 9 && shift) {
     // shift-tab
     if (this.usingGnav) {
-      const gridCell = this.currCell()
       if (!gridCell || !this.currDir) {
-        return false
+        return false;
       }
-      const gnav = gridCell['prev' + this.currDir]
+      const gnav = gridCell['prev' + this.currDir];
       if (!gnav) {
-        return false
+        return false;
       }
-      this.currDir = gnav.dir
-      this.activateCell(gnav.cell[0], gnav.cell[1])
+      this.currDir = gnav.dir;
+      this.activateCell(gnav.cell[0], gnav.cell[1]);
     } else {
       if (!this.currClueIndex || !this.clues[this.currClueIndex] ||
           !this.clues[this.currClueIndex].prev) {
-        return false
+        return false;
       }
-      this.cnavTo(this.clues[this.currClueIndex].prev)
+      this.cnavTo(this.clues[this.currClueIndex].prev);
     }
-    return true
+    return true;
   }
   if (!this.currCellIsValid()) {
-    return false
+    return false;
   }
 
-  this.usingGnav = true
+  this.usingGnav = true;
   if (key == 8) {
-    const gridCell = this.currCell()
     if (gridCell.currLetter != '0' && gridCell.currLetter != '?' &&
         !gridCell.prefill) {
-      return true
+      return true;
     }
     // backspace in an empty or prefilled cell
-    this.retreatCursorInLight();
-    return true
+    this.retreatCursorInLight();;
+    return true;
   }
   if (key == 46) { // delete key
-    const gridCell = this.currCell();
     if (gridCell && gridCell.isLight && !gridCell.prefill) {
       this.clearCell(this.currRow, this.currCol);
       this.updateActiveCluesState();

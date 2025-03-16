@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.61.5: March 15, 2025
+
+- Make the gnav-span ordering adhere to the clue ordering when a
+  cell is a part of a light in the current direction. The bug was
+  that if we had nodir clues with shaped cells, or if we had a 3d
+  puzzle with some reversals, then the fancy ordering would appear
+  jumpy.
+
 ### Minor Version: Exolve v1.61.4: March 10, 2025
 
 - If a clue has cells revealed in square brackets, then also reveal
