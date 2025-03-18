@@ -2153,6 +2153,13 @@ is preceded by and followed by a 1-pixel-thick grid line that has the background
 colour. It is generally convenient to eliminate the grid line in such grids,
 using `exolve-option: override-number-GRIDLINE:0`.
 
+To specify which directions a shaped cell is connected in (and contrariwise, to
+block all the other directions), you should use the
+[`exolve-cell-decorator`](#exolve-cell-decorator) feature. For a detailed
+example, see the crossword with hexagonal cells, in
+[`test-shaped-cells.html`](test-shaped-cells.html) (it also shows a couple of
+other shaped-cell examples).
+
 Please do not include an `id` or `fill` attributes in any shaped-cell element.
 
 Inside the `exolve-grid` section, as seen above, a cell can be marked as
@@ -2166,9 +2173,6 @@ location, by adding the coordinates within the square brackets, like this:
 overall grid extent in pixels is likely to be off. Please use
 [`exolve-grid-bounds`](#exolve-grid-bounds) to specify the grid's horizontal
 and vertical spans in such cases.
-
-You can see the above example as well as a couple more examples, in
-[`test-shaped-cells.html`](test-shaped-cells.html).
 
 We disallow shaped-cells in 3d-grids and when diagramless cells are present, to
 limit code complexity.
