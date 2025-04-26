@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.61 February 22, 2025
+### Version: Exolve v1.62, April 25, 2025
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -2683,6 +2683,9 @@ For crossword puzzles in PDF files, just copy the text of the crossword
 (don't worry about the grid!) and past it into the `Paste text ...` area
 in the interface. The software will be able to figure out the grid automatically
 in most cases (see details above in).
+
+You can save crosswords in Exolve format (.html) or PUZ format (.puz) from
+exolve-player.
 
 You can use your own copy of the player, or you can use [the one that I
 have put up on my site](https://viresh-ratnakar.github.io/exolve-player.html).

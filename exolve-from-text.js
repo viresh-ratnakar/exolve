@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.61 February 22, 2025
+Version: Exolve v1.62, April 25, 2025
 */
 
 /**
@@ -390,6 +390,7 @@ ExolveGridSkeleton.prototype.expandLinkedGroups = function() {
       return [];
     }
     if (grp.length < phParts.length - 1) {
+      /** TODO: why not try all possible splits when grp.length == 2? */
       console.log('Clue ' + par[1] + par[0] + ' has ' + grp.length + ' linked parts and enum has too many more parts: ' + phParts.length);
       return [];
     }

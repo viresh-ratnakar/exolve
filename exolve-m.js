@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.61 February 22, 2025';
+  this.VERSION = 'Exolve v1.62, April 25, 2025';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -4364,13 +4364,54 @@ Exolve.prototype.finalClueTweaks = function() {
   }
 }
 
+/**
+ * Remove def markers ~{...}~ from s
+ */
+Exolve.prototype.deDefMarkers = function(s) {
+  const reDef = new RegExp('(~\\{(.*)\\}~)');
+  let match;
+  while ((match = s.match(reDef)) && match.length > 2) {
+    const idx = s.indexOf(match[0]);
+    console.assert(idx >= 0, s, match);
+    const cStart = idx + 2;
+    const end = s.indexOf('}~', cStart);
+    s = s.substr(0, idx) + s.substring(cStart, end) + s.substr(end + 2);
+  }
+  return s;
+}
+
+/**
+ * Format the text of the clue, tweaking it per:
+ *   forExolve: only relevant when showEnums is false. If this is true then
+ *              enums are suppressed by appending an asterisk.
+ *   showEnums: if false then enums (if present) are suppressed
+ *   showDefs: if true then def markers ~{}~ are kept.
+ */
+Exolve.prototype.formatClue = function(
+    clue, forExolve=true, showEnums=true, showDefs=false) {
+  clue = clue.trim();
+  if (!showDefs) {
+    clue = this.deDefMarkers(clue);
+  }
+  if (showEnums) {
+    return clue;
+  }
+  const idx = clue.lastIndexOf('(');
+  if (idx < 0 || clue[clue.length - 1] != ')') {
+    return clue;
+  }
+  return forExolve ? (clue + '*') : clue.substr(0, idx);
+}
+
 Exolve.prototype.rcValid = function(r, c) {
   return (r >= 0 && c >= 0 &&
           r < this.gridHeight && c < this.gridWidth);
 }
 
-// Using hyphenAfter[] and wordEndAfter[] in clues as well as from
-// exolve-force-*, set {hyphen,wordEnd}{ToRight,Below} in grid[i][j]s.
+/**
+ * Using hyphenAfter[] and wordEndAfter[] in clues as well as from
+ * exolve-force-*, set {hyphen,wordEnd}{ToRight,Below} in grid[i][j]s.
+ */
 Exolve.prototype.setWordEndsAndHyphens = function() {
   for (c of this.forcedSeps['force-hyphen-right']) {
     if (this.rcValid(c[0], c[1])) {
@@ -8411,7 +8452,7 @@ Exolve.prototype.copyNotes = function() {
   navigator.clipboard.write(data).then(
       this.copyNotesSuccess.bind(this),
       function () {
-        this.log('Somehow failed to copy to the clipboard');
+        console.log('Somehow failed to copy notes to the clipboard');
       });
 }
 

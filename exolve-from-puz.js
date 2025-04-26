@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.61 February 22, 2025
+Version: Exolve v1.62, April 25, 2025
 */
 
 function exolveFromPuzNextNull(buffer, offset) {

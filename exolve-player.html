@@ -10,11 +10,12 @@ See the full license notice in exolve-m.js.
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.61"/>
-<script src="exolve-m.js?v1.61"></script>
-<script src="exolve-from-ipuz.js?v1.61"></script>
-<script src="exolve-from-puz.js?v1.61"></script>
-<script src="exolve-from-text.js?v1.61"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.62"/>
+<script src="exolve-m.js?v1.62"></script>
+<script src="exolve-from-ipuz.js?v1.62"></script>
+<script src="exolve-from-puz.js?v1.62"></script>
+<script src="exolve-from-text.js?v1.62"></script>
+<script src="exolve-to-puz.js?v1.62"></script>
 
 <style>
 .xlvp-wait {
@@ -184,9 +185,20 @@ pre,
         There isn't a current crossword. Perhaps open one?
       </pre>
     </details>
-    <button id="xlvp-save" class="xlvp-button" disabled onclick="xlvpSave()">
-       Save Exolve-converted crossword as exolve-player-output.html
-    </button>
+    <div>
+      <button id="xlvp-save" class="xlvp-button" disabled onclick="xlvpSave()">
+         Save crossword as:
+      </button>
+      <input id="xlvp-save-prefix" name="xlvp-save-prefix" type="text"
+          size="40" title="Enter filename without suffix"
+          style="text-align:right" value="exolve-player-output"/>
+      <select id="xlvp-save-type" name="xlvp-save-type"
+          title="Choose among .html (Exolve) or .puz formats" value="html">
+        <option value="html">.html (Exolve format)</option>
+        <option value="puz">.puz (enums shown if present)</option>
+        <option value="puznoenum">.puz (enums suppressed)</option>
+      </select>
+    </div>
   </div>
   <div id="xlvp-links" style="font-size:80%">
     <p><b>Links</b></p>
@@ -206,6 +218,8 @@ let xlvpFromTextActive = null;
 const xlvpFrame = document.getElementById('xlvp-frame');
 const xlvpSrc = document.getElementById('xlvp-src');
 const xlvpSaveButton = document.getElementById('xlvp-save');
+const xlvpSavePrefix = document.getElementById('xlvp-save-prefix');
+const xlvpSaveType = document.getElementById('xlvp-save-type');
 const xlvpFile = document.getElementById('xlvp-file');
 const xlvpText = document.getElementById('xlvp-text');
 const xlvpW = document.getElementById('xlvp-w');
@@ -228,7 +242,6 @@ function xlvpSaveState() {
     'textW': xlvpW.value,
     'textH': xlvpH.value,
     'textData': xlvpText.value,
-    'saveDisabled': xlvpSaveButton.disabled,
   };
   try {
     window.localStorage.setItem(xlvpStateKey, JSON.stringify(state));
@@ -249,7 +262,7 @@ function xlvpRestoreState() {
     if (state.textH) xlvpH.value = state.textH;
     if (state.textData) xlvpText.value = state.textData;
     if (state.data) {
-      xlvpShowExolveInner(state.data, !state.saveDisabled, true);
+      xlvpShowExolveInner(state.data, true);
     }
     console.log('Successfully restored exolve-player state');
   } catch (err) {
@@ -299,15 +312,15 @@ xlvpLastCrossword.addEventListener('click', xlvpToggleMinimizeCurrent);
 
 xlvpRestoreState();
 
-function xlvpShowExolve(specs, converted=false, hideChooser=true) {
-  const ret = xlvpShowExolveInner(specs, converted, hideChooser);
+function xlvpShowExolve(specs, hideChooser=true) {
+  const ret = xlvpShowExolveInner(specs, hideChooser);
   if (ret) {
     xlvpSaveState();
   }
   return ret;
 }
 
-function xlvpShowExolveInner(specs, converted, hideChooser) {
+function xlvpShowExolveInner(specs, hideChooser) {
   let start = specs.indexOf('exolve-begin')
   let end = specs.indexOf('exolve-end')
   if (start < 0 || end < 0 || start >= end) {
@@ -337,7 +350,7 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
                                 'exolve-option: ' +
                                 xlvpPuz.optionsForWarningFixes.join(' ') +
                                 '\nexolve-end'; 
-        xlvpShowExolve(noWarningsSpecs, converted, hideChooser);
+        xlvpShowExolve(noWarningsSpecs, hideChooser);
       });
     }
   } catch (err) {
@@ -357,7 +370,17 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
 
   xlvpData = data;
   xlvpSrc.innerText = xlvpData;
-  xlvpSaveButton.disabled = !converted;
+  let xlvpSavePrefixValue = xlvpPuz.title;
+  if (xlvpPuz.setter) {
+    xlvpSavePrefixValue += '-by-' + xlvpPuz.setter;
+  }
+  if (!xlvpSavePrefixValue) {
+    xlvpSavePrefixValue = 'exolve-player-output';
+  } else {
+    xlvpSavePrefixValue = xlvpSavePrefixValue.replace(/\s+/g, '-');
+  }
+  xlvpSavePrefix.value = xlvpSavePrefixValue;
+  xlvpSaveButton.disabled = false;
   xlvpFrame.style.display = '';
   xlvpShowing = true;
   xlvpLastCrossword.innerHTML = 'Hide current crossword';
@@ -366,16 +389,16 @@ function xlvpShowExolveInner(specs, converted, hideChooser) {
   return true;
 }
 
-function xlvpSave() {
-  const data = '' +
+function xlvpSaveGetHTMLData() {
+  return '' +
     '<!DOCTYPE html>\n' +
     '<html lang="en">\n' +
     '<head>\n' +
     '<meta charset="utf-8"/>\n' +
     '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n' +
     '<link rel="stylesheet" type="text/css" ' +
-    'href="https://viresh-ratnakar.github.io/exolve-m.css?v1.61"/>\n' +
-    '<script src="https://viresh-ratnakar.github.io/exolve-m.js?v1.61">' +
+    'href="https://viresh-ratnakar.github.io/exolve-m.css"/>\n' +
+    '<script src="https://viresh-ratnakar.github.io/exolve-m.js">' +
     '<\/script>\n' +
     '<\/head>\n' +
     '<body>\n' +
@@ -386,13 +409,40 @@ function xlvpSave() {
     '<\/script>\n' +
     '<\/body>\n' +
     '<\/html>\n';
+}
+
+function xlvpSaveGetDetails() {
+  const ret = {
+    filename: '',
+    data: '',
+    contentType: '',
+  };
+  if (xlvpSaveType.value == 'html') {
+    ret.filename = xlvpSavePrefix.value + '.html';
+    ret.data = xlvpSaveGetHTMLData();
+    ret.contentType = 'text/html;charset=UTF-8';
+  } else {
+    ret.filename = xlvpSavePrefix.value + '.puz';
+    const showEnums = xlvpSaveType.value == 'puz';
+    ret.data = exolveToPuz(xlvpPuz, showEnums);
+    ret.contentType = 'application/x-crossword';
+  }
+  return ret;
+}
+
+function xlvpSave() {
+  const saveDetails = xlvpSaveGetDetails();
+  if (!saveDetails.data) {
+    alert("Could not export data to the desired format");
+    return;
+  }
   const a = document.createElement("a");
   a.style.display = "none";
   document.body.appendChild(a);
   a.href = window.URL.createObjectURL(
-    new Blob([data], {type: "text/html;charset=UTF-8"})
+    new Blob([saveDetails.data], {type: saveDetails.contentType})
   );
-  a.setAttribute("download", 'exolve-player-output.html');
+  a.setAttribute("download", saveDetails.filename);
   a.click();
   window.URL.revokeObjectURL(a.href);
   document.body.removeChild(a);
@@ -570,7 +620,7 @@ function xlvpHandleFromTextMessage(message) {
       xlvpChoices.push(smallXlv);
       const chooser = document.getElementById(`xlvp-chooser-${i}`);
       chooser.addEventListener('click', () => {
-        xlvpShowExolve(matches[i].exolve, true, false);
+        xlvpShowExolve(matches[i].exolve, false);
         chooser.classList.add('xlvp-chooser-entry-sel');
         for (let j = 0; j < matches.length; j++) {
           if (j == i) {

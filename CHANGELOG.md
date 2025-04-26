@@ -1,5 +1,12 @@
 # Changelog
 
+### Exolve v1.62: April 25, 2025
+
+- Allow saving as .puz from exolve-player. The code for this was
+  refactored out of exet and brought into a new file called exolve-to-puz.js.
+- Also move a couple of clue formatting functions from Exet to Exolve
+  (these are needed in exolveToPuz().
+
 ### Minor Version: Exolve v1.61.5: March 15, 2025
 
 - Make the gnav-span ordering adhere to the clue ordering when a
