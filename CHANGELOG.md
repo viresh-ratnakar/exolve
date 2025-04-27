@@ -1,5 +1,13 @@
 # Changelog
 
+### Exolve v1.62.1: April 27, 2025
+
+- Add a way to prevent some cells from allowing multi-letter
+  entries when rebus-cells option is used. In some puzzles, you
+  want to use rebus cells, but not everywhere. You can now do this
+  with `exolve-no-rebus` sections, in which you can specify any
+  combinations of cells and lights to exclude.
+
 ### Exolve v1.62: April 25, 2025
 
 - Allow saving as .puz from exolve-player. The code for this was

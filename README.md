@@ -220,6 +220,7 @@ and the `exolve-end` line:
 * `exolve-explanations`
 * `exolve-nina`
 * `exolve-colour` / `exolve-color`
+* `exolve-no-rebus`
 * `exolve-question`
 * `exolve-submit`
 * `exolve-option`
@@ -440,6 +441,25 @@ that do not fit the default cell size then you should use bigger cells, using
 If there are rebus cells, then the across-direction indicator arrow in the
 current cell is placed below the text intsead of to the right of it, to leave
 more space for the text.
+
+When there are rebus cells, sometimes you want to exclude some cells/lights
+from allowing multiple-letter entries (i.e., you only want certain cells to
+have rebus entries). You can do that by adding a section called
+`exolve-no-rebus`. Just like `exolve-nina` and `exolve-color`, this section
+accepts any combination of lights and cells
+(using the [extended chessboard notation](#extended-chessboard-notation))
+in its listing of where multiple-letter entries should be disallowed. For
+example,
+
+```
+  exolve-option: rebus-cells
+  exolve-no-rebus: 6A 6D d5 c3r4
+```
+
+This would disallow multiple-letter entry into all the cells involved in the
+lights `6A`, `6D` as well as the cells `d5` and `c3r4`. Note that in a 3-d
+crossword you can specify lights using names such as `6aw` etc.
+(see the [`exolve-3d`](#exolve-3d) section).
 
 You cannot have rebus cells in crosswords that use languages with
 max-char-codes greater than one and in crosswords with diagramless cells (this

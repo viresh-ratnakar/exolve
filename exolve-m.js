@@ -173,6 +173,7 @@ function Exolve(puzzleSpec,
 
   this.ninaLines = [];
   this.colourLines = [];
+  this.noRebusLines = [];
 
   this.grid = [];
   this.clues = {};
@@ -1380,6 +1381,8 @@ Exolve.prototype.parseOverall = function() {
     } else if (parsedSec.section == 'colour' ||
                parsedSec.section == 'color') {
       this.colourLines.push(firstLine - 1)
+    } else if (parsedSec.section == 'no-rebus') {
+      this.noRebusLines.push(firstLine - 1);
     } else if (parsedSec.section == 'force-hyphen-right' ||
                parsedSec.section == 'force-hyphen-below' ||
                parsedSec.section == 'force-bar-right' ||
@@ -1478,7 +1481,11 @@ Exolve.prototype.isColour = function(s) {
   return e.color !== '';
 }
 
-Exolve.prototype.parseColoursNinas = function(s) {
+/**
+ * Parse ninas, colours, no-rebus lines (basically sections
+ * that specify cells/lights.
+ */
+Exolve.prototype.parseColoursNinasEtc = function(s) {
   let nextNinaColour = 0;
   for (let n of this.ninaLines) {
     nextNinaColour = this.parseNina(this.specLines[n], nextNinaColour);
@@ -1486,17 +1493,22 @@ Exolve.prototype.parseColoursNinas = function(s) {
   for (let c of this.colourLines) {
     this.parseColour(this.specLines[c]);
   }
+  for (let c of this.noRebusLines) {
+    this.parseNoRebus(this.specLines[c]);
+  }
 }
 
-// Parse a nina line, which consists of cell locations or clue indices.
+/**
+ * Parse a nina line, which consists of cell locations or clue indices.
+ */
 Exolve.prototype.parseNina = function(s, nextNinaColour) {
   s = this.colonSplit(s).value;
-  const ninaList = []
-  const ccccStrs = s.split(' ')
-  let colour = ''
-  for (let ccccStr of ccccStrs) {
+  const ninaList = [];
+  const ccccStrs = s.split(' ');
+  let colour = '';
+  for (const ccccStr of ccccStrs) {
     if (!ccccStr) {
-      continue
+      continue;
     }
     const cccc = this.parseCCCC(ccccStr);
     if (cccc.colour) {
@@ -1531,9 +1543,9 @@ Exolve.prototype.parseColour = function(s) {
   const cList = [];
   const ccccStrs = s.split(' ');
   let colour = '';
-  for (let ccccStr of ccccStrs) {
+  for (const ccccStr of ccccStrs) {
     if (!ccccStr) {
-      continue
+      continue;
     }
     const cccc = this.parseCCCC(ccccStr);
     if (cccc.colour) {
@@ -1560,6 +1572,25 @@ Exolve.prototype.parseColour = function(s) {
       colour: colour,
       list: cList,
   });
+}
+
+Exolve.prototype.parseNoRebus = function(s) {
+  s = this.colonSplit(s).value;
+  const ccccStrs = s.split(' ');
+  for (const ccccStr of ccccStrs) {
+    if (!ccccStr) {
+      continue;
+    }
+    const cccc = this.parseCCCC(ccccStr);
+    if (!cccc.cells) {
+      this.throwErr(
+          ccccStr + ' in exolve-no-rebus is not a cell/light specification');
+    }
+    for (const cell of cccc.cells) {
+      const gridCell = this.grid[cell[0]][cell[1]];
+      gridCell.noRebus = true;
+    }
+  }
 }
 
 Exolve.prototype.reversalKey = function(cells) {
@@ -2323,6 +2354,10 @@ Exolve.prototype.checkConsistency = function() {
       this.throwErr('Cannot use 3d-across/3d-away/3d-down sections in ' +
                     'non 3-D crosswords, not across/down');
     }
+  }
+  if (this.noRebusLines.length > 0 && !this.hasRebusCells) {
+    this.throwErr('Cannot specify exolve-no-rebus without turning on the ' +
+                  'exolve-option for rebus-cells');
   }
   if (this.submitURL) {
     let numKeys = 1
@@ -6795,7 +6830,7 @@ Exolve.prototype.enableMultiLetterEntry = function() {
     return;
   }
   const gridCell = this.currCell();
-  if (!gridCell || !gridCell.isLight) {
+  if (!gridCell || !gridCell.isLight || gridCell.noRebus) {
     return;
   }
   this.multiLetterCellRow = this.currRow;
@@ -6807,7 +6842,7 @@ Exolve.prototype.enableMultiLetterEntry = function() {
  * multiple letters are to be allowed to be entered during the
  * current entry of letters into a cell.
  */
-Exolve.prototype.checkMultiLetterMode = function(entry) {
+Exolve.prototype.checkMultiLetterMode = function(gridCell, entry) {
   if (!this.multiLetter) {
     return false;
   }
@@ -6820,10 +6855,10 @@ Exolve.prototype.checkMultiLetterMode = function(entry) {
    */
   this.multiLetterCellRow = -1;
   this.multiLetterCellCol = -1;
-  if (this.lastKeyHadShift || entry.length > 1) {
+  if ((this.lastKeyHadShift && !gridCell.noRebus) || entry.length > 1) {
     return true;
   }
-  if (this.currRow == mRow && this.currCol == mCol) {
+  if (this.currRow == mRow && this.currCol == mCol && !gridCell.noRebus) {
     this.multiLetterCellRow = mRow;
     this.multiLetterCellCol = mCol;
     return true;
@@ -6842,7 +6877,7 @@ Exolve.prototype.handleGridInput = function() {
   }
   let newInput = this.gridInput.value;
   let currDisplayChar = this.stateToDisplayChar(gridCell.currLetter);
-  const multiLetterMode = this.checkMultiLetterMode(currDisplayChar);
+  const multiLetterMode = this.checkMultiLetterMode(gridCell, currDisplayChar);
   if (gridCell.currLetter != '0' && gridCell.currLetter != '?' &&
       newInput != currDisplayChar && !multiLetterMode) {
     // The "new" input may be before or after the old input.
@@ -9782,8 +9817,10 @@ Exolve.prototype.createPuzzle = function() {
     this.makeGrid3D();
   }
 
-  // Now that we know light numbering:
-  this.parseColoursNinas();
+  /**
+   * Now that we know light numbering:
+   */
+  this.parseColoursNinasEtc();
   this.recolourCells();
   this.redisplayNinas();
 
