@@ -1441,7 +1441,7 @@ Example:
   exolve-question: What is the nina that begins with S?
     Hint: The <i>first</i> hint!
     Hint: The second hint is noticeably longer.
-    Hint:
+    Hint: Yet Another Hint.
 ```
 When hints are available for a question, and not all hints have yet been shown,
 a lightbulb icon is shown at the end of the question. Clicking on this icon
