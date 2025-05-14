@@ -1,5 +1,28 @@
 # Changelog
 
+### Exolve v1.63: May 13, 2025
+
+- Add exolve-to-ipuz.js for converting Exolve format to ipuz.
+  We only support "simple" puzzles at this time (no diagramless cells,
+  no nodir clues, not 3d, etc.).
+- Set Exolve.hasEnums if any clue enum provides a numeric length.
+- In exolve-player, when using exolve-to-{ipuz,puz}.js conversions, use
+  hasEnums to decide what kind of crossword it is (with enums or without),
+  rather than asking the user to decide whether to suppress enums.
+- Bug-fix: exolve-to-puz.js for saving current letter entries in cells
+  as solutions (now it uses the actual cell solutions).
+- Minor clean-ups.
+- Bug-fix: in exolve-from-ipz.js, suppress display of enums added
+  only to append anno/solution to a clue.
+- Add '(abbr.)' and '(acr.)' and some variants to known enums. These
+  are often used in US-style crosswords.
+- Add support for hints in questions (similar to clues). Refactor
+  the hints-in-clues code and reuse it, as an `ExolveHints` class.
+- Save the ExolveHints object for each clue in the clues[ci] object.
+  When returning to a clue, use its previous number of hints-shown
+  as the starting point.
+- Make the 'Hint:' prefix in clues/questions bold.
+
 ### Exolve v1.62.1: April 27, 2025
 
 - Add a way to prevent some cells from allowing multi-letter

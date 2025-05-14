@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.62, April 25, 2025
+Version: Exolve v1.63, May 13, 2025
 */
 
 let exolveToPuzChars8859 = null;
@@ -79,6 +79,12 @@ function exolveToPuz(xlvp, showEnums=true) {
     if (xlvp.layers3d > 1) {
       throw 'This puzzle has lights other than across/down';
     }
+    if (xlvp.hasDgmlessCells > 1) {
+      throw 'This puzzle has diagramless cells';
+    }
+    if (xlvp.allowChars) {
+      throw 'This puzzle uses special characters';
+    }
     /**
      * Generously estimate length of the buffer needed.
      */
@@ -117,8 +123,8 @@ function exolveToPuz(xlvp, showEnums=true) {
           solution = solution + '.';
           playerState = playerState + '.';
         } else {
-          solution = solution + (gridCell.currLetter != '0' ?
-            gridCell.currLetter : '?');
+          solution = solution + (gridCell.solution != '0' ?
+            xlvp.stateToDisplayChar(gridCell.solution) : '?');
           playerState = playerState + '-';
           if (gridCell.startsAcrossClue) {
             orderedClueIndices.push('A' + gridCell.startsClueLabel);
@@ -159,9 +165,12 @@ function exolveToPuz(xlvp, showEnums=true) {
     const clueLens = [];
     for (const ci of orderedClueIndices) {
       const theClue = xlvp.clues[ci];
+      if (theClue.reversed) {
+        throw 'Reversed clues are not supported';
+      }
       const startOffset = offset;
       clueOffsets.push(startOffset);
-      const puzClue = xlvp.formatClue(
+      let puzClue = xlvp.formatClue(
           theClue.clueSpan.innerText.replace(/\s+/g,' '),
           false, showEnums, false);
       if (theClue.children.length > 0) {

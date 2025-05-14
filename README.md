@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.62, April 25, 2025
+### Version: Exolve v1.63, May 13, 2025
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -30,9 +30,10 @@ Yet another option is to embed the Exolve puzzle within arbitrary web pages
 [Exolve widget](#exolve-widget) section.
 
 The [Exolve Player](https://exolve.app) web app can be used to play crossword
-files in several formats (including .puz and even just the clues copied from
-a PDF in many cases). An easy-to-remember URL for this web app is
-[exolve.app](https://exolve.app).
+files in several formats (including .puz, .ipuz, and even just the clues copied
+from a PDF in many cases). An easy-to-remember URL for this web app is
+[exolve.app](https://exolve.app). Exolve Player can also be used to export to
+Exolve, .puz, and .ipuz formats.
 
 You can also use the file [exolve-embedder.html](exolve-embedder.html) to
 serve .puz and .ipuz files using Exolve. See the details in the
@@ -645,7 +646,8 @@ setter to specify the enum as "(two words)" or "(?)" or "(7, 2w)", for example).
 Within these special cases, in the corner cases of "(7, 2words)" and
 "(6 letters)", the parsing interprets 7 and 6 respectively to be the length of
 the entry, and will check it against the length of the light as with a normal
-enum.
+enum. Some prefixes of "abbreviation" and "acronym" are also treated as enums,
+within parentheses.
 
 In the rare case that there are multiple candidate enum parts in a clue, the
 last one is used. However, this can be overridden by explicitly using "[]"
@@ -1428,6 +1430,27 @@ example:
   exolve-question: That quirky poet? (1,1,8) [lowercase-ok] e e cummings
   exolve-question: A long comment from you, please (300)* [lowercase-ok]
 ```
+
+### Hints in questions
+
+You can include hints in questions, just like in clues. This is done
+by providing a sequence of lines immediately under the question, each one carrying
+the prefix, `Hint:` (case-insensitive). Each hint can include HTML formatting.
+Example:
+```
+  exolve-question: What is the nina that begins with S?
+    Hint: The <i>first</i> hint!
+    Hint: The second hint is noticeably longer.
+    Hint:
+```
+When hints are available for a question, and not all hints have yet been shown,
+a lightbulb icon is shown at the end of the question. Clicking on this icon
+will reveal the next hint. Clicking on any hint will hide all the hints once
+again.
+
+As with clue hints, Exolve does not save state about how many hints were shown
+for any question, so if you reload the puzzle then all hints restart in the
+not-shown state.
 
 If the setter has created an `exolve-submit` section, then answers to each
 `exolve-question` are also sent to the submit URL (see below for details).
@@ -2362,7 +2385,7 @@ next subsection.
 
 If you have your crossword available as a .puz or .ipuz file, you can convert
 it to the Exolve format using [`exolve-player.html`](#exolve-player.html). Or, you
-can serve it using [`Exolve Embedder`](#exolve-embedder). Or, you
+can serve it using [`Exolve Embedder`](#exolve-embedder).
 
 ### Exolve widget
 

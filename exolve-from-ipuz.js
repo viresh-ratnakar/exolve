@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.62, April 25, 2025
+Version: Exolve v1.63, May 13, 2025
 */
 
 /**
@@ -59,6 +59,7 @@ exolveFromIpuz = function(ipuz, fname='') {
 
   let exolve = `
     exolve-begin
+      exolve-option: ignore-enum-mismatch
       exolve-width: ${w}
       exolve-height: ${h}`
   if (id) {
@@ -183,79 +184,87 @@ exolveFromIpuz = function(ipuz, fname='') {
     }
   }
   for (let i = 0; i < h; i++) {
-    let gridRow = '        '
+    let gridRow = '        ';
     for (let j = 0; j < w; j++) {
-      let gridCell = grid[i][j]
+      const gridCell = grid[i][j];
       if (!gridCell.isLight) {
-        gridRow += '.'
-        continue
+        gridRow += '.';
+        continue;
       }
-      gridRow += ipuzSol ? gridCell.solution : gridCell.currLetter
-      if (gridCell.hasCircle) gridRow += '@'
-      if (gridCell.hasBarAfter && gridCell.hasBarUnder) gridRow += '+'
-      else if (gridCell.hasBarAfter) gridRow += '|'
-      else if (gridCell.hasBarUnder) gridRow += '_'
+      gridRow += ipuzSol ? gridCell.solution : gridCell.currLetter;
+      if (gridCell.hasCircle) gridRow += '@';
+      if (gridCell.hasBarAfter && gridCell.hasBarUnder) gridRow += '+';
+      else if (gridCell.hasBarAfter) gridRow += '|';
+      else if (gridCell.hasBarUnder) gridRow += '_';
     }
-    exolve += '\n' + gridRow
+    exolve += '\n' + gridRow;
   }
 
-  let clues = ipuz['clues'] || {}
+  const clues = ipuz['clues'] || {};
   for (let idir in clues) {
-    let dir = 'A'
-    let ldir = idir.toLowerCase()
+    let dir = 'A';
+    let ldir = idir.toLowerCase();
     if (ldir == 'across') {
     } else if (ldir == 'down') {
-      dir = 'D'
+      dir = 'D';
     } else {
-      console.log('ipuz: unsupported direction: ' + idir)
+      console.log('ipuz: unsupported direction: ' + idir);
       return '';
     }
     exolve += `
-      exolve-${ldir}:`
-    let dirClues = clues[idir]
-    for (clue of dirClues) {
-      let objClue = clue || {}
+      exolve-${ldir}:`;
+    const dirClues = clues[idir];
+    for (const clue of dirClues) {
+      let objClue = clue || {};
       if (typeof objClue !== 'object') {
-        objClue = {clue: objClue}
+        objClue = {clue: objClue};
       } else if (Array.isArray(objClue)) {
-        objClue = {number: objClue[0], clue: objClue[1]}
+        objClue = {number: objClue[0], clue: objClue[1]};
       }
-      let clueText = []
-      if (objClue.number) clueText.push(objClue.number)
-      else if (objClue.label) clueText.push('[' + objClue.label + ']')
+      const clueText = [];
+      if (objClue.number) {
+        clueText.push(objClue.number);
+      } else if (objClue.label) {
+        clueText.push('[' + objClue.label + ']');
+      }
       if (objClue.continued) {
         for (let child of objClue.continued) {
-          let s = ''
-          if (child.direction) s += child.direction.charAt(0)
-          if (child.number) s += child.number
-          if (s) clueText.push(',' + s)
+          let s = '';
+          if (child.direction) s += child.direction.charAt(0);
+          if (child.number) s += child.number;
+          if (s) clueText.push(',' + s);
         }
       }
-      if (objClue.clue) clueText.push(objClue.clue)
-      let haveEnum = false
-      if (objClue.enumeration) {
-        clueText.push('(' + objClue.enumeration + ')')
-        haveEnum = true
+      let haveEnum = false;
+      if (objClue.clue) {
+        clueText.push(objClue.clue);
+        if (objClue.clue.trim().endsWith(')')) {
+          haveEnum = true;
+        }
+      }
+      if (objClue.enumeration && !haveEnum) {
+        clueText.push('(' + objClue.enumeration + ')');
+        haveEnum = true;
       }
       if (objClue.answer) {
         if (!haveEnum) {
-          clueText.push('(?)')
-          haveEnum = true
+          clueText.push('(?)*');
+          haveEnum = true;
         }
-        clueText.push('[' + objClue.answer + ']')
+        clueText.push('[' + objClue.answer + ']');
       }
       if (objClue.explanation) {
         if (!haveEnum) {
-          clueText.push('(?)')
-          haveEnum = true
+          clueText.push('(?)*');
+          haveEnum = true;
         }
-        clueText.push(objClue.explanation)
+        clueText.push(objClue.explanation);
       }
 
       exolve += `
-          ${clueText.join(' ')}`
+          ${clueText.join(' ')}`;
     }
   }
-  exolve += '\n    exolve-end\n'
-  return exolve
+  exolve += '\n    exolve-end\n';
+  return exolve;
 }

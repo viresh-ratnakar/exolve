@@ -10,12 +10,13 @@ See the full license notice in exolve-m.js.
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.62"/>
-<script src="exolve-m.js?v1.62"></script>
-<script src="exolve-from-ipuz.js?v1.62"></script>
-<script src="exolve-from-puz.js?v1.62"></script>
-<script src="exolve-from-text.js?v1.62"></script>
-<script src="exolve-to-puz.js?v1.62"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.63"/>
+<script src="exolve-m.js?v1.63"></script>
+<script src="exolve-from-ipuz.js?v1.63"></script>
+<script src="exolve-from-puz.js?v1.63"></script>
+<script src="exolve-from-text.js?v1.63"></script>
+<script src="exolve-to-ipuz.js?v1.63"></script>
+<script src="exolve-to-puz.js?v1.63"></script>
 
 <style>
 .xlvp-wait {
@@ -193,10 +194,10 @@ pre,
           size="40" title="Enter filename without suffix"
           style="text-align:right" value="exolve-player-output"/>
       <select id="xlvp-save-type" name="xlvp-save-type"
-          title="Choose among .html (Exolve) or .puz formats" value="html">
+          title="Choose among .html (Exolve), .puz, .ipuz formats" value="html">
         <option value="html">.html (Exolve format)</option>
-        <option value="puz">.puz (enums shown if present)</option>
-        <option value="puznoenum">.puz (enums suppressed)</option>
+        <option value="puz">.puz</option>
+        <option value="ipuz">.ipuz</option>
       </select>
     </div>
   </div>
@@ -368,6 +369,7 @@ function xlvpShowExolveInner(specs, hideChooser) {
     }
   }
 
+
   xlvpData = data;
   xlvpSrc.innerText = xlvpData;
   let xlvpSavePrefixValue = xlvpPuz.title;
@@ -421,10 +423,13 @@ function xlvpSaveGetDetails() {
     ret.filename = xlvpSavePrefix.value + '.html';
     ret.data = xlvpSaveGetHTMLData();
     ret.contentType = 'text/html;charset=UTF-8';
-  } else {
+  } else if (xlvpSaveType.value == 'puz') {
     ret.filename = xlvpSavePrefix.value + '.puz';
-    const showEnums = xlvpSaveType.value == 'puz';
-    ret.data = exolveToPuz(xlvpPuz, showEnums);
+    ret.data = exolveToPuz(xlvpPuz, xlvpPuz.hasEnums);
+    ret.contentType = 'application/x-crossword';
+  } else if (xlvpSaveType.value == 'ipuz') {
+    ret.filename = xlvpSavePrefix.value + '.ipuz';
+    ret.data = exolveToIpuz(xlvpPuz, xlvpPuz.hasEnums);
     ret.contentType = 'application/x-crossword';
   }
   return ret;
