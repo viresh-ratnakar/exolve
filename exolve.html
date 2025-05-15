@@ -3148,18 +3148,24 @@ Exolve.prototype.findEnum = function(clueLine) {
   return candidate;
 }
 
-// Parse an enum like (4) or (4,5), or (5-2,4) or (5 6). Also allow enums like these:
-//   (?), (2 words) (5 letters), (6, 2 wds) (abbr.) (acr.)
-// Return an object with the following properties:
-// enumLen: set to 0 if the enum is something like (?) or (2 words), else
-//   the #letters implied by the enum.
-// hyphenAfter[] (0-based indices)
-// wordEndAfter[] (0-based indices)
-// afterClue index after clue
-// afterEnum index after enum
-// dontShow if enum is followed immediately by *
-// placeholder (something like ???? ???-?'?)
-// enumStr the substring that is the enum, such as "(4-2,1)"
+/**
+ * Parse an enum like (4) or (4,5), or (5-2,4) or (5 6). Also allow enums like these:
+ *   (?), (2 words) (5 letters), (6, 2 wds) (abbr.) (acr.)
+ * Return an object with the following properties:
+ * enumLen: set to 0 if the enum is something like (?) or (2 words), else
+ *   the #letters implied by the enum.
+ * hyphenAfter[] (0-based indices)
+ * wordEndAfter[] (0-based indices)
+ * afterClue index after clue
+ * afterEnum index after enum
+ * dontShow if enum is followed immediately by *
+ * placeholder (something like ???? ???-?'?)
+ * enumStr the substring that is the enum, such as "(4-2,1)"
+ * hasEmptyBracs is true if there is [] terminating the clue and not an enum
+ *
+ * For US-style puzzles with no enums, if an anno is provided, it is
+ * prefixed with '[]'.
+ */
 Exolve.prototype.parseEnum = function(clueLine) {
   const parse = {
     enumLen: 0,
@@ -3170,9 +3176,16 @@ Exolve.prototype.parseEnum = function(clueLine) {
     dontShow: false,
     placeholder: '',
     enumStr: '',
+    hasEmptyBracs: false,
   };
   const foundEnum = this.findEnum(clueLine);
   if (!foundEnum) {
+    const bracsIndex = clueLine.lastIndexOf('[]');
+    if (bracsIndex >= 0) {
+      parse.afterClue = bracsIndex;
+      parse.afterEnum = bracsIndex;
+      parse.hasEmptyBracs = true;
+    }
     return parse;
   }
   const enumLocation = foundEnum[0];
@@ -3933,10 +3946,10 @@ Exolve.prototype.setClueSolution = function(ci) {
 }
 
 Exolve.prototype.parseAnno = function(anno, clueIndex) {
-  let theClue = this.clues[clueIndex]
-  anno = anno.trim()
+  let theClue = this.clues[clueIndex];
+  anno = anno.trim();
   while (anno && anno.substr(0, 1) == '[') {
-    let indexOfBrac = anno.indexOf(']')
+    let indexOfBrac = anno.indexOf(']');
     if (indexOfBrac <= 0) {
       break;
     }
@@ -3944,24 +3957,25 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
     let cellsOfOrphan = this.parseCellsOfOrphan(inBrac);
     if (!theClue.cellsOfOrphan &&
         cellsOfOrphan && cellsOfOrphan.cells.length > 0) {
-      theClue.cellsOfOrphan = cellsOfOrphan.cells
+      theClue.cellsOfOrphan = cellsOfOrphan.cells;
       for (let segment of cellsOfOrphan.segments) {
-        this.cellsToOrphan[JSON.stringify(segment)] = clueIndex
-        this.szCellsToOrphan++
+        this.cellsToOrphan[JSON.stringify(segment)] = clueIndex;
+        this.szCellsToOrphan++;
       }
+      this.hasReveals = true;
     } else if (inBrac && !theClue.solution) {
-      theClue.explicitSol = true
+      theClue.explicitSol = true;
       theClue.solution = inBrac;
+      this.hasReveals = true;
     } else if (!inBrac) {
-      // Skip empty [] in anno, used to point at the start of the anno if
-      // there are multiple enum-like strings within the clue.
-      anno = anno.substr(indexOfBrac + 1).trim();
-      break;
+      /**
+       * Skip empty [] in anno, used to point at the start of the anno if
+       * there are multiple or no enum-like strings within the clue.
+       */
     } else {
       break;
     }
     anno = anno.substr(indexOfBrac + 1).trim();
-    this.hasReveals = true
   }
   let numBlanks = 0;
   while (anno && anno.substr(0, 1) == '_') {
@@ -3975,6 +3989,9 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
       theClue.placeholderForBlank = anno.substring(1, x);
       anno = anno.substr(x + 1).trim();
     }
+  }
+  if (anno) {
+    this.hasReveals = true;
   }
   theClue.anno = anno;
 }

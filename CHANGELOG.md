@@ -1,5 +1,16 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.1: May 14, 2025
+
+- Add better support for enum-less clues in US-style crosswords: the marker
+  `[]` can now be used to separate an enum-less clue from in-clue
+  solution/anno.
+- Make `parseEnum()` detect this marker and report it in the returned parse
+  object has `\.hasEmptyBracs`.
+- Bug-fix: exolve-from-ipuz.js was outputting 0 as cell solution in exolve,
+  which made it break when a puzzle had only some solutions available. Changed
+  to '?'.
+
 ### Exolve v1.63: May 13, 2025
 
 - Add exolve-to-ipuz.js for converting Exolve format to ipuz.
@@ -23,7 +34,7 @@
   as the starting point.
 - Make the 'Hint:' prefix in clues/questions bold.
 
-### Exolve v1.62.1: April 27, 2025
+### Minor Version: Exolve v1.62.1: April 27, 2025
 
 - Add a way to prevent some cells from allowing multi-letter
   entries when rebus-cells option is used. In some puzzles, you

@@ -747,14 +747,18 @@ slot of an orphan clue](#jigsaw-puzzle-clues), upon "Reveal this," even with
 this option.
 
 If the leading part of the anno needs to be something in square brackets, such
-as "... (6) [t]WITTER ...," then setters should include the solution before
+as `... (6) [t]WITTER ...`, then setters should include the solution before
 that (even if it can be inferred from the grid), to avoid misinterpreting the
-leading part as the solution, like "... (6) [WITTER] [t]WITTER ..." Or, they
+leading part as the solution, like `... (6) [WITTER] [t]WITTER ...` Or, they
 can use an empty pair of square brackets to mark the end of the clue, like
-"... (6) [] [t]WITTER ..." The special "[]" clue-end marker string is also
+`... (6) [] [t]WITTER ...` The special `[]` clue-end marker string is also
 useful if there is any ambiguity about where the clue ends (perhaps because of
 multiple enum-like substrings) that cannot be resolved by providing the
 solution in square brackets.
+
+In addition, for US-style grids with no enums, if an annotation needs to be
+specified, it can be done by ending the clue part with `[]` and then
+appending the annotation.
 
 Here are some more complex examples of enum/annotation parsing.
 ```
@@ -767,6 +771,10 @@ Here are some more complex examples of enum/annotation parsing.
   7 This is also an enum-less but with-anno clue that also ends here! (?)* [] [t]WITTER Here is the anno.
   8 This clue, even though its anno contains an enum-like substring, ends here! (4) The (word) and (4 letters) enum-like parts here are not numeric.
   9 This clue (13) does not end now (4) as [square brackets do not follow immediately]; it ends here! (4)
+ 10 US-style enum-less clue with no anno
+ 11 US-style enum-less clue, also with no anno []
+ 12 US-style enum-less clue, with anno [] Here's the explanation, friends!
+ 12 US-style enum-less clue, with in-clue solution [] [ANSWER]
 ```
 
 #### In-clue annotations

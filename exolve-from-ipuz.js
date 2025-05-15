@@ -191,7 +191,10 @@ exolveFromIpuz = function(ipuz, fname='') {
         gridRow += '.';
         continue;
       }
-      gridRow += ipuzSol ? gridCell.solution : gridCell.currLetter;
+      const c = (gridCell.solution && gridCell.solution != '0' &&
+                 gridCell.solution != '?') ?
+          gridCell.solution : '?';
+      gridRow += c;
       if (gridCell.hasCircle) gridRow += '@';
       if (gridCell.hasBarAfter && gridCell.hasBarUnder) gridRow += '+';
       else if (gridCell.hasBarAfter) gridRow += '|';
@@ -248,14 +251,14 @@ exolveFromIpuz = function(ipuz, fname='') {
       }
       if (objClue.answer) {
         if (!haveEnum) {
-          clueText.push('(?)*');
+          clueText.push('[]');
           haveEnum = true;
         }
         clueText.push('[' + objClue.answer + ']');
       }
       if (objClue.explanation) {
         if (!haveEnum) {
-          clueText.push('(?)*');
+          clueText.push('[]');
           haveEnum = true;
         }
         clueText.push(objClue.explanation);
