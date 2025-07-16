@@ -8,7 +8,7 @@
   beginning or end, then combine those chunks with their neighbours.
   This reduces complexity (by cutting down the number of possiilities).
 - Add special cases for total length = 9 and enum only indicating one
-  chunk (we had such special cases already for total length = 7, 8, 9).
+  chunk (we had such special cases already for total length = 6, 7, 8).
   The special cases try these splits: [3, 6], [4, 5], [5, 4], [6, 3].
 - When the number of lights is exactly two, and the enum-determined
   chunks number 4 or more, previously we were giving up. Now, we
