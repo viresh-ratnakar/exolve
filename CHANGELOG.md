@@ -1,5 +1,35 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.3: July 15, 2025
+
+- This update only touches exolve-from-text.js. It makes a few improvement,
+  now handling a few more cases for linked clues.
+- If there's a linked enum that has chunks shorter than length 3 at the
+  beginning or end, then combine those chunks with their neighbours.
+  This reduces complexity (by cutting down the number of possiilities).
+- Add special cases for total length = 9 and enum only indicating one
+  chunk (we had such special cases already for total length = 7, 8, 9).
+  The special cases try these splits: [3, 6], [4, 5], [5, 4], [6, 3].
+- When the number of lights is exactly two, and the enum-determined
+  chunks number 4 or more, previously we were giving up. Now, we
+  handle this too, by simply trying to split at each of the natural
+  boundaries (this was listed as a TODO in the code, is now handled).
+- Add a couple more autogrid test files.
+
+### Minor Version: Exolve v1.63.2: May 17, 2025
+
+- Instead of hasEnums, which was set to true if *any* clue had a numeric enum,
+  compute and set allCluesHaveEnums, which is a more useful property for Exet,
+  because that's the situation when we want Exet to require enums.
+- In exolve-to-puz.js and exolve-to-ipuz.js, get rid of "showEnums": if a clue
+  had an enum, it should be shown, if not (or if it was hidden with a \*),
+  then it should not.
+- In exolve-to-ipuz.js if ipuz does not have solutions, then use '0" for
+  light cells (not '?'), thereby preventing "Reveal all" from showing up.
+- Save enumParse in clues.
+- When parsing enums, let afterClue point to the start of the part of the
+  clue where the enum begins (if it exists, else end of clue)
+
 ### Minor Version: Exolve v1.63.1: May 14, 2025
 
 - Add better support for enum-less clues in US-style crosswords: the marker
