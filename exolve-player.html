@@ -425,11 +425,11 @@ function xlvpSaveGetDetails() {
     ret.contentType = 'text/html;charset=UTF-8';
   } else if (xlvpSaveType.value == 'puz') {
     ret.filename = xlvpSavePrefix.value + '.puz';
-    ret.data = exolveToPuz(xlvpPuz, xlvpPuz.hasEnums);
+    ret.data = exolveToPuz(xlvpPuz);
     ret.contentType = 'application/x-crossword';
   } else if (xlvpSaveType.value == 'ipuz') {
     ret.filename = xlvpSavePrefix.value + '.ipuz';
-    ret.data = exolveToIpuz(xlvpPuz, xlvpPuz.hasEnums);
+    ret.data = exolveToIpuz(xlvpPuz);
     ret.contentType = 'application/x-crossword';
   }
   return ret;
@@ -530,17 +530,20 @@ function xlvpDrag(ev) {
 
 function xlvpOnText() {
   if (xlvpFromTextActive) {
-    /* Cancel as been clicked */
+    /* Cancel has been clicked */
     xlvpEndFromTextWorker();
     return;
   }
   xlvpShowText(xlvpText.value);
 }
 
-function xlvpEndFromTextWorker() {
+function xlvpRestoreInferDisplay() {
   xlvpInfer.innerHTML = xlvpInferHTML;
   xlvpInfer.className = 'xlvp-button';
   xlvpInferMsg.innerHTML = '';
+}
+
+function xlvpEndFromTextWorker() {
   if (xlvpFromTextActive) {
     xlvpFromTextActive.worker.terminate();
     xlvpFromTextActive = null;
@@ -548,13 +551,20 @@ function xlvpEndFromTextWorker() {
 }
 
 function xlvpShowText(text, fname='provided text') {
+  xlvpInferMsg.innerHTML = 'Generating candidates...';
+  xlvpInfer.innerHTML = 'Working! [click to cancel]';
+  xlvpInfer.className = 'xlvp-button-working';
+  xlvpInferMsg.offsetHeight;  /** hack to force repaint */
+  /** Try to get the UI to update */
+  setTimeout(xlvpShowTextInner, 0, text, fname);
+}
+
+function xlvpShowTextInner(text, fname) {
+  xlvpInferMsg.style.display = '';  /** force repaint */
   if (xlvpFromTextActive) {
     /* New text data, kill the old worker if active */
     xlvpEndFromTextWorker();
   }
-  xlvpInfer.className = 'xlvp-button-working';
-  xlvpInfer.innerHTML = 'Working! [click to cancel]';
-
   const w = xlvpW.value;
   const h = xlvpH.value;
 
@@ -565,6 +575,7 @@ function xlvpShowText(text, fname='provided text') {
                      ' grid from ' + fname + ': ' + worker;
     alert(alertMsg);
     xlvpEndFromTextWorker();
+    xlvpRestoreInferDisplay();
     return;
   }
   xlvpFromTextActive = {
@@ -592,6 +603,7 @@ function xlvpHandleFromTextMessage(message) {
   const saved = xlvpFromTextActive;
 
   xlvpEndFromTextWorker();
+  xlvpRestoreInferDisplay();
 
   const matches = message.results || [];
   if (matches.length == 0) {

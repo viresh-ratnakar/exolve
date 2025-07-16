@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.4: July 16, 2025
+
+- Only a tweak to exolve-player.html: sometimes exolveFromText() takes
+  a long time in set-up (when there are lots of baseline candidates, as
+  can now be the case after v1.63.3). Force the UI to refresh and show
+  the red "Working! ..." button immediately in xlvpShowText().
+
 ### Minor Version: Exolve v1.63.3: July 15, 2025
 
 - This update only touches exolve-from-text.js. It makes a few improvement,
