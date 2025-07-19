@@ -242,7 +242,8 @@ function Exolve(puzzleSpec,
   this.hasZ3dClues = false;
   this.hasNodirClues = false;
   this.hasPlaceholders = false;
-  this.hasEnums = false;
+  /** Do all clues have enums with lengths specified? */
+  this.allCluesHaveEnums = false;
   this.reversals = {};
   this.usedReversals = {};
   // Clues labeled non-numerically (like [A] a clue...) use this to create a
@@ -1838,14 +1839,15 @@ Exolve.prototype.redisplayQuestions = function() {
     if (typeof entry === 'object') {
       s = entry.question;
     }
-    let enumParse = this.parseEnum(s);
+    const enumParse = this.parseEnum(s);
     let inputLen = enumParse.placeholder.length;
 
-    let afterEnum = enumParse.afterEnum;
-    let rawQ = s.substr(0, enumParse.afterClue);
+    const rawQ = s.substr(
+        0, (enumParse.dontShow ?
+            enumParse.afterClue : enumParse.afterEnum)).trim();
 
     let hideEnum = (inputLen > 0 && enumParse.dontShow);
-    s = s.substr(afterEnum).trim();
+    s = s.substr(enumParse.afterEnum).trim();
 
     let forceUpper = true;
     if (s.substr(0,14) == "[lowercase-ok]") {
@@ -2890,13 +2892,16 @@ Exolve.prototype.newClue = function(index) {
   clue.label = index.substr(1);
   clue.cells = [];
   clue.clue = '';
+
+  clue.enumParse = this.parseEnum('');
   clue.enumLen = 0;
   clue.hyphenAfter = [];
   clue.wordEndAfter = [];
+  clue.placeholder = '';
+
   clue.anno = '';
   clue.linkedOffset = 0;
   clue.reversed = false;
-  clue.placeholder = '';
   clue.solution = '';
   clue.hints = [];
   return clue;
@@ -3060,16 +3065,16 @@ Exolve.prototype.markClueStartsUsingGrid = function() {
 
 // If there are any html closing tags, move past them.
 Exolve.prototype.adjustAfterEnum = function(clueLine, afterEnum) {
-  let lineAfter = clueLine.substr(afterEnum)
+  let lineAfter = clueLine.substr(afterEnum);
   while (lineAfter.trim().substr(0, 2) == '</') {
     let closer = clueLine.indexOf('>', afterEnum);
     if (closer < 0) {
-      return afterEnum
+      return afterEnum;
     }
-    afterEnum = closer + 1
-    lineAfter = clueLine.substr(afterEnum)
+    afterEnum = closer + 1;
+    lineAfter = clueLine.substr(afterEnum);
   }
-  return afterEnum
+  return afterEnum;
 }
 
 // Parse a cell location in "chess notation" (a1 = bottom-left, etc.) or as
@@ -3156,8 +3161,8 @@ Exolve.prototype.findEnum = function(clueLine) {
  *   the #letters implied by the enum.
  * hyphenAfter[] (0-based indices)
  * wordEndAfter[] (0-based indices)
- * afterClue index after clue
- * afterEnum index after enum
+ * afterClue index after clue (excluding enum if present)
+ * afterEnum index after enum (if present)
  * dontShow if enum is followed immediately by *
  * placeholder (something like ???? ???-?'?)
  * enumStr the substring that is the enum, such as "(4-2,1)"
@@ -3191,14 +3196,13 @@ Exolve.prototype.parseEnum = function(clueLine) {
   const enumLocation = foundEnum[0];
   const enumEndLocation = foundEnum[1];
   const isNumeric = foundEnum[2];
-  parse.enumStr = clueLine.substring(enumLocation, enumEndLocation + 1)
+  parse.enumStr = clueLine.substring(enumLocation, enumEndLocation + 1);
+  parse.afterClue = enumLocation;
   if (clueLine.charAt(enumEndLocation + 1) == '*') {
     parse.afterEnum = enumEndLocation + 2;
-    parse.afterClue = enumLocation;
     parse.dontShow = true;
   } else {
-    parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1)
-    parse.afterClue = parse.afterEnum;
+    parse.afterEnum = this.adjustAfterEnum(clueLine, enumEndLocation + 1);
   }
   if (!isNumeric) {
     /* Salvage an enumLen from cases like (6, 2 words) and (5 letters) */
@@ -3225,7 +3229,7 @@ Exolve.prototype.parseEnum = function(clueLine) {
     for (let i = 0; i < nextPart; i++) {
       parse.placeholder = parse.placeholder + '?';
     }
-    parse.enumLen = parse.enumLen + nextPart
+    parse.enumLen += nextPart;
     enumLeft = enumLeft.replace(/^\s*\d+/, '');
     enumLeft = enumLeft.replace(/^\s+(\d)/, ',$1');
     let nextSymbol = enumLeft.substr(0, 1);
@@ -3635,23 +3639,26 @@ Exolve.prototype.parseInClueAnnos = function(clue) {
   }
 }
 
-// Parse a single clue.
-// Return an Clue object with the following properties set:
-// index
-// label
-// isOffNum
-// children[] (raw parseClueLabel() results, not yet clueIndices)
-// clue
-// enumLen
-// hyphenAfter[] (0-based indices)
-// wordEndAfter[] (0-based indices)
-// placeholder
-// placeholderForBlank
-// startCell optional, used in diagramless+unsolved and off-numeric labels
-// cells[] optionally filled, if all clue cells are specified in the clue
-// anno (the part after the enum, if present)
-// isFiller
-// inClueAnnos: array of class names for in-clue anno spans
+/**
+ * Parse a single clue.
+ * Return an Clue object with the following properties set:
+ * index
+ * label
+ * isOffNum
+ * children[] (raw parseClueLabel() results, not yet clueIndices)
+ * clue
+ * enumLen
+ * enumStr
+ * hyphenAfter[] (0-based indices)
+ * wordEndAfter[] (0-based indices)
+ * placeholder
+ * enumParse
+ * startCell optional, used in diagramless+unsolved and off-numeric labels
+ * cells[] optionally filled, if all clue cells are specified in the clue
+ * anno (the part after the enum, if present)
+ * isFiller
+ * inClueAnnos: array of class names for in-clue anno spans
+ */
 Exolve.prototype.parseClue = function(dir, clueLine) {
   clueLine = clueLine.trim();
   let numCellsGiven = 0;
@@ -3742,12 +3749,18 @@ Exolve.prototype.parseClue = function(dir, clueLine) {
   }
 
   const enumParse = this.parseEnum(clueLine);
+  clue.enumParse = enumParse;
+  /**
+   * If enumParse does not provide enumLen, we'll set clue.enumLen
+   * from cell count later, if possible.
+   */
   clue.enumLen = enumParse.enumLen;
   clue.hyphenAfter = enumParse.hyphenAfter;
   clue.wordEndAfter = enumParse.wordEndAfter;
   clue.placeholder = enumParse.placeholder;
   clue.enumStr = enumParse.enumStr;
-  clue.clue = clueLine.substr(0, enumParse.afterClue).trim();
+
+  clue.clue = clueLine.substr(0, enumParse.afterEnum).trim();
   clue.anno = clueLine.substr(enumParse.afterEnum).trim();
 
   this.setClueCellsDgmless(clue);
@@ -4129,9 +4142,6 @@ Exolve.prototype.parseClueLists = function() {
         startNewTable = false;
         newTableHeading = '';
       }
-      if (clue.enumLen > 0) {
-        this.hasEnums = true;
-      }
 
       if (clue.clue) {
         this.allClueIndices.push(clue.index);
@@ -4450,21 +4460,29 @@ Exolve.prototype.roughlyStartsWith = function(s, prefix) {
   return normS.startsWith(normP);
 }
 
-// Copy clue solutions to annos if warranted.
-// Place a trailing period and space at the end of clue full display labels that
-// end in letter/digit. Wrap in a clickable span if all cells are not known.
-//
-// For American-style crosswords (no enums provided), set enunLen in the
-// clue to be the number of cells.
+/**
+ * Copy clue solutions to annos if warranted.
+ * Place a trailing period and space at the end of clue full display labels that
+ * end in letter/digit. Wrap in a clickable span if all cells are not known.
+ *
+ * For American-style crosswords (no enums provided), set enunLen in the
+ * clue to be the number of cells.
+ *
+ * Set allCluesHaveEnums to true if all non-child clues have numeric enums.
+ */
 Exolve.prototype.finalClueTweaks = function() {
+  this.allCluesHaveEnums = true;
   for (const clueIndex of this.allClueIndices) {
     const theClue = this.clues[clueIndex];
     this.setClueSolution(clueIndex);
+    if (!theClue.parentClueIndex && !theClue.enumParse.enumLen) {
+      this.allCluesHaveEnums = false;
+    }
     if (!theClue.enumLen && !this.hasDgmlessCells) {
       const cells = this.getAllCells(clueIndex);
       theClue.enumLen = cells.length;
     }
-    theClue.dispSol = ''
+    theClue.dispSol = '';
     if (this.addSolutionToAnno && theClue.solution &&
         !this.isOrphan(clueIndex) && !theClue.showBlanks &&
         (theClue.explicitSol ||
@@ -4475,26 +4493,26 @@ Exolve.prototype.finalClueTweaks = function() {
     }
     if (theClue.anno || theClue.dispSol ||
         (theClue.solution && theClue.showBlanks)) {
-      this.hasReveals = true
+      this.hasReveals = true;
     }
     if (!theClue.fullDisplayLabel) {
-      continue
+      continue;
     }
-    let label = theClue.fullDisplayLabel
-    let l = label.length
+    let label = theClue.fullDisplayLabel;
+    let l = label.length;
     if (l < 1) {
-      continue
+      continue;
     }
-    let last = label.charAt(l - 1).toLowerCase()
+    let last = label.charAt(l - 1).toLowerCase();
     if ((last >= 'a' && last <= 'z') || (last >= '0' && last <= '9')) {
-      label = label + '. '
+      label = label + '. ';
     } else {
-      label = label + ' '
+      label = label + ' ';
     }
     if (!this.allCellsKnown(clueIndex)) {
       theClue.fullDisplayLabel = `<span class="xlv-clickable"><span
         id="${this.prefix}-curr-clue-label" class="xlv-curr-clue-label"
-        title="${this.textLabels['mark-clue.hover']}">${label}</span></span>`
+        title="${this.textLabels['mark-clue.hover']}">${label}</span></span>`;
     } else {
       theClue.fullDisplayLabel = `<span id="${this.prefix}-curr-clue-label"
         class="xlv-curr-clue-label">${label}</span>`;
@@ -4519,10 +4537,10 @@ Exolve.prototype.deDefMarkers = function(s) {
 }
 
 /**
- * Format the text of the clue, tweaking it per:
- *   forExolve: only relevant when showEnums is false. If this is true then
- *              enums are suppressed by appending an asterisk.
- *   showEnums: if false then enums (if present) are suppressed
+ * Format the text of the clue.
+ *   forExolve: If the enum part has a * after it, then do not show the enum
+ *     when forExolve is false.
+ *   showEnums: Deprecated and ignored.
  *   showDefs: if true then def markers ~{}~ are kept.
  */
 Exolve.prototype.formatClue = function(
@@ -4531,16 +4549,11 @@ Exolve.prototype.formatClue = function(
   if (!showDefs) {
     clue = this.deDefMarkers(clue);
   }
-  if (showEnums) {
-    return clue;
-  }
   const enumPart = this.parseEnum(clue);
-  if (enumPart.enumLen == 0 && enumPart.enumStr != '(?)') {
-    /** Note that enums like "(2 words)" are not suppressed */
-    return clue.substr(0, enumPart.afterEnum);
+  if (enumPart.dontShow && !forExolve) {
+    return clue.substr(0, enumPart.afterClue).trim();
   }
-  return forExolve ? clue.substr(0, enumPart.afterEnum) + '*' :
-                     clue.substr(0, enumPart.afterClue);
+  return clue.substr(0, enumPart.afterEnum).trim();
 }
 
 Exolve.prototype.rcValid = function(r, c) {
@@ -4920,7 +4933,17 @@ Exolve.prototype.stripLineBreaks = function(s) {
 }
 
 Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
-  let clueText = inCurrClue ? this.stripLineBreaks(clue.clue) : clue.clue;
+  let clueText = clue.clue.trim();
+  if (clueText.endsWith('*')) {
+    /** reparse for enum, as exet modifies clue before calling this */
+    const enumParse = this.parseEnum(clueText);
+    if (enumParse.dontShow) {
+      clueText = clueText.substr(0, enumParse.afterClue).trim();
+    }
+  }
+  if (inCurrClue) {
+    clueText = this.stripLineBreaks(clueText);
+  }
   let html = '';
   let idx = clueText.indexOf('~{');
   let endIdx = 0;
@@ -8093,24 +8116,24 @@ Exolve.prototype.checkAll = function(conf=true, erase=true) {
 }
 
 Exolve.prototype.revealClueAnno = function(ci) {
-  let clueIndices = this.getLinkedClues(ci);
-  for (let clueIndex of clueIndices) {
-    let theClue = this.clues[clueIndex]
+  const clueIndices = this.getLinkedClues(ci);
+  for (const clueIndex of clueIndices) {
+    const theClue = this.clues[clueIndex];
     if (theClue.annoSpan) {
-      theClue.annoSpan.style.display = ''
+      theClue.annoSpan.style.display = '';
     }
     if (theClue.placeholderBlank) {
       if (theClue.solution) {
-        theClue.placeholderBlank.value = theClue.solution
+        theClue.placeholderBlank.value = theClue.solution;
         if (clueIndex == this.currClueIndex) {
-          this.copyPlaceholderBlankToCurr(clueIndex)
+          this.copyPlaceholderBlankToCurr(clueIndex);
         }
       }
     }
     if (theClue.inClueAnnoReveals) {
       for (let c in theClue.inClueAnnoReveals) {
         for (let s of theClue.inClueAnnoReveals[c]) {
-          s.className = c
+          s.className = c;
         }
       }
     }
@@ -8915,16 +8938,32 @@ Exolve.prototype.handleAfterPrint = function() {
   this.printingChanges = null;
 }
 
+Exolve.prototype.parseFontSize = function(str) {
+  const ret = {
+    number: NaN,
+    unit: '',
+    str: str,
+  };
+  const strStart = str.search(/[a-zA-Z]/);
+  if (strStart < 0) return ret;
+  ret.number = parseFloat(str.substr(0, strStart));
+  ret.unit = str.substr(strStart);
+  return ret;
+}
+
 Exolve.prototype.setPrintFont = function(fromMenu) {
   if (!this.printFontMenu || !this.printFontInput) return;
   if (fromMenu && this.printFontMenu.value != 'other') {
     this.printFontInput.value = this.printFontMenu.value;
   }
-  if (!this.printFontInput.value) {
-    this.printFontInput.value = '18px';
-  }
   if (this.printFontInput.value != this.printFontInput.value.toLowerCase()) {
     this.printFontInput.value = this.printFontInput.value.toLowerCase();
+  }
+  const parsedFont = this.parseFontSize(this.printFontInput.value);
+  if (isNaN(parsedFont.number)) {
+    this.printFontInput.value = '18px';
+  } else {
+    this.printFontInput.value = '' + parsedFont.number + parsedFont.unit;
   }
   if (!fromMenu) {
     if (['18px', '22px', '26px', '14px'].includes(this.printFontInput.value)) {
@@ -8936,7 +8975,7 @@ Exolve.prototype.setPrintFont = function(fromMenu) {
 }
 
 /**
- * Given an img elelemt, make it point to a QR code for the
+ * Given an img element, make it point to a QR code for the
  * given URL. Set the size (width, height) of the image to
  * dim
  */
@@ -9053,7 +9092,8 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'B4') ? 353.0/25.4 :
                    ((page == 'legal') ? 14.0 :
                    ((page == 'ledger') ? 17.0 : 11.0)))))))));
-  const font = (this.printFontInput ? this.printFontInput.value : '18px') || '18px';
+  const font = this.parseFontSize(
+      (this.printFontInput ? this.printFontInput.value : '18px') || '18px');
 
   const scope = document.getElementById(this.prefix + '-print-scope').value;
   const inksaver = document.getElementById(this.prefix + '-print-inksaver').checked;
@@ -9318,7 +9358,16 @@ Exolve.prototype.handleBeforePrint = function() {
     #${this.prefix}-frame div,
     #${this.prefix}-frame table {
       color: black;
-      font-size: ${settings.font};
+      font-size: ${settings.font.str};
+    }
+    #${this.prefix}-frame .xlv-title {
+      font-size: ${settings.font.number * 1.5}${settings.font.unit};
+    }
+    #${this.prefix}-frame .xlv-anno-text {
+      font-size: ${settings.font.number * 0.75}${settings.font.unit} !important;
+    }
+    #${this.prefix}-frame .xlv-copyright {
+      font-size: ${settings.font.number * 0.625}${settings.font.unit} !important;
     }
     .xlv-button,
     .xlv-clear-area,

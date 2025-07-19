@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.5: July 18, 2025
+
+- When printing, also scale title/copyright/anno font sizes.
+
 ### Minor Version: Exolve v1.63.4: July 16, 2025
 
 - Only a tweak to exolve-player.html: sometimes exolveFromText() takes
