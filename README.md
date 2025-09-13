@@ -1951,7 +1951,7 @@ Here are all the names of pieces of text that you can relabel:
 | `warnings-label` | Please fix, or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
 | `warnings.hover` | Issues detected: click &times; to dismiss.    |
 | `print` | Print                                                  |
-| `print.hover` | Show/hide panel for printing or creating PDFs.   |
+| `print.hover` | Show/hide panel for printing or creating a PDF or saving grid image to SVG file. |
 | `print-heading` | Print or create a PDF:                         |
 | `print-size` | Page size:                                        |
 | `print-grid-scale` | Force grid scale to:                        |
@@ -1992,7 +1992,10 @@ Here are all the names of pieces of text that you can relabel:
 | `print-qrcode-cta`| Solve online                                 |
 | `print-qrcode-size`| QR code size:                               |
 | `print-url-qrcodes`| Convert Explanations URLs to QR codes   |
-| `print-url-qrcodes-heading`| Links             |
+| `print-url-qrcodes-heading`| Links            |
+| `print-grid-svg`| Print grid to SVG file:     |
+| `print-grid-svg-file-name`| exolve-grid.svg   |
+| `print-grid-svg-save`| Save as                |
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
@@ -2808,7 +2811,7 @@ you can add the class `xlv-only-print` to it.
 ### Additional settings for printing
 
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
-with the title "Settings for printing/PDFs". This lets you specify:
+with various settings for printing or creating PDFS. These include:
 
 - Page size (such as 'Letter' or 'A4'). As of May 2022, you still need to
   pick the same page size in the printer's settings that open up when you
@@ -2889,6 +2892,18 @@ of September, 2023.
 - Printing settings in Firefox seem especially complex. If the printed area
   overflows with Firefox, try toggling to set the Firefox print setting
   "Fit to page width" instead of "Scale [100]."
+
+### Saving just the grid image to as an SVG file
+
+At the bottom of the "Print" panel, there is a button that lets you save
+just the grid image to an SVG file. SVG is a widely supported image file
+format (most modern browsers as well as imaging applications support it).
+The grid is saved along with the letters already entered (if any), to
+a file named `exolve-grid.svg`. You can also edit the file name.
+
+Note that if there is a current clue, it will get highlighted in the
+saved image. You can avoid that by first de-selecting it (by clicking
+on a dark square or on the title).
 
 ## Webifi
 

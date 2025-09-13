@@ -546,7 +546,7 @@ function Exolve(puzzleSpec,
         'exolve/blob/master/README.md#exolve-option">options</a>:',
     'warnings.hover': 'Issues detected: click on [&times;] to dismiss.',
     'print': 'Print',
-    'print.hover': 'Show/hide panel for printing or creating PDFs.',
+    'print.hover': 'Show/hide panel for printing or creating a PDF or saving grid image to SVG file.',
     'print-heading': 'Print or create a PDF:',
     'print-size': 'Page size:',
     'print-only-grid': 'Only grid',
@@ -591,6 +591,9 @@ function Exolve(puzzleSpec,
     'print-qrcode-cta-label': 'Call to action',
     'print-qrcode-cta': 'Online version',
     'print-qrcode-size': 'QR code size:',
+    'print-grid-svg': 'Print grid to SVG file:',
+    'print-grid-svg-file-name': 'exolve-grid.svg',
+    'print-grid-svg-save': 'Save as',
     'show-notes-seq': 'Show clue-solving sequence:',
     'show-notes-entries': 'Show entered solutions:',
     'show-notes-times': 'Show clue-solving times:',
@@ -1006,6 +1009,17 @@ Exolve.prototype.init = function() {
                     </button>
                   </div>
                 </p>
+                <hr>
+                <p>
+                  <b>${this.textLabels['print-grid-svg']}</b>
+                  <button id="${this.prefix}-print-grid-svg"
+                      class="xlv-small-button">
+                    ${this.textLabels['print-grid-svg-save']}
+                  </button>
+                  <input class="xlv-input" id="${this.prefix}-print-grid-svg-file-name"
+                      value="${this.textLabels['print-grid-svg-file-name']}" size="20">
+                  </input>
+                </p>
               </div>
               <div id="${this.prefix}-notes-panel"
                   class="xlv-notes-panel xlv-toggleable" style="display:none">
@@ -1283,6 +1297,9 @@ Exolve.prototype.init = function() {
   const qrUrlsRefresher = this.qrUrlsRefresher.bind(this);
   this.qrUrlsCheckbox.addEventListener('change', qrUrlsRefresher);
   this.qrUrlsTable = document.getElementById(this.prefix + '-url-qrcodes-table');
+
+  const printGridSvg = document.getElementById(this.prefix + '-print-grid-svg');
+  printGridSvg.addEventListener('click', this.printGridSvg.bind(this));
 
   this.webifiButton = document.getElementById(this.prefix + '-webifi');
   this.webifiButton.style.display = 'none';
@@ -9904,6 +9921,69 @@ Exolve.prototype.paginate = function(settings) {
   }
 }
 
+Exolve.prototype.printGridSvg = function() {
+  const fname = document.getElementById(
+      this.prefix + '-print-grid-svg-file-name').value.trim();
+  if (!fname) {
+    alert('Please provide a non-blank file name');
+    return;
+  }
+  const clone = this.svg.cloneNode(true);
+
+  /* Capture colours as SVG rects. Hacky. */
+  for (const g of [this.ninaGroup, this.colourGroup]) {
+    if (g.style.display == 'none') {
+      continue;
+    }
+    for (const r of g.children) {
+      const x = parseFloat(r.style.left);
+      const y = parseFloat(r.style.top);
+      const w = parseFloat(r.style.width);
+      const h = parseFloat(r.style.height);
+      const colour = r.style.backgroundColor;
+      const rect = this.makeRect(x, y, w, h, colour);
+      rect.setAttributeNS(null, 'class', 'xlv-coloured-cell');
+      if (r.style.transform) {
+        rect.style.transform = r.style.transform;
+      }
+      clone.insertAdjacentElement('beforeend', rect);
+    }
+  }
+
+  /**
+   * The following is also a bit hacky, but not worth reproducing
+   * the entire stylesheet for this obscure feature.
+   */
+  const styleHeader = '' +
+  `<style>
+  .xlv-cell-num,
+  .xlv-cell-text {
+    font-family: sans-serif;
+  }
+  .xlv-cell-circle {
+    fill: rgba(0,0,0,0.0);
+  }
+  .xlv-coloured-cell {
+    fill-opacity: 0.25;
+    transform-box: fill-box;
+  }
+  </style>
+  `;
+
+  clone.insertAdjacentHTML('afterbegin', styleHeader);
+  const svgString = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
 Exolve.prototype.javaHash = function(arr) {
   const str = arr.join(' ');
   let hash = 0;
@@ -10295,6 +10375,9 @@ function createPuzzle() {
   position: relative;
   display: inline-block;
 }
+.xlv-grid {
+  display: block;
+}
 .xlv-frame .xlv-grid-input-wrapper {
   position: absolute;
   border: none;
@@ -10429,8 +10512,13 @@ function createPuzzle() {
   border: none !important;
   padding: 0 0 6px 0;
   outline: none !important;
+}
+.xlv-answer {
   background-image:
     repeating-linear-gradient(to bottom, transparent, transparent 13px, black 14px);
+}
+.xlv-input {
+  text-decoration: underline;
 }
 .xlv-clue-extraction-slot {
   line-height: normal !important;

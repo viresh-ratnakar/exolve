@@ -1,5 +1,18 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.6: September 12, 2025
+
+- Instead of using the image background that was supposed to make it
+  look like a notebook, style `xlv-input` with an underline. This is
+  a single-line text-entry field used in the print-settings panel, and
+  the repeated background was anyway not showing up.
+- Remove the annoting 4 pixel gap at the bottom of the SVG element.
+  This was coming from the SVG having a default `inline-block`
+  rendering, which is now changed to `block`.
+- Add an option to save the current grid as an SVG file. CSS styling
+  of fonts and cell colours are somewhat hackily added to this
+  obscure feature.
+
 ### Minor Version: Exolve v1.63.5: July 18, 2025
 
 - When printing, also scale title/copyright/anno font sizes.
