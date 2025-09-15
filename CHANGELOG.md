@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.8: September 15, 2025
+
+- Refactor `printGridSvg()` to use a function that takes the filename
+  as an arg (we'll use it from Exet too).
+
 ### Minor Version: Exolve v1.63.7: September 15, 2025
 
 - Refactor file-downloading code to Exolve.fileDownload(), so that we

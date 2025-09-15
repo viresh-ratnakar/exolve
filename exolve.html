@@ -9938,13 +9938,7 @@ Exolve.prototype.fileDownload = function(data, contentType, fileName) {
   URL.revokeObjectURL(a.href);
 }
 
-Exolve.prototype.printGridSvg = function() {
-  const fname = document.getElementById(
-      this.prefix + '-print-grid-svg-file-name').value.trim();
-  if (!fname) {
-    alert('Please provide a non-blank file name');
-    return;
-  }
+Exolve.prototype.saveGridSvgFile = function(fname) {
   const clone = this.svg.cloneNode(true);
 
   /* Capture colours as SVG rects. Hacky. */
@@ -9990,6 +9984,16 @@ Exolve.prototype.printGridSvg = function() {
   clone.insertAdjacentHTML('afterbegin', styleHeader);
   const svgString = new XMLSerializer().serializeToString(clone);
   this.fileDownload(svgString, 'image/svg+xml', fname);
+}
+
+Exolve.prototype.printGridSvg = function() {
+  const fname = document.getElementById(
+      this.prefix + '-print-grid-svg-file-name').value.trim();
+  if (!fname) {
+    alert('Please provide a non-blank file name');
+    return;
+  }
+  this.saveGridSvgFile(fname);
 }
 
 Exolve.prototype.javaHash = function(arr) {
