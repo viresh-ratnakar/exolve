@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.7: September 15, 2025
+
+- Refactor file-downloading code to Exolve.fileDownload(), so that we
+  can also reuse it from Exet.
+
 ### Minor Version: Exolve v1.63.6: September 12, 2025
 
 - Instead of using the image background that was supposed to make it

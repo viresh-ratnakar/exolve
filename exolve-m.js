@@ -9874,6 +9874,23 @@ Exolve.prototype.paginate = function(settings) {
   }
 }
 
+/**
+ * This can be called without an instance, i.e., like:
+ *   Exolve.prototype.fileDownload(...);
+ */
+Exolve.prototype.fileDownload = function(data, contentType, fileName) {
+  const blob = new Blob([data], {type: contentType});
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
 Exolve.prototype.printGridSvg = function() {
   const fname = document.getElementById(
       this.prefix + '-print-grid-svg-file-name').value.trim();
@@ -9925,16 +9942,7 @@ Exolve.prototype.printGridSvg = function() {
 
   clone.insertAdjacentHTML('afterbegin', styleHeader);
   const svgString = new XMLSerializer().serializeToString(clone);
-  const blob = new Blob([svgString], { type: 'image/svg+xml' });
-
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fname;
-
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+  this.fileDownload(svgString, 'image/svg+xml', fname);
 }
 
 Exolve.prototype.javaHash = function(arr) {
