@@ -647,8 +647,11 @@ function Exolve(puzzleSpec,
  * This only needs to be called if you have a web page from which
  * you destroy and create new Exolve puzzles repeatedly (such as
  * ExolvePlayer).
+ *
+ * Pass deleteState as true if this was truly a temp puzzle (such
+ * as a preview) whose state will not need to be recovered later.
  */
-Exolve.prototype.destroy = function() {
+Exolve.prototype.destroy = function(deleteState=false) {
   if (this.frame) {
     this.frame.innerHTML = '';
     this.frame = null;
@@ -661,6 +664,9 @@ Exolve.prototype.destroy = function() {
       window.removeEventListener(e, this.windowListeners[e]);
     }
     this.windowListeners = {};
+  }
+  if (deleteState) {
+    window.localStorage.removeItem('xlvstate:' + this.id);
   }
 }
 

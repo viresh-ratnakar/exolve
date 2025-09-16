@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.9: September 16, 2025
+
+- Add optional `deleteState` param (defaultingto false) to `destroy()`
+  for deleting saved state (to be used from Exet for temp crosswords
+  created for printing--those temp crosswords do not have notTemp
+  set as they need before/after-print handlers).
+
 ### Minor Version: Exolve v1.63.8: September 15, 2025
 
 - Refactor `printGridSvg()` to use a function that takes the filename
