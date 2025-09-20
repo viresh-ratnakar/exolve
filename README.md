@@ -1968,9 +1968,9 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-small` | Small                                       |
 | `print-font-other` | Other                                       |
 | `print-crossword` | Print crossword                              |
-| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl/Cmd-B). |
+| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl/Cmd-b). |
 | `print-page` | Print page                                        |
-| `print-page.hover` | Print the whole page (Ctrl/Cmd-P).     |
+| `print-page.hover` | Print the whole page (Ctrl/Cmd-p).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
 | `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
 | `print-title` | Title                                            |
@@ -2259,7 +2259,7 @@ can be turned off with a checkbox). These are:
 - The solution entered. This is ON by default.
 - The time at which the clue was solved. This is OFF by default.
 
-When solving a clue, if you type Ctrl/Cmd-/ (Ctrl-Slash), then you are directly
+When solving a clue, if you type Ctrl/Cmd-/ (Ctrl-slash), then you are directly
 taken to the notes line for that particular clue, where you can edit the
 note or just read what you may have written. When in the notes already, Ctrl/Cmd-/
 will take you back to your last location in the grid (if any). When no clue is
@@ -2763,7 +2763,7 @@ vertically under the grid.
 ## Printing
 
 You can print web pages containing Exolve crosswords using the browser's "Print"
-command (Ctrl/Cmd-P) or by using the "Print" link shown under the grid
+command (Ctrl/Cmd-p) or by using the "Print" link shown under the grid
 (this latter way of printing opens up a panel that provides some additional
 settings: see below). The current state of the crossword gets printed. If you
 want to print the blank grid after you've already filled some entries, or if
@@ -2847,11 +2847,11 @@ Additionally, from this panel, you have three buttons for printing:
 - You can click on a button labelled "Print crossword". This will print *only*
   the crossword. This is useful if the crossword is embedded with some
   background or other content around it. You can also print just the crossword
-  using the shortcut Ctrl/Cmd-B after clicking on any light cell in the crossword
+  using the shortcut Ctrl/Cmd-b after clicking on any light cell in the crossword
   grid.
 - You can click on a button labelled "Print page". This will print the whole
   page, just like what you'll get from the browser's "print" function (which
-  can be invoked with a Ctrl/Cmd-P).
+  can be invoked with a Ctrl/Cmd-p).
 - If you want to print the whole page *without reformatting the crossword*
   (if Exolve's reformatting plays havoc, overlapping with the surrounding
   content, for example), then you can click on "Print wysiwyg".

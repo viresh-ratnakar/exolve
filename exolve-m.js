@@ -400,7 +400,7 @@ function Exolve(puzzleSpec,
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction.</li>
          <li><b>Ctrl/Cmd-q:</b> Clear this, <b>Ctrl/Cmd-Q:</b> Clear All!,
-             <b>Ctrl/Cmd-B:</b> Print crossword, <b>Ctrl/Cmd-/:</b> Jump to/back-from
+             <b>Ctrl/Cmd-b:</b> Print crossword, <b>Ctrl/Cmd-/:</b> Jump to/back-from
              notes, <b>Ctrl/Cmd-*:</b> Mark clue as fave in notes, adding a *
              prefix.</li>
          <li><b>Delete:</b>
@@ -515,7 +515,7 @@ function Exolve(puzzleSpec,
     'print-font-small': 'Small',
     'print-font-other': 'Other',
     'print-crossword': 'Print crossword',
-    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl/Cmd-B).',
+    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl/Cmd-b).',
     'print-page': 'Print page',
     'print-page.hover': 'Print the whole page (Ctrl/Cmd-p).',
     'print-page-wysiwyg': 'Print wysiwyg',
