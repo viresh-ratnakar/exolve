@@ -338,10 +338,10 @@ function Exolve(puzzleSpec,
   this.textLabels = {
     'clear': 'Clear this',
     'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
-        'from full clues with a second click. Shortcut: Ctrl-q.',
+        'from full clues with a second click. Shortcut: Ctrl/Cmd-q.',
     'clear-all': 'Clear all!',
     'clear-all.hover': 'Clear everything! A second click clears any ' +
-        'placeholder entries in clues. Shortcut: Ctrl-Q.',
+        'placeholder entries in clues. Shortcut: Ctrl/Cmd-Q.',
     'check': 'Check this',
     'check.hover': 'Erase mistakes in highlighted cells. Long-click to ' +
         'check just the current cell.',
@@ -399,9 +399,9 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light square in that direction.</li>
-         <li><b>Ctrl-q:</b> Clear this, <b>Ctrl-Q:</b> Clear All!,
-             <b>Ctrl-B:</b> Print crossword, <b>Ctrl-/:</b> Jump to/back-from
-             notes, <b>Ctrl-*:</b> Mark clue as fave in notes, adding a *
+         <li><b>Ctrl/Cmd-q:</b> Clear this, <b>Ctrl/Cmd-Q:</b> Clear All!,
+             <b>Ctrl/Cmd-B:</b> Print crossword, <b>Ctrl/Cmd-/:</b> Jump to/back-from
+             notes, <b>Ctrl/Cmd-*:</b> Mark clue as fave in notes, adding a *
              prefix.</li>
          <li><b>Delete:</b>
              Clear the contents of the current square.</li>
@@ -428,8 +428,8 @@ function Exolve(puzzleSpec,
     'crossword-id': 'Crossword ID',
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
-    'notes-help': '<li>Ctrl-/ takes you to the current clue\'s notes ' +
-        '(or overall notes) and back (if already there).</li><li>Ctrl-* ' +
+    'notes-help': '<li>Ctrl/Cmd-/ takes you to the current clue\'s notes ' +
+        '(or overall notes) and back (if already there).</li><li>Ctrl/Cmd-* ' +
         'adds a * prefix to the current clue\'s notes.</li><li>Hovering ' +
         'over a clue\'s notes shows the clue as a tooltip.</li>',
     'jotter': 'Jotter',
@@ -515,9 +515,9 @@ function Exolve(puzzleSpec,
     'print-font-small': 'Small',
     'print-font-other': 'Other',
     'print-crossword': 'Print crossword',
-    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl-B).',
+    'print-crossword.hover': 'Print just this crossword, hiding any content outside it (Ctrl/Cmd-B).',
     'print-page': 'Print page',
-    'print-page.hover': 'Print the whole page (Ctrl-p or Cmd-p).',
+    'print-page.hover': 'Print the whole page (Ctrl/Cmd-p).',
     'print-page-wysiwyg': 'Print wysiwyg',
     'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword.',
 
@@ -6693,24 +6693,25 @@ Exolve.prototype.fromNotesToGrid = function() {
 
 // For tab/shift-tab, ctrl-q, ctrl-Q, ctrl-B, ctrl-e
 Exolve.prototype.handleKeyDown = function(e) {
-  let key = e.which || e.keyCode
+  let key = e.which || e.keyCode;
   this.lastKeyHadShift = e.shiftKey;
+  const isCtrl = e.ctrlKey || e.metaKey;
   if (key == 9) {
     if (this.handleKeyUpInner(key, e.shiftKey)) {
       // Tab input got used already.
       e.preventDefault()
     }
-  } else if (e.ctrlKey && (e.key == 'q' || e.key == 'Q')) {
+  } else if (isCtrl && (e.key == 'q' || e.key == 'Q')) {
     this.muzzleEvent(e);
     if (e.key == 'Q') {
       this.clearAll();
     } else {
       this.clearCurr();
     }
-  } else if (e.ctrlKey && e.key == 'B') {
+  } else if (isCtrl && e.key == 'B') {
     this.muzzleEvent(e);
     this.printNow('crossword');
-  } else if (e.ctrlKey && e.key == '/') {
+  } else if (isCtrl && e.key == '/') {
     if (this.notesPanel.contains(e.target) &&
         this.currCellIsValid()) {
       this.muzzleEvent(e);
@@ -6718,7 +6719,7 @@ Exolve.prototype.handleKeyDown = function(e) {
     } else if (this.focusOnNotes()) {
       this.muzzleEvent(e);
     }
-  } else if (e.ctrlKey && e.key == '*') {
+  } else if (isCtrl && e.key == '*') {
     if (this.markAsFave()) {
       this.muzzleEvent(e);
     }

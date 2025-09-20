@@ -1848,9 +1848,9 @@ Here are all the names of pieces of text that you can relabel:
 | Name             | Default text                         |
 |------------------|--------------------------------------|
 | `clear`          | Clear this                           |
-| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl-q.|
+| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl/Cmd-q.|
 | `clear-all`      | Clear all!                           |
-| `clear-all.hover` | Clear everything! A second click clears any placeholder entries in clues. Shortcut: Ctrl-Q.|
+| `clear-all.hover` | Clear everything! A second click clears any placeholder entries in clues. Shortcut: Ctrl/Cmd-Q.|
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
 | `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell.|
@@ -1897,7 +1897,7 @@ Here are all the names of pieces of text that you can relabel:
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
 | `notes.hover`    | Show/hide notes panel.               |
-| `notes-help`     | Ctrl-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
+| `notes-help`     | Ctrl/Cmd-/ takes you to the current clue's notes (or overall notes) and back (if already there). Ctrl/Cmd-\* adds a * prefix to the current clue's notes. Hovering over a clue's notes shows the clue as a tooltip.|
 | `jotter`         | Jotter                               |
 | `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams and subtractions.|
 | `jotter-text.hover`|You can shuffle letters by clicking above. If you enter something like "Alphabet - betas  =" then it will be replaced by "lpha - s" (subtraction of common letters). |
@@ -1968,9 +1968,9 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-small` | Small                                       |
 | `print-font-other` | Other                                       |
 | `print-crossword` | Print crossword                              |
-| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl-B). |
+| `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl/Cmd-B). |
 | `print-page` | Print page                                        |
-| `print-page.hover` | Print the whole page (Ctrl-p or Cmd-P).     |
+| `print-page.hover` | Print the whole page (Ctrl/Cmd-P).     |
 | `print-page-wysiwyg` | Print wysiwyg                             |
 | `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
 | `print-title` | Title                                            |
@@ -2259,16 +2259,16 @@ can be turned off with a checkbox). These are:
 - The solution entered. This is ON by default.
 - The time at which the clue was solved. This is OFF by default.
 
-When solving a clue, if you type Ctrl-/ (Ctrl-Slash), then you are directly
+When solving a clue, if you type Ctrl/Cmd-/ (Ctrl-Slash), then you are directly
 taken to the notes line for that particular clue, where you can edit the
-note or just read what you may have written. When in the notes already, Ctrl-/
+note or just read what you may have written. When in the notes already, Ctrl/Cmd-/
 will take you back to your last location in the grid (if any). When no clue is
-selected, typing Ctrl-/ will take you the overall notes section.
+selected, typing Ctrl/Cmd-/ will take you the overall notes section.
 
-Similarly, when solving a clue, if you type Ctrl-\* (Ctrl-asterisk) then
+Similarly, when solving a clue, if you type Ctrl/Cmd-\* (Ctrl-asterisk) then
 a \* is added to the front of the clue's notes to mark it as a favourite.
 The focus stays on the crossword and does not jump to the notes (unlike
-Ctrl-/).
+Ctrl/Cmd-/).
 
 Hovering the mouse on a clue's notes shows the clue as a tooltip.
 
@@ -2763,7 +2763,7 @@ vertically under the grid.
 ## Printing
 
 You can print web pages containing Exolve crosswords using the browser's "Print"
-command (Ctrl-P or Cmd-P) or by using the "Print" link shown under the grid
+command (Ctrl/Cmd-P) or by using the "Print" link shown under the grid
 (this latter way of printing opens up a panel that provides some additional
 settings: see below). The current state of the crossword gets printed. If you
 want to print the blank grid after you've already filled some entries, or if
@@ -2847,11 +2847,11 @@ Additionally, from this panel, you have three buttons for printing:
 - You can click on a button labelled "Print crossword". This will print *only*
   the crossword. This is useful if the crossword is embedded with some
   background or other content around it. You can also print just the crossword
-  using the shortcut Ctrl-b after clicking on any light cell in the crossword
+  using the shortcut Ctrl/Cmd-B after clicking on any light cell in the crossword
   grid.
 - You can click on a button labelled "Print page". This will print the whole
   page, just like what you'll get from the browser's "print" function (which
-  can be invoked with a Ctrl-p or Cmd-p).
+  can be invoked with a Ctrl/Cmd-P).
 - If you want to print the whole page *without reformatting the crossword*
   (if Exolve's reformatting plays havoc, overlapping with the surrounding
   content, for example), then you can click on "Print wysiwyg".
@@ -2897,7 +2897,11 @@ of September, 2023.
 
 At the bottom of the "Print" panel, there is a button that lets you save
 just the grid image to an SVG file. SVG is a widely supported image file
-format (most modern browsers as well as imaging applications support it).
+format: most modern browsers as well as imaging applications support it.
+You can also easily convert it to the more widely used PNG format (there
+are many online tools
+[readily available](https://www.google.com/search?q=svg+to+png)).
+
 The grid is saved along with the letters already entered (if any), to
 a file named `exolve-grid.svg`. You can also edit the file name.
 

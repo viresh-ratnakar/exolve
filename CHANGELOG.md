@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.10: September 20, 2025
+
+- Allow the Cmd key to be used on Macs instead of the Ctrl key.
+
 ### Minor Version: Exolve v1.63.9: September 16, 2025
 
 - Add optional `deleteState` param (defaultingto false) to `destroy()`
