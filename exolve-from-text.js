@@ -108,8 +108,8 @@ exolveFromText = function(w, h, text, fname='') {
 
   const lines = exolveFromTextClean(text).split('\n');
 
-  const clueStartRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*/;
-  const clueRE = /^\s*\d{1,2}(?!\d)([ ]*[,&][ ]*[aAdD][^ ]*)*.*\([0-9, '-]+\)/;
+  const clueStartRE = /^\s*\d{1,2}(?!\d)/; /* 1 or 2 digits at the beginning */
+  const clueRE = /^\s*\d{1,2}(?!\d).*\([0-9, '-]+\)/;
   const childRE = /^\s*\d{1,2}(?!\d)[\s\.:]*see /i;
   const wordsRE = /[a-zA-Z]+/;
   const copyrightRE = /^\s*(copyright|\(c\)|Ⓒ)/i;
@@ -233,6 +233,11 @@ exolveFromTextClean = function(s) {
    * some leading space after a newline ("bullets" are often found here).
    */
   s = s.replace(/\n\s+[^\w"',\.\(\)-]*([1-9][0-9]*)/g, '\n $1');
+
+  /**
+   * If an enum has been split by a newline, remove that newline.
+   */
+  s = s.replace(/\(([0-9 ,'-]*)\n([0-9 ,'-]*)\)/g, '($1$2)');
 
   /**
    * Remove end-of-line hyphenations.

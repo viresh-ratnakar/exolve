@@ -1,5 +1,14 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.11: October 3, 2025
+
+- Fix a corner case in exolveFromText(): sometimes newlines get
+  spliced within the enum part, when copy-pasting from a PDF.
+  Remove such newlines first.
+- Simplify the regexps for identifying clue lines and clue starts:
+  the part that was trying to parse linked clue numbers was a bit
+  flawed, and was anyway optional, so removing it is fine.
+
 ### Minor Version: Exolve v1.63.10: September 20, 2025
 
 - Allow the Cmd key to be used on Macs instead of the Ctrl key.

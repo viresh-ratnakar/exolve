@@ -6,7 +6,8 @@ Across
 11 Clue (10)
 12 Clue (4)
 14 Clue (11)
-18 Clue (3,5,3)
+18 Clue (3,5
+,3)
 21 Clue (4)
 22 Clue (10)
 25 Clue (9)
