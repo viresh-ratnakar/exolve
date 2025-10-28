@@ -6165,7 +6165,7 @@ Exolve.prototype.getLinkedClues = function(clueIndex) {
 
 // Get HTML for back/forth buttons in current clue.
 Exolve.prototype.getCurrClueButtons = function() {
-  return `<span>
+  return `<span id="${this.prefix}-nextprev-span" class="xlv-nextprev-span">
       <button id="${this.prefix}-curr-clue-prev"
         class="xlv-small-button xlv-nextprev"
         title="${this.textLabels['curr-clue-prev.hover']}"

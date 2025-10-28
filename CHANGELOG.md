@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.12: October 28, 2025
+
+- Add a class and id to the above-clue span that holds the prev/next buttons.
+
 ### Minor Version: Exolve v1.63.11: October 3, 2025
 
 - Fix a corner case in exolveFromText(): sometimes newlines get
