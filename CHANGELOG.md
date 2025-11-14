@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.63.13: November 13, 2025
+
+- Make a few grid/clue-related functions take optional grid/clues
+  params, so that we can use them from Exet on ExetFillState.
+
 ### Minor Version: Exolve v1.63.12: October 28, 2025
 
 - Add a class and id to the above-clue span that holds the prev/next buttons.
