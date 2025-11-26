@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.63, May 13, 2025
+Version: Exolve v1.64, November 25, 2025
 */
 
 function exolveFromPuzNextNull(buffer, offset) {
@@ -70,7 +70,7 @@ function exolveFromPuz(buffer, fname='') {
     for (let j = 0; j < width; j++) {
       let solution = decoder.decode(buffer.slice(offset, offset + 1));
       offset++;
-      exolveGrid += solution
+      exolveGrid += (!solution || solution == '0') ? '?' : solution;
     }
     exolveGrid += '\n';
   }

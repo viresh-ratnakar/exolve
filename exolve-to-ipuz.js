@@ -24,10 +24,10 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.63, May 13, 2025
+Version: Exolve v1.64, November 25, 2025
 */
 
-function exolveToIpuzAddClue(xlvp, showEnums, ci, cluesArray) {
+function exolveToIpuzAddClue(xlvp, ci, cluesArray) {
   const clue = xlvp.clues[ci];
   if (clue.reversed) {
     throw 'Reversed clues like ' + ci + ' are not supported';
@@ -35,7 +35,7 @@ function exolveToIpuzAddClue(xlvp, showEnums, ci, cluesArray) {
   const ipuzClue = {
     number: clue.label,
     label: clue.displayLabel,
-    clue: xlvp.formatClue(clue.clue, false, showEnums, false),
+    clue: xlvp.formatClue(clue.clue, false, /* deprecated */ true, false),
   };
   if (clue.childrenClueIndices.length > 0) {
     ipuzClue.number = [clue.label];
@@ -82,12 +82,15 @@ function exolveToIpuzAddCell(xlvp, gridCell, cellsArray, solCellsArray=null) {
     value: '#',
   };
   if (gridCell.isLight) {
-    ipuzSolCell.value = xlvp.stateToDisplayChar(gridCell.solution) ?? '0';
+    const c = (gridCell.solution && gridCell.solution != '0' &&
+               gridCell.solution != '?') ?
+      xlvp.stateToDisplayChar(gridCell.solution) : '?';
+    ipuzSolCell.value = c;
   }
   solCellsArray.push(ipuzSolCell);
 }
 
-function exolveToIpuz(xlvp, showEnums=true) {
+function exolveToIpuz(xlvp) {
   try {
     if (xlvp.layers3d > 1) {
       throw 'This puzzle has lights other than across/down';
@@ -103,7 +106,7 @@ function exolveToIpuz(xlvp, showEnums=true) {
     }
     const ipuz = {
       version: "http://ipuz.org/v2",
-      kind: [ showEnums ?
+      kind: [ xlvp.allCluesHaveEnums ?
           "http://ipuz.org/crossword/crypticcrossword#1" :
           "http://ipuz.org/crossword#1" ],
       dimensions: {
@@ -133,7 +136,7 @@ function exolveToIpuz(xlvp, showEnums=true) {
     if (explanations) {
       ipuz.explanation = explanations;
     }
-    if (showEnums) {
+    if (xlvp.allCluesHaveEnums) {
       ipuz.showenumerations = true;
     }
     if (!xlvp.hasUnsolvedCells) {
@@ -157,11 +160,11 @@ function exolveToIpuz(xlvp, showEnums=true) {
         /** Add clue(s) if cell starts light(s) */
         if (gridCell.startsAcrossClue) {
           const ci = 'A' + gridCell.startsClueLabel;
-          exolveToIpuzAddClue(xlvp, showEnums, ci, ipuz.clues.Across);
+          exolveToIpuzAddClue(xlvp, ci, ipuz.clues.Across);
         }
         if (gridCell.startsDownClue) {
           const ci = 'D' + gridCell.startsClueLabel;
-          exolveToIpuzAddClue(xlvp, showEnums, ci, ipuz.clues.Down);
+          exolveToIpuzAddClue(xlvp, ci, ipuz.clues.Down);
         }
       }
     }

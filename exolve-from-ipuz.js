@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.63, May 13, 2025
+Version: Exolve v1.64, November 25, 2025
 */
 
 /**
@@ -101,8 +101,8 @@ exolveFromIpuz = function(ipuz, fname='') {
   }
   exolve += `
       exolve-grid:`
-  const block = ipuz['block'] || '#'
-  const empty = ipuz['empty'] || '0'
+  const block = ipuz['block'] || '#';
+  const empty = ipuz['empty'] || '0';
   if (ipuz['puzzle'].length != h) {
     console.log('ipuz: mismatched height')
     return '';
@@ -157,28 +157,28 @@ exolveFromIpuz = function(ipuz, fname='') {
       }
     }
   }
-  let ipuzSol = ipuz['solution']
+  const ipuzSol = ipuz['solution'];
   if (ipuzSol) {
     if (ipuzSol.length != h) {
       console.log('ipuz: solution: mismatched height')
       return '';
     }
     for (let i = 0; i < h; i++) {
-      let ipuzSolRow = ipuzSol[i]
+      const ipuzSolRow = ipuzSol[i];
       if (ipuzSolRow.length != w) {
-        console.log('ipuz: solution: mismatched width')
+        console.log('ipuz: solution: mismatched width');
         return '';
       }
       for (let j = 0; j < w; j++) {
-        let gridCell = grid[i][j]
-        if (!gridCell.isLight) continue
-        let ipuzSolCell = ipuzSolRow[j]
+        const gridCell = grid[i][j];
+        if (!gridCell.isLight) continue;
+        let ipuzSolCell = ipuzSolRow[j];
         if (typeof ipuzSolCell !== 'object' || !ipuzSolCell) {
-          ipuzSolCell = {value: ipuzSolCell}
+          ipuzSolCell = {value: ipuzSolCell};
         }
         if (ipuzSolCell.value !== null && ipuzSolCell.value != empty &&
             typeof ipuzSolCell.value !== 'object') {
-          gridCell.solution = ipuzSolCell.value
+          gridCell.solution = ipuzSolCell.value;
         }
       }
     }
@@ -191,9 +191,9 @@ exolveFromIpuz = function(ipuz, fname='') {
         gridRow += '.';
         continue;
       }
-      const c = (gridCell.solution && gridCell.solution != '0' &&
-                 gridCell.solution != '?') ?
-          gridCell.solution : '?';
+      const c = !ipuzSol ? '0' : (
+          (gridCell.solution && gridCell.solution != '0') ?
+              gridCell.solution : '?');
       gridRow += c;
       if (gridCell.hasCircle) gridRow += '@';
       if (gridCell.hasBarAfter && gridCell.hasBarUnder) gridRow += '+';

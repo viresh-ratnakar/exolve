@@ -1,5 +1,15 @@
 # Changelog
 
+### Exolve v1.64: November 25, 2025
+
+- Refactor the code so that we can resize the grid repeatedly.
+- Make handleResize() also resize the grid, if the available
+  min viewport dimension changes by more than 25 pixels.
+- Make sure that we clear out any HTML elements attached to
+  grid cells, including setting innerHTML to '', so that we do not
+  have memory leaks.
+- When redisplaying the grid, restore current active cells/clue, if any.
+
 ### Minor Version: Exolve v1.63.13: November 13, 2025
 
 - Make a few grid/clue-related functions take optional grid/clues

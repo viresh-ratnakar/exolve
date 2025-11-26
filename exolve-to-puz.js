@@ -24,7 +24,7 @@ SOFTWARE.
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
 
-Version: Exolve v1.63, May 13, 2025
+Version: Exolve v1.64, November 25, 2025
 */
 
 let exolveToPuzChars8859 = null;
@@ -74,7 +74,7 @@ function exolveToPuzEnc8859(s, buffer, offset) {
   return offset;
 }
 
-function exolveToPuz(xlvp, showEnums=true) {
+function exolveToPuz(xlvp) {
   try {
     if (xlvp.layers3d > 1) {
       throw 'This puzzle has lights other than across/down';
@@ -123,8 +123,10 @@ function exolveToPuz(xlvp, showEnums=true) {
           solution = solution + '.';
           playerState = playerState + '.';
         } else {
-          solution = solution + (gridCell.solution != '0' ?
-            xlvp.stateToDisplayChar(gridCell.solution) : '?');
+          const c = (gridCell.solution && gridCell.solution != '?' &&
+                     gridCell.solution != '0') ?
+            xlvp.stateToDisplayChar(gridCell.solution) : '?';
+          solution = solution + c;
           playerState = playerState + '-';
           if (gridCell.startsAcrossClue) {
             orderedClueIndices.push('A' + gridCell.startsClueLabel);
@@ -172,7 +174,7 @@ function exolveToPuz(xlvp, showEnums=true) {
       clueOffsets.push(startOffset);
       let puzClue = xlvp.formatClue(
           theClue.clueSpan.innerText.replace(/\s+/g,' '),
-          false, showEnums, false);
+          false, /* deprecated */ true, false);
       if (theClue.children.length > 0) {
         const chI = theClue.displayLabel.indexOf(',');
         if (chI >= 0) {
