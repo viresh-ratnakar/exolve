@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.64.1: December 1, 2025
+
+- Bug-fix: grid input wrapper size should be set in displayGrid().
+- Bug-fix: after a resize event, restore focus to wherever it was before
+  (which could even be outside of Exolve), if that element is still in
+  the DOM.
+
 ### Exolve v1.64: November 25, 2025
 
 - Refactor the code so that we can resize the grid repeatedly.

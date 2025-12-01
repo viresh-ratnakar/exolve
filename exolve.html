@@ -1171,8 +1171,6 @@ Exolve.prototype.init = function() {
   this.svg = document.getElementById(this.prefix + '-grid');
   this.gridInputWrapper = document.getElementById(
       this.prefix + '-grid-input-wrapper');
-  this.gridInputWrapper.style.width = '' + this.cellW + 'px';
-  this.gridInputWrapper.style.height = '' + (this.cellH - 2) + 'px';
   this.gridInputWrapper.insertAdjacentHTML('beforeend',
       `<div id="${this.prefix}-grid-input-rarr"
           class="xlv-grid-input-rarr">&rtrif;</div>
@@ -1193,7 +1191,6 @@ Exolve.prototype.init = function() {
   for (let e of [this.gridInputRarr, this.gridInputDarr,
                  this.gridInputLarr, this.gridInputUarr]) {
     e.style.color = this.colorScheme['arrow'];
-    e.style.fontSize = this.arrowSize + 'px';
   }
   if (this.hasRebusCells) {
     /**
@@ -5443,6 +5440,7 @@ Exolve.prototype.maybeResizeGrid = function() {
   }
   /** Let's resize the grid */
   this.computeGridSize();
+  const activeElement = document.activeElement;
   this.redisplayGrid();
   if (this.usingGnav) {
     this.activateCell(this.currRow, this.currCol);
@@ -5451,6 +5449,14 @@ Exolve.prototype.maybeResizeGrid = function() {
     const temp = this.currClueIndex;
     this.currClueIndex = '';
     this.cnavTo(temp);
+  }
+  /**
+   * The focus could have been outside the Exolve puzzle, refocus
+   * if that element is still in the DOM.
+   */
+  if (document.body.contains(activeElement) &&
+      activeElement != document.activeElement) {
+    activeElement.focus();
   }
 }
 
@@ -6001,8 +6007,8 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
     return null;
   }
 
-  this.gridInputWrapper.style.left = '' + gridCell.cellLeft + 'px'
-  this.gridInputWrapper.style.top = '' + gridCell.cellTop + 'px'
+  this.gridInputWrapper.style.left = '' + gridCell.cellLeft + 'px';
+  this.gridInputWrapper.style.top = '' + gridCell.cellTop + 'px';
   this.gridInput.value = gridCell.prefill ? '' :
       this.stateToDisplayChar(gridCell.currLetter);
   this.gridInputRarr.style.display = 'none';
@@ -6010,64 +6016,64 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
   this.gridInputLarr.style.display = 'none';
   this.gridInputUarr.style.display = 'none';
 
-  this.gridInputWrapper.style.display = ''
-  this.gridInput.focus()
+  this.gridInputWrapper.style.display = '';
+  this.gridInput.focus();
   // Try to place the cursor at the end
   if (this.gridInput.setSelectionRange) {
-    let len = this.gridInput.value.length
+    const len = this.gridInput.value.length;
     this.gridInput.setSelectionRange(len, len);
   }
 
-  let activeClueIndex = ''
-  let activeClueLabel = ''
+  let activeClueIndex = '';
+  let activeClueLabel = '';
   // If the current direction does not have an active clue, toggle direction
   if (this.currDir == 'A' && !gridCell.isDgmless &&
       !gridCell.acrossClueLabel && !gridCell.dgmlessSpanA) {
-    this.toggleCurrDir()
+    this.toggleCurrDir();
   } else if (this.currDir == 'D' && !gridCell.isDgmless &&
              !gridCell.downClueLabel && !gridCell.dgmlessSpanD) {
-    this.toggleCurrDir()
+    this.toggleCurrDir();
   } else if (this.currDir == 'Z' && !gridCell.z3dClueLabel) {
-    this.toggleCurrDir()
+    this.toggleCurrDir();
   } else if (this.currDir.charAt(0) == 'X' &&
              (!gridCell.nodirClues ||
               !gridCell.nodirClues.includes(this.currDir))) {
-    this.toggleCurrDir()
+    this.toggleCurrDir();
   }
   if (this.currDir == 'A') {
     if (gridCell.acrossClueLabel) {
-      activeClueLabel = gridCell.acrossClueLabel
+      activeClueLabel = gridCell.acrossClueLabel;
       activeClueIndex = this.getDirClueIndex('A', activeClueLabel);
     }
   } else if (this.currDir == 'D') {
     if (gridCell.downClueLabel) {
-      activeClueLabel = gridCell.downClueLabel
+      activeClueLabel = gridCell.downClueLabel;
       activeClueIndex = this.getDirClueIndex('D', activeClueLabel);
     }
   } else if (this.currDir == 'Z') {
     if (gridCell.z3dClueLabel) {
-      activeClueLabel = gridCell.z3dClueLabel
+      activeClueLabel = gridCell.z3dClueLabel;
       activeClueIndex = this.getDirClueIndex('Z', activeClueLabel);
     }
   } else {
     // currDir is actually a clueindex (for an X clue)
-    activeClueIndex = this.currDir
-    activeClueLabel = this.currDir.substr(1)
+    activeClueIndex = this.currDir;
+    activeClueLabel = this.currDir.substr(1);
   }
   if (activeClueIndex != '') {
     if (!this.clues[activeClueIndex]) {
-      activeClueIndex = ''
+      activeClueIndex = '';
       if (this.offNumClueIndices[activeClueLabel]) {
         for (const ci of this.offNumClueIndices[activeClueLabel]) {
           if (ci.charAt(0) == 'X' ||
               ci.charAt(0) == activeClueIndex.charAt(0)) {
-            activeClueIndex = ci
-            break
+            activeClueIndex = ci;
+            break;
           }
         }
       }
       if (!this.clues[activeClueIndex]) {
-        activeClueIndex = ''
+        activeClueIndex = '';
       }
     }
   }
@@ -6108,7 +6114,7 @@ Exolve.prototype.gnavToInner = function(cell, dir) {
   } else {
     // Isolated cell, hopefully a part of some nodir clue
     this.activeCells.push([this.currRow, this.currCol])
-    activeClueIndex = this.lastOrphan
+    activeClueIndex = this.lastOrphan;
   }
   gridCell.cellRect.style.fill = this.colorScheme['input'];
   if (!gridCell.prefill) {
@@ -7392,6 +7398,12 @@ Exolve.prototype.displayGrid = function() {
   const fontSize = this.cellLetterSize('');
   this.gridInput.style.fontSize = fontSize;
   this.gridInputWrapper.style.fontSize = fontSize;
+  this.gridInputWrapper.style.width = '' + this.cellW + 'px';
+  this.gridInputWrapper.style.height = '' + (this.cellH - 2) + 'px';
+  for (let e of [this.gridInputRarr, this.gridInputDarr,
+                 this.gridInputLarr, this.gridInputUarr]) {
+    e.style.fontSize = this.arrowSize + 'px';
+  }
   this.numCellsToFill = 0;
   this.numCellsPrefilled = 0;
   const cellColor = this.colorScheme['cell'];
