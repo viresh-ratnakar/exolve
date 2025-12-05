@@ -1,0 +1,37 @@
+ACROSS
+1,17. Clue (6,9)
+4. Clue (8)
+10. Clue (9)
+11. Clue (5)
+12. Clue (6)
+13. Clue (7)
+15. Clue (5)
+17. Clue (9)
+19. Clue (9)
+20. Clue (5)
+21. Clue (7)
+23. Clue (6)
+26. Clue (5)
+27. Clue (9)
+28. Clue (8)
+29. Clue (6)
+
+DOWN
+1. Clue (4)
+2. Clue (5)
+3. Clue (9)
+5. Clue (9)
+6. Clue (5)
+7. Clue (9)
+8. Clue (4,6)
+9/23. Clue (4,4)
+14. Clue (10)
+16. Clue (9)
+17. See 1.
+18. Clue (9)
+22. Clue (5)
+24. Clue (5)
+25. Clue (4)
+
+# 1,17 should point to 17d (present) not 17a
+# 9/23 should point 23d (missing) not 23 a

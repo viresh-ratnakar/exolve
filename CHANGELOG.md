@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.64.2: December 5, 2025
+
+- When parsing a list of linked clues, if a child's dir is not
+  specified, then we were picking the current direction. Do not do that
+  if the current dir already has a clue with the child's number and that
+  clue as an enum specified.
+
 ### Minor Version: Exolve v1.64.1: December 1, 2025
 
 - Bug-fix: grid input wrapper size should be set in displayGrid().

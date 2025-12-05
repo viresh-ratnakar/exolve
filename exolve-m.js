@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.64, November 25, 2025';
+  this.VERSION = 'Exolve v1.64.2, December 5, 2025';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -264,6 +264,7 @@ function Exolve(puzzleSpec,
   this.knownIncorrect = false;
 
   this.allClueIndices = [];
+  this.allClueDirs = new Set;
   this.PLACEHOLDER_BLANK_LEN = 15;
 
   this.BLOCK_CHAR = '⬛';
@@ -3469,14 +3470,14 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
     }
     // Consume trailing period if it is there (but not if it's followed
     // immediately by another period (i.e., don't skip "...")
-    periodParts = clueLine.match(/^\s*\./)
+    const periodParts = clueLine.match(/^\s*\./);
     if (periodParts && periodParts.length == 1 && !clueLine.match(/^\s*\.\./)) {
-      parse.hasChildren = false
-      parse.skip += periodParts[0].length
-      clueLine = clueLine.substr(periodParts[0].length)
+      parse.hasChildren = false;
+      parse.skip += periodParts[0].length;
+      clueLine = clueLine.substr(periodParts[0].length);
     }
   }
-  return parse
+  return parse;
 }
 
 /**
@@ -3552,9 +3553,11 @@ Exolve.prototype.sameCells = function(cells1, cells2) {
   return true
 }
 
-// If clueIndex is an orphan clue but the clue has enough info
-// to resolve it to a known (and unspecified) grid clue, return
-// its index. Otherwise return clueIndex itself.
+/**
+ * If clueIndex is an orphan clue but the clue has enough info
+ * to resolve it to a known (and unspecified) grid clue, return
+ * its index. Otherwise return clueIndex itself.
+ */
 Exolve.prototype.maybeRelocateClue = function(clueIndex, dir, clue) {
   if (!clue.startCell) {
     return clueIndex
@@ -4017,9 +4020,12 @@ Exolve.prototype.parseAnno = function(anno, clueIndex) {
   theClue.anno = anno;
 }
 
-// Parse across and down clues from their exolve sections previously
-// identified by parseOverall(). Sets lastOrphan, if any.
-// Sets cellsToOrphan[] for orphan clues for which revelations are provided.
+/**
+ * Parse across, down, 3d, nodir clues from their exolve sections previously
+ * identified by parseOverall(). Sets lastOrphan, if any.
+ * Sets cellsToOrphan[] for orphan clues for which revelations are provided.
+ * Sets allClueIndices array and allClueDirs set.
+ */
 Exolve.prototype.parseClueLists = function() {
   // Parse across, down, nodir clues
   let prev = null;
@@ -4154,6 +4160,9 @@ Exolve.prototype.parseClueLists = function() {
       if (clue.clue) {
         this.allClueIndices.push(clue.index);
       }
+      if (clue.dir) {
+        this.allClueDirs.add(clue.dir);
+      }
     }
     if (filler) {
       this.throwErr('Filler line should not be at the end: ' + filler);
@@ -4227,21 +4236,54 @@ Exolve.prototype.allCellsKnown = function(clueIndex) {
   return cells.length == clue.enumLen
 }
 
-// For clues that have "child" clues (indicated like, '2, 13, 14' for parent 2,
-// child 13, child 14), save the parent-child relationships, and successor grid
-// cells for last cells in component clues, and spilled-over hyphenAfter and
-// wordEndAfter locations.
-Exolve.prototype.processClueChildren = function() {
-  for (let clueIndex of this.allClueIndices) {
-    let clue = this.clues[clueIndex]
-    if (!clue.children) {
-      continue
+/**
+ * If the child does not have a dir specified, return the
+ * best alternative.
+ */
+Exolve.prototype.pickChildDir = function(child, clue) {
+  if (child.dir) return child.dir;
+  const dirs = [clue.dir];
+  for (const otherDir of this.allClueDirs) {
+    if (otherDir != clue.dir) {
+      dirs.push(otherDir);
     }
-    // Process children
-    // We also need to note the successor of the last cell from the parent
-    // to the first child, and then from the first child to the next, etc.
-    // We need to also deal with the rare snake, where a bunch of linked
-    // clues end on the starting cell.
+  }
+  /** best: clue that exists and has no enum specified */
+  for (const dir of dirs) {
+    let childIndex = this.getDirClueIndex(dir, child.label);
+    if (this.clues[childIndex] && !this.clues[childIndex].enumStr) {
+      return dir;
+    }
+  }
+  /** next best: clue that does not exist */
+  for (const dir of dirs) {
+    let childIndex = this.getDirClueIndex(dir, child.label);
+    if (!this.clues[childIndex]) {
+      return dir;
+    }
+  }
+  return clue.dir;
+}
+
+/**
+ * For clues that have "child" clues (indicated like, '2, 13, 14' for parent 2,
+ * child 13, child 14), save the parent-child relationships, and successor grid
+ * cells for last cells in component clues, and spilled-over hyphenAfter and
+ * wordEndAfter locations.
+ */
+Exolve.prototype.processClueChildren = function() {
+  for (const clueIndex of this.allClueIndices) {
+    const clue = this.clues[clueIndex];
+    if (!clue.children) {
+      continue;
+    }
+    /**
+     * Process children
+     * We also need to note the successor of the last cell from the parent
+     * to the first child, and then from the first child to the next, etc.
+     * We need to also deal with the rare snake, where a bunch of linked
+     * clues end on the starting cell.
+     */
     let lastRowCol = null;
     let firstRowCol = null;
     if (clue.cells.length > 0) {
@@ -4250,46 +4292,27 @@ Exolve.prototype.processClueChildren = function() {
       // If we do not know the enum of this clue (likely a diagramless puzzle),
       // do not set successors.
       if (!clue.enumLen || clue.enumLen <= 0) {
-        lastRowCol = null
+        lastRowCol = null;
       }
     }
     const firstRowColDir = clue.dir;
-    let lastRowColDir = clue.dir
-    dupes = {}
-    const allDirections = ['A', 'D', 'Z', 'X']
+    let lastRowColDir = clue.dir;
+    const dupes = {};
     let linkSep = (clue.linkSep != ',') ? (' ' + clue.linkSep + ' ') : ', ';
     for (let chi = 0; chi < clue.children.length; chi++) {
       const child = clue.children[chi];
-      // Direction could be the same as the direction of the parent. Or,
-      // if there is no such clue, then direction could be the other direction.
-      // The direction could also be explicitly specified with a suffix.
-      let childIndex = this.getDirClueIndex(clue.dir, child.label);
+      let childIndex = '';
       if (!child.isOffNum) {
-        if (!this.clues[childIndex]) {
-          for (let otherDir of allDirections) {
-            if (otherDir == clue.dir) {
-              continue;
-            }
-            const testChildIndex = this.getDirClueIndex(otherDir, child.label);
-            if (this.clues[testChildIndex]) {
-              childIndex = testChildIndex;
-              break
-            }
-          }
-        }
-        if (child.dir) {
-          childIndex = this.getDirClueIndex(child.dir, child.label);
-        } else {
-          child.dir = childIndex.charAt(0)
-        }
+        const dir = this.pickChildDir(child, clue);
+        childIndex = this.getDirClueIndex(dir, child.label);
       } else {
         if (!this.offNumClueIndices[child.label] ||
             this.offNumClueIndices[child.label].length < 1) {
-          this.throwErr('non-num child label ' + child.label + ' was not seen')
+          this.throwErr('non-num child label ' + child.label + ' was not seen');
         }
-        childIndex = this.offNumClueIndices[child.label][0]
+        childIndex = this.offNumClueIndices[child.label][0];
       }
-      let childClue = this.clues[childIndex]
+      let childClue = this.clues[childIndex];
       if (!childClue || childIndex == clueIndex) {
         /**
          * Note: Keep the format of this exception exactly like this, as
@@ -4322,8 +4345,8 @@ Exolve.prototype.processClueChildren = function() {
       childClue.parentClueIndex = clueIndex
 
       if (lastRowCol && childClue.cells.length > 0) {
-        let cell = childClue.cells[0]
-        let childDir = childClue.dir
+        let cell = childClue.cells[0];
+        const childDir = childClue.dir;
         if (lastRowCol[0] == cell[0] && lastRowCol[1] == cell[1]) {
           if (childDir == lastRowColDir || childClue.cells.length == 1) {
             this.throwErr('loop in successor for ' + lastRowCol)
@@ -4340,12 +4363,11 @@ Exolve.prototype.processClueChildren = function() {
           dir: lastRowColDir
         };
       }
-
-      lastRowCol = null
+      lastRowCol = null;
       if (childClue.cells.length > 0) {
-        lastRowCol = childClue.cells[childClue.cells.length - 1]
+        lastRowCol = childClue.cells[childClue.cells.length - 1];
       }
-      lastRowColDir = childClue.dir
+      lastRowColDir = childClue.dir;
     }
     // Fix snake:
     if (firstRowCol && lastRowCol &&
@@ -4363,17 +4385,17 @@ Exolve.prototype.processClueChildren = function() {
       }
     }
     if (this.hasDgmlessCells) {
-      continue
+      continue;
     }
     // If clue.wordEndAfter[] or clue.hyphenAfter() spill into children,
     // then copy the appropriate parts there.
-    let prevLen = clue.cells.length
-    let wordEndIndex = 0
+    let prevLen = clue.cells.length;
+    let wordEndIndex = 0;
     while (wordEndIndex < clue.wordEndAfter.length &&
            clue.wordEndAfter[wordEndIndex] < prevLen) {
       wordEndIndex++;
     }
-    let hyphenIndex = 0
+    let hyphenIndex = 0;
     while (hyphenIndex < clue.hyphenAfter.length &&
            clue.hyphenAfter[hyphenIndex] < prevLen) {
       hyphenIndex++;
@@ -10144,29 +10166,29 @@ Exolve.prototype.createIdIfNeeded = function() {
 }
 
 Exolve.prototype.createPuzzle = function() {
-  this.init()
+  this.init();
   this.createListeners();
 
-  this.parseAndDisplayPrelude()
-  this.parseAndDisplayExplanations()
-  this.parseAndDisplayMaker()
+  this.parseAndDisplayPrelude();
+  this.parseAndDisplayExplanations();
+  this.parseAndDisplayMaker();
 
-  this.parseGrid()
-  this.markClueStartsUsingGrid()
-  this.parseClueLists()
+  this.parseGrid();
+  this.markClueStartsUsingGrid();
+  this.parseClueLists();
 
-  this.processClueChildren()
+  this.processClueChildren();
   this.clueSolutionsToGridSolutions();
 
   this.parseAlternatives();
 
   this.createIdIfNeeded();
 
-  this.finalClueTweaks()
+  this.finalClueTweaks();
   this.setWordEndsAndHyphens();
-  this.setUpGnav()
+  this.setUpGnav();
 
-  this.applyStyles()
+  this.applyStyles();
 
   this.redisplayQuestions();
   this.displayClues();

@@ -803,8 +803,8 @@ own custom CSS rules.
 
 ### Linked lights and clues
 If a linked clue includes other "children clues," this can be indicated by
-appending a comma-separated (or &amp;-separated) list of children clue numbers
-to the parent clue number. Example:
+appending a comma-separated (other separators that are allowed: "&amp;", "/",
+the word "and") list of children clue numbers to the parent clue number. Example:
 ```
   exolve-across:
     1, 5, 2d In spite of adverse circumstances (7,3,4)
@@ -831,6 +831,10 @@ Further, the interface lets you type letters in a loop along the sequence (as
 that seems to be the fun thing to do for this corner case). For backspacing
 (when erasing) cells in such a snake-swallowing-its-own-head loopy linked
 group, the interface stops the backspacing at the first cell.
+
+The child clue itself should *not* have an enum specified (if it does, Exolve
+will assume that the other direction is intended, as long as no direction
+qualifier was listed next to the child's number).
 
 ### Filled clues
 While solving, when a light is fully filled in, its clue number changes
