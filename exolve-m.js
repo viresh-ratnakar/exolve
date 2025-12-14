@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.64.2, December 5, 2025';
+  this.VERSION = 'Exolve v1.64.3, December 14, 2025';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2315,17 +2315,17 @@ Exolve.prototype.parseRelabel = function() {
   }
   const relabelLines = relabelText.split('\n');
   for (specLine of relabelLines) {
-    const colon = specLine.indexOf(':')
+    const colon = specLine.indexOf(':');
     if (colon < 0) {
       this.throwErr('Line in exolve-relabel does not look like ' +
-                    '"name: new-label":' + specLine)
+                    '"name: new-label":' + specLine);
     }
-    let id = specLine.substr(0, colon).trim()
-    let val = specLine.substr(colon + 1).trim()
+    let id = specLine.substr(0, colon).trim();
+    let val = specLine.substr(colon + 1).trim();
     if (this.textLabels[id]) {
-      this.textLabels[id] = val
+      this.textLabels[id] = val;
     } else {
-      this.throwErr('exolve-relabel: unsupported id: ' + id)
+      this.throwErr('exolve-relabel: unsupported id: ' + id);
     }
   }
 }
@@ -3534,23 +3534,23 @@ Exolve.prototype.clueFromLabel = function(s) {
 
 Exolve.prototype.sameCells = function(cells1, cells2) {
   if ((!cells1 && cells2) || (cells1 && !cells2)) {
-    return false
+    return false;
   }
   if (!cells1 && !cells2) {
-    return true
+    return true;
   }
   if (cells1.length != cells2.length) {
-    return false
+    return false;
   }
   for (let i = 0; i < cells1.length; i++) {
-    const c1 = cells1[i]
-    const c2 = cells2[i]
+    const c1 = cells1[i];
+    const c2 = cells2[i];
     if (c1.length != 2 || c2.length != 2 ||
         c1[0] != c2[0] || c1[1] != c2[1]) {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 /**
@@ -3560,87 +3560,87 @@ Exolve.prototype.sameCells = function(cells1, cells2) {
  */
 Exolve.prototype.maybeRelocateClue = function(clueIndex, dir, clue) {
   if (!clue.startCell) {
-    return clueIndex
+    return clueIndex;
   }
   if (!(clue.isOffNum && dir != 'X') &&
       !(clue.cells.length > 0 && dir == 'X')) {
-    return clueIndex
+    return clueIndex;
   }
-  const r = clue.startCell[0]
-  const c = clue.startCell[1]
-  let gridCell = this.grid[r][c]
+  const r = clue.startCell[0];
+  const c = clue.startCell[1];
+  const gridCell = this.grid[r][c];
   if (!gridCell.startsClueLabel) {
-    return clueIndex
+    return clueIndex;
   }
-  let replIndex = null
-  let clueAtRepl = null
+  let replIndex = null;
+  let clueAtRepl = null;
   if (dir == 'X') {
     if (gridCell.startsAcrossClue) {
-      replIndex = 'A' + gridCell.startsClueLabel
-      clueAtRepl = this.clues[replIndex]
+      replIndex = 'A' + gridCell.startsClueLabel;
+      clueAtRepl = this.clues[replIndex];
       if (clueAtRepl && !clueAtRepl.clue &&
           this.sameCells(clue.cells, clueAtRepl.cells)) {
-        return replIndex
+        return replIndex;
       }
     }
     if (gridCell.startsDownClue) {
-      replIndex = 'D' + gridCell.startsClueLabel
-      clueAtRepl = this.clues[replIndex]
+      replIndex = 'D' + gridCell.startsClueLabel;
+      clueAtRepl = this.clues[replIndex];
       if (clueAtRepl && !clueAtRepl.clue &&
           this.sameCells(clue.cells, clueAtRepl.cells)) {
-        return replIndex
+        return replIndex;
       }
     }
     if (gridCell.startsZ3dClue) {
-      replIndex = 'Z' + gridCell.startsClueLabel
-      clueAtRepl = this.clues[replIndex]
+      replIndex = 'Z' + gridCell.startsClueLabel;
+      clueAtRepl = this.clues[replIndex];
       if (clueAtRepl && !clueAtRepl.clue &&
           this.sameCells(clue.cells, clueAtRepl.cells)) {
-        return replIndex
+        return replIndex;
       }
     }
-    return clueIndex
+    return clueIndex;
   }
   if (dir == 'A' && gridCell.startsAcrossClue) {
-    replIndex = 'A' + gridCell.startsClueLabel
+    replIndex = 'A' + gridCell.startsClueLabel;
   } else if (dir == 'D' && gridCell.startsDownClue) {
-    replIndex = 'D' + gridCell.startsClueLabel
+    replIndex = 'D' + gridCell.startsClueLabel;
   } else if (dir == 'Z' && gridCell.startsZ3dClue) {
-    replIndex = 'Z' + gridCell.startsClueLabel
+    replIndex = 'Z' + gridCell.startsClueLabel;
   }
-  clueAtRepl = this.clues[replIndex]
+  clueAtRepl = this.clues[replIndex];
   if (replIndex && clueAtRepl && !clueAtRepl.clue &&
       clueAtRepl.cells.length > 0) {
-    return replIndex
+    return replIndex;
   }
-  return clueIndex
+  return clueIndex;
 }
 
 Exolve.prototype.parseInClueAnnos = function(clue) {
-  clue.inClueAnnos = []
-  let idx = clue.clue.indexOf('~{')
-  let endIdx = 0
-  let clueText = clue.clue
+  clue.inClueAnnos = [];
+  let idx = clue.clue.indexOf('~{');
+  let endIdx = 0;
+  let clueText = clue.clue;
   while (idx >= 0) {
-    endIdx = clueText.indexOf('}~', idx + 1)
+    endIdx = clueText.indexOf('}~', idx + 1);
     if (endIdx < 0) {
-      endIdx = idx
-      break
+      endIdx = idx;
+      break;
     }
-    let cls = 'xlv-definition'
+    let cls = 'xlv-definition';
     if (clueText.charAt(idx + 2) == '{') {
-      let close = clueText.indexOf('}', idx + 3)
+      let close = clueText.indexOf('}', idx + 3);
       if (close > idx + 3) {
-        let parsedCls = clueText.substring(idx + 3, close).trim()
+        let parsedCls = clueText.substring(idx + 3, close).trim();
         if (parsedCls) {
-          cls = parsedCls
+          cls = parsedCls;
         }
       }
     }
-    clue.inClueAnnos.push(cls)
-    this.hasReveals = true
-    endIdx += 2
-    idx = clueText.indexOf('~{', endIdx)
+    clue.inClueAnnos.push(cls);
+    this.hasReveals = true;
+    endIdx += 2;
+    idx = clueText.indexOf('~{', endIdx);
   }
 }
 
@@ -4559,8 +4559,18 @@ Exolve.prototype.deDefMarkers = function(s) {
   while ((match = s.match(reDef)) && match.length > 2) {
     const idx = s.indexOf(match[0]);
     console.assert(idx >= 0, s, match);
-    const cStart = idx + 2;
+    let cStart = idx + 2;
     const end = s.indexOf('}~', cStart);
+    /**
+     * Check for and remove in-clue anno that looks like:
+     * ...~{{some-class} ...}~....
+     */
+    if (s.charAt(cStart) == '{') {
+      const inClueEnd = s.indexOf('}', cStart + 1);
+      if (inClueEnd < end) {
+        cStart = inClueEnd + 1;
+      }
+    }
     s = s.substr(0, idx) + s.substring(cStart, end) + s.substr(end + 2);
   }
   return s;
@@ -10153,10 +10163,10 @@ Exolve.prototype.createIdIfNeeded = function() {
       if (clue.childrenClueIndices && clue.childrenClueIndices.length > 0) {
         label += ',' + clue.childrenClueIndices.join(',');
       }
-      idHashFodders.push(label + ' ' + clue.clue);
+      idHashFodders.push(label + ' ' + this.deDefMarkers(clue.clue));
     }
     const hash = this.javaHash(idHashFodders);
-    this.id = `xlv-#${hash.toString(36)}`;
+    this.id = `xlv-${hash.toString(36)}`;
   }
   if (exolvePuzzles[this.id]) {
     this.throwErr('Puzzle id ' + this.id + ' is already in use');

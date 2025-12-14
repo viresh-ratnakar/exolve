@@ -1,5 +1,14 @@
 # Changelog
 
+### Minor Version: Exolve v1.64.3: December 14, 2025
+
+- When creating an exolve id, only use alphanumeric characters (basically
+  get rid of the `#` that we were inserting). Also, when creating the id
+  by hashing the puzzle, remove def markers from clues (the aim is that
+  if the same crossword is used with and without solutions, we create the
+  same id).
+- Make deDefMarkers() also strip away in-clue-anno class names.
+
 ### Minor Version: Exolve v1.64.2: December 5, 2025
 
 - When parsing a list of linked clues, if a child's dir is not
