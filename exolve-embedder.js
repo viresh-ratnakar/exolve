@@ -11,16 +11,26 @@ See the full license notice in exolve-m.js.
  * decoding the URL parameters to find a puzzle file and serve it.
  */
 class ExolveEmbedder {
-  constructor() {
+  /**
+   * If dirPrefix is specified, it is prepended to the crossword
+   * path before reading the file. If titlePrefix is specified, it
+   * is prepended to the puzzle title (or "Untitled" if puzzle title
+   * is missing) and set as the document title.
+   */
+  constructor(dirPrefix='', titlePrefix='') {
+    this.dirPrefix = dirPrefix;
+    this.titlePrefix = titlePrefix;
     this.embedder = document.getElementById('xlv-embedder');
-    const urlParams = new URLSearchParams(window.location.search);
     this.crossword = '';
     this.exolveOverrides = '';
+
+    const urlParams = new URLSearchParams(window.location.search);
+
     for (const [key, value] of urlParams) {
       const decodedValue = decodeURIComponent(value);
-      if (key == 'crossword') {
+      if (key == 'crossword' || key == 'xwd') {
         if (this.crossword) {
-          throw new Error('Multiple "crossword=" keys found.');
+          throw new Error('Multiple "crossword=" or "xwd=" keys found.');
         }
         this.crossword = decodedValue;
         continue;
@@ -28,8 +38,9 @@ class ExolveEmbedder {
       this.exolveOverrides += 'exolve-' + key + ': ' + decodedValue + '\n';
     }
     if (!this.crossword) {
-      throw new Error('Must specify "?crossword=[puz/ipuz/exolve file]" in the URL.');
+      throw new Error('Must specify "?crossword=[puz/ipuz/exolve file]" (or ?xwd=...) in the URL.');
     }
+    this.crossword = dirPrefix + this.crossword;
     const finisher = this.showData.bind(this);
     fetch(this.crossword, {
       mode: 'cors',
@@ -67,6 +78,9 @@ class ExolveEmbedder {
 
     try {
       const xlv = new Exolve(exolveSpecs, 'xlv-embedder', null, notInIframe);
+      if (this.titlePrefix) {
+        document.title = this.titlePrefix + (xlv.title || 'Untitled');
+      }
     } catch (err) {
       this.showMessage(err);
       return false;

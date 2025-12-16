@@ -2344,7 +2344,10 @@ The software automatically saves state. It does so in the browser's local
 storage. Users can also copy and share a URL that saves the state after the #
 (if requested through provideStateUrl=true in the constructor). The state uses
 the puzzle id specified in the [`exolve-id`](#exolve-id) section (or the id
-automatically created, if that section is not there) as the key.
+automatically created, if that section is not there) as the key. Note that
+sharing state via a URL is _not_ available in Exolve Player (as it is a generic
+player that is not tied to a secific crossword, so a URL that has just the
+current solving state captured is not sufficient for sharing).
 
 Please note that a variety of factors control access to and size limits of
 local storage. Especially when embedding Exolve puzzles in cross-site iframes,
