@@ -45,6 +45,7 @@ exolve-begin
 
   exolve-width: 3
   exolve-height: 3
+  exolve-host: Fancy hosting service
 
   # You can provide solution letters instead of zeroes in the grid, which
   # will create control buttons for revealing and checking entered letters.
@@ -131,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.64.3, December 14, 2025';
+  this.VERSION = 'Exolve v1.64.4, December 16, 2025';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -494,6 +495,7 @@ function Exolve(puzzleSpec,
     'jotter.hover': 'Show/hide a jotting pad that also lets you try out anagrams and subtractions.',
     'jotter-text.hover': 'You can shuffle letters by clicking above. If you enter something like [Alphabet - betas =] then it will be replaced by [lpha - s] (subtraction of common letters).',
     'maker-info': 'Exolve-maker info',
+    'host-info': 'Hosted by',
     'manage-storage': 'Manage local storage',
     'manage-storage.hover': 'View puzzle Ids for which state has been saved. ' +
         'Delete old saved states to free up local storage space if needed.',
@@ -1429,6 +1431,8 @@ Exolve.prototype.parseOverall = function() {
       this.copyright = parsedSec.value.trim();
     } else if (parsedSec.section == 'credits') {
       this.credits.push(parsedSec.value.trim());
+    } else if (parsedSec.section == 'host') {
+      this.host = parsedSec.value.trim();
     } else if (parsedSec.section == 'width') {
       this.gridWidth = parseInt(parsedSec.value);
     } else if (parsedSec.section == 'height') {
@@ -2335,19 +2339,24 @@ Exolve.prototype.parseAndDisplayExplanations = function() {
   this.revelationList.push(this.explanations);
 }
 
-Exolve.prototype.parseAndDisplayMaker = function() {
+Exolve.prototype.parseAndDisplayMetadata = function() {
+  let html = '';
+
+  if (this.host) {
+    html += `<br>${this.textLabels['host-info']}: ${this.host}\n`;
+  }
   const lines = this.sectionLines['maker'] || [-1,-1];
-  if (lines[0] < 0) {
-    return;
+  if (lines[0] >= 0) {
+    const makerText = this.extractSectionLines(lines[0], lines[1]);
+    if (makerText) {
+      html += `<br>${this.textLabels['maker-info']}:<br>\n` +
+        '<div style="margin:0 0 0 4ex">\n' + makerText + '</div>';
+    }
   }
-  const makerText = this.extractSectionLines(lines[0], lines[1]);
-  if (!makerText) {
-    return;
+  if (html) {
+    const elt = document.getElementById(this.prefix + '-metadata')
+    elt.insertAdjacentHTML('beforeend', html)
   }
-  const maker = `<br>${this.textLabels['maker-info']}:<br>\n` +
-    '<div style="margin:0 0 0 4ex">\n' + makerText + '</div>';
-  const elt = document.getElementById(this.prefix + '-metadata')
-  elt.insertAdjacentHTML('beforeend', maker)
 }
 
 // Parses exolve-relabel, noting relabelled texts of various buttons etc.
@@ -10228,7 +10237,7 @@ Exolve.prototype.createPuzzle = function() {
 
   this.parseAndDisplayPrelude();
   this.parseAndDisplayExplanations();
-  this.parseAndDisplayMaker();
+  this.parseAndDisplayMetadata();
 
   this.parseGrid();
   this.markClueStartsUsingGrid();

@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.64.4: December 16, 2025
+
+- Add new 'exolve-host' field for showing hosting info within the crossword
+  metadata section.
+
 ### Minor Version: Exolve v1.64.3: December 14, 2025
 
 - When creating an exolve id, only use alphanumeric characters (basically

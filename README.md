@@ -228,6 +228,7 @@ and the `exolve-end` line:
 * `exolve-language`
 * `exolve-relabel`
 * `exolve-maker`
+* `exolve-host`
 * `exolve-force-hyphen-right`
 * `exolve-force-hyphen-below`
 * `exolve-force-bar-right`
@@ -1906,6 +1907,7 @@ Here are all the names of pieces of text that you can relabel:
 | `jotter.hover`   | Show/hide a jotting pad that also lets you try out anagrams and subtractions.|
 | `jotter-text.hover`|You can shuffle letters by clicking above. If you enter something like "Alphabet - betas  =" then it will be replaced by "lpha - s" (subtraction of common letters). |
 | `maker-info`     | Exolve-maker info                    |
+| `host-info`      | Hosted by                            |
 | `manage-storage` | Manage local storage                 |
 | `manage-storage.hover` | View puzzle Ids for which state has been saved. Delete old saved states to free up local storage space if needed.|
 | `manage-storage-close` | Close (manage storage)         |
@@ -2022,6 +2024,16 @@ In this multiline section, you can include arbitrary metadata about the
 puzzle's construction. The Exet crossword construction web app uses this section
 to record some info such as its version and the lexicon it used. The metadata
 can be seen after clicking the Exolve button.
+
+## `exolve-host`
+
+If your provide this, it will be displayed in a "Hosted by: ..." line within
+the section shown after clicking the Exolve button. It can have HTML tags.
+
+Example:
+```
+  exolve-host: <a href="https://xlufz.ratnakar.org/exost.html">Exost</a>
+```
 
 ## `exolve-force-hyphen-right`, `exolve-force-hyphen-below`, `exolve-force-bar-right`, `exolve-force-bar-below`
 
