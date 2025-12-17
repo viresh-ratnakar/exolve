@@ -3015,12 +3015,13 @@ var exolvePuzzles;
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
  * notTemp If false, state is not saved in local storage and some event
- *    listeners are not created. Useful for creating temporary/preview puzzles.
- *    Note that if you create a normal (notTemp=true) puzzle and your web page
- *    is going to destroy it for some reason during its normal course
- *    (ExolvePlayer does this, for example), then you should call destroy() on
- *    the puzzle object before removing all references to it. This will remove
- *    listeners for 'resize' and printing events, for example.
+ *    listeners are not created and webifi is not loaded. Useful for creating
+ *    temporary/preview puzzles. Note that if you create a normal (notTemp=true)
+ *    puzzle and your web page is going to destroy it for some reason during
+ *    its normal course (ExolvePlayer does this, for example), then you should
+ *    call destroy() on the puzzle object before removing all references to it.
+ *    This will remove *    listeners for 'resize' and printing events, for
+ *    example.
  */
 function Exolve(puzzleText,
                 containerId="",

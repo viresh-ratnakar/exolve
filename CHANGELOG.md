@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.64.5: December 16, 2025
+
+- Disable webifi for temp puzzles.
+
 ### Minor Version: Exolve v1.64.4: December 16, 2025
 
 - Add new 'exolve-host' field for showing hosting info within the crossword

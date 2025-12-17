@@ -118,12 +118,13 @@ var exolvePuzzles;
  * maxDim If non-zero, use this as the suggested max size of the container
  *    in px.
  * notTemp If false, state is not saved in local storage and some event
- *    listeners are not created. Useful for creating temporary/preview puzzles.
- *    Note that if you create a normal (notTemp=true) puzzle and your web page
- *    is going to destroy it for some reason during its normal course
- *    (ExolvePlayer does this, for example), then you should call destroy() on
- *    the puzzle object before removing all references to it. This will remove
- *    listeners for 'resize' and printing events, for example.
+ *    listeners are not created and webifi is not loaded. Useful for creating
+ *    temporary/preview puzzles. Note that if you create a normal (notTemp=true)
+ *    puzzle and your web page is going to destroy it for some reason during
+ *    its normal course (ExolvePlayer does this, for example), then you should
+ *    call destroy() on the puzzle object before removing all references to it.
+ *    This will remove *    listeners for 'resize' and printing events, for
+ *    example.
  */
 function Exolve(puzzleSpec,
                 containerId='',
@@ -132,7 +133,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.64.4, December 16, 2025';
+  this.VERSION = 'Exolve v1.64.5, December 16, 2025';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -5902,9 +5903,11 @@ Exolve.prototype.addWebifi = function() {
  * If the puzzle has the useWebifi option set (or there is a URL param for
  * webifi), and the serving site has provided webifi scripts, then we load
  * them async and add a Webifi button.
+ *
+ * We skip webifi when notTemp is false.
  */
 Exolve.prototype.loadWebifi = function() {
-  if (this.webifi) {
+  if (this.webifi || !this.notTemp) {
     return;
   }
   if (!this.useWebifi) {
