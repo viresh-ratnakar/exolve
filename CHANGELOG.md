@@ -1,5 +1,14 @@
 # Changelog
 
+### Exolve v1.65: December 18, 2025
+
+- Theere is no change to core Exolve. However, this revision adds the
+  `exolve-exost.js` file that is the client library for uploading and
+  managing crosswords at the [Exost](https://xlufz.ratnakar.org/exost.html)
+  Crossword Hosting site (that I've just set up).
+- Exolve Player now uses this library, and you can upload crossword to
+  Exost directly from it.
+
 ### Minor Version: Exolve v1.64.5: December 16, 2025
 
 - Disable webifi for temp puzzles.

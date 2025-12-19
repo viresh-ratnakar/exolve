@@ -10,13 +10,14 @@ See the full license notice in exolve-m.js.
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.64"/>
-<script src="exolve-m.js?v1.64"></script>
-<script src="exolve-from-ipuz.js?v1.64"></script>
-<script src="exolve-from-puz.js?v1.64"></script>
-<script src="exolve-from-text.js?v1.64"></script>
-<script src="exolve-to-ipuz.js?v1.64"></script>
-<script src="exolve-to-puz.js?v1.64"></script>
+<link rel="stylesheet" type="text/css" href="exolve-m.css?v1.65"/>
+<script src="exolve-m.js?v1.65"></script>
+<script src="exolve-from-ipuz.js?v1.65"></script>
+<script src="exolve-from-puz.js?v1.65"></script>
+<script src="exolve-from-text.js?v1.65"></script>
+<script src="exolve-to-ipuz.js?v1.65"></script>
+<script src="exolve-to-puz.js?v1.65"></script>
+<script src="exolve-exost.js?v1.65"></script>
 
 <style>
 .xlvp-wait {
@@ -98,11 +99,16 @@ pre,
   border-bottom: 1px solid black;
 }
 #xlvp-save,
-#xlvp-view {
+#xlvp-view,
+#xlvp-exost {
   margin-top: 10px;
 }
 #xlvp-last-crossword {
   float: right;
+}
+.xlvp-xst-status {
+  font-size: 80%;
+  font-size: italic;
 }
 </style>
 
@@ -186,6 +192,73 @@ pre,
         There isn't a current crossword. Perhaps open one?
       </pre>
     </details>
+    <details id="xlvp-exost">
+      <summary>
+        Upload/update this crossword for hosting on Exost
+      </summary>
+      <div style="margin-left:2em;padding:4px;font-size:80%">
+        <table>
+          <tr>
+            <td colspan="2">
+              <label for="xlvp-xst-email">Email: </label>
+              <input type="email" class="xlv-answer" id="xlvp-xst-email" size="32" placeholder="your@email.address">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <label for="xlvp-xst-pwd">Password: </label>
+              <input type="password" class="xlv-answer" id="xlvp-xst-pwd" size="28" placeholder="Retrievable via email">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Get your password emailed to you:
+            </td>
+            <td>
+              <button onclick="exost.requestPwd()">Go!</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <span class="xlvp-xst-status" id="xlvp-xst-pwd-status"></span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Upload/update Exost-hosted version:
+            </td>
+            <td>
+              <button onclick="exost.uploadExolve(xlvpData, xlvpPuz)">Go!</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <span class="xlvp-xst-status" id="xlvp-xst-upload-status"></span>
+            </td>
+          </tr>
+          <tr id="xlvp-xst-url-row">
+            <td colspan="2">
+              Exost URL: <a class="xlvp-xst-status" target="_blank" id="xlvp-xst-url"></a>
+              <button id="xlvp-xst-cpurl-u" onclick="exost.copyURL(xlvpXstUrl, false, 'xlvp-xst-cpurl-u')"
+                title="Copy Exost URL">&#128279;</button>
+              <button id="xlvp-xst-cpurl-e" onclick="exost.copyURL(xlvpXstUrl, true, 'xlvp-xst-cpurl-e')"
+                title="Copy Exost iframe embed code">&lt;/&gt;</button>
+            </td>
+          </tr>
+        </table>
+
+        <p style="font-size:90%;font-style:italic">
+          You can view the list of all your uploaded crosswords (and delete any,
+          if you wish to) at the <a target="_blank"
+              href="https://xlufz.ratnakar.org/exost.html">Exost</a> site.
+          Please note that by uploading your crossword, you're agreeing to
+          the simple terms and conditions listed on the Exost site. In
+          particular, please note that if you've opened someone else's
+          crossword on this page, you shouldn't be uploading it for hosting
+          anywhere unless you've received explicit permission from them.
+        </p>
+      </div>
+    </details>
     <div>
       <button id="xlvp-save" class="xlvp-button" disabled onclick="xlvpSave()">
          Save crossword as:
@@ -236,6 +309,20 @@ let xlvpPuz = null;
 let xlvpChoices = [];
 
 const xlvpStateKey = '42-xlvp-player-state';
+
+const exost = new ExolveExost({
+    exostURL: 'https://xlufz.ratnakar.org/exost.html',
+    apiServer: 'https://xlufz.ratnakar.org/exost.php',
+    emailEltId: 'xlvp-xst-email',
+    pwdEltId: 'xlvp-xst-pwd',
+    pwdStatusEltId: 'xlvp-xst-pwd-status',
+    uploadStatusEltId: 'xlvp-xst-upload-status',
+    uploadCallback: xlvpXstUploadCallback
+});
+const xlvpXstUrlRow = document.getElementById('xlvp-xst-url-row');
+const xlvpXstUrlElt = document.getElementById('xlvp-xst-url');
+const xlvpXstUploadStatus = document.getElementById('xlvp-xst-upload-status');
+let xlvpXstUrl = '';
 
 function xlvpSaveState() {
   const state = {
@@ -384,11 +471,29 @@ function xlvpShowExolveInner(specs, hideChooser) {
   xlvpSavePrefix.value = xlvpSavePrefixValue;
   xlvpSaveButton.disabled = false;
   xlvpFrame.style.display = '';
+
+  xlvpXstUrl = '';
+  xlvpXstUrlRow.style.display = 'none';
+  xlvpXstUploadStatus.innerHTML = '';
+
   xlvpShowing = true;
   xlvpLastCrossword.innerHTML = 'Hide current crossword';
   xlvpLastCrossword.disabled = false;
   xlvpFrame.scrollIntoView();
   return true;
+}
+
+function xlvpXstUploadCallback(result) {
+  if (result.error) {
+    console.log('Exost upload failed: ' + result.error);
+    return;
+  }
+  if (result.url) {
+    xlvpXstUrl = result.url;
+    xlvpXstUrlElt.href = xlvpXstUrl;
+    xlvpXstUrlElt.innerText = xlvpXstUrl;
+    xlvpXstUrlRow.style.display = '';
+  }
 }
 
 function xlvpSaveGetHTMLData() {

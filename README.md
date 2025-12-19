@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.64, November 25, 2025
+### Version: Exolve v1.65, Decemmber 18, 2025
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -38,6 +38,10 @@ Exolve, .puz, and .ipuz formats.
 You can also use the file [exolve-embedder.html](exolve-embedder.html) to
 serve .puz and .ipuz files using Exolve. See the details in the
 [Exolve Embedder](#exolve-embedder) section.
+
+In late 2025, I set up a free, no-strings-attached crossword hosting
+service called [Exost](https://xlufz.ratnakar.org/exost.html). You can upload
+crosswords to it from its own site, or from Exolve Player, or from Exet.
 
 Here is an example of the puzzle specification:
 
@@ -2416,6 +2420,19 @@ next subsection.
 If you have your crossword available as a .puz or .ipuz file, you can convert
 it to the Exolve format using [`exolve-player.html`](#exolve-player.html). Or, you
 can serve it using [`Exolve Embedder`](#exolve-embedder).
+
+### Exost
+
+In late 2025, I set up a free, no-strings-attached crossword hosting
+service called [Exost](https://xlufz.ratnakar.org/exost.html). You can upload
+crosswords to it from its own site, or from Exolve Player, or from Exet.
+On that site, you can use exolve, puz, or ipuz formats. From Exolve Player
+and from Exet, you can upload the current crossword to Exost. From
+Exolve Player, you have the additional ability to start from just the text
+of the clues. From Exet, you have an additional option of uploading a
+crossword without its solutions. This can be useful if you want to first
+put up a crossword without solutions and then perhaps after some time
+replace it with a version that does provide solutions.
 
 ### Exolve widget
 
