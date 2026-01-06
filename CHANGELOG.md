@@ -1,5 +1,20 @@
 # Changelog
 
+### Exolve v1.66: January 5, 2026
+
+- Add print/pdf font-size choice `auto` and make it the default. We iterate to
+  pick the largest font size that will let the crossword fit within one page,
+  when the `auto` setting is used. I've been manually doing that forever, and
+  it seems like a good default (even if it adds a little bit of delay).
+- Remove paginate() to reduce complexity. It was used to try to break clue
+  columns in a lined-up manner when spilling to multiple pages. But
+  mult-page printouts/PDFs still are pretty weird-looking, this complexity
+  is not worth it (and there's a better option now of getting single-page
+  output, with font-size `auto`).
+- Move the 'Print wysiwg' button to a separate row (it does not use any
+  settings from the settings panel anyway).
+- Allow length-1 nodir clues.
+
 ### Exolve v1.65: December 18, 2025
 
 - Theere is no change to core Exolve. However, this revision adds the

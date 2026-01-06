@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.65, Decemmber 18, 2025
+### Version: Exolve v1.66, January 5, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1972,6 +1972,7 @@ Here are all the names of pieces of text that you can relabel:
 | `print-margin`| Margin (inches, up to 4 numbers)                 |
 | `print-margin.hover`| The numbers are in inches, and are for top, right, bottom, left. Missing numbers are taken from symmetry or last available values. |
 | `print-font` | Font size:                                        |
+| `print-font-auto` | Auto (fill page)                             |
 | `print-font-normal` | Normal                                     |
 | `print-font-large` | Large                                       |
 | `print-font-xlarge` | Extra Large                                |
@@ -1981,8 +1982,9 @@ Here are all the names of pieces of text that you can relabel:
 | `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl/Cmd-b). |
 | `print-page` | Print page                                        |
 | `print-page.hover` | Print the whole page (Ctrl/Cmd-p).     |
+| `print-page-wysiwyg-label` | Print the page as-is:               |
 | `print-page-wysiwyg` | Print wysiwyg                             |
-| `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword.|
+| `print-page-wysiwyg.hover` | Print the whole page without reformatting the crossword (none of the settings above are used).|
 | `print-title` | Title                                            |
 | `print-setter` | Setter                                          |
 | `print-preamble` | Preamble                                      |
@@ -2810,24 +2812,29 @@ print, and then print.
 You can create PDF files for your crosswords by "printing to file" in most
 browsers.
 
-The printed puzzle is laid out in a newspaper-like multi-column layout
-(except under the "Page break" setting described later). If not all the puzzle
-entries have been filled in, then the printing is done in three columns, with
-the grid occupying two columns. This makes the grid a bit larger and easier
-for writing into.
+The printed puzzle is laid out in a newspaper-like multi-column layout.
+If not all the puzzle entries have been filled in, then the printing is done in
+three columns, with the grid occupying two columns. This makes the grid a bit
+larger and easier for writing into.
 
 If all the puzzle entries have been filled in, then the printing is done in
 two columns, with the grid occupying the first column (which makes it slightly
-smaller than the three-column layout for incomplete puzzles). If the puzzle
+smaller than in the three-column layout for incomplete puzzles). If the puzzle
 provides annotations and/or explanations that get revealed, then this two-column
 layout is especially useful to limit the printed size.
 
-For most puzzles, this layout should fit within a single page, in Portrait mode,
-for standard page sizes. You can reduce the font size from the settings menu if
-it just goes over a single page by a few lines.
+The font size can be specified from the print settings section. The default
+setting is `auto`, which makes the software use the largest font size that will
+make the puzzle fit in one page (this takes slightly longer, as we iterate
+to find the best font size before committing to it). Note that this calculation
+only uses the crossword element, not anything outside it, so if you're using
+th "Print page" option (i.e., not "Print crossword"), you might need to
+manually choose a smaller font size if the automatically chosen one leads to
+a page split because of elements outside the crossword.
 
 *As of September 2023, at least in Chrome, printing has become buggy when the
-puzzle spills over to a second page. Please reduce font-size if that happens, to
+puzzle spills over to a second page, if you manually pick a large font size.
+Please reduce font-size (or revert to the `auto` setting) if that happens, to
 try to fit the puzzle into a single page.*
 
 You can override the column choices for completed (default: 2 columns) and
@@ -2858,9 +2865,9 @@ with various settings for printing or creating PDFS. These include:
   for the top/right/bottom/left margins, respectively. Missing values will
   be copied from their symmetric counterparts, and if that's missing too, then
   from the last available value.
-- Font size (Normal, Large, Extra Large, Small, or specify an arbitrary font
-  size). Please note that the specific font size picked, such as "18px" may
-  not be the actual printed size exactly (because of scaling). However, in
+- Font size (Auto, Normal, Large, Extra Large, Small, or specify an arbitrary
+  font size). Please note that the specific font size picked, such as "18px",
+  may not be the actual printed size exactly (because of scaling). However, in
   general, you can increase/decrease the font size setting and the printed
   size will increase/decrease accordingly.
 - You can choose to print just the grid or just the clues (instead of the
@@ -2870,7 +2877,7 @@ with various settings for printing or creating PDFS. These include:
   the Down clues start.
 - You can selectively exclude any of these from printing: title, setter,
   preamble, explanations, copyright, questions. These exclusion settings are
-  ignored when printing in wysiwig mode.
+  ignored when printing in wysiwyg mode.
 - Inksaver. Set this option to print using a chequered pattern instead of a
   complete fill as the background colour for blocks.
 - Include QR code. Use this option to include a QR code. The QR code will
@@ -2890,7 +2897,8 @@ Additionally, from this panel, you have three buttons for printing:
   can be invoked with a Ctrl/Cmd-p).
 - If you want to print the whole page *without reformatting the crossword*
   (if Exolve's reformatting plays havoc, overlapping with the surrounding
-  content, for example), then you can click on "Print wysiwyg".
+  content, for example), then you can click on "Print wysiwyg". Note that this
+  completely ignores any other Exolve print settings such as font-size.
 
 ### Printing layout algorithm details
 
@@ -2899,19 +2907,6 @@ In preparation for printing, Exolve lays out the crossword part of the page
 2-columns format, and 320 + 16 + 320 + 16 + 320 in 3-column format) with 0
 margin. It then balances the clues across the 3 or 2 columns, so that the
 bottom edge is even.
-
-This is followed by an attempt at pagination (only done if the top-left of the
-Exolve crossword is very near the top-left of the page). The aspect ratio of
-the page size specified (taking into account the margins) is used to find where
-the page boundary is (in pixels). If the content already fits in one page, then
-nothing further needs to be done. If the content seems to only slighlty spill
-over to a second page, then a small left margin is added, sufficient to make the
-aspect ratio fit. If there's a non-trivial spill onto a second page, then
-Exolve inserts empty helper divs (with heights set as needed) to try to ensure
-that no clue is cut midway at the bottom of the first page *and* that the the
-remaining clues line up at the top on the second page. The hope is that browser
-will simply scale the content correctly and will arrive at the same page
-boundary.
 
 If printing only the crossword, all other page content is temporarily moved
 inside a DIV that is not displayed, whereas the top frame DIV of the Exolve
