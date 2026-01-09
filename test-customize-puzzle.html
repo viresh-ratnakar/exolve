@@ -54,6 +54,7 @@ function customizeExolve(p) {
     'p.gridInput',
     'p.gridInputWrapper',
     'p.allClueIndices',
+    'p.viewportDim',
   ]
   for (let v of expectedVars) {
     eval('console.log("' + v + ' = " + ' + v + ')')
@@ -85,6 +86,7 @@ function customizeExolve(p) {
     'p.cnavToInner',
     'p.punctuateEntry',
     'p.getCellsEntry',
+    'p.getViewportDim',
   ]
   for (let f of expectedFunctions) {
     eval('console.log("func ' + f + ' = " + (' + f + '!= null))')
