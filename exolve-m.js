@@ -85,7 +85,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.66, January 5, 2025';
+  this.VERSION = 'Exolve v1.66.1, January 22, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -5062,6 +5062,9 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
 
 /**
  * A class for rendering hints in the current clue and in questions.
+ * The light bulb span is created as a pior sibling to "container" so that
+ * it is (float-)rendered at its parent's top-right. The hints spans are
+ * inserted inside and at the end of container.
  */
 function ExolveHints(xlv, container, hints, hintsShown=0, resize=false) {
   this.xlv = xlv;
@@ -5074,20 +5077,22 @@ function ExolveHints(xlv, container, hints, hintsShown=0, resize=false) {
 
   if (this.hints.length == 0) return;
 
+  let bulbHtml = `<span id="${this.bulbId}" class="xlv-hint-bulb"`;
+  if (this.hints.length > 1 && this.hintsShown > 0) {
+    bulbHtml += ` title="${this.xlv.textLabels['hint-bulb-another.hover']}"`;
+  } else {
+    bulbHtml += ` title="${this.xlv.textLabels['hint-bulb.hover']}"`;
+  }
+  if (this.hintsShown == this.hints.length) {
+    bulbHtml += ' style="display:none"';
+  }
+  bulbHtml += `>${this.xlv.textLabels['hint-bulb']}</span>`;
+  this.container.insertAdjacentHTML('beforebegin', bulbHtml);
+
   let html = '';
   for (let i = 0; i < this.hints.length; i++) {
     html += this.renderHint(i, i < this.hintsShown);
   }
-  html += ` <span id="${this.bulbId}" class="xlv-hint-bulb"`;
-  if (this.hints.length > 1 && this.hintsShown > 0) {
-    html += ` title="${this.xlv.textLabels['hint-bulb-another.hover']}"`;
-  } else {
-    html += ` title="${this.xlv.textLabels['hint-bulb.hover']}"`;
-  }
-  if (this.hintsShown == this.hints.length) {
-    html += ' style="display:none"';
-  }
-  html += `>${this.xlv.textLabels['hint-bulb']}</span>`;
   this.container.insertAdjacentHTML('beforeend', html);
   const bulb = document.getElementById(this.bulbId);
   bulb.style.color = this.xlv.colorScheme['hint-bulb'];
@@ -5106,7 +5111,8 @@ ExolveHints.prototype.renderHint = function(index, shown) {
     style += ';display:none';
   }
   html += ` title="${this.xlv.textLabels['hint.hover']}" style="${style}">`;
-  html += ' <span class="xlv-hint-prefix">';
+  html += (index == 0) ? '&nbsp;&nbsp;' : ' ';
+  html += '<span class="xlv-hint-prefix">';
   html += this.xlv.textLabels['hint'];
   if (this.hints.length > 1) {
     html += ` ${index + 1}/${this.hints.length}`;
@@ -5137,11 +5143,20 @@ ExolveHints.prototype.updateHints = function() {
   }
 }
 
+ExolveHints.prototype.needsScrolling = function() {
+  return !this.container.classList.contains('xlv-question') &&
+         (this.xlv.currClue.scrollHeight > this.xlv.currClue.clientHeight);
+}
+
 ExolveHints.prototype.handleHideHints = function() {
   if (this.hints.length == 0 || this.hintsShown == 0) return;
   this.hintsShown = 0;
   this.updateHints();
   if (this.resize) this.xlv.resizeCurrClueAndControls();
+  if (this.needsScrolling()) {
+    const bulb = document.getElementById(this.bulbId);
+    bulb.scrollIntoView();
+  }
 }
 
 ExolveHints.prototype.handleHintBulbClick = function() {
@@ -5149,6 +5164,10 @@ ExolveHints.prototype.handleHintBulbClick = function() {
   this.hintsShown++;
   this.updateHints();
   if (this.resize) this.xlv.resizeCurrClueAndControls();
+  if (this.needsScrolling()) {
+    const hints = this.container.getElementsByClassName('xlv-hint');
+    hints[0].scrollIntoView();
+  }
 }
 
 Exolve.prototype.displayClues = function() {
@@ -9367,7 +9386,7 @@ Exolve.prototype.handleBeforePrint = function() {
    * If some other crossword on this same web page is trying to get printed
    * with printOnlyCrossword=true or printAsIs=true, then bail out.
    */
-  for (let id in exolvePuzzles) {
+  for (const id in exolvePuzzles) {
     const other = exolvePuzzles[id];
     if (typeof other === 'object' && other !== null &&
         other.id && other.id != this.id &&
@@ -10201,7 +10220,6 @@ Exolve.prototype.createIdIfNeeded = function() {
   if (exolvePuzzles[this.id]) {
     this.throwErr('Puzzle id ' + this.id + ' is already in use');
   }
-  exolvePuzzles[this.id] = this;
   document.getElementById(this.prefix + '-id-span').innerText = this.id;
 }
 
@@ -10256,6 +10274,10 @@ Exolve.prototype.createPuzzle = function() {
   if (this.customizer) {
     this.customizer(this);
   }
+  /**
+   * Register into the global exolvePuzzles[] registry only at the very end.
+   */
+  exolvePuzzles[this.id] = this;
 }
 
 /**

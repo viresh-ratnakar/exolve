@@ -1,5 +1,17 @@
 # Changelog
 
+### Minor Version: Exolve v1.66.1: January 22, 2026
+
+- Move the hints light-bulb to appear at the top-right (float) of the
+  enclosing container. This generally looks better, and is more usable
+  when the clue is so long that it requires a scrollbar.
+- When a new hint is shown, scroll it into view. Similarly, when the hints
+  are hidden, scroll to the bulb. BUT: do all of this only within the current
+  clue *and* when it has a visible scrollbar.
+- Register a new Exolve crossword into the global exolvePuzzles object
+  only at the very end (so that in case an exception is thrown at some
+  point then we do not create the entry).
+
 ### Exolve v1.66: January 5, 2026
 
 - Add print/pdf font-size choice `auto` and make it the default. We iterate to

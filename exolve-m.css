@@ -255,6 +255,7 @@ Version: Exolve v1.66, January 5, 2026
 }
 .xlv-curr-clue-inner {
   padding: 2px 0 8px 0 !important;
+  position: relative;
 }
 .xlv-curr-orphan,
 .xlv-curr-clue-label {
@@ -403,6 +404,7 @@ Version: Exolve v1.66, January 5, 2026
 }
 .xlv-question {
   margin: 12px 0 2px 0 !important;
+  position: relative;
 }
 .xlv-input,
 .xlv-answer {
@@ -443,6 +445,7 @@ Version: Exolve v1.66, January 5, 2026
 }
 .xlv-hint-bulb {
   cursor: pointer;
+  float: right;
   font-weight: normal;
 }
 .xlv-hint-bulb:hover {
