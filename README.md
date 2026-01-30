@@ -806,6 +806,35 @@ are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
 
+#### Concise versions of long clues
+If a crossword has some really long clues, then you can choose to provide
+concise versions of these clues using a `Concise: ...` line immediately
+following the clue (similar to the optional `Hint: ...` lines). The concise
+version of the clue will be displayed in the clues list. When a clue is
+clicked on and made the current clue, its full version will be displayed,
+both above the grid and in the clues list. The full version will also be
+always shown in printed clue lists. When the concise version is shown,
+it is also coloured slightly differently (in `darkred`, but you can tweak
+that with `exolve-option: colour-concise-clue:...`). Example:
+
+```
+    13 A really long clue that rambles on and on and on and on and on and on
+       and on and on and on and on and on and on and on and on, but miraculously
+       leads to a three-letter answer (3)
+       Concise: A really long clue &hellip; (3)
+```
+
+Note that if you want to show the enum in the concise version, you have to
+include it at the end of the `Concise: ...` line, as shown in the example above.
+
+The concise version shown in the clues list will have a hover-text that
+says:
+```
+The clue text has been trimmed here for brevity. You can see the full clue
+by clicking on it.
+```
+This hover-text can be changed using `exolve-relabel` (for `concise-clue.hover`).
+
 ### Linked lights and clues
 If a linked clue includes other "children clues," this can be indicated by
 appending a comma-separated (other separators that are allowed: "&amp;", "/",
@@ -1705,6 +1734,7 @@ be overriding), and descriptions.
 | `colour-small-button-text` | darkgreen     | The text in small buttons.        |
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
+| `colour-concise-clue`      | darkred       | Colour for concise versions of long clues.|
 
 When you set any of the above options, that modification applies to
 both the "light mode" and the "dark mode" (see next section). If you want
@@ -2011,6 +2041,8 @@ Here are all the names of pieces of text that you can relabel:
 | `show-notes-seq`| Show clue-solving sequence: |
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
+| `concise-clue.hover`| Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.|
+
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
 not include any HTML markup.

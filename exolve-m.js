@@ -85,7 +85,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.66.1, January 22, 2026';
+  this.VERSION = 'Exolve v1.66.2, January 29, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -300,6 +300,7 @@ function Exolve(puzzleSpec,
     'active': 'mistyrose',
     'active-clue': 'mistyrose',
     'anno': 'darkgreen',
+    'concise-clue': 'darkred',
     'hint': 'dodgerblue',
     'hint-bulb': 'dodgerblue',
     'arrow': 'white',
@@ -567,6 +568,7 @@ function Exolve(puzzleSpec,
     'show-notes-seq': 'Show clue-solving sequence:',
     'show-notes-entries': 'Show entered solutions:',
     'show-notes-times': 'Show clue-solving times:',
+    'concise-clue.hover': 'Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.',
   };
 
   /**
@@ -4101,6 +4103,14 @@ Exolve.prototype.parseClueLists = function() {
         lastDirClue.hints.push(clueLine.substr(5).trim());
         continue;
       }
+      if (clueLine.substr(0, 8).toLowerCase() == 'concise:') {
+        if (!lastDirClue) {
+          this.throwErr(
+              '[Concise: ...] line without any preceding clue: ' + clueLine);
+        }
+        lastDirClue.concise = clueLine.substr(8).trim();
+        continue;
+      }
       const clue = this.parseClue(clueDirection, clueLine);
       if (clue.isFiller) {
         filler = filler + clueLine + '\n';
@@ -5001,6 +5011,13 @@ Exolve.prototype.stripLineBreaks = function(s) {
   return s.replace(/<\/br\s*>/gi, "")
 }
 
+Exolve.prototype.renderLongClue = function(concise, full) {
+  return `<span class="xlv-concise-clue"
+    style="color:${this.colorScheme['concise-clue']}"
+    title="${this.textLabels['concise-clue.hover']}">` + concise + '</span>' +
+    '<span class="xlv-long-clue">' + full + '</span>';
+}
+
 Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
   let clueText = clue.clue.trim();
   if (clueText.endsWith('*')) {
@@ -5012,6 +5029,9 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
   }
   if (inCurrClue) {
     clueText = this.stripLineBreaks(clueText);
+  }
+  if (clue.concise) {
+    clueText = this.renderLongClue(clue.concise, clueText);
   }
   let html = '';
   let idx = clueText.indexOf('~{');
@@ -5998,6 +6018,7 @@ Exolve.prototype.maybeConfirm = function(msg) {
 Exolve.prototype.deactivateCurrClue = function() {
   for (let x of this.activeClues) {
     x.style.background = 'inherit';
+    x.classList.remove('xlv-active-clue');
   }
   this.activeClues = [];
   this.currClueIndex = null;
@@ -6352,6 +6373,7 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
       continue;
     }
     theClue.clueTR.style.background = colour;
+    theClue.clueTR.classList.add('xlv-active-clue');
     if (this.cluesPanelLines > 0) {
       this.scrollIfNeeded(theClue.clueTR);
     }
@@ -6909,27 +6931,27 @@ Exolve.prototype.retreatCursorInLight = function() {
 Exolve.prototype.toggleClueSolvedState = function(clueIndex) {
   if (this.allCellsKnown(clueIndex)) {
     this.log('toggleClueSolvedState() called on ' + clueIndex +
-                ' with all cells known')
-      return
+                ' with all cells known');
+      return;
   }
-  let clue = this.clues[clueIndex]
+  const clue = this.clues[clueIndex];
   if (!clue || !clue.clueTR) {
-    return
+    return;
   }
-  let cls = clue.clueTR.className
-  let currLab = null
+  const hasSolvedClass = clue.clueTR.classList.contains('xlv-solved');
+  let currLab = null;
   if (clueIndex == this.currClueIndex) {
-    currLab = document.getElementById(this.prefix + '-curr-clue-label')
+    currLab = document.getElementById(this.prefix + '-curr-clue-label');
   }
-  if (cls == 'xlv-solved') {
-    clue.clueTR.className = ''
+  if (hasSolvedClass) {
+    clue.clueTR.classList.remove('xlv-solved');
     if (currLab) {
-      currLab.className = 'xlv-curr-clue-label'
+      currLab.className = 'xlv-curr-clue-label';
     }
   } else {
-    clue.clueTR.className = 'xlv-solved'
+    clue.clueTR.classList.add('xlv-solved');
     if (currLab) {
-      currLab.className = 'xlv-curr-clue-label xlv-solved'
+      currLab.className = 'xlv-curr-clue-label xlv-solved';
     }
   }
 }
@@ -6960,13 +6982,13 @@ Exolve.prototype.updateClueState =
     return;
   }
   let solved = false;
-  if (clue && clue.clueTR && clue.clueTR.className == 'xlv-solved') {
+  if (clue && clue.clueTR && clue.clueTR.classList.contains('xlv-solved')) {
     solved = true;
   }
   let numFilled = 0;
   let numPrefilled = 0;
   for (const ci of cis) {
-    const theClue = this.clues[ci]
+    const theClue = this.clues[ci];
     if (!theClue.clueTR) {
       numFilled = 0;
       break;
@@ -7003,7 +7025,11 @@ Exolve.prototype.updateClueState =
   let cls = solved ? 'xlv-solved' : '';
   for (const ci of cis) {
     if (this.clues[ci].clueTR) {
-      this.clues[ci].clueTR.setAttributeNS(null, 'class', cls);
+      if (solved) {
+        this.clues[ci].clueTR.classList.add('xlv-solved');
+      } else {
+        this.clues[ci].clueTR.classList.remove('xlv-solved');
+      }
     }
     if (ci == this.currClueIndex) {
       let currLab = document.getElementById(this.prefix + '-curr-clue-label');

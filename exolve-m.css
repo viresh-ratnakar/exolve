@@ -589,4 +589,26 @@ a.xlv-link:hover {
   .xlv-only-print {
     display: none;
   }
+  .xlv-long-clue {
+    display: none;
+  }
+  .xlv-concise-clue {
+    display: inline;
+  }
+  .xlv-active-clue .xlv-long-clue,
+  .xlv-curr-clue .xlv-long-clue {
+    display: inline;
+  }
+  .xlv-active-clue .xlv-concise-clue,
+  .xlv-curr-clue .xlv-concise-clue {
+    display: none;
+  }
+}
+@media print {
+  .xlv-long-clue {
+    display: inline;
+  }
+  .xlv-concise-clue {
+    display: none;
+  }
 }

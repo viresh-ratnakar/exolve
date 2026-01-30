@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.66.2: January 29, 2026
+
+- Add a way to specify a concise version of a very long clue. This
+  is done similar to the way hints can be specified: via a line immediately
+  following the clue that looks like `Concise: ...`.
+- The concise version is shown in clues lists. The full version is shown
+  when the clue is the current clue. Printing always uses full versions.
+
 ### Minor Version: Exolve v1.66.1: January 22, 2026
 
 - Move the hints light-bulb to appear at the top-right (float) of the
