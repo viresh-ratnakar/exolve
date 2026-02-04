@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.66, January 5, 2026
+### Version: Exolve v1.67, February 4, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -569,6 +569,9 @@ The title of the puzzle and the name/pseudonym of the crossword setter. Example:
   exolve-title: My Lovely Crossword
   exolve-setter: Narsi Sus
 ```
+The title and setter fields are rendered at the very top, on two separate lines,
+except on a [mobile phone](#phone-display), where they are shown on the same
+line.
 
 ## `exolve-email`
 Optional email address (or comma-separated addresses) where solvers can contact
@@ -613,14 +616,16 @@ Crossword puzzles often come with a preamble that contains special instructions
 and/or hints. The preamble text occupies multiple lines—starting from the
 line *after* the `exolve-preamble` (or `exolve-prelude`) line, and going all the
 way down to the line preceding the next `exolve-something` section. The preamble
-may include HTML tags. The preamble is rendered just above the grid, in the
-rendered puzzle. Example:
+may include HTML tags. Example:
 ```
   exolve-preamble:
     Words should be entered in the grid <i>after</i> deleting one letter. The
     letters thus deleted, in clue order, form the name of a famous farm
     animal.
 ```
+The preamble is rendered just above the grid in the rendered puzzle, except on
+a [mobile phone](#phone-display), where it is shown below the grid but above
+the clues lists.
 
 ## `exolve-across`, `exolve-down`, `exolve-nodir`
 The `exolve-across` and `exolve-down` sections should be used to specify the
@@ -1735,6 +1740,11 @@ be overriding), and descriptions.
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
 | `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
 | `colour-concise-clue`      | darkred       | Colour for concise versions of long clues.|
+| `colour-phone-kb-bg`       | whitesmoke    | Phone keyboard (shown in English only): background colour. |
+| `colour-phone-kb-btn-border`| #mistyrose   | Phone keyboard (shown in English only): button border. |
+| `colour-phone-kb-btn-bg`   | #fafafa       | Phone keyboard (shown in English only): button background. |
+| `colour-phone-kb-btn-text`| black          | Phone keyboard (shown in English only): button text. |
+| `colour-phone-kb-btn-bg-active`| #ffb6b4   | Phone keyboard (shown in English only): button background when active. |
 
 When you set any of the above options, that modification applies to
 both the "light mode" and the "dark mode" (see next section). If you want
@@ -2042,6 +2052,7 @@ Here are all the names of pieces of text that you can relabel:
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
 | `concise-clue.hover`| Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.|
+| `preamble-link`     | &Darr;Preamble          |
 
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
@@ -2830,6 +2841,41 @@ panels laid out horizontally to the right of the grid. If the width is wide
 enough for only one column, then the layout has the clues panels laid out
 vertically under the grid.
 
+## Phone display
+
+When we detect that the display is a mobile phone (smaller dimension is no
+more than 500 *and* touch events are enabled) and the crossword is nearly at
+the top of the page, then we make a small number of tweaks to the on-screen
+layout, to optimize for that use case:
+
+- The title and setter fields are shown on the same line (unless they are too
+  long), the title's font-size is slightly reduced.
+- If there is a preamble, then it is shown below the grid (above the clues
+  lists). In that case, a link that says "&Darr;Preamble" is shown next to the
+  title/setter fields. Clicking on this link will scroll the display to make
+  the preamble visible. The text shown in this link can be changed using
+  `exolve-relabel` for `preamble-link`.
+- If the current clue overlaps any of title/setter/preamble-link elements, then
+  that element is blurred.
+- For English crosswords, we suppress the automatic system keyboard and
+  instead show an on-screen keyboard at the bottom that has just the letters
+  `A-Z`, a button labelled "&times;" to close the keyboard, and a button
+  labelled "&#x232B;" for backspace. This keyboard takes up less space than the
+  automatic keyboard 9and also avoids some complications with the sticky
+  display of the current clue above the grid). The colour-scheme of this
+  keyboard can be tweaked using `exolve-option: colour-phone-kb-...:...`.
+- The on-screen keyboard is not used if there are special characters allowed
+  or if there are rebus cells.
+
+Before printing, these tweaks are undone (and restored after printing). Note
+that on phones, "portrait" mode works best (there's no easy cross-platform
+way to lock into portrait mode from a browser, so we do not do that).
+
+If the on-screen keyboard is visible and the user shifts focus to some other
+input element (such as a form input outside the crossword grid) then the
+automatic keyboard will appear too (its keystrokes will go to the current
+focus).
+
 ## Printing
 
 You can print web pages containing Exolve crosswords using the browser's "Print"
@@ -3064,8 +3110,7 @@ var exolvePuzzles;
  *    puzzle and your web page is going to destroy it for some reason during
  *    its normal course (ExolvePlayer does this, for example), then you should
  *    call destroy() on the puzzle object before removing all references to it.
- *    This will remove *    listeners for 'resize' and printing events, for
- *    example.
+ *    This will remove listeners for 'resize' and printing events, for example.
  */
 function Exolve(puzzleText,
                 containerId="",

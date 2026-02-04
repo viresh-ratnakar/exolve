@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.66, January 5, 2026
+Version: Exolve v1.67, January 5, 2026
 */
 
 @media (max-width: 500px) {
@@ -14,12 +14,12 @@ Version: Exolve v1.66, January 5, 2026
   }
 }
 .xlv-frame {
-  font-size: 16px;
+  box-sizing: border-box;
   font-family: serif;
+  font-size: 16px;
   font-weight: 400;
   letter-spacing: normal !important;
   line-height: normal !important;
-  box-sizing: border-box;
 }
 .xlv-anno-text,
 .xlv-status,
@@ -186,6 +186,9 @@ Version: Exolve v1.66, January 5, 2026
   display: flex;
   flex-flow: column wrap;
 }
+.xlv-title-setter {
+  text-align: center;
+}
 .xlv-title {
   text-align: center;
   font-weight: bold;
@@ -196,8 +199,26 @@ Version: Exolve v1.66, January 5, 2026
   text-align: center;
   margin: 4px 0 8px 0;
 }
+.xlv-preamble-link {
+  display: none;
+  font-size: 90%;
+  font-weight: normal;
+}
+.xlv-phone-display .xlv-title {
+  font-size: 110%;
+  display: inline-block;
+  margin: 2px 0;
+}
+.xlv-phone-display .xlv-setter,
+.xlv-phone-display .xlv-preamble-link-shown {
+  display: inline-block;
+  margin: 2px 0 2px 4px;
+}
 .xlv-preamble {
   padding: 0;
+}
+.xlv-phone-display .xlv-preamble {
+  padding: 4px;
 }
 .xlv-frame .xlv-preamble table {
   margin: 0;
@@ -557,6 +578,9 @@ a.xlv-link:visited {
 a.xlv-link:hover {
   font-weight: bold;
 }
+.xlv-phone-display a.xlv-preamble-link:hover {
+  font-weight: normal;
+}
 .xlv-toggleable {
   margin-top: 6px !important;
   border-top: 1px solid gray;
@@ -585,6 +609,48 @@ a.xlv-link:hover {
   padding: 0 0 0 16px !important;
   text-align: left;
 }
+
+/**
+ * Phone keyboard styling.
+ */
+.xlv-phone-kb {
+  align-items: center;
+  bottom: 0;
+  position: fixed;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+  touch-action: manipulation;
+  user-select: none;
+  width: 100%;
+}
+.xlv-phone-kb-row {
+  box-sizing: content-box;
+  display: flex;
+  gap: 0.55%;
+  justify-content: center;
+  max-width: 500px;
+  width: 100%;
+}
+.xlv-phone-kb-btn {
+  aspect-ratio: 1;
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: bold;
+  justify-content: center;
+  transition: background-color 0.1s, transform 0.05s;
+  width: 9.5%;
+}
+.xlv-phone-kb-btn:active {
+  transform: translateY(2px);
+}
+.xlv-phone-kb-close {
+  border-radius: 50%;
+}
+
 @media not print {
   .xlv-only-print {
     display: none;

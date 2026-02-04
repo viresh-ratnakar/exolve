@@ -1,5 +1,29 @@
 # Changelog
 
+### Exolve v1.67: February 4, 2026
+
+- Optimizations for mobile phone displays.
+- Detect that we're on a phone (dim <= 500 AND touch events).
+- When on a phone, put setter and title on the same line, and reduce the
+  title's font size a bit. Do this by adding an `xlv-phone-display` class
+  to `this.frame` and adding CSS rules.
+- Move the preamble element to go above the clues instead of taking up space
+  at the top. Add a link at the top to scroll to it if there is a preamble
+  (all only when detected to be on a phone).
+- For printing: undo-before and redo-after (all these tweaks).
+- Add `interactive-widget=resizes-content` to all meta/viewport tags in html
+  files: this fixes (on Android) the fact that the top clue was not staying
+  sticky when an on-screen keyboard was shown.
+- Add `maximum0scale=1` too to meta/viewport tags: this stops automatic
+  zooming on iOS, when a cell is clicked.
+- For English, add an on-screen keyboard (on phones). On Android as well as
+  iOS, the automatic keyboard is too big. On iOS, it also prevents the problem
+  of the top clue not being sticky with the automatic keyboard.
+- When Exolve's on-screen keyboard is shown, disable the automatic keyboard
+  by intercepting the focus event on `gridInput` and calling `preventDefault()`
+  as well as `blur()`. Also add CSS rules to avoid doungle-tap-zooming on the
+  keyboard.
+
 ### Minor Version: Exolve v1.66.2: January 29, 2026
 
 - Add a way to specify a concise version of a very long clue. This
