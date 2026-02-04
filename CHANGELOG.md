@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.67.1: February 4, 2026
+
+- Make the phone keyboard key rectangles slightly taller.
+
 ### Exolve v1.67: February 4, 2026
 
 - Optimizations for mobile phone displays.
