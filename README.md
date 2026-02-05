@@ -2883,7 +2883,7 @@ cell in the grid). This only takes into account input fields that already
 exist when the crossword is first rendered. In particular, if there are
 multiple crosswords, then clicking on input fields from the second crossword
 would not make the on-screen crossword go away, currently. This is a flaw that
-I want to fix, eventually (by sharing a singleton `ExolveCrossword` object
+I want to fix, eventually (by sharing a singleton `ExolveKeyboard` object
 across all crosswords on the page).
 
 ## Printing
