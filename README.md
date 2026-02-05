@@ -2868,6 +2868,9 @@ tweaks to the on-screen layout, to optimize for that use case:
   keyboard can be tweaked using `exolve-option: colour-phone-kb-...:...`.
   - The on-screen keyboard is not used if there are special characters allowed
     or if there are rebus cells or diagramless cells.
+  - We also (currently) enable the on-screen crossword for the *first* crossword
+    on the page (when you happen to have multiple crosswords on the same web
+    page).
 
 Before printing, these tweaks are undone (and restored after printing). Note
 that on phones, "portrait" mode works best (there's no easy cross-platform
@@ -2876,7 +2879,12 @@ way to lock into portrait mode from a browser, so we do not do that).
 If the on-screen keyboard is visible and the user shifts focus to some other
 input element (such as a form input outside the crossword grid) then the
 automatic keyboard is hidden away (until the user clicks again on a light
-cell in the grid).
+cell in the grid). This only takes into account input fields that already
+exist when the crossword is first rendered. In particular, if there are
+multiple crosswords, then clicking on input fields from the second crossword
+would not make the on-screen crossword go away, currently. This is a flaw that
+I want to fix, eventually (by sharing a singleton `ExolveCrossword` object
+across all crosswords on the page).
 
 ## Printing
 
