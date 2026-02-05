@@ -2844,28 +2844,30 @@ vertically under the grid.
 ## Phone display
 
 When we detect that the display is a mobile phone (smaller dimension is no
-more than 500 *and* touch events are enabled) and the crossword is nearly at
-the top of the page, then we make a small number of tweaks to the on-screen
-layout, to optimize for that use case:
+more than 500 *and* touch events are enabled), then we make a small number of
+tweaks to the on-screen layout, to optimize for that use case:
 
-- The title and setter fields are shown on the same line (unless they are too
-  long), the title's font-size is slightly reduced.
-- If there is a preamble, then it is shown below the grid (above the clues
-  lists). In that case, a link that says "&Darr;Preamble" is shown next to the
-  title/setter fields. Clicking on this link will scroll the display to make
-  the preamble visible. The text shown in this link can be changed using
-  `exolve-relabel` for `preamble-link`.
-- If the current clue overlaps any of title/setter/preamble-link elements, then
-  that element is blurred.
-- For English crosswords, we suppress the automatic system keyboard and
-  instead show an on-screen keyboard at the bottom that has just the letters
-  `A-Z`, a button labelled "&times;" to close the keyboard, and a button
-  labelled "&#x232B;" for backspace. This keyboard takes up less space than the
-  automatic keyboard 9and also avoids some complications with the sticky
+- If the crossword is nearly at the top of the page, then we tweak placements
+  of a few elements to keep the grid as far up as possible, leaving space below
+  for the on-screen keyboard.
+  - The title and setter fields are shown on the same line (unless they are too
+    long), the title's font-size is slightly reduced.
+  - If there is a preamble, then it is shown below the grid (above the clues
+    lists). In that case, a link that says "&Darr;Preamble" is shown next to the
+    title/setter fields. Clicking on this link will scroll the display to make
+    the preamble visible. The text shown in this link can be changed using
+    `exolve-relabel` for `preamble-link`.
+  - When the current clue overlaps any of title/setter/preamble-link elements,
+    then that element is blurred.
+- For English crosswords, we suppress the automatic system on-screen keyboard
+  and instead show our own on-screen "Exolve keyboard" at the bottom that has
+  just the letters `A-Z`, a button labelled "&times;" to close the keyboard, and
+  a button labelled "&#x232B;" for backspace. This keyboard takes up less space
+  than the automatic keyboard and also avoids some complications with the sticky
   display of the current clue above the grid). The colour-scheme of this
   keyboard can be tweaked using `exolve-option: colour-phone-kb-...:...`.
-- The on-screen keyboard is not used if there are special characters allowed
-  or if there are rebus cells.
+  - The on-screen keyboard is not used if there are special characters allowed
+    or if there are rebus cells or diagramless cells.
 
 Before printing, these tweaks are undone (and restored after printing). Note
 that on phones, "portrait" mode works best (there's no easy cross-platform
@@ -2873,8 +2875,8 @@ way to lock into portrait mode from a browser, so we do not do that).
 
 If the on-screen keyboard is visible and the user shifts focus to some other
 input element (such as a form input outside the crossword grid) then the
-automatic keyboard will appear too (its keystrokes will go to the current
-focus).
+automatic keyboard is hidden away (until the user clicks again on a light
+cell in the grid).
 
 ## Printing
 

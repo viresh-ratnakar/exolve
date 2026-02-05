@@ -21,6 +21,9 @@ Version: Exolve v1.67, January 5, 2026
   letter-spacing: normal !important;
   line-height: normal !important;
 }
+.xlv-frame * {
+  box-sizing: border-box;
+}
 .xlv-anno-text,
 .xlv-status,
 .xlv-saving,
@@ -193,11 +196,11 @@ Version: Exolve v1.67, January 5, 2026
   text-align: center;
   font-weight: bold;
   font-size: 1.5em;
-  margin: 2px 6px 4px;
+  padding: 2px 6px 4px;
 }
 .xlv-setter {
   text-align: center;
-  margin: 4px 0 8px 0;
+  padding: 4px 0 8px 0;
 }
 .xlv-preamble-link {
   display: none;
@@ -207,12 +210,12 @@ Version: Exolve v1.67, January 5, 2026
 .xlv-phone-display .xlv-title {
   font-size: 110%;
   display: inline-block;
-  margin: 2px 0;
+  padding: 2px 0;
 }
 .xlv-phone-display .xlv-setter,
 .xlv-phone-display .xlv-preamble-link-shown {
   display: inline-block;
-  margin: 2px 0 2px 4px;
+  padding: 2px 0 2px 4px;
 }
 .xlv-preamble {
   padding: 0;
@@ -347,7 +350,6 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-clues-box {
   overflow-y: auto;
-  box-sizing: border-box;
   margin: 0;
 }
 .xlv-clues-label {
@@ -442,7 +444,6 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-clue-extraction-slot {
   line-height: normal !important;
-  box-sizing: border-box;
   text-align: center;
   vertical-align: middle;
 }
@@ -497,7 +498,6 @@ Version: Exolve v1.67, January 5, 2026
   padding: 8px;
 }
 .xlv-textarea {
-  box-sizing: border-box;
   outline: none;
   width: 100%;
 }
@@ -625,11 +625,9 @@ a.xlv-link:hover {
   width: 100%;
 }
 .xlv-phone-kb-row {
-  box-sizing: content-box;
   display: flex;
   gap: 0.55%;
   justify-content: center;
-  max-width: 500px;
   width: 100%;
 }
 .xlv-phone-kb-btn {
@@ -641,6 +639,9 @@ a.xlv-link:hover {
   font-size: 16px;
   font-weight: bold;
   justify-content: center;
+  margin: 0;
+  outline: none;
+  padding: 0 4px 2px 4px;
   transition: background-color 0.1s, transform 0.05s;
   width: 9.5%;
 }

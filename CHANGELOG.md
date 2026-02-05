@@ -1,5 +1,22 @@
 # Changelog
 
+### Minor Version: Exolve v1.67.2: February 4, 2026
+
+- Made all `box-sizing` styles to be `border-box`, and made `getViewportWidth()`
+  return the width of the parent div if it was not fully wide (as is often the
+  case in blogs), finally fixing some width-overflow issues. Only a clue label
+  element still needs to have `content-box` (used for aligning clue numbers and
+  indenting clues properly).
+- Separated "phone display tweaks" and "phone Exolve keyboard" into two
+  independent things. Both are possibly used when we detect a phone display.
+  Phone display tweaks are made if the top is very near the viewport top.
+  Exolve keyboard is shown is the language is English (plus a few constraints
+  as noted in the README).
+- Bug-fix: restore keyboard after printing, if needed.
+- Fixed the "automatic keyboard appearing along with Exolve keyboard issue":
+  we now attach a `focus` listener to all inputs/textareas/contenteditables
+  and hide the Exolve keyboard.
+
 ### Minor Version: Exolve v1.67.1: February 4, 2026
 
 - Make the phone keyboard key rectangles slightly taller.
