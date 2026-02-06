@@ -1,5 +1,19 @@
 # Changelog
 
+### Minor Version: Exolve v1.67.3: February 5, 2026
+
+- Make `viewportDim/getViewport{Width,Height}()` go back to referring to the
+  actual viewport (as we need that to decide if we're on a phone). The
+  additional constraint of reducing to fit the container div (as is sometimes
+  needed) is now handled by setting a separate `viewportDimUsable` field.
+- Also adjust viewportDimUsable for horizontal margins.
+- Make ExolveKB a singleton object shared by multiple puzzles on the page if
+  needed. Add a die() method to reset it (for use in exolve-player). But if
+  revived after die(), it does not need to look at all the non-Exolve input
+  elements for adding keyboard-hiding handlers.
+- ExolveKB: do `focus` listening on *all* crosswords on the page.
+- ExolveKB: give the keyboard `z-index: 3`.
+
 ### Minor Version: Exolve v1.67.2: February 4, 2026
 
 - Made all `box-sizing` styles to be `border-box`, and made `getViewportWidth()`

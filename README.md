@@ -2860,7 +2860,7 @@ tweaks to the on-screen layout, to optimize for that use case:
   - When the current clue overlaps any of title/setter/preamble-link elements,
     then that element is blurred.
 - For English crosswords, we suppress the automatic system on-screen keyboard
-  and instead show our own on-screen "Exolve keyboard" at the bottom that has
+  and instead show our own on-screen "ExolveKB keyboard" at the bottom that has
   just the letters `A-Z`, a button labelled "&times;" to close the keyboard, and
   a button labelled "&#x232B;" for backspace. This keyboard takes up less space
   than the automatic keyboard and also avoids some complications with the sticky
@@ -2868,9 +2868,9 @@ tweaks to the on-screen layout, to optimize for that use case:
   keyboard can be tweaked using `exolve-option: colour-phone-kb-...:...`.
   - The on-screen keyboard is not used if there are special characters allowed
     or if there are rebus cells or diagramless cells.
-  - We also (currently) enable the on-screen crossword for the *first* crossword
-    on the page (when you happen to have multiple crosswords on the same web
-    page).
+  - If there are multiple crosswords on the same web page that are all eligible
+    to use ExolveKB, then its colour-scheme is taken from the very first
+    crossword.
 
 Before printing, these tweaks are undone (and restored after printing). Note
 that on phones, "portrait" mode works best (there's no easy cross-platform
@@ -2879,12 +2879,7 @@ way to lock into portrait mode from a browser, so we do not do that).
 If the on-screen keyboard is visible and the user shifts focus to some other
 input element (such as a form input outside the crossword grid) then the
 automatic keyboard is hidden away (until the user clicks again on a light
-cell in the grid). This only takes into account input fields that already
-exist when the crossword is first rendered. In particular, if there are
-multiple crosswords, then clicking on input fields from the second crossword
-would not make the on-screen crossword go away, currently. This is a flaw that
-I want to fix, eventually (by sharing a singleton `ExolveKeyboard` object
-across all crosswords on the page).
+cell in the grid).
 
 ## Printing
 

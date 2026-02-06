@@ -623,6 +623,7 @@ a.xlv-link:hover {
   touch-action: manipulation;
   user-select: none;
   width: 100%;
+  z-index: 3;
 }
 .xlv-phone-kb-row {
   display: flex;
