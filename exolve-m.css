@@ -442,6 +442,9 @@ Version: Exolve v1.67, January 5, 2026
 .xlv-input {
   text-decoration: underline;
 }
+.xlv-frame input[type="checkbox"] {
+  vertical-align: text-bottom;
+}
 .xlv-clue-extraction-slot {
   line-height: normal !important;
   text-align: center;

@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.67.3, February 5, 2026';
+  this.VERSION = 'Exolve v1.67.4, February 10, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -1367,6 +1367,12 @@ Exolve.prototype.checkPhoniness = function() {
   const touchCheck = ('ontouchstart' in window) ||
                      (navigator.maxTouchPoints > 0);
   if (!touchCheck) {
+    return;
+  }
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const phoneKeywords =
+    /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  if (!phoneKeywords.test(userAgent)) {
     return;
   }
   this.onPhone = true;

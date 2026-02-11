@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.67.4: February 10, 2026
+
+- Also add a userAgent check for confirming that we're on a phone (to
+  avoid a false positive on touch-screen laptops where we somehow start
+  with a small window).
+- Tweak alignment of checkboxes
+
 ### Minor Version: Exolve v1.67.3: February 5, 2026
 
 - Make `viewportDim/getViewport{Width,Height}()` go back to referring to the
