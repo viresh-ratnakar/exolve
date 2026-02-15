@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.68.1: February 15, 2026
+
+- Minor bug-fix from v1.68: when the x button is clicked on the phone
+  keyboard, we do need to handle the 'click' event (otherwise it propagates
+  on to the clue underneath).
+
 ### Exolve v1.68: February 14, 2026
 
 - Make the buttons under the grid centered. Add prev/next nav buttons on the

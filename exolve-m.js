@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.68, February 14, 2026';
+  this.VERSION = 'Exolve v1.68.1, February 15, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -1544,7 +1544,7 @@ class ExolveKB {
       ]
     ];
     layout.forEach((rowKeys) => {
-      const handleRelease = () => {
+      const handleRelease = (e) => {
         this.#hidePreview();
       };
       const rowDiv = document.createElement("div");
@@ -1557,10 +1557,12 @@ class ExolveKB {
           btn.classList.add("xlv-phone-kb-close");
         }
         const handlePress = (e) => {
-          e.preventDefault();
-          this.puz.phoneKBInput(ch);
           this.#showPreview(btn, ch);
         };
+        const handleClick = (e) => {
+          this.puz.phoneKBInput(ch);
+        };
+        btn.addEventListener("click", handleClick);
         btn.addEventListener("pointerdown", handlePress);
         btn.addEventListener("pointerup", handleRelease);
         btn.addEventListener("pointerleave", handleRelease);
