@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.68.1, February 15, 2026';
+  this.VERSION = 'Exolve v1.68.2, February 15, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -312,7 +312,7 @@ function Exolve(puzzleSpec,
     'button-text': 'white',
     'nav-button-border': 'darkgreen',
     'nav-button-text': '#4caf50',
-    'nav-button-bg': 'whitesmoke',
+    'nav-button-bg': 'transparent',
     'nav-button-bg-hover': 'mistyrose',
     'caret': 'gray',
     'cell': 'white',
@@ -355,7 +355,6 @@ function Exolve(puzzleSpec,
     'small-button-text': 'lightgreen',
     'nav-button-border': 'whitesmoke',
     'nav-button-text': 'whitesmoke',
-    'nav-button-bg': '#333',
 
   }
   this.colorScheme = this.lightColorScheme;

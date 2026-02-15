@@ -389,6 +389,7 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-frame .xlv-nav-button {
   border-radius: 0;
+  font-weight: bold;
 }
 .xlv-frame:focus {
   border: none;
@@ -396,9 +397,6 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-button:hover {
   cursor: pointer;
-}
-.xlv-nav-button:hover {
-  font-weight: bold;
 }
 .xlv-button:disabled {
   cursor: not-allowed;

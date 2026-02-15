@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.68.2: February 15, 2026
+
+- Minor styling tweaks for the new nav buttons. Make default background
+  `transparent` (instead of `whitesmoke`) and make `font-weight` always be
+  `bold` (instead of only upon hover, which was creating a janky resizing in
+  Firefox).
+
 ### Minor Version: Exolve v1.68.1: February 15, 2026
 
 - Minor bug-fix from v1.68: when the x button is clicked on the phone

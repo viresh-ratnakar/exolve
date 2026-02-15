@@ -1717,7 +1717,7 @@ be overriding), and descriptions.
 | `colour-button-text`       | white         | The text in buttons.              |
 | `colour-nav-button-border` | darkgreen     | Border of next/prev nav buttons.  |
 | `colour-nav-button-text`   | #4caf50       | Text of next/prev nav buttons.    |
-| `colour-nav-button-bg`     | whitesmoke    | Background of next/prev nav buttons.|
+| `colour-nav-button-bg`     | transparent   | Background of next/prev nav buttons.|
 | `colour-nav-button-bg-hover`| mistyrose    | Background of next/prev nav buttons when hovering.|
 | `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
 | `colour-cell`              | white         | Light squares.                    |
@@ -1788,7 +1788,6 @@ The tweaks made are to the following colours:
 - Colour `small-button-hover` is set to #330066.
 - Colour `nav-button-border` is set to whitesmoke.
 - Colour `nav-button-text` is set to whitesmoke.
-- Colour `nav-button-bg` is set to #333.
 
 As mentioned in the previous section, when you override a colour with
 `exolve-option: colour-<name>:<c>`, it gets overridden for both light mode
