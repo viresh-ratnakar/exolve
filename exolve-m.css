@@ -61,8 +61,11 @@ Version: Exolve v1.67, January 5, 2026
   }
   .xlv-button {
     font-size: 9px;
-    padding: 4px;
+    padding: 6px 2px;
     border-radius: 4px;
+  }
+  .xlv-nav-button {
+    padding: 6px;
   }
   .xlv-anno-text,
   .xlv-small-print,
@@ -91,9 +94,12 @@ Version: Exolve v1.67, January 5, 2026
     max-width: 480px;
   }
   .xlv-button {
-    font-size: 11px;
-    padding: 5px;
+    font-size: 10px;
+    padding: 6px 3px;
     border-radius: 8px;
+  }
+  .xlv-nav-button {
+    padding: 6px;
   }
   .xlv-preamble {
     margin: 8px 0 0;
@@ -106,7 +112,7 @@ Version: Exolve v1.67, January 5, 2026
   }
   .xlv-button {
     font-size: 14px;
-    padding: 8px;
+    padding: 6px;
     border-radius: 12px;
   }
   .xlv-grid-panel {
@@ -264,7 +270,7 @@ Version: Exolve v1.67, January 5, 2026
   height: 56px;
 }
 .xlv-curr-clue-label {
-  margin: 0 0 0 4px;
+  margin: 0;
 }
 .xlv-curr-clue {
   font-weight: bold;
@@ -342,6 +348,9 @@ Version: Exolve v1.67, January 5, 2026
   text-anchor: middle;
   width: 100%;
 }
+.xlv-controls {
+  text-align: center;
+}
 .xlv-controls-etc {
   padding: 0 0 2px 0;
 }
@@ -358,9 +367,6 @@ Version: Exolve v1.67, January 5, 2026
   break-inside: avoid;
   break-after: avoid;
 }
-.xlv-nextprev {
-  vertical-align: text-top;
-}
 .xlv-frame hr {
   margin: 0 0 4px 0;
 }
@@ -372,7 +378,17 @@ Version: Exolve v1.67, January 5, 2026
   outline: none;
   text-align: center;
   text-decoration: none;
+  touch-action: manipulation;
   width: inherit;
+}
+.xlv-frame .xlv-prev {
+  margin-right: 1px;
+}
+.xlv-frame .xlv-next {
+  margin-left: 1px;
+}
+.xlv-frame .xlv-nav-button {
+  border-radius: 0;
 }
 .xlv-frame:focus {
   border: none;
@@ -380,6 +396,9 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-button:hover {
   cursor: pointer;
+}
+.xlv-nav-button:hover {
+  font-weight: bold;
 }
 .xlv-button:disabled {
   cursor: not-allowed;
@@ -399,6 +418,7 @@ Version: Exolve v1.67, January 5, 2026
   text-align: center;
   text-decoration: none;
   text-shadow: none;
+  touch-action: manipulation;
   width: inherit;
 }
 .xlv-small-button:hover {
@@ -622,7 +642,7 @@ a.xlv-link:hover {
   position: fixed;
   flex-direction: column;
   gap: 0;
-  padding: 1px 0;
+  padding: 6px 0 1px;
   touch-action: manipulation;
   user-select: none;
   width: 100%;
@@ -632,7 +652,9 @@ a.xlv-link:hover {
   display: flex;
   gap: 0.55%;
   justify-content: center;
+  touch-action: none;
   width: 100%;
+
 }
 .xlv-phone-kb-btn {
   aspect-ratio: 0.9;
@@ -646,7 +668,9 @@ a.xlv-link:hover {
   margin: 0;
   outline: none;
   padding: 0 4px 2px 4px;
-  transition: background-color 0.1s, transform 0.05s;
+  position: relative;
+  touch-action: manipulation;
+  transition: transform 0.05s;
   width: 9.5%;
 }
 .xlv-phone-kb-btn:active {
@@ -654,6 +678,29 @@ a.xlv-link:hover {
 }
 .xlv-phone-kb-close {
   border-radius: 50%;
+}
+.xlv-kb-preview {
+  position: absolute;
+  bottom: 110%;
+  left: 0;
+  line-height: 35px;
+  height: 35px;
+  width: 100%;
+  display: none;
+  width: 100%;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transform: scale(0.5);
+  transition: transform 0.1s ease-out;
+}
+.xlv-kb-preview-active {
+  display: block;
+  transform: scale(1);
 }
 
 @media not print {

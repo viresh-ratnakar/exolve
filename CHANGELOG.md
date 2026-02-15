@@ -1,5 +1,25 @@
 # Changelog
 
+### Exolve v1.68: February 14, 2026
+
+- Make the buttons under the grid centered. Add prev/next nav buttons on the
+  outsides of the top button row. Remove similar buttons that were there at
+  the top, in the current clue.
+- Make these buttons look nearly grid cells, stylistically (unlike the other
+  buttons).
+- Change the icons used in these next/prev buttons to left/right-pointing
+  triangles.
+- Add `relabel` options for most of the styling of these buttons.
+- The motivation for this is that the old buttons were nearly useless because
+  they were too small and too close to each other (especially a problem on
+  phone displays).
+- Phone keyboard tweaks: add hover-bubble to show and confirm the letter that
+  was pressed, add a little more margin at the top.
+- In the top (current clue) colour the clue number with darkred (customizable
+  via `colour-curr-unsolved`) when not fully filled.
+- When deactivating, remember the last `currClueIndex`, and use it for resuming
+  next/prev navigation.
+
 ### Minor Version: Exolve v1.67.4: February 10, 2026
 
 - Also add a userAgent check for confirming that we're on a phone (to

@@ -1715,6 +1715,10 @@ be overriding), and descriptions.
 | `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
 | `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
 | `colour-button-text`       | white         | The text in buttons.              |
+| `colour-nav-button-border` | darkgreen     | Border of next/prev nav buttons.  |
+| `colour-nav-button-text`   | #4caf50       | Text of next/prev nav buttons.    |
+| `colour-nav-button-bg`     | whitesmoke    | Background of next/prev nav buttons.|
+| `colour-nav-button-bg-hover`| mistyrose    | Background of next/prev nav buttons when hovering.|
 | `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
 | `colour-cell`              | white         | Light squares.                    |
 | `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
@@ -1738,7 +1742,8 @@ be overriding), and descriptions.
 | `colour-small-button-hover`| lightpink     | Small buttons with mouseover.     |
 | `colour-small-button-text` | darkgreen     | The text in small buttons.        |
 | `colour-solution`          | dodgerblue    | The solution part of the anno, as well as entries in placeholder blanks.|
-| `colour-solved`            | dodgerblue    | The clue number in the list of clues, once the clue has been solved.|
+| `colour-solved`            | dodgerblue    | The clue number in the list of clues or top-clue, once the clue has been solved.|
+| `colour-curr-unsolved`     | darkred       | The clue number in the top-clue, when unsolved.|
 | `colour-concise-clue`      | darkred       | Colour for concise versions of long clues.|
 | `colour-phone-kb-bg`       | whitesmoke    | Phone keyboard (shown in English only): background colour. |
 | `colour-phone-kb-btn-border`| #mistyrose   | Phone keyboard (shown in English only): button border. |
@@ -1774,12 +1779,16 @@ value of RGB for the font colour (on the root Exolve DIV element) is >= 155.
 The tweaks made are to the following colours:
 
 - Colour `currclue` is set to black (but see "Smart colouring" below).
+- Colour `curr-unsolved` is set to pink.
 - Colour `active-clue` is set to #663366.
 - Colour `orphan` is set to #663300.
 - Colour `anno` is set to lightgreen.
 - Colour `imp-text` is set to lightgreen.
 - Colour `small-button-text` is set to lightgreen.
 - Colour `small-button-hover` is set to #330066.
+- Colour `nav-button-border` is set to whitesmoke.
+- Colour `nav-button-text` is set to whitesmoke.
+- Colour `nav-button-bg` is set to #333.
 
 As mentioned in the previous section, when you override a colour with
 `exolve-option: colour-<name>:<c>`, it gets overridden for both light mode
@@ -1928,9 +1937,9 @@ Here are all the names of pieces of text that you can relabel:
 | `submit`         | Submit                               |
 | `submit.hover`   | Submit the solution!                 |
 | `setter-by`      | By                                   |
-| `curr-clue-prev` | &lsaquo;                             |
+| `curr-clue-prev` | &#9668;                              |
 | `curr-clue-prev.hover` | Previous clue.                 |
-| `curr-clue-next` | &rsaquo;                             |
+| `curr-clue-next` | &#9658;                              |
 | `curr-clue-next.hover` | Next clue.                     |
 | `squares-filled` | Squares filled                       |
 | `across-label`   | Across                               |
