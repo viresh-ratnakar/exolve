@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.67, February 4, 2026
+### Version: Exolve v1.69, February 25, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -13,10 +13,11 @@ make a copy and then replace the part that contains the example grid with your
 own puzzle specification, starting at the `exolve-begin` line and ending at the
 `exolve-end` line.
 
-The files [exolve-m.html](exolve-m.html), [exolve-m.css](exolve-m.css),
-[exolve-m.js](exolve-m.js) have the same  content as
-[exolve.html](exolve.html), except that it is split into separate parts: HTML
-(including the puzzle specification), CSS, and JavaScript. This allows the
+The files [exolve-m.js](exolve-m.js), [exolve-m.css](exolve-m.css), and
+[exolve-m.html](exolve-m.html) (you would probably rename a copy of
+this to `your-puzzle-name.html` and edit it), have the same  content as
+[exolve.html](exolve.html), except that it is split into separate parts:
+JavaScript, CSS, and HTML (including the puzzle specification), This allows the
 JavaScript and CSS to be reused across multiple puzzles.
 
 Another simple option is to just use the
@@ -24,6 +25,10 @@ Another simple option is to just use the
 of [exolve-m.html](exolve-m.html), but it does not require you to host the
 [exolve-m.css](exolve-m.css) and [exolve-m.js](exolve-m.js) files, as it
 links to their latest copies on a website that I maintain, hosted on GitHub.
+
+In late 2025, I set up a free, no-strings-attached crossword hosting
+service called [Exost](https://xlufz.ratnakar.org/exost.html). You can upload
+crosswords to it from its own site, or from Exolve Player, or from Exet.
 
 Yet another option is to embed the Exolve puzzle within arbitrary web pages
 (like blog posts) in a "widget". See the details in the
@@ -38,10 +43,6 @@ Exolve, .puz, and .ipuz formats.
 You can also use the file [exolve-embedder.html](exolve-embedder.html) to
 serve .puz and .ipuz files using Exolve. See the details in the
 [Exolve Embedder](#exolve-embedder) section.
-
-In late 2025, I set up a free, no-strings-attached crossword hosting
-service called [Exost](https://xlufz.ratnakar.org/exost.html). You can upload
-crosswords to it from its own site, or from Exolve Player, or from Exet.
 
 Here is an example of the puzzle specification:
 
@@ -67,32 +68,27 @@ exolve-end
 ```
 
 The format is very simple and uses plain text (but the parsing code is
-also occasionally simplistic and not very forgiving, so please go through the
+also occasionally simplistic and not very forgiving, so please do go through the
 format documentation). The setter has the option to provide solutions (as in the
-example above), or to just use 0 to indicate a square that needs to be filled
+example above), or to just use 0 to indicate a cell that needs to be filled
 (i.e., is a part of a "light," in crossword terms).
 
-A few example puzzles are also included in this directory, each in a file with
-the ".exolve" extension. These showcase some of the available features, such as
-ninas, additional clues or questions, submission, barred puzzles, diagramless
-puzzles, etc. To try one of these, create a copy of [exolve.html](exolve.html)
-and edit it as described above, splicing in the whole .exolve file from
-`exolve-begin` to `exolve-end`. A whole suite of test-\*.html files is also
-available in this directory. I use them to test new releases, but you can use
-them to see examples of usage of most Exolve features.
+A whole suite of test-\*.html files is also available in this directory. I use
+them to test new releases, but you can use them to see examples of usage of most
+Exolve features.
 
 ## Controls
-The basic control is to click on a square and enter a letter in it. If a square
-is a part of both an across clue and a down clue, then clicking on that square
-while it is the current square (or pressing the Enter key) will toggle the
+The basic control is to click on a cell and enter a letter in it. If a cell
+is a part of both an across clue and a down clue, then clicking on that cell
+while it is the current cell (or pressing the Enter key) will toggle the
 active direction (unless the shift key is also pressed with a click, in which
 case no directon-toggling will happen, which is useful when navigating back
-to the grid from some other input element).
+to the grid from some other clicked element).
 
 The control buttons (*Clear this*, *Clear all!*, *Check this*, *Check all!*,
 *Reveal this*, and *Reveal all!*) work as suggested by their names ("this"
-refers to the currently selected light(s)). You can click on a clue to jump to
-its squares. If the setter has not provided all solutions, then only the
+refers to the currently selected light(s)). You can click on a clue to make
+its cells active. If the setter has not provided all solutions, then only the
 "Clear this/all" control buttons are shown, the "Check/Reveal" buttons do not
 get shown.
 
@@ -102,33 +98,22 @@ letters in the current light also cross other fully filled lights), only then
 will these remaining letters get cleared.
 
 A long click on either of "Check this" or "Reveal this" will toggle the text
-"this" to "cell," and the checking/revealing will then only happen on the
+"this" to "cell", and the checking/revealing will then only happen on the
 current cell (as opposed to the whole light), for that particular activation
 of the button. Caveat: this does not seem to work on phones and tablets (only
 tested on Android devices though).
 
 Setters can use [`exolve-option`](#exolve-option) `show-cell-level-buttons`
 to additionally show an extra row of buttons containing these two cell-level
-buttons: "Check cell" and "Reveal cell."
+buttons: "Check cell" and "Reveal cell".
 
-Exolve supports diagramless puzzles, where the blocked squares are not
-identified and the solver has to figure out their locations. In fact, exolve
-supports *partially* diagramless puzzless, where only some squares or some
-partial areas of the grid do not show where the blocked squares are. While
-solving such a puzzle, the solver can press the space bar in a diagramless
-square to posit that it is a blocked square (the dark square character, ⬛,
-will get placed in that square. It can be deleted just like any other regular
-entry). Further, when a user enters or clears a blocked square in a diagramless
-cell, the appropriate action will also be taken in the square that is the
-symmetric counterpart of the current square.
-
-If the setter has provided annotations by appending annotations at the end of
-some clues, then these annotations get shown when the solver clicks
-"Reveal all!". Clue-specific annotations get revealed/hidden with
-"Reveal/Clear this" buttons (unless the clue only has diagramless cells).
-In a puzzle in which solutions are not provided, the "Reveal this" button will
-still get shown if there are any clues for which annotations are present (these
-annotations may be full solutions or just hints, possibly).
+If the setter has provided annotations by [appending annotations at the end of
+some clues](#annotations), then these annotations get shown when the solver
+clicks "Reveal all!". Clue-specific annotations get revealed/hidden with
+"Reveal/Clear this" buttons. In a puzzle in which solutions are not provided,
+the "Reveal this" button will still get shown if there are any clues for which
+annotations are present (these annotations may be full solutions or just notes,
+possibly).
 
 If the setter has provided the location of one or more ninas (through
 [`exolve-nina`](#exolve-nina) sections), then an additional button control,
@@ -145,9 +130,9 @@ If the setter has set up a submit URL (with an [`exolve-submit`](#exolve-submit)
 section—the URL can be set up using a Google Form, for instance), then there is
 a *Submit* buttion.
 
-When the solver enters a letter in a square, the cursor automatically jumps to
-the next square for the currently active clue (the next square can be from a
-different clue, when there are linked clues that "cover" multiple clues).
+When the solver enters a letter in a cell, the cursor automatically jumps to
+the next cell for the currently active clue (the next cell can be from a
+different clue, when there are linked clues).
 
 If the solver changes a cell entry from a non-blank letter to a different
 non-blank letter, then that changed letter is highlighted by showing in a
@@ -157,7 +142,7 @@ and the [duration (`highlight-overwritten-seconds`)](#exolve-option) can be
 configured.
 
 If the solver hits the delete key, it will erase the contents of the current
-square without advancing.
+cell without advancing.
 
 The solver can press Tab/Shift-Tab to navigate to the next/previous clue. The
 solver can use the arrow keys to navigate to the next/previous light cells in
@@ -167,7 +152,7 @@ that direction to one side, then the cursor moves there (this is intuitively
 helpful in tiled grids created using `exolve-shaped-cell`).
 
 The software tries to keep the current clue visible when scrolling, as long
-as the square with the cursor is visible.
+as the cell with the cursor is visible.
 
 "Clear/Check/Reveal all" buttons, the "Show ninas" button, and the "Submit"
 button solicit additional confirmation from the solver.
@@ -179,13 +164,13 @@ then the focus stays with the clue, letting you select and copy parts of
 the clue/anno if needed.
 
 You can click on the black background or on the puzzle title, setter, or
-preamble (if present) to unhighlight the current clue (for printing or
-screenshotting, for example).
+preamble (if present) to unhighlight the current clue (for screenshotting,
+for example).
 
 ## Extended chessboard notation
 In a few cases (such as when specifying colouring or ninas or locations of
 some clue numbers in diagramless puzzles), you might need to specify the location
-of a square in the grid. You can do that in one of the following ways:
+of a cell in the grid. You can do that in one of the following ways:
 ```
 a3 (column "a": the 1st column from the left, and row 3 from the bottom)
 f11 (column "f": the 6th column from the left, and row 11 from the bottom)
@@ -269,8 +254,8 @@ I did not use "//" as the comment marker as it is used in URLs.
 Any text appearing before `exolve-begin` or after `exolve-end` is ingored.
 
 ## `exolve-width`, `exolve-height`
-The width and height of the puzzle—i.e., how many squares across and how many
-squares down is the crossword grid. Example:
+The width and height of the puzzle—i.e., how many cells across and how many
+cells down is the crossword grid. Example:
 ```
   exolve-width: 15
   exolve-height: 15
@@ -280,7 +265,7 @@ squares down is the crossword grid. Example:
 The grid specification starts from the line *after* the `exolve-grid` line and
 goes all the way to the next `exolve-something` section. There should be exactly
 as many lines in this section as the height of the grid. On each line, the
-squares in that row of the grid are specified.
+cells in that row of the grid are specified.
 
 There are two kinds of puzzles: with solutions provided and without solutions
 provided. Here are simple examples of both:
@@ -292,13 +277,13 @@ Grid with solutions provided:
     R.R
     EAR
 ```
-This is a 3x3 grid with one blocked square in the center ("." is used to
-indicate blocked squares). In this grid, 1 Across = ACE, 1 Down = ARE,
+This is a 3x3 grid with one blocked cell in the center ("." is used to
+indicate blocked cells). In this grid, 1 Across = ACE, 1 Down = ARE,
 3 Down = ERR, and 3 Across = EAR. When solution letters are included like this,
 the control buttons for checking/revealing answers get shown. 
 
 In a grid with solutions provided, setters may use the letter '?' as a
-placeholder in any light square for which they have not yet decided what
+placeholder in any light cell for which they have not yet decided what
 letter to place.
 
 Grid without solutions provided:
@@ -315,13 +300,13 @@ revealing answers do not get shown.
 It is also possible to specify barred grids, instead of blocked ones. In fact,
 it is possible to specify a a grid that uses both bars and blocks. Bars (and
 some other special treatments) are specified using letters that follow the main
-grid square specifier, which we'll refer to as *decorators*. A bar to the right
-of a square is specified using the decorator |. A bar under a square is
-specified using the decorator \_. A square that has both a bar after and a bar
+grid cell specifier, which we'll refer to as *decorators*. A bar to the right
+of a cell is specified using the decorator |. A bar under a cell is
+specified using the decorator \_. A cell that has both a bar after and a bar
 under can use "|\_" or the shortcut for that, "+". Arbitrary many spaces are
-allowed between grid square specifications, and spaces can (*should!*) be used
-to line up the squares in the presence of decorators. Here is an example 3x3
-grid that uses both bars and blocked squares:
+allowed between grid cell specifications, and spaces can (*should!*) be used
+to line up the cells in the presence of decorators. Here is an example 3x3
+grid that uses both bars and blocked cells:
 ```
   exolve-grid:
     A M|B
@@ -329,8 +314,8 @@ grid that uses both bars and blocked squares:
     E|A T
 ```
 
-The decorator "@" can also be used to inscribe circles inside some squares, and
-the decorator "\*" can be used to indicate that a square is to be diagramless.
+The decorator "@" can also be used to inscribe circles inside some cells, and
+the decorator "\*" can be used to indicate that a cell is to be diagramless.
 Here's the last example again, this time with circles around some cells, and
 some cells being diagramless:
 ```
@@ -339,6 +324,7 @@ some cells being diagramless:
     X* .  E*
     E| A  T
 ```
+For more details, see the section on [diagramless cells](#diagramless-cells).
 
 The decorator "!" can be used to mark a cell as pre-filled (its solution letter
 must be provided). The solution letter will be pre-filled and will not be
@@ -541,27 +527,66 @@ when any cell does not have a solution. We disallow more than 3 distinct groups
 of alternatives within any single clue (as it's an unlikely scenario and the
 listing of all possible solutions would be too long).
 
-### Some details about diagramless cells
-Note that "diagramlessness" only hides from the solver whether a square is
-in a light or is a blocked square—if the setter has used any bars, they do get
-displayed to the solver, even in diagramless cells.
+### Diagramless cells
+Exolve supports diagramless puzzles, where the blocked cells are not
+identified and the solver has to figure out their locations. In fact, exolve
+supports *partially* diagramless puzzless, where only some cells or some
+partial areas of the grid do not show where the blocked cells are. As noted
+earlier, you specify that a cell is diagramless by using the `*` character
+in its specification in the `exolve-grid` section.
 
-If a puzzle with diagramless squares has specified all solutions, then
+While a puzzle with diagramless cells, the solver can press the space bar in
+a diagramless cell to posit that it is a blocked cell. In that case, a
+`darkred` (customizable via `exolve-option: colour-dgmless-divider:...`)
+cell will be added to the cell, with a white margin iaround it. It can be
+deleted by pressing the space bar again. When a user enters or clears a blocked
+cell in a diagramless cell, the appropriate action will also be taken in the
+cell that is the symmetric counterpart of the current cell, unless the
+`diagramless-asymmetric` option has been specified.
+
+Normally, a diagramless cell only allows adding/clearing a letter or a block.
+One can also create a diagramless puzzle where diagramless cells can allow
+users to add/remove *bars*. To enable this, `exolve-option: diagramless-bars` 
+must be specified. When this option is specified, the user can also toggle
+bars in diagramless cells: a bar to the right can be toggled with the `|`
+key, and a bar to the bottom can be toggled with the `_` key.
+
+#### Some details about diagramless cells
+Note that "diagramlessness" only hides from the solver whether a cell is
+in a light or is a blocked cell—if the setter has used any bars, they do get
+displayed to the solver, even in diagramless cells. This is the behaviour
+without the `diagramless-bars` option. When that option is set, then the
+placement of the diagramless specifier `*` determines whether a bar is
+always shown or is left to the user to figure out. In the example below,
+the bar to the right of the top-left cell, along with its symmetric counterpart
+in the last row, are shown to the user, as they are indicated *after* the
+diagramless decorator, `*`. The bars to the bottom (in two cells) are located
+*before* the `*` decorator, so they are not shown (the user can place them using
+the underscore key, once they've deciphered their existence).
+```
+  exolve-option: diagramless-bars
+  exolve-grid:
+    0*| 0_* 0*
+    0*  0_* 0*
+    0*  0*| 0*
+```
+
+If a puzzle with diagramless cells has specified all solutions, then
 check/reveal controls get displayed. For example, revealing a blocked
-diagramless square will show the dark square character, ⬛, in that square. 
+diagramless cell will show a darkred cell in that cell. With the
+`diagramless-bars` option, any revealed bars will be shown
+coloured in `darkred` (can be customized using `colour-dgmless-divider`).
 
 If the setter wants to *not* provide solutions for a puzzle that has some
-diagramless squares, then the blocked square marker (".") should not be used
-in the blocked squares that are also diagramless (otherwise the solver can peak
-into the HTML source and see where the blocked squares are). Each diagramless
-square in such a puzzle should be specified with a "0" followed by the
-diagramless decorator, i.e., as "0\*". But then, even the Exolve software has no
-way of knowing which grid square any clue starts on. However, sometimes, even
-in a puzzle with diagramless squares, the setter may want to provide the clue
-start locations for *some* clues. Exolve provides a way to do this: the setter
-can optionally include the location of the square where a clue starts for any
-clue, using the extended chessboard notation. Details are provided in the next
-section.
+diagramless cells, then the blocked cell marker (".") should not be used
+in the blocked cells that are also diagramless (otherwise the solver can peak
+into the HTML source and see where the blocked cells are). Each diagramless
+cell in such a puzzle should be specified with a "0" followed by the
+diagramless decorator, i.e., as "0\*".
+
+If any clue numbers are to be shown in the grid in a puzzle that has diagramless
+cells or jugsaw-puzzle clues, then you should indicate each such clue's starting
+cell, as described in the [`Listing clue cells`](#listing-clue-cells) section.
 
 ## `exolve-title`, `exolve-setter`
 The title of the puzzle and the name/pseudonym of the crossword setter. Example:
@@ -883,22 +908,6 @@ or other reasons that don't let us determine when a clue's light is fully
 filled). For such clues, the solver can click on the clue number to set (or
 unset) its "has-been-solved" state manually.
 
-As mentioned in the previous section, in a grid that has diagramless squares
-and that does not provide solutions, if the setter wants to display some clue
-numbers in squares, they can do so by prepending the clue (in the
-`exolve-across` or exolve-down section) with "#&lt;L&gt;", where &lt;L&gt; is
-the location of the square in the
-[extended chessboard notation](#extended-chessboard-notation).
-Examples:
-```
-  exolve-across:
-    #a9 15 Imprison and tie perhaps
-    #c17r42 31 Greeting
-```
-Here, the clue number 15 will get displayed in the square that is in the first
-column and the 9th row from the bottom, and 31 will get displayed in the 17th
-column and 31st row.
-
 ### Filler lines between clues
 Any line in a clues section (i.e., in
 `exolve-across`/`exolve-down`/`exolve-nodir`) that cannot be parsed as a clue or
@@ -929,6 +938,29 @@ on a cell that does not have a light in the currently active direction (say
 Across), but does have both a nodir light and an across light going through
 it, the nodir light will become active (as nodir clues are listed before across
 clues in the specs).
+
+### Listing clue cells
+In a grid that has diagramless cells or jigsaw-puzzle clues, if the setter wants
+to display some clue numbers in cells, they can do so by prepending the clue (in
+the `exolve-across` or `exolve-down` or `exolve-nodir` section) with
+"#&lt;L&gt;", where &lt;L&gt; is the location of the first cell for that clue,
+in the [extended chessboard notation](#extended-chessboard-notation).
+Examples:
+```
+  exolve-across:
+    #a9 15 Imprison and tie perhaps
+    #c17r42 31 Greeting
+```
+Here, the clue number 15 will get displayed in the cell that is in the first
+column and the 9th row from the bottom, and 31 will get displayed in the 17th
+column and 31st row.
+
+If it's an across or down clue that provides the enum, and if that enum agrees
+with the length of the light starting at that cell and in the same direction,
+then all cells belonging to the light are assigned to that clue.
+
+You can also list all cells explcitly in the same manner, which is a feature
+typicall needed for `nodir` clues (descried a couple of subsections below).
 
 ### Non-numeric clue labels
 If you want to use non-numeric clue labels (such as A, B, C, etc.), you can
@@ -961,13 +993,10 @@ example get ignored. If you have consecutive periods, they do not get ignored
 
 ### Some details about clue numbers
 Across and down clue numbers within the grid are automatically inferred from
-the grid, except in two cases. The first is when there are diagramless cells
-and solutions have not been provided. The second is in jigsaw-style puzzles,
-where the setter opts to deliberately not provide associations between grid
-squares and clues, by using non-numeric clue labels without providing their
-grid locations. When the solver is entering a value in a light for which the
-clue association is not known, the highlighted "current clue" browsable
-interface runs through all the clues for which all grid cells are not known.
+the grid, except in two cases. The first is when there are diagramless cells.
+The second is in jigsaw-style puzzles, where the setter opts to deliberately
+not provide associations between grid cells and clues, by using non-numeric
+clue labels without providing their grid locations.
 
 Clue numbering can be affected by the following additional factors covered in
 other sections:
@@ -1053,8 +1082,10 @@ then the clue is shown with a text entry area next to it. Solvers can record
 their solutions here, until they figure out where in the grid those letters
 should be entered. Solvers can transfer recorded letters from these placeholder
 areas by simply clicking the "copy-placeholder" button (that looks like [⇲])
-next to the placeholder area, whenever they have some squares highlighted for
-entry in the grid.
+next to the placeholder area, whenever they have some cells highlighted for
+entry in the grid. This button is not shown in puzzles with diagramless cells,
+as cells highlighted in the grid in such puzzles can generally span multiple
+lights.
 
 You can force a placeholder blank to appear after any clue (not just "orphan"
 ones that qualify using the criteria listed above). See the next sub-section.
@@ -1067,27 +1098,23 @@ only there in puzzles that have such placeholder entries, and in such puzzles, a
 tooltip is shown over the 'Clear all' button to let the user know.
 
 The same placeholder text and the copy-placeholder button ([⇲]) are also shown
-in the highlighted scrollable 'orphan' clues widget, whenever the currently
-highlighed squares do not have a known clue association.
-
-The copy-placeholder button feature does not get activated if there are any
-diagramless cells (as only one diagramless cell is active at a time generally).
-
+in the clue above the grid, for an "orphan" clue, when the solver clicks in
+the grid in a cell that has no known clue association.
 The copy-placeholder buttons can be disabled (i.e., not shown at all) by
 specifying `exolve-option: hide-copy-placeholder-buttons`. This is useful if
 you find the buttons distracting in appearance, or if copying from the
 placeholder is not very useful for some other reason (for eg., lights are split
 into parts).
 
-Within such clues, in grids with solutions provided, it is possible to indicate
-which cells in the grid belong to the clue, for use in "Reveal this" and "Check
-this." This is done by listing in square brackets a space-separated sequence of
-clue indices and/or cell locations. Clue indices can be like 12a or 12A or 13d
-or 13D (must include direction, just like the way these are specified in
-`exolve-nina` and `exolve-colour`). If any clue indices are used in the
-specified sequence, then those clues themselves must have some of their cell
-locations known. This listing should be present right after the enum part, if at
-all.  Examples:
+Within such jigsaw-puzzle clues, in grids with solutions provided, it is
+possible to indicate which cells in the grid belong to the clue, for use in
+"Reveal this" and "Check this." This is done by listing in square brackets
+a space-separated sequence of clue indices and/or cell locations. Clue indices
+can be like 12a or 12A or 13d or 13D (must include direction, just like the way
+these are specified in `exolve-nina` and `exolve-colour`). If any clue indices
+are used in the specified sequence, then those clues themselves must have some
+of their cell locations known. This listing should be present right after the
+enum part, if at all.  Examples:
 ```
   exolve-nodir:
     [A] Some clue (5) [1a]
@@ -1097,40 +1124,23 @@ all.  Examples:
 In the last clue above, there is no enum provided. Even though the software
 knows all the cells of this clue, it does not know if there are multiple
 words or hyphens. The solution in such cases can be provided in square brackets
-at the beginning of the anno.
+at the beginning of the annotation.
 
 The inferred or provided solution for an orphan clue gets revealed in its
 placeholder blank upon "Reveal this" and "Reveal all."
 
-Individually listed cells, if highlighted just by themselves (which would be
-the case if they are diagramless) do not let solvers reveal/check the whole
-orphan clue: a single cell may be a part of multiple clues.
-
-There are some subtle implications of providing revelations for orphan clues
-in this manner. In the above example, say a light in the grid (such as 1a) that
-belongs to some orphan clue (A in this case) is highlighted by clicking on one
-of its cells. The current clue shown in the clues list will be last orphan clue
-that the solver looked at, say B (different from A). If the solver clicks
-"Reveal this" then 1a will be revealed in the grid, and A will get highlighted
-in the clues list.
-
-If, after clicking on 1a in the grid, say the solver clicks on clue C in the
-clues list and then clicks "Reveal this." We infer the solver's intent from
-their last click. In this case, C in the clues list will get revealed, and
-the highlighting in the grid will change from 1a to whatever is the correct
-light for C.
-
-Another subtle point is that in a puzzle with diagramless cells, it's possible
+A subtle point is that in a puzzle with diagramless cells, it's possible
 for a clue to have specified some of its cells (the first few), but not all.
 Its cells can be revealed by naming itself, and listing the additional cells.
 For example:
 ```
-    15 Imprison and tie perhaps (one word) [15a e9 f9] DETAIN.
+    #a5 15 Imprison and tie perhaps (one word) [15a e9 f9] DETAIN.
 ```
 
-Note also that "Reveal all" does not reveal orphan-clue-to-grid-light
-associations. But, even after "Reveal all," solvers may go through orphan
-clues, clicking "Reveal this" for each.
+Note also that when cells for an orphan clue are provided as above,
+"Reveal all" does *not* reveal orphan-clue-to-grid-light associations. But
+(even after clicking on "Reveal all") solvers can go through orphan clues,
+clicking "Reveal this" for each, to see the locations.
 
 ### Adding "extraction slots" before clues
 
@@ -1379,7 +1389,7 @@ that case, a "Show ninas" control button will get displayed. Each nina should
 use its own `exolve-nina` line, and the ninas will get displayed in different
 colours upon clicking "Show ninas" (as well as "Reveal all").
 
-The squares involved in a nina are specified in the
+The cells involved in a nina are specified in the
 [extended chessboard notation](#extended-chessboard-notation)
 described above. It can also use clue indices like A12 and D33 (with uppercase
 A or D preceding the clue number) or like 12a, 12A, 33d, or 33D. Example:
@@ -1419,14 +1429,14 @@ confused with the extended chessboard notation or clue indices). For example:
     2 <span class="acrostic-1">O</span>pen borders working (2)
     2 <span class="acrostic-1">W</span>indow (8)
 ```
-Span-class-specified and square-location-specified ninas can be intermixed too,
+Span-class-specified and cell-location-specified ninas can be intermixed too,
 such as:
 ```
   exolve-nina: a4 c4 clue-nina
 ```
 
 ## `exolve-colour`, `exolve-color`
-Specific cells in the grid may be coloured using this feature. The squares
+Specific cells in the grid may be coloured using this feature. The cells
 involved are again specified in the
 [extended chessboard notation](#extended-chessboard-notation)
 or with clue
@@ -1514,7 +1524,7 @@ from solvers. The format is easily seen from this example:
 ```
 The first parameter is the URL. The second parameter k is the key for the
 letters entered in the grid. The letters are all strung together, row by row.
-Dots for blocked squares are also included. In a diagramless square, if the
+Dots for blocked cells are also included. In a diagramless cell, if the
 solver has proposed placing a block, then it is represented by "1" in the
 solution string. Consider this grid-fill:
 ```
@@ -1682,6 +1692,11 @@ The list of currently supported options is as follows:
   dedicated option, such as `GRIDLINE`.
 - **`rebus-cells`** Allow multiple letters to be entered in cells. See
   [`Rebus cells`](#rebus-cells) for details.
+- **`diagramless-bars`** Allow bars to be added to diagramless cells. See
+  [`Diagramless cells`](#diagramless-cells) for details.
+- **`diagramless-asymmetric`** By default, diagramless-block (and bar) additions
+  and removals trigger the same action on the symmetric counterpart of the cell.
+  Setting this option avoids triggering this symmetric action.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   override the default layout choices used for printing puzzles (and creating
   PDFs). By default, a completed puzzle is printed in 2 columns
@@ -1695,6 +1710,10 @@ The list of currently supported options is as follows:
   and the bottom of the clue shown on top. Defaults to 0. You can set this
   to something like `20`, but note that if the clue text is very long then
   this setting will get overridden.
+- **`extra-space-on-top:<N>`** Add N extra pixels space above the panel
+  containing the grid and the clues (and below the title/preamble part).
+  Defaults to 0. Note that the standard space there is 56 pixels; this is extra,
+  and can be negative (if you want to reduce it from 56 pixels).
 - **`webifi`** Provide a "Webifi" link under the crossword. See the
   [Webifi section](#webifi) for details.
 
@@ -1710,8 +1729,8 @@ be overriding), and descriptions.
 | `colour-active`            | mistyrose     | Squares for the light(s) currently active.|
 | `colour-active-clue`       | mistyrose     | The current clue(s) in the clues list get(s) this as background colour.|
 | `colour-anno`              | darkgreen     | The text of the annotations.       |
-| `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the square where the solver is typing.|
-| `colour-background`        | black         | The background: blocked squares and bars.|
+| `colour-arrow`             | mistyrose     | The right- or down-arrow (or left-, or up-arrow in crosswords with reversals) in the cell where the solver is typing.|
+| `colour-background`        | black         | The background: blocked cells and bars.|
 | `colour-button`            | #4caf50       | Buttons (Check/Reveal etc).       |
 | `colour-button-hover`      | darkgreen     | Buttons with mouseover.           |
 | `colour-button-text`       | white         | The text in buttons.              |
@@ -1719,20 +1738,21 @@ be overriding), and descriptions.
 | `colour-nav-button-text`   | #4caf50       | Text of next/prev nav buttons.    |
 | `colour-nav-button-bg`     | transparent   | Background of next/prev nav buttons.|
 | `colour-nav-button-bg-hover`| mistyrose    | Background of next/prev nav buttons when hovering.|
-| `colour-caret`             | gray          | The flashing cursor in the square where the solver is typing.|
-| `colour-cell`              | white         | Light squares.                    |
+| `colour-caret`             | gray          | The flashing cursor in the cell where the solver is typing.|
+| `colour-cell`              | white         | Light cells.                    |
 | `colour-circle`            | gray          | Any circles drawn with the @ decorator.|
-| `colour-circle-input`      | gray          | Same as above, in the square where the solver is typing.|
+| `colour-circle-input`      | gray          | Same as above, in the cell where the solver is typing.|
 | `colour-currclue`          | white         | Background for the current clue above the grid.|
 | `colour-def-underline`     | #3eb0ff       | The underline in a revealed definition within a clue.|
+| `colour-dgmless-divider`   | darkred       | Colour of user-placed or revealed bars/blocks in diagramless puzzles.|
 | `colour-hint`              | dodgerblue    | The text of the hints.       |
 | `colour-hint-bulb`         | dodgerblue    | The text of the hint icon (only relevant if you override the default icon, which is a lightbulb, with text). |
 | `colour-imp-text`          | darkgreen     | "Important" text: setter's name, answer entries, grid-filling status.|
-| `colour-input`             | #ffb6b4       | The light square where the solver is typing.|
-| `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first square. |
-| `colour-light-label-input` | black         | Same as above, in the square where the solver is typing.|
+| `colour-input`             | #ffb6b4       | The light cell where the solver is typing.|
+| `colour-light-label`       | black         | The number (or nun-numeric label) of a clue, in its first cell. |
+| `colour-light-label-input` | black         | Same as above, in the cell where the solver is typing.|
 | `colour-light-text`        | black         | The typed solution letters in lights.|
-| `colour-light-text-input`  | black         | Same as above, in the square where the solver is typing.|
+| `colour-light-text-input`  | black         | Same as above, in the cell where the solver is typing.|
 | `colour-orphan`            | linen         | The background colour of the current clue(s) without known location(s) in the grid.|
 | `colour-overwritten-end`   | #bb00bb       | The end-colour of the animation to highlight overwritten cells.|
 | `colour-overwritten-start` | #ff00ff       | The start-colour of the animation to highlight overwritten cells.|
@@ -1748,7 +1768,7 @@ be overriding), and descriptions.
 | `colour-phone-kb-bg`       | whitesmoke    | Phone keyboard (shown in English only): background colour. |
 | `colour-phone-kb-btn-border`| #mistyrose   | Phone keyboard (shown in English only): button border. |
 | `colour-phone-kb-btn-bg`   | #fafafa       | Phone keyboard (shown in English only): button background. |
-| `colour-phone-kb-btn-text`| black          | Phone keyboard (shown in English only): button text. |
+| `colour-phone-kb-btn-text` | black         | Phone keyboard (shown in English only): button text. |
 | `colour-phone-kb-btn-bg-active`| #ffb6b4   | Phone keyboard (shown in English only): button background when active. |
 
 When you set any of the above options, that modification applies to
@@ -1905,12 +1925,12 @@ Here are all the names of pieces of text that you can relabel:
 | Name             | Default text                         |
 |------------------|--------------------------------------|
 | `clear`          | Clear this                           |
-| `clear.hover`    | Clear highlighted clues and squares. Clear crossers from full clues with a second click. Shortcut: Ctrl/Cmd-q.|
+| `clear.hover`    | Clear highlighted clues and cells. Clear crossers from full clues with a second click. Shortcut: Ctrl/Cmd-q.|
 | `clear-all`      | Clear all!                           |
 | `clear-all.hover` | Clear everything! A second click clears any placeholder entries in clues. Shortcut: Ctrl/Cmd-Q.|
 | `check`          | Check this                           |
 | `checkcell`      | Check cell                           |
-| `check.hover`    | Erase mistakes in highlighted squares. Long-click to check the just current cell.|
+| `check.hover`    | Erase mistakes in highlighted cells. Long-click to check the just current cell.|
 | `checkcell.hover`| Erase the current cell if it's incorrect. |
 | `check-all`      | Check all!                           |
 | `check-all.hover`| Erase all mistakes. Reveal any available annos if no mistakes.|
@@ -1921,7 +1941,7 @@ Here are all the names of pieces of text that you can relabel:
 | `email-notes-recipients.hover`|Draft recipient(s): |
 | `reveal`         | Reveal this                          |
 | `revealcell`     | Reveal cell                          |
-| `reveal.hover`   | Reveal highlighted clue/squares. Long-click to reveal the just current cell.|
+| `reveal.hover`   | Reveal highlighted clue/cells. Long-click to reveal the just current cell.|
 | `revealcell.hover`| Reveal the solution letter in the current cell. |
 | `show-ninas`     | Show ninas                           |
 | `show-ninas.hover` | Show ninas hidden in the grid/clues.|
@@ -1988,9 +2008,9 @@ Here are all the names of pieces of text that you can relabel:
 | `3d-dn`          | dn                                   |
 | `3d-up`          | up                                   |
 | `mark-clue.hover` | Click to forcibly mark/unmark as solved. <sub>(Only used for clue labels on clues that do not have all their cell-associations known)</sub>|
-| `placeholder.hover` | You can record your solution here before copying to squares. |
+| `placeholder.hover` | You can record your solution here before copying to cells. |
 | `placeholder-copy` | &#8690; |
-| `placeholder-copy.hover`| Copy into currently highlighted squares. |
+| `placeholder-copy.hover`| Copy into currently highlighted cells. |
 | `confirm-clear-all` | Are you sure you want to clear every entry!? |
 | `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!? (Placeholder entries in clues will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
 | `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries in clues!? |
@@ -1998,7 +2018,7 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-clear-all-orphans1` | Are you sure you want to clear every entry!?  (The placeholder entries will not be cleared. To clear the placeholders, click on clear-all again after clearing the grid.) |
 | `confirm-clear-all-orphans2` | Are you sure you want to clear every entry including all the placeholder entries!? |
 | `confirm-check-all` | Are you sure you want to clear mistakes everywhere!? |
-| `confirm-mismatched-copy` | Are you sure you want to do this mismatched copy (#letters-from : #squares-to)? |
+| `confirm-mismatched-copy` | Are you sure you want to do this mismatched copy (#letters-from : #cells-to)? |
 | `confirm-show-ninas` | Are you sure you want to reveal the nina(s)!? |
 | `confirm-reveal-all` | Are you sure you want to reveal the whole solution!? |
 | `confirm-submit` | Are you sure you are ready to submit!? |
@@ -2150,7 +2170,7 @@ the default calculations may not yield the correct bounds.
 
 ## `exolve-cell-decorator`
 
-You can create arbitary shapes and patterns to add to selected light cells,
+You can create arbitary shapes and patterns to add to selected cells,
 using `exolve-cell-decorator` lines. Each such line specifies one or more SVG
 elements, that assume the cells's top-left coordinates are (0,0). Exolve
 will take care of rendering the decorator at each cell where it is placed.
@@ -2191,6 +2211,10 @@ then just add the prefix `non-clickable`, like this:
 ```
 exolve-cell-decorator: non-clickable <line stroke="red" x1="20" y1="28" x2="26" y2="28">
 ```
+
+Note that cell-decorators can be added to light cells as well as dark cells.
+When added to a dark cell, clicking would lead to deactivation of any current
+clue/cell (can be disabled with `non-clickable`).
 
 The grid is rendered in raster order (row-wise, and within each row,
 column-wise). This means that decorators in cells occurring later in the
@@ -2489,7 +2513,7 @@ replace it with a version that does provide solutions.
 
 ### Exolve widget
 
-The simplest serving option might be to embed an "Exolve widget" in your
+A simple serving option is to embed an "Exolve widget" in your
 blog or website. You can use the following HTML snippet anywhere within the
 HTML of your website/blog-post (replace the puzzle specs between exolve-begin
 and exolve-end with your own puzzle).
@@ -2799,7 +2823,7 @@ UK-style crossword grids. Here are the constraints under which this works:
   entry at exactly word-breaks or hyphens. Moreover (to keep the
   algorithm complexity in check), only one extra word-break/hyphen in the
   entry is supported (compared to the number of linked clues).
-- There aren't very long strips of consecutive blackened squares.
+- There aren't very long strips of consecutive blackened cells.
 
 We first look for the coomon case where every 4x4 area has at least one black
 cell. If that fails, then we re-try, without this constraint.
@@ -3029,7 +3053,7 @@ a file named `exolve-grid.svg`. You can also edit the file name.
 
 Note that if there is a current clue, it will get highlighted in the
 saved image. You can avoid that by first de-selecting it (by clicking
-on a dark square or on the title).
+on a dark cell or on the title).
 
 ## Webifi
 

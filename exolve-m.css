@@ -5,7 +5,7 @@ Copyright (c) 2019 Viresh Ratnakar
 
 See the full license notice in exolve-m.js.
 
-Version: Exolve v1.67, January 5, 2026
+Version: Exolve v1.69, February 25, 2026
 */
 
 @media (max-width: 500px) {
@@ -267,7 +267,6 @@ Version: Exolve v1.67, January 5, 2026
 }
 .xlv-clear-area {
   width: 100%;
-  height: 56px;
 }
 .xlv-curr-clue-label {
   margin: 0;

@@ -1,5 +1,65 @@
 # Changelog
 
+### Exolve v1.69: February 25, 2026
+
+- Allow diagramless cells to have user-toggleable bars with
+  `exolve-option: diagramless-bars`. Toggling can be done with
+  `|` and `_` keys (for bar-after and bar-under, respectively).
+  - Add the state of diagramless bars to the state-saving/parsing,
+    (using '1'/'0', but only when there *is* a toggleable bar).
+- In the `exolve-grid` specs, if you place a `|` or `_` or `+` *before*
+  the diagramless marker `*`, then the bar(s) are not shown (the user
+  has to figure them out). If you place the bar marker *after* the `*`,
+  then a bar is shown (and the user does not get to toggle it). If you
+  provide solutions in the grid specs, then check/reveal buttons will
+  also check the correctness of any user-placed bars.
+- Change how user-toggleable blocks work in diagramless cells:
+  - Don't use a display char that looks like a square (for one thing,
+    it's colour is hard to tweak). Instead, use an SVG rect.
+  - Give the diagramless block as well as bars a colour that is
+    tweakable with `colour-dgmless-divider`. Note that this
+    colour does not become purple and fade when we overwrite a letter
+    with a block (it wasn't happening earlier too, as that block
+    character that we used was difficult to colour, as noted above).
+- "Check" cell/curr/all, on diagramless cells with bars/blocks now
+  only clears misplaced blocks/bars (does not supply what the user
+  hasn't found).
+- Add an explicit `restoreState()` call in `maybeResizeGrid()`, to
+  recover diagramless bars/blocks state.
+- Add `exolve-option: diagramless-asymmetric` to stop forcing
+  symmetric actions when toggling blocks (and now bars, possibly) in
+  diagramless cells.
+- Add `exolve-option: extra-space-on-top:<N>` to increase (or decrease,
+  with a negative value) the vertical space between the title/preamble
+  section and the top of the grid/clues, from its default value of 56 pixels.
+- Allow `cell-decorator`s to be added to dark cells too. This can be used
+  to decorate any large areas of dark cells in puzzles that have them
+  (typically in irregularly shaped puzzles).
+- Tweaks to gnav (nav by clicking on grid) and cnav (nav by clicking on clue):
+  - `starts{Across,Down}Cells() now bails out on diagramless cells.
+  - If there are diagramless cells, but some non-diagramless cells form
+    full across/down lights, and an across/down clue identifies its
+    start cell as the start cell of such a light, and the lengths match,
+    then we decide that we've found all the cells of that clue.
+  - If there are diagramless cells, `markClueStartsUsingGrid()` marks
+    A/D clue starts when it can, but it does not assign any numbers.
+    Such clue-start-marking comes in useful in the way described by the previous
+    bullet.
+  - If we click on an A/D clue whose start is known, but not the length,
+    and if that start has an orphan span abutting it, then we highlight the
+    whole span.
+  - Rename "diagramlessSpan{A,D}" to "orphanSpan{A,D}" and include non-dgmless
+    orphan cells too in these. An example would be an unclued across clue (or
+    one that is clued via a nodir, but in a jigsaw puzzle).
+  - If a nodir clue span of cells fully subsumes an orphan span (after the
+    latter has been extended on either side if appropriate, by any
+    reachable lights), then we remove that orphan span from its cells'
+    navigation (thus, clicking on a cell will trigger the nodir clue getting
+    activated).
+  - Bug-fix: When assembling orphan spans along A/D, do not include
+    cells that already have been found in that A/D direction in another
+    clue (except when extending on the sides).
+
 ### Minor Version: Exolve v1.68.2: February 15, 2026
 
 - Minor styling tweaks for the new nav buttons. Make default background
