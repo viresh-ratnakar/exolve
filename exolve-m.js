@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.69, February 25, 2026';
+  this.VERSION = 'Exolve v1.69.1, February 27, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -206,6 +206,7 @@ function Exolve(puzzleSpec,
   this.hasDgmlessCells = false;
   this.dgmlessBars = false;
   this.dgmlessSymmetry = true;
+  this.topClueWysiwyg = false;
   this.hasUnsolvedCells = false;
   this.hasReveals = false;
   this.hasAcrossClues = false;
@@ -2334,6 +2335,10 @@ Exolve.prototype.parseOption = function(s) {
       this.colourOnlyCellBottom = true;
       continue;
     }
+    if (spart == "top-clue-wysiwyg") {
+      this.topClueWysiwyg = true;
+      continue;
+    }
     if (spart == "webifi") {
       this.useWebifi = true;
       continue;
@@ -3542,7 +3547,7 @@ Exolve.prototype.findEnum = function(clueLine) {
   while (start < clueLine.length) {
     let enumLocation = cluePart.search(/\([1-9]+[0-9\-,\.'’\s]*\)/);
     let numeric = true;
-    if (enumLocation < 0 && !candidate) {
+    if (enumLocation < 0) {
       numeric = false;
       /** Look for the strings 'words'/'letters' or subwords, or ?, in parens */
       enumLocation = cluePart.search(
@@ -3551,7 +3556,7 @@ Exolve.prototype.findEnum = function(clueLine) {
     if (enumLocation < 0 && !candidate) {
       /**
        * Look for the strings 'abr', 'abb', or 'abbreviation'/'acronym'
-       * prefixes, in parens.
+       * prefixes, in parens. But only if no candidate has been found yet.
        */
       enumLocation = cluePart.search(
           /\(([^)]*(a[b]?b[r]?[e]?[v]?[i]?[a]?[t]?[i]?[o]?[n]?|acr[o]?[n]?[y]?[m]?)[^)a-z]*)\)/i);
@@ -4970,13 +4975,14 @@ Exolve.prototype.finalClueTweaks = function() {
     } else {
       label = label + ' ';
     }
+    cls = 'class="xlv-curr-clue-label xlv-clue-label"';
     if (!this.allCellsKnown(clueIndex)) {
       theClue.fullDisplayLabel = `<span class="xlv-clickable"><span
-        id="${this.prefix}-curr-clue-label" class="xlv-curr-clue-label"
+        id="${this.prefix}-curr-clue-label" ${cls}
         title="${this.textLabels['mark-clue.hover']}">${label}</span></span>`;
     } else {
       theClue.fullDisplayLabel = `<span id="${this.prefix}-curr-clue-label"
-        class="xlv-curr-clue-label">${label}</span>`;
+        ${cls}>${label}</span>`;
     }
   }
 }
@@ -5413,7 +5419,7 @@ Exolve.prototype.applyStyles = function() {
       color: ${this.colorScheme['curr-unsolved']};
     }
     #${this.prefix}-frame span.xlv-solved,
-    #${this.prefix}-frame .xlv-solved td:first-child {
+    #${this.prefix}-frame .xlv-solved td.xlv-clue-label {
       color: ${this.colorScheme['solved']};
     }
     #${this.prefix}-frame .xlv-definition {
@@ -5466,6 +5472,9 @@ Exolve.prototype.applyStyles = function() {
 }
 
 Exolve.prototype.stripLineBreaks = function(s) {
+  if (this.topClueWysiwyg) {
+    return s;
+  }
   s = s.replace(/<br\s*\/?>/gi, " / ")
   return s.replace(/<\/br\s*>/gi, "")
 }
@@ -5584,13 +5593,14 @@ function ExolveHints(xlv, container, hints, hintsShown=0, resize=false) {
 }
 
 ExolveHints.prototype.renderHint = function(index, shown) {
-  let html = '<span class="xlv-hint" ';
+  let html = '';
+  html += '<span class="xlv-hint" ';
   let style = `color:${this.xlv.colorScheme['hint']}`;
   if (!shown) {
     style += ';display:none';
   }
   html += ` title="${this.xlv.textLabels['hint.hover']}" style="${style}">`;
-  html += (index == 0) ? '&nbsp;&nbsp;' : ' ';
+  html += (index == 0 && !this.xlv.topClueWysiwyg) ? '&nbsp;&nbsp;' : ' ';
   html += '<span class="xlv-hint-prefix">';
   html += this.xlv.textLabels['hint'];
   if (this.hints.length > 1) {
@@ -5647,6 +5657,27 @@ ExolveHints.prototype.handleHintBulbClick = function() {
     const hints = this.container.getElementsByClassName('xlv-hint');
     hints[0].scrollIntoView();
   }
+}
+
+/**
+ * Returns {text: ..., len: ...}
+ */
+Exolve.prototype.getCluePlaceholderBlank = function(clue) {
+  const ret = {
+    text: '',
+    len: this.PLACEHOLDER_BLANK_LEN
+  };
+  if (clue.placeholder) {
+    ret.text = clue.placeholder.replace(/\?/g, '·');
+    ret.len = ret.text.length;
+  }
+  if (clue.showBlanks && clue.showBlanks > 1) {
+    ret.len = clue.showBlanks;
+  }
+  if (clue.placeholderForBlank) {
+    ret.text = clue.placeholderForBlank;
+  }
+  return ret;
 }
 
 Exolve.prototype.displayClues = function() {
@@ -5785,20 +5816,9 @@ Exolve.prototype.displayClues = function() {
 
     if ((theClue.showBlanks || this.isOrphan(clueIndex)) &&
         !theClue.parentClueIndex) {
-      let placeholder = '';
-      let len = this.PLACEHOLDER_BLANK_LEN;
-      if (theClue.placeholder) {
-        placeholder = theClue.placeholder.replace(/\?/g, '·');
-        len = placeholder.length;
-      }
-      if (theClue.showBlanks && theClue.showBlanks > 1) {
-        len = theClue.showBlanks;
-      }
-      if (theClue.placeholderForBlank) {
-        placeholder = theClue.placeholderForBlank;
-      }
+      const ph = this.getCluePlaceholderBlank(theClue);
       theClue.placeholderBlank =
-          this.addPlaceholderBlank(clueCol, false, len, placeholder, clueIndex);
+          this.addPlaceholderBlank(clueCol, false, ph.len, ph.text, clueIndex);
       this.answersList.push({
         input: theClue.placeholderBlank,
         isq: false,
@@ -6892,8 +6912,14 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
     this.activeClues.push(theClue.clueTR);
   }
   this.currClueIndex = activeClueIndex;
-  this.currClueInner.innerHTML = curr.fullDisplayLabel +
-    `<span id="${this.prefix}-curr-clue-text"></span>`;
+  const html = this.topClueWysiwyg ?
+    `<table class="xlv-clues-table"><tr>
+     <td>${curr.fullDisplayLabel}</td>
+     <td><div id="${this.prefix}-curr-clue-text"></div></td>
+     </td></tr></table>` :
+    (curr.fullDisplayLabel +
+     `<span id="${this.prefix}-curr-clue-text"></span>`)
+  this.currClueInner.innerHTML = html;
   const clueSpan = document.getElementById(`${this.prefix}-curr-clue-text`);
   this.renderClueSpan(curr, clueSpan, true);
   if (curr.hints.length > 0) {
@@ -6907,17 +6933,13 @@ Exolve.prototype.cnavToInner = function(activeClueIndex, grabFocus = false) {
     currLab.addEventListener(
         'click', this.toggleClueSolvedState.bind(this, this.currClueIndex));
   }
-  if (this.clues[parentIndex].placeholderBlank) {
-    let placeholder = '';
-    const len = this.clues[parentIndex].placeholderBlank.size ||
-                this.PLACEHOLDER_BLANK_LEN;
-    if (this.clues[parentIndex].placeholder) {
-      placeholder = this.clues[parentIndex].placeholder.replace(/\?/g, '·');
-    }
-    this.addPlaceholderBlank(this.currClueInner, true, len, placeholder, parentIndex);
+  if (curr.placeholderBlank) {
+    const ph = this.getCluePlaceholderBlank(curr);
+    this.addPlaceholderBlank(this.currClueInner, true,
+        ph.len, ph.text, parentIndex);
     this.copyPlaceholderBlankToCurr(parentIndex);
     if (grabFocus && !this.usingGnav && parentIndex == activeClueIndex) {
-      this.clues[parentIndex].placeholderBlank.focus();
+      curr.placeholderBlank.focus();
     }
   }
   this.currClueInner.style.background = this.colorScheme['currclue'];
@@ -7445,12 +7467,12 @@ Exolve.prototype.toggleClueSolvedState = function(clueIndex) {
   if (hasSolvedClass) {
     clue.clueTR.classList.remove('xlv-solved');
     if (currLab) {
-      currLab.className = 'xlv-curr-clue-label';
+      currLab.classList.remove('xlv-solved');
     }
   } else {
     clue.clueTR.classList.add('xlv-solved');
     if (currLab) {
-      currLab.className = 'xlv-curr-clue-label xlv-solved';
+      currLab.classList.add('xlv-solved');
     }
   }
 }
@@ -7486,20 +7508,23 @@ Exolve.prototype.updateClueState =
   }
   let numFilled = 0;
   let numPrefilled = 0;
+  const cells = this.getAllCells(clueIndex);
+  for (const cell of cells) {
+    const gridCell = this.grid[cell[0]][cell[1]];
+    if (gridCell.currLetter == '0' || gridCell.currLetter == '?') {
+      numFilled = 0;
+      break;
+    }
+    numFilled++;
+    if (gridCell.prefill) {
+      numPrefilled++;
+    }
+  }
   for (const ci of cis) {
     const theClue = this.clues[ci];
     if (!theClue.clueTR) {
       numFilled = 0;
       break;
-    }
-    let isFullRet = this.isFull(ci);
-    if (!isFullRet[0]) {
-      numFilled = 0;
-      break;
-    }
-    numFilled += isFullRet[1];
-    if (isFullRet[0] == 2) {
-      numPrefilled += isFullRet[1];
     }
   }
   if (forceSolved) {
@@ -7508,20 +7533,19 @@ Exolve.prototype.updateClueState =
     } else {
       solved = false;
       // override for all-prefilled
-      if (this.allCellsKnown(clueIndex) && numPrefilled == clue.enumLen) {
+      if (this.allCellsKnown(clueIndex) && numPrefilled == cells.length) {
         solved = true;
       }
     }
   } else if ((clue.anno || clue.dispSol) && clue.annoSpan.style.display == '') {
     solved = true;
   } else if (this.allCellsKnown(clueIndex)) {
-    solved = numFilled == clue.enumLen;
+    solved = (numFilled > 0) && (numFilled == cells.length);
   }
   if (solved && numFilled == numPrefilled && annoPrefilled &&
       (clue.anno || clue.dispSol)) {
     this.revealClueAnno(clueIndex);
   }
-  let cls = solved ? 'xlv-solved' : '';
   for (const ci of cis) {
     if (this.clues[ci].clueTR) {
       if (solved) {
@@ -7531,10 +7555,13 @@ Exolve.prototype.updateClueState =
       }
     }
     if (ci == this.currClueIndex) {
-      let currLab = document.getElementById(this.prefix + '-curr-clue-label');
+      const currLab = document.getElementById(this.prefix + '-curr-clue-label');
       if (currLab) {
-        currLab.setAttributeNS(
-            null, 'class', 'xlv-curr-clue-label' + (cls ? (' ' + cls) : ''));
+        if (solved) {
+          currLab.classList.add('xlv-solved');
+        } else {
+          currLab.classList.remove('xlv-solved');
+        }
       }
     }
   }
@@ -8518,33 +8545,26 @@ Exolve.prototype.clearCell = function(row, col) {
   }
 }
 
-// Returns a pair of numbers. The first number is 0 if not full, 1 if full,
-// 2 if full entirely with prefills. The second number is the number of
-// full cells.
+// Returns true if the light is full.
 Exolve.prototype.isFull = function(clueIndex) {
-  let theClue = this.clues[clueIndex]
+  const theClue = this.clues[clueIndex];
   if (!theClue) {
-    return [0, 0];
+    return false;
   }
-  let cells = theClue.cells
+  let cells = theClue.cells;
   if (cells.length < 1) {
-    cells = theClue.cellsOfOrphan
+    cells = theClue.cellsOfOrphan;
     if (!cells || cells.length < 1) {
-      return [0, 0];
+      return false;
     }
   }
-  let numPrefills = 0;
-  for (let x of cells) {
-    let gridCell = this.grid[x[0]][x[1]]
-    if (gridCell.prefill) {
-      numPrefills++;
-      continue
-    }
+  for (const x of cells) {
+    const gridCell = this.grid[x[0]][x[1]];
     if (gridCell.currLetter == '0' || gridCell.currLetter == '?') {
-      return [0, 0];
+      return false;
     }
   }
-  return (numPrefills == cells.length) ? [2, cells.length] : [1, cells.length];
+  return true;
 }
 
 Exolve.prototype.clearCurr = function() {
@@ -8618,7 +8638,7 @@ Exolve.prototype.clearCurr = function() {
     if (this.clues[z3d] && !currClues[z3d]) crossers.push(z3d);
     let hasFull = false;
     for (let crosser of crossers) {
-      if (this.isFull(crosser)[0]) {
+      if (this.isFull(crosser)) {
         hasFull = true;
         break;
       }

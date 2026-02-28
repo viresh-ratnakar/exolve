@@ -1,5 +1,24 @@
 # Changelog
 
+### Minor Version: Exolve v1.69.1: February 27, 2026
+
+- Add `exolve-option: top-clue-wysiwyg` to render the top clue in a
+  tabular DIV instead of an inline SPAN. When this option is used, any BR tags
+  in the clue are retained when it is shown above the grid (without it, they
+  get turned to slashes).
+- Give the clue label the `xlv-clue-label` class even when shown above the grid.
+  Otherwise it does not get some styling there in the `top-clue-wysiwyg` mode
+  (making it wrap oddly, for example).
+- Bug-fix: show suggested placeholder text in the curr-clue too.
+- Bug-fix: actually use the *last* enum in a clue, even if it's a "(?)".
+- Bug-fix: clue labels that were clickable (for setting "solved" state
+  manually when not all cells are known) used a css rule that incorrectly
+  used `td:first-child` (broken if extraction slots are used, as in
+  test-mixed-solved.html). Change tp `td:xlv-clue-label`.
+- Bug-fix: checking if a clue had all cells filled (for setting the colour
+  of its label) was flawed for linked clues with overlapping lights. Fixed
+  by getting all cells and checking (instead of relying on enumLen).
+
 ### Exolve v1.69: February 25, 2026
 
 - Allow diagramless cells to have user-toggleable bars with

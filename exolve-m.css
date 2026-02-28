@@ -497,6 +497,10 @@ Version: Exolve v1.69, February 25, 2026
   font-style: italic;
   font-weight: bold;
 }
+.xlv-clues-table .xlv-hint {
+  display: block;
+  margin-top: 4px;
+}
 .xlv-storage-list {
   outline: solid 1px gray;
   margin: 6px 1px;
