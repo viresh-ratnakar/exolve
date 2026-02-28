@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.69.3: February 28, 2026
+
+- Bug-fix: `clue.showBlanks` was getting used outside the loop (for setting
+  `Exolve.hasPlaceholders`);
+
 ### Minor Version: Exolve v1.69.2: February 28, 2026
 
 - Make extra headings in clues lists appear in the Notes panel too.

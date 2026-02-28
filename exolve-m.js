@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.69.2, February 28, 2026';
+  this.VERSION = 'Exolve v1.69.3, February 28, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -4595,12 +4595,12 @@ Exolve.prototype.parseClueLists = function() {
       if (clue.dir) {
         this.allClueDirs.add(clue.dir);
       }
+      if (clue.showBlanks) {
+        this.hasPlaceholders = true;
+      }
     }
     if (filler) {
       this.throwErr('Filler line should not be at the end: ' + filler);
-    }
-    if (clue.showBlanks) {
-      this.hasPlaceholders = true;
     }
   }
   if (firstClueIndex && lastClueIndex) {
