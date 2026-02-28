@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.69.2: February 28, 2026
+
+- Make extra headings in clues lists appear in the Notes panel too.
+- Also, if the nodir section has a heading (`noDirHeading`), then show that
+  too in the Notes panel.
+- Simplify the code for handling `newTableHeading` a bit (there was no
+  need for a separate boolean `startsNewTable`).
+
 ### Minor Version: Exolve v1.69.1: February 27, 2026
 
 - Add `exolve-option: top-clue-wysiwyg` to render the top clue in a

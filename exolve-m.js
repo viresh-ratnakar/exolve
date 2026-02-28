@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.69.1, February 27, 2026';
+  this.VERSION = 'Exolve v1.69.2, February 28, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -4480,7 +4480,6 @@ Exolve.prototype.parseClueLists = function() {
     }
     let filler = '';
     let lastDirClue = null;
-    let startNewTable = false;
     let newTableHeading = '';
     for (let l = first; l <= last; l++) {
       let clueLine = this.specLines[l].trim();
@@ -4488,7 +4487,6 @@ Exolve.prototype.parseClueLists = function() {
         continue;
       }
       if (clueLine.substr(0, 3) == '---') {
-        startNewTable = true;
         newTableHeading = clueLine.substr(3).trim();
         continue;
       }
@@ -4586,10 +4584,8 @@ Exolve.prototype.parseClueLists = function() {
         clue.filler = filler;
         filler = '';
       }
-      if (startNewTable) {
-        clue.startNewTable = true;
+      if (newTableHeading) {
         clue.newTableHeading = newTableHeading;
-        startNewTable = false;
         newTableHeading = '';
       }
 
@@ -5717,7 +5713,7 @@ Exolve.prototype.displayClues = function() {
       }
       dir = clueDir;
     }
-    if (theClue.startNewTable) {
+    if (theClue.newTableHeading) {
       const newPanel = document.createElement('div');
       newPanel.setAttributeNS(null, 'class',
                               'xlv-clues-box xlv-clues-extra-panel');
@@ -9637,9 +9633,12 @@ Exolve.prototype.makeNotesPanel = function() {
         ((dir == 'D' && this.layers3d == 1) ? this.textLabels['down-label'] :
         ((dir == 'D' && this.layers3d > 1) ? this.textLabels['3d-aw-label'] :
         ((dir == 'Z' && this.layers3d > 1) ? this.textLabels['3d-dn-label'] :
-          this.textLabels['nodir-label'])))));
+        (this.nodirHeading ?? this.textLabels['nodir-label']))))));
       html += `
       <p><b>${label}</b></p>`
+    } else if (clue.newTableHeading) {
+      html += `
+      <p><b>${clue.newTableHeading}</b></p>`
     }
     html += `
       <div style="border-bottom:1px solid lightgray">
