@@ -1,5 +1,12 @@
 # Changelog
 
+### Minor Version: Exolve v1.69.4: March 3, 2026
+
+- Made `DGMLESS_BLOCK_SCALE` a property of the Exolve object (defaulting to
+  0.5). This can now be tweaked (via something like
+  `exolve-option-DGMLESS_BLOCK_SCALE:0.8`) to make the diagramlesss larger
+  or smaller (1.0 will fill up the cell).
+
 ### Minor Version: Exolve v1.69.3: February 28, 2026
 
 - Bug-fix: `clue.showBlanks` was getting used outside the loop (for setting

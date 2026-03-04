@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.69.3, February 28, 2026';
+  this.VERSION = 'Exolve v1.69.4, March 3, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -190,6 +190,7 @@ function Exolve(puzzleSpec,
   this.SEP_WIDTH_BY2 = 1.5;
   this.NUMBER_START_X = 2;
   this.MAX_REBUS_SIZE = 20;
+  this.DGMLESS_BLOCK_SCALE = 0.5;
 
   this.PRINT_WIDTH_PIXELS = 992;
   this.MIN_DIM_PIXELS = 325;
@@ -5988,8 +5989,8 @@ Exolve.prototype.computeGridSize = function() {
   this.cellWBy2 = Math.floor((this.cellW + 1) / 2);
   this.cellHBy2 = Math.floor((this.cellH + 1) / 2);
   this.squareDimBy2 = Math.min(this.cellWBy2, this.cellHBy2);
-  this.dgmlessBlockW = Math.round(this.cellW * 1 / 2);
-  this.dgmlessBlockH = Math.round(this.cellH * 1 / 2);
+  this.dgmlessBlockW = Math.round(this.cellW * this.DGMLESS_BLOCK_SCALE);
+  this.dgmlessBlockH = Math.round(this.cellH * this.DGMLESS_BLOCK_SCALE);
 
   if (!this.tilingWHGiven) {
     this.tilingW = this.cellW + this.GRIDLINE;
