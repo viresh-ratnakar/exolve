@@ -1,5 +1,14 @@
 # Changelog
 
+### Minor Version: Exolve v1.69.5: March 29, 2026
+
+- Phone keyboard: tie letter entry to the "pointerdown" event itself rather
+  than the click event. The click event does not fire if the finger slides off
+  or if there is a long press.
+- But close the keyboard (after the close button is clicked) only after
+  the click event, as otherwise the click event might get passed on to
+  some underlying element.
+
 ### Minor Version: Exolve v1.69.4: March 3, 2026
 
 - Made `DGMLESS_BLOCK_SCALE` a property of the Exolve object (defaulting to

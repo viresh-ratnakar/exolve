@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.69.4, March 3, 2026';
+  this.VERSION = 'Exolve v1.69.5, March 29, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -1489,7 +1489,8 @@ Exolve.prototype.redoPhoneTweaks = function() {
 
 Exolve.prototype.phoneKBInput = function(ch) {
   if (ch == ExolveKB.CLOSE_KEY) {
-    this.deactivator();
+    /** The KB will remove itself when the underlying click is received */
+    this.phoneKB.closeClicked();
     return;
   }
   if (ch == ExolveKB.DELETE_KEY) {
@@ -1552,6 +1553,13 @@ class ExolveKB {
     return true;
   }
 
+  clickHandler(e) {
+    e.stopPropagation();
+    if (this.shouldClose && this.puz) {
+      this.puz.deactivator();
+    }
+  }
+
   /**
    * Should not be called directly: use getOrCreate() (private constructors are
    * not allowed by JavaScript).
@@ -1586,6 +1594,7 @@ class ExolveKB {
     this.preview = document.createElement("div");
     this.preview.classList.add("xlv-kb-preview");
     this.container.appendChild(this.preview);
+    this.shouldClose = false;
     this.hide();
     puz.frame.insertAdjacentElement('beforeend', this.container);
 
@@ -1598,10 +1607,11 @@ class ExolveKB {
         ExolveKB.DELETE_KEY
       ]
     ];
+    const handleClick = this.clickHandler.bind(this);
+    const handleRelease = (e) => {
+      this.preview.classList.remove('xlv-kb-preview-active');
+    };
     layout.forEach((rowKeys) => {
-      const handleRelease = (e) => {
-        this.#hidePreview();
-      };
       const rowDiv = document.createElement("div");
       rowDiv.classList.add("xlv-phone-kb-row");
       rowKeys.forEach((ch) => {
@@ -1612,9 +1622,8 @@ class ExolveKB {
           btn.classList.add("xlv-phone-kb-close");
         }
         const handlePress = (e) => {
+          this.shouldClose = false;
           this.#showPreview(btn, ch);
-        };
-        const handleClick = (e) => {
           this.puz.phoneKBInput(ch);
         };
         btn.addEventListener("click", handleClick);
@@ -1639,9 +1648,6 @@ class ExolveKB {
     btn.appendChild(this.preview);
     this.preview.innerHTML = ch;
     this.preview.classList.add('xlv-kb-preview-active');
-  }
-  #hidePreview() {
-    this.preview.classList.remove('xlv-kb-preview-active');
   }
 
   /**
@@ -1711,6 +1717,16 @@ class ExolveKB {
       this.puz = puz;
     }
     this.container.style.display = 'flex';
+  }
+  /**
+   * When the "close" button is pressed, we save that, and then
+   * actually close in the subsequent clickHandler() call, to
+   * avoid triggering a click event on the underlying element
+   * (often a clue, which otherwise would just bring the keyboard
+   * back up again).
+   */
+  closeClicked() {
+    this.shouldClose = true;
   }
   hide() {
     if (!this.container) {
