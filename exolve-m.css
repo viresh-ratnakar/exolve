@@ -677,8 +677,11 @@ a.xlv-link:hover {
 .xlv-phone-kb-btn:active {
   transform: translateY(2px);
 }
-.xlv-phone-kb-close {
+.xlv-phone-kb-btn-round {
   border-radius: 50%;
+}
+.xlv-phone-kb-btn-small {
+  font-size: 10px;
 }
 .xlv-kb-preview {
   position: absolute;
@@ -702,6 +705,15 @@ a.xlv-link:hover {
 .xlv-kb-preview-active {
   display: block;
   transform: scale(1);
+}
+.xlv-phone-kb-help {
+  padding: 4px;
+  font-family: monospace;
+  font-size: 12px;
+}
+.xlv-phone-kb-help td {
+  margin: 2px;
+  vertical-align: top;
 }
 
 @media not print {

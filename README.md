@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.69, February 25, 2026
+### Version: Exolve v1.70, March 31, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1714,6 +1714,11 @@ The list of currently supported options is as follows:
   containing the grid and the clues (and below the title/preamble part).
   Defaults to 0. Note that the standard space there is 56 pixels; this is extra,
   and can be negative (if you want to reduce it from 56 pixels).
+- **`top-clue-wysiwyg`**: Show the top clue inside a DIV block and make it look
+  just like it does in the clues lists: tabular, with the the clue number being
+  in a slim column by itself, and the rest of the clue (including any embedded
+  BR tags) in a wide adjoining column. Without this option, BR tags in clues
+  are converted to slash ("/") characters when shown above the grid.
 - **`webifi`** Provide a "Webifi" link under the crossword. See the
   [Webifi section](#webifi) for details.
 
@@ -1766,7 +1771,7 @@ be overriding), and descriptions.
 | `colour-curr-unsolved`     | darkred       | The clue number in the top-clue, when unsolved.|
 | `colour-concise-clue`      | darkred       | Colour for concise versions of long clues.|
 | `colour-phone-kb-bg`       | whitesmoke    | Phone keyboard (shown in English only): background colour. |
-| `colour-phone-kb-btn-border`| #mistyrose   | Phone keyboard (shown in English only): button border. |
+| `colour-phone-kb-btn-border`| #mistyrose   | Phone keyboard (shown in English only): button border and help-text background. |
 | `colour-phone-kb-btn-bg`   | #fafafa       | Phone keyboard (shown in English only): button background. |
 | `colour-phone-kb-btn-text` | black         | Phone keyboard (shown in English only): button text. |
 | `colour-phone-kb-btn-bg-active`| #ffb6b4   | Phone keyboard (shown in English only): button background when active. |
@@ -2081,6 +2086,7 @@ Here are all the names of pieces of text that you can relabel:
 | `show-notes-times`| Show clue-solving times:  |
 | `concise-clue.hover`| Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.|
 | `preamble-link`     | &Darr;Preamble          |
+| `phone-kb-help`     | [Longish help message for Exolve's on-screen keyboard...]|
 
 
 The `.hover`-suffixed names are for tooltips. The relabelings for these should
@@ -2356,11 +2362,12 @@ can be turned off with a checkbox). These are:
 - The solution entered. This is ON by default.
 - The time at which the clue was solved. This is OFF by default.
 
-When solving a clue, if you type Ctrl/Cmd-/ (Ctrl-slash), then you are directly
-taken to the notes line for that particular clue, where you can edit the
-note or just read what you may have written. When in the notes already, Ctrl/Cmd-/
-will take you back to your last location in the grid (if any). When no clue is
-selected, typing Ctrl/Cmd-/ will take you the overall notes section.
+When solving a clue, if you type Ctrl-/ or Cmd-/ (Ctrl-slash), then you are
+directly taken to the notes line for that particular clue, where you can edit
+the note or just read what you may have written. When in the notes already,
+Ctrl-/ or Cmd-/ (or, additionally, the Enter key) will take you back to your
+last location in the grid (if any). When no clue is selected, typing Ctrl-/ or
+Cmd-/ will take you to the overall notes section.
 
 Similarly, when solving a clue, if you type Ctrl/Cmd-\* (Ctrl-asterisk) then
 a \* is added to the front of the clue's notes to mark it as a favourite.
@@ -2899,14 +2906,18 @@ tweaks to the on-screen layout, to optimize for that use case:
   display of the current clue above the grid). The colour-scheme of this
   keyboard can be tweaked using `exolve-option: colour-phone-kb-...:...`.
   - The on-screen keyboard is not used if there are special characters allowed
-    or if there are rebus cells or diagramless cells.
+    or if there are rebus cells.
   - If there are multiple crosswords on the same web page that are all eligible
     to use ExolveKB, then its colour-scheme is taken from the very first
     crossword.
+  - The on-screen keyboard has its own Help button. It also lets you bring up
+    an extra row of buttons (arrows, enter, space, "\*", "\_", "|", and
+    "Notes") by clicking on a "More" button.
 
-Before printing, these tweaks are undone (and restored after printing). Note
-that on phones, "portrait" mode works best (there's no easy cross-platform
-way to lock into portrait mode from a browser, so we do not do that).
+Before printing, these phone-specific tweaks are undone (and restored after
+printing). Note that on phones, "portrait" mode works best (there's no easy
+cross-platform way to lock into portrait mode from a browser, so we do not do
+that).
 
 If the on-screen keyboard is visible and the user shifts focus to some other
 input element (such as a form input outside the crossword grid) then the
