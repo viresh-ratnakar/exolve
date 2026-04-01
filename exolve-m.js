@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70, March 31, 2026';
+  this.VERSION = 'Exolve v1.70.1, March 31, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -7570,7 +7570,7 @@ Exolve.prototype.handleKeyDown = function(e) {
         this.currCellIsValid()) {
       this.muzzleEvent(e);
       this.fromNotesToGrid();
-    } else if (e.key != 13 && this.focusOnNotes()) {
+    } else if (key != 13 && this.focusOnNotes()) {
       this.muzzleEvent(e);
     }
   } else if (isCtrl && e.key == '*') {

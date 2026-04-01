@@ -1,5 +1,35 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.1: March 31, 2026
+
+- Fixed regression: Enter key in grid should *not* take us to the notes
+  panel! Many thanks to raphdesbiens-cmd@ for reporting the bug promptly
+  and suggesting the fix.
+
+### Exolve v1.70: March 31, 2026
+
+- Tweaks to the phone keyboard: add an optional fourth row of keys on top.
+  The fourth row can be made visible by tapping the "More" button. It's sticky,
+  but can be dismissed by tapping on the "Less" button that replaces "More".
+- The extra row has arrows, enter, space, "Notes", "\*", underscore and pipe.
+- Also add a "Help" button to the phone keyboard, to explain things. The
+  explainer text appears above the keyboard and can be dismissed by clicking
+  in it (or by clicking Help again).
+- Make the Enter key toggle back from the Notes panel to the grid (apart from
+  Ctrl-/, which still works too). From phones, this is convenient and now a
+  bit more needed as the Notes button is available on the phone keyboard and
+  you need a convenient way to get back (Ctrl-/ is not possible from most
+  phone keyboards).
+- With the space bar (and the diagramless bar keys, underscore and pipe) now
+  available on the phone keyboard, allow phone keyboards too when there are
+  diagramless cells (previously disallowed).
+- Moreover, for diagramless puzzles, enable the fourth row in the phone keyboard
+  by default.
+- Fix space bar to mean "clear cell and advance" again, except in diagramless
+  cells, where it (continues to) toggle block placement.
+- Bug-fix: Empty preamble elements should have display = none. Without this,
+  on phones, we also had a slight grid-centering problem.
+
 ### Minor Version: Exolve v1.69.5: March 29, 2026
 
 - Phone keyboard: tie letter entry to the "pointerdown" event itself rather
