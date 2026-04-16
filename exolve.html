@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70.1, March 31, 2026';
+  this.VERSION = 'Exolve v1.70.2, April 16, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -460,9 +460,9 @@ function Exolve(puzzleSpec,
     'submit': 'Submit',
     'submit.hover': 'Submit the solution!',
     'setter-by': 'By',
-    'curr-clue-prev': '&#9668;',
+    'curr-clue-prev': '&lt;',
     'curr-clue-prev.hover': 'Previous clue.',
-    'curr-clue-next': '&#9658;',
+    'curr-clue-next': '&gt;',
     'curr-clue-next.hover': 'Next clue.',
     'squares-filled': 'Squares filled',
     'across-label': 'Across',
@@ -491,7 +491,7 @@ function Exolve(puzzleSpec,
              Clear the contents of the current cell.</li>
          <li><b>Space bar:</b>
              Toggle block in the current cell if it's diagramless. Otherwise, clear cell and advance forward.</li>
-         <li><b>Enter (from notes):</b> Return to the grid (same as Ctrl-/ or Cmd-/).</li>
+         <li><b>Enter (from notes, but not Shift-Enter):</b> Return to the grid (same as Ctrl-/ or Cmd-/).</li>
          <li><b>|/_:</b>
              When diagramless-bars option is on, toggle bar-after/under in the current cell if it's diagramless.</li>
          <li><b>Double-click or Shift+Letter:</b>
@@ -515,7 +515,7 @@ function Exolve(puzzleSpec,
     'crossword-id': 'Crossword ID',
     'notes': 'Notes',
     'notes.hover': 'Show/hide notes panel.',
-    'notes-help': '<li>Ctrl/Cmd-/ or Enter to go from notes to grid.</li>' +
+    'notes-help': '<li>Ctrl/Cmd-/ or Enter (but not Shift-Enter) to go from notes to grid.</li>' +
         '<li>Place * at the start of a clue\'s note to mark a fave.</li>' +
         '<li>Hover on a clue\'s note to see the clue as a tooltip.</li>',
     'jotter': 'Jotter',
@@ -1466,6 +1466,7 @@ Exolve.prototype.init = function() {
 }
 
 Exolve.prototype.checkPhoniness = function() {
+  this.onPhone = false;
   /**
    * Don't use phone settings in temp crosswords (thus also avoid using them in
    * Exet) and in big-enough displays.
@@ -7612,10 +7613,11 @@ Exolve.prototype.handleKeyDown = function(e) {
   } else if (isCtrl && e.key == 'B') {
     this.muzzleEvent(e);
     this.printNow('crossword');
-  } else if ((isCtrl && e.key == '/') || (key == 13) ) {
+  } else if ((isCtrl && e.key == '/') || (key == 13 && !e.shiftKey)) {
     /** Enter key (13) from Notes panel is intercepted (but not from grid input) */
     if (this.notesPanel.contains(e.target) &&
         this.currCellIsValid()) {
+      /** Shift-Enter can be used in Notes to add a new line. */
       this.muzzleEvent(e);
       this.fromNotesToGrid();
     } else if (key != 13 && this.focusOnNotes()) {

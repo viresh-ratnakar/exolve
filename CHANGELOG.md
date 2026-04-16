@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.2: April 16, 2026
+
+- Use &lt; and and &gt; instead of &#9668; and &#9658; for prev/next clue. The
+  buttons look neater this way.
+- When in notes, Enter takes us back to the grid (from v1.70). But there was no
+  way to add an newline within notes, because of that. Stop jumping back to the
+  grid if Ctrl or Shift has been pressed apart from Enter.
+
 ### Minor Version: Exolve v1.70.1: March 31, 2026
 
 - Fixed regression: Enter key in grid should *not* take us to the notes

@@ -1961,9 +1961,9 @@ Here are all the names of pieces of text that you can relabel:
 | `submit`         | Submit                               |
 | `submit.hover`   | Submit the solution!                 |
 | `setter-by`      | By                                   |
-| `curr-clue-prev` | &#9668;                              |
+| `curr-clue-prev` | &lt;                              |
 | `curr-clue-prev.hover` | Previous clue.                 |
-| `curr-clue-next` | &#9658;                              |
+| `curr-clue-next` | &gt;                              |
 | `curr-clue-next.hover` | Next clue.                     |
 | `squares-filled` | Squares filled                       |
 | `across-label`   | Across                               |
@@ -2365,9 +2365,10 @@ can be turned off with a checkbox). These are:
 When solving a clue, if you type Ctrl-/ or Cmd-/ (Ctrl-slash), then you are
 directly taken to the notes line for that particular clue, where you can edit
 the note or just read what you may have written. When in the notes already,
-Ctrl-/ or Cmd-/ (or, additionally, the Enter key) will take you back to your
-last location in the grid (if any). When no clue is selected, typing Ctrl-/ or
-Cmd-/ will take you to the overall notes section.
+Ctrl-/ or Cmd-/ (or, additionally, the Enter key—a new line can be entered
+by using Shift-Enter) will take you back to your last location in the grid
+(if any). When no clue is selected, typing Ctrl-/ or Cmd-/ will take you to
+the overall notes section.
 
 Similarly, when solving a clue, if you type Ctrl/Cmd-\* (Ctrl-asterisk) then
 a \* is added to the front of the clue's notes to mark it as a favourite.
