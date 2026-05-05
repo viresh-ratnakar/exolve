@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.3: May 5, 2026
+
+- For linked clues, add `&amp;` and `&#038;` as child-separators. Also
+  make the separator regexp case-insensitive (to catch `And` too, not
+  just `and`, for eg.).
+
 ### Minor Version: Exolve v1.70.2: April 16, 2026
 
 - Use &lt; and and &gt; instead of &#9668; and &#9658; for prev/next clue. The

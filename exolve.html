@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70.2, April 16, 2026';
+  this.VERSION = 'Exolve v1.70.3, May 5, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -4084,11 +4084,11 @@ Exolve.prototype.parseClueLabel = function(clueLine, consumeTrailing=true, isChi
     // Look for ,/&/and/'/'
     // For &, /, and "and": only treat them as child indicators if followed by a
     // number.
-    commaParts = clueLine.match(/^\s*(?:,|(?:and|&|\/)\s*[1-9])/);
+    commaParts = clueLine.match(/^\s*(?:,|(?:and|&|&amp;|&#038;|\/)\s*[1-9])/i);
     if (commaParts && commaParts.length == 1) {
       parse.hasChildren = true;
       // Store the separator char in linkSep
-      parse.linkSep = commaParts[0].trim();
+      parse.linkSep = commaParts[0].toLowerCase().trim();
       let skipLen = commaParts[0].length;
       if (parse.linkSep.startsWith('and') ||
           parse.linkSep.startsWith('/') ||
