@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.4: May 12, 2026
+
+- Make the copy-placeholders button round (looks better, methinks).
+
 ### Minor Version: Exolve v1.70.3: May 5, 2026
 
 - For linked clues, add `&amp;` and `&#038;` as child-separators. Also

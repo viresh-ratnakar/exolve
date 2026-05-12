@@ -418,6 +418,10 @@ Version: Exolve v1.70.2, April 16, 2026
   touch-action: manipulation;
   width: inherit;
 }
+.xlv-curr-clue .xlv-small-button,
+.xlv-clues-table .xlv-small-button {
+  border-radius: 50%;
+}
 .xlv-small-button:hover {
   cursor: pointer;
 }

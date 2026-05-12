@@ -1081,11 +1081,11 @@ across/down clue with a non-numeric label whose start/cells are not specified,
 then the clue is shown with a text entry area next to it. Solvers can record
 their solutions here, until they figure out where in the grid those letters
 should be entered. Solvers can transfer recorded letters from these placeholder
-areas by simply clicking the "copy-placeholder" button (that looks like [⇲])
-next to the placeholder area, whenever they have some cells highlighted for
-entry in the grid. This button is not shown in puzzles with diagramless cells,
-as cells highlighted in the grid in such puzzles can generally span multiple
-lights.
+areas by simply clicking the circular "copy-placeholder" button (that looks
+like (⇲)) next to the placeholder area, whenever they have some cells
+highlighted for entry in the grid. This button is not shown in puzzles with
+diagramless cells, as cells highlighted in the grid in such puzzles can
+generally span multiple lights.
 
 You can force a placeholder blank to appear after any clue (not just "orphan"
 ones that qualify using the criteria listed above). See the next sub-section.
@@ -1097,7 +1097,7 @@ no entries in the grid (eg, by clicking on it a _second_ time). This option is
 only there in puzzles that have such placeholder entries, and in such puzzles, a
 tooltip is shown over the 'Clear all' button to let the user know.
 
-The same placeholder text and the copy-placeholder button ([⇲]) are also shown
+The same placeholder text and the copy-placeholder button (⇲) are also shown
 in the clue above the grid, for an "orphan" clue, when the solver clicks in
 the grid in a cell that has no known clue association.
 The copy-placeholder buttons can be disabled (i.e., not shown at all) by
@@ -1197,7 +1197,7 @@ text (from the enum or from the overridden text).
 
 Just like the placeholder blanks that appear in orphan clues, these forced
 placeholder blanks will also be accompanied by "copy-placeholder buttons"
-(that looks like [⇲]), unless disabled by specifying
+(that look like (⇲)), unless disabled by specifying
 `exolve-option: hide-copy-placeholder-buttons`.
 
 ### Some clue numbering nuances
