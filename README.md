@@ -2085,7 +2085,7 @@ Here are all the names of pieces of text that you can relabel:
 | `show-notes-entries`| Show entered solutions: |
 | `show-notes-times`| Show clue-solving times:  |
 | `concise-clue.hover`| Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.|
-| `preamble-link`     | &Darr;Preamble          |
+| `preamble-link`     | &Darr;Intro          |
 | `phone-kb-help`     | [Longish help message for Exolve's on-screen keyboard...]|
 
 
@@ -2893,7 +2893,7 @@ tweaks to the on-screen layout, to optimize for that use case:
   - The title and setter fields are shown on the same line (unless they are too
     long), the title's font-size is slightly reduced.
   - If there is a preamble, then it is shown below the grid (above the clues
-    lists). In that case, a link that says "&Darr;Preamble" is shown next to the
+    lists). In that case, a link that says "&Darr;Intro" is shown next to the
     title/setter fields. Clicking on this link will scroll the display to make
     the preamble visible. The text shown in this link can be changed using
     `exolve-relabel` for `preamble-link`.

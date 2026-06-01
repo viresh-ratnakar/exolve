@@ -23,8 +23,6 @@ SOFTWARE.
 
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
-
-Version: Exolve v1.69, January 5, 2026
 */
 
 let exolveToPuzChars8859 = null;

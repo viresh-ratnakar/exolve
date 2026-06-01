@@ -23,8 +23,6 @@ SOFTWARE.
 
 The latest code and documentation for Exolve can be found at:
 https://github.com/viresh-ratnakar/exolve
-
-Version: Exolve v1.69, January 5, 2026
 */
 
 /**
@@ -165,16 +163,14 @@ exolveFromText = function(w, h, text, fname='') {
             console.log('Ignored potential clue start: ' + joinedLine);
           }
         }
-        if (!seenDown) sections.across.push(line.trim());
-        else sections.down.push(line.trim());
+        exolveFromTextAddClue(line, seenDown, sections);
         joinedLine = '';
       } else if (clueStartRE.test(line)) {
         joinedLine = line;
       } else {
         joinedLine = joinedLine + ' ' + line;
         if (clueRE.test(joinedLine) || childRE.test(joinedLine)) {
-          if (!seenDown) sections.across.push(joinedLine.trim());
-          else sections.down.push(joinedLine.trim());
+          exolveFromTextAddClue(joinedLine, seenDown, sections);
           joinedLine = '';
         }
       }
@@ -219,6 +215,12 @@ exolveFromText = function(w, h, text, fname='') {
   return exolveFromTextCreateWorker(ret.candidates);
 }
 
+exolveFromTextAddClue = function(clueText, isDown, sections) {
+  const c = clueText.trim();
+  if (!isDown) sections.across.push(c);
+  else sections.down.push(c);
+}
+
 /**
  * Do lots of cleaning of the text.
  */
@@ -248,6 +250,18 @@ exolveFromTextClean = function(s) {
    * Insert spaces before enums, if missing.
    */
   s = s.replace(/([^\s])\(([1-9])/g, '$1 ($2');
+
+  /**
+   * Clues copied from some sites have duplicated clue text that looks
+   * like:
+   *   4 My clue is this (5)4 across. My clue is this. 5 letters.
+   *   2, 14 My linked clue is this (4,5)2 down, 14 down. My linked clue is this. 4 letters and 5 letters.
+   * or (for linked clues):
+   *   16 See 616 down. See 6
+   * We clean it up here.
+   */
+  s = s.replace(/([1-9][0-9]*)([^\n]*)\)\1\s(across|down)[^\n]*\n/gi, '$1$2)\n');
+  s = s.replace(/([1-9][0-9]*)(\s*See[^\n]*)([0-9])\1\s(across|down)[^\n]*\n/gi, '$1$2$3\n');
 
   /**
    * Insert newlines between clues that got stitched together (a common

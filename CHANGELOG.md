@@ -1,5 +1,14 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.5: June 1, 2026
+
+- Keep the VERSION string only in one place in exolve-m.js (and its clone
+  in exolve.html) so that we do not have to update it everywhere.
+- Change the phone-display of the preamble link to say "Intro" instead
+  of "Preamble"
+- In Exolve Player, deal with cleaning up clues text from Guardian that
+  contains duplicated clues (accessibility versions).
+
 ### Minor Version: Exolve v1.70.4: May 12, 2026
 
 - Make the copy-placeholders button round (looks better, methinks).

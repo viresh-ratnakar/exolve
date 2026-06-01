@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70.4, May 12, 2026';
+  this.VERSION = 'Exolve v1.70.5, June 1, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -588,7 +588,7 @@ function Exolve(puzzleSpec,
     'show-notes-entries': 'Show entered solutions:',
     'show-notes-times': 'Show clue-solving times:',
     'concise-clue.hover': 'Some clue text has been trimmed here for brevity. You can see the full clue by clicking on it.',
-    'preamble-link': '&Darr;Preamble',
+    'preamble-link': '&Darr;Intro',
     'phone-kb-help': `
       Exolve's on-screen keyboard can used for entering letters
       into the grid. The "${ExolveKB.CLOSE_KEY}" button can be used
