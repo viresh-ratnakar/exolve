@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.70.6: June 6, 2026
+
+- Move the "setter" line slightly up my getting rid of its top margin and
+  adding that to the bottom margin (as it looked too close to the top of
+  the grid when printing). The "title" line anyway has enough bottom margin.
+
 ### Minor Version: Exolve v1.70.5: June 1, 2026
 
 - Keep the VERSION string only in one place in exolve-m.js (and its clone

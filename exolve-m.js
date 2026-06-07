@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70.5, June 1, 2026';
+  this.VERSION = 'Exolve v1.70.6, June 6, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
