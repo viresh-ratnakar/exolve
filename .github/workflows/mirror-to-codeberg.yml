@@ -1,0 +1,31 @@
+name: Mirror to Codeberg
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CODEBERG_SSH_KEY }}
+
+      - name: Add Codeberg to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H codeberg.org >> ~/.ssh/known_hosts
+
+      - name: Push to Codeberg
+        run: |
+          git remote add codeberg git@codeberg.org:viresh-ratnakar/exolve.git
+          git push codeberg refs/heads/master:refs/heads/master --force
