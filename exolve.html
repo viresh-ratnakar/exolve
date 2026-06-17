@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.70.6, June 6, 2026';
+  this.VERSION = 'Exolve v1.71, June 17, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -585,6 +585,14 @@ function Exolve(puzzleSpec,
     'print.hover': 'Show/hide panel for printing or creating a PDF or saving grid image to SVG file.',
     'print-heading': 'Print or create a PDF:',
     'print-size': 'Page size:',
+    'print-portrait': 'Portrait',
+    'print-landscape': 'Landscape',
+    'print-cols': 'Columns:',
+    'print-cols-hover': 'Number of columns. [Auto] picks reasonable values based upon the state of the puzzle and the page orientation. For three columns, you can decide whether the grid should span 1 or 2 of them.',
+    'print-cols-auto': 'Auto',
+    'print-cols-2': '2 (grid in 1)',
+    'print-cols-3-1': '3 (grid in 1)',
+    'print-cols-3-2': '3 (grid in 2)',
     'print-only-grid': 'Only grid',
     'print-only-clues': 'Only clues',
     'print-all': 'Grid and clues',
@@ -709,8 +717,6 @@ function Exolve(puzzleSpec,
   this.ignoreUnclued = false;
   this.ignoreEnumMismatch = false;
   this.showCellLevelButtons = false;
-  this.printCompleted3Cols = false;
-  this.printIncomplete2Cols = false;
   this.noNinaButton = false;
   this.useWebifi = false;
   this.hltOverwrittenMillis = 5000;
@@ -961,6 +967,19 @@ Exolve.prototype.init = function() {
                       <option value="6in 9in">Book: 6in x 9in</option>
                       <option value="legal">Legal: 8.5in x 14in</option>
                       <option value="ledger">Ledger: 11in x 17in</option>
+                    </select>
+                    <select name="${this.prefix}-print-orientation" id="${this.prefix}-print-orientation">
+                      <option value="portrait">${this.textLabels['print-portrait']}</option>
+                      <option value="landscape">${this.textLabels['print-landscape']}</option>
+                    </select>
+                  </div>
+                  <div title="${this.textLabels['print-cols-hover']}">
+                    ${this.textLabels['print-cols']}
+                    <select name="${this.prefix}-print-cols" id="${this.prefix}-print-cols">
+                      <option value="auto">${this.textLabels['print-cols-auto']}</option>
+                      <option value="2-1">${this.textLabels['print-cols-2']}</option>
+                      <option value="3-1">${this.textLabels['print-cols-3-1']}</option>
+                      <option value="3-2">${this.textLabels['print-cols-3-2']}</option>
                     </select>
                   </div>
                   <div title="${this.textLabels['print-margin.hover']}">
@@ -2507,12 +2526,11 @@ Exolve.prototype.parseOption = function(s) {
       /* Deprecated, we always try to position clues to the right now. */
       continue;
     }
-    if (spart == "print-incomplete-2cols") {
-      this.printIncomplete2Cols = true;
-      continue;
-    }
-    if (spart == "print-completed-3cols") {
-      this.printCompleted3Cols = true;
+    if (spart == "print-incomplete-2cols" ||
+        spart == "print-completed-3cols") {
+      /* Deprecated, now we let the user pick printing columnization (apart
+       * from the default "auto" mode).
+       */
       continue;
     }
     if (spart == "rebus-cells") {
@@ -10211,6 +10229,8 @@ Exolve.prototype.makeQRsInExplanations = function() {
 Exolve.prototype.getPrintSettings = function() {
   const pageSizeElt = document.getElementById(this.prefix + '-page-size');
   const pageMarginsElt = document.getElementById(this.prefix + '-page-margins');
+  const orientationElt = document.getElementById(this.prefix + '-print-orientation');
+  const columnsElt = document.getElementById(this.prefix + '-print-cols');
 
   const margins = [0, 0, 0, 0];
   const marginStrs = pageMarginsElt.value.trim().split(/\s+/);
@@ -10226,7 +10246,7 @@ Exolve.prototype.getPrintSettings = function() {
 
   const page = (pageSizeElt ? pageSizeElt.value : 'letter') || 'letter';
 
-  const widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
+  let widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
                   ((page == '6in 9in') ? 6.0 :
                   ((page == 'A4') ? 210.0/25.4 :
                   ((page == 'A3') ? 297.0/25.4 :
@@ -10234,7 +10254,7 @@ Exolve.prototype.getPrintSettings = function() {
                   ((page == 'B5') ? 176.0/25.4 :
                   ((page == 'B4') ? 250.0/25.4 :
                   ((page == 'ledger') ? 11.0 : 8.5))))))));
-  const heightIn = ((page == 'letter') ? 11.0 :
+  let heightIn = ((page == 'letter') ? 11.0 :
                    ((page == '6in 9in') ? 9.0 :
                    ((page == 'A4') ? 297.0/25.4 :
                    ((page == 'A3') ? 420.0/25.4 :
@@ -10243,6 +10263,14 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'B4') ? 353.0/25.4 :
                    ((page == 'legal') ? 14.0 :
                    ((page == 'ledger') ? 17.0 : 11.0)))))))));
+  let orientation = 'portrait';
+  if (orientationElt && orientationElt.value == 'landscape') {
+    orientation = 'landscape';
+    const temp = widthIn;
+    widthIn = heightIn;
+    heightIn = temp;
+  }
+  const isLandscape = (orientation == 'landscape');
   const font = this.parseFontSize(
       (this.printFontInput ? this.printFontInput.value : '18px') || '18px');
 
@@ -10265,20 +10293,41 @@ Exolve.prototype.getPrintSettings = function() {
    */
   let threeColumns = false;
   if (this.numCellsToFill == this.numCellsFilled) {
-    if (this.printCompleted3Cols && (scope == 'all')) {
+    if (isLandscape && (scope == 'all')) {
       threeColumns = true;
     }
   } else {
-    if (!this.printIncomplete2Cols && (scope == 'all')) {
+    if (!isLandscape && (scope == 'all')) {
       threeColumns = true;
     }
+  }
+  let gridColumns = threeColumns ? (isLandscape ? 1 : 2) : 1;
+  /**
+   * Override threeColumns/gridColumns, possibly, if columnsOption
+   * is set (but don't do it if onlyClues/onlyGrid is selected).
+   */
+  if (scope != 'all' && columnsElt) {
+    columnsElt.value = 'auto';
+  }
+  const columnsOption = columnsElt ? columnsElt.value : 'auto';
+  if (columnsOption == '2-1') {
+    threeColumns = false;
+    gridColumns = 1;
+  } else if (columnsOption == '3-1') {
+    threeColumns = true;
+    gridColumns = 1;
+  } else if (columnsOption == '3-2') {
+    threeColumns = true;
+    gridColumns = 2;
   }
   return {
     scope: scope,
     onlyClues: (scope == 'only-clues'),
     onlyGrid: (scope == 'only-grid'),
     allInScope: (scope == 'all'),
+    orientation: orientation,
     threeColumns: threeColumns,
+    gridColumns: gridColumns,
     page: page,
     font: font,
     autofont: font.str.startsWith('auto'),
@@ -10526,6 +10575,11 @@ Exolve.prototype.preprint = function(settings) {
       zoom: ${zoomPerc}%;
       margin: 0;
     }
+    @media print {
+      @page {
+        size: ${settings.orientation};
+      }
+    }
     #${this.prefix}-frame {
       width: ${this.PRINT_WIDTH_PIXELS}px;
     }
@@ -10599,13 +10653,18 @@ Exolve.prototype.preprintToFit = function(settings) {
   /**
    * We set dpi to a value that assumes that printing will scale
    * PRINT_WIDTH_PIXELS pixels to wIn inches.
-   *
-   * Adjust height limit by 72 as that seems to be needed.
    */
   const wIn =
     settings.pageWidthIn - (settings.margins[0] + settings.margins[2]);
   const dpi = this.PRINT_WIDTH_PIXELS / wIn;
-  const hPx = -72 + Math.floor(dpi * (
+  /**
+   * hPx used to needed to be adjusted down (-70 was the delta) because printed
+   * line-height tends be bigger than displayed line-height. But now we
+   * explicitly set line-height for clues/preamble/explanations to 1.2 (which is
+   * close to the value for the "normal" setting), and this adjustment is no
+   * longer needed.
+   */
+  const hPx = Math.floor(dpi * (
         settings.pageHeightIn - (settings.margins[1] + settings.margins[3]))) -
         (settings.qr ? this.qrTable.getBoundingClientRect().height : 0);
 
@@ -10710,12 +10769,21 @@ Exolve.prototype.printTwoColumns = function(settings) {
     text-align: left;
     height: ${'' + scaledH + 'px'};
   }
-  #${this.prefix}-frame .xlv-wide-box {
+  #${this.prefix}-grid-parent,
+  #${this.prefix}-grid-parent-centerer,
+  #${this.prefix}-frame .xlv-wide-box,
+  #${this.prefix}-frame .xlv-grid-panel {
     width: ${COLUMN_WIDTH}px;
   }
   #${this.prefix}-frame .xlv-clues,
   #${this.prefix}-frame .xlv-clues-flex {
     display: block;
+  }
+  #${this.prefix}-frame .xlv-preamble,
+  #${this.prefix}-frame .xlv-title-setter,
+  #${this.prefix}-frame .xlv-explanations,
+  #${this.prefix}-frame .xlv-clues {
+    line-height: 1.2 !important;
   }
   `;
   this.frame.appendChild(customStyles);
@@ -10875,7 +10943,7 @@ Exolve.prototype.printThreeColumns = function(settings) {
 
   const svgWidth = this.boxW + (2 * this.offsetLeft)
   const svgHeight = this.boxH + (2 * this.offsetTop)
-  const goodGridDim = COLUMN_SEP + 2 * COLUMN_WIDTH;
+  const goodGridDim = ((settings.gridColumns - 1) * COLUMN_SEP) + (settings.gridColumns * COLUMN_WIDTH);
   const scale = settings.gridScale ? settings.gridScale :
       Math.min(1.75, goodGridDim / svgWidth);
   const scaledH = svgHeight * scale;
@@ -10890,12 +10958,21 @@ Exolve.prototype.printThreeColumns = function(settings) {
     transform: scale(${scale});
     transform-origin: top left;
   }
-  #${this.prefix}-frame .xlv-wide-box {
-    width: ${COLUMN_SEP + (2 * COLUMN_WIDTH)}px;
+  #${this.prefix}-grid-parent,
+  #${this.prefix}-grid-parent-centerer,
+  #${this.prefix}-frame .xlv-wide-box,
+  #${this.prefix}-frame .xlv-grid-panel {
+    width: ${goodGridDim}px;
   }
   #${this.prefix}-frame .xlv-clues,
   #${this.prefix}-frame .xlv-clues-flex {
     display: block;
+  }
+  #${this.prefix}-frame .xlv-preamble,
+  #${this.prefix}-frame .xlv-title-setter,
+  #${this.prefix}-frame .xlv-explanations,
+  #${this.prefix}-frame .xlv-clues {
+    line-height: 1.2 !important;
   }
   `;
   this.frame.appendChild(customStyles);
@@ -10918,7 +10995,7 @@ Exolve.prototype.printThreeColumns = function(settings) {
     grid-row-start: 1;
     grid-row-end: 2;
     grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column-end: ${settings.gridColumns + 1};
     padding: 0;
   }
   #${this.prefix}-clues {
@@ -10934,7 +11011,7 @@ Exolve.prototype.printThreeColumns = function(settings) {
     grid-column-end: 2;
   }
   #${this.prefix}-printed-clues-2 {
-    grid-row-start: 2;
+    grid-row-start: ${settings.gridColumns};
     grid-row-end: 3;
     grid-column-start: 2;
     grid-column-end: 3;
@@ -11006,14 +11083,14 @@ Exolve.prototype.printThreeColumns = function(settings) {
   let best1end = 0;
   let best2end = 0;
   let bestGap = 1000;
-  for (let i = 0; i < clues.length; i++) {
-    const h1 = clues[i].h;
+  for (let i = -1; i < clues.length; i++) {
+    const h1 = (i < 0) ? 0 : clues[i].h;
     for (let j = i + 1; j < clues.length; j++) {
-      const h2 = clues[j].h - clues[i].h;
-      const gap12 = Math.abs(h2 - h1);
+      const h2 = clues[j].h - h1;
+      const gap12 = Math.abs(h2 - h1 - (settings.gridColumns == 1 ? gridPanelH : 0));
       const h3 = h - clues[j].h;
       const gap13 = Math.abs(h1 + gridPanelH - h3);
-      const gap23 = Math.abs(h2 + gridPanelH - h3);
+      const gap23 = Math.abs(h2 + (settings.gridColumns == 1 ? 0 : gridPanelH) - h3);
       const gap = gap12 + gap23 + gap13;
       if (gap < bestGap) {
         bestGap = gap;

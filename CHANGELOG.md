@@ -1,5 +1,28 @@
 # Changelog
 
+### Minor Version: Exolve v1.71: June 17, 2026
+
+- Some printing improvements: add 'Landscape' printing option, allow
+  user to pick columnization.
+- In landcape mode, for unfilled puzzles we use two columns, and for filled
+  puzzles we use three columns (with the grid spanning 1 column).
+- Exolve's picking of columnization is now the 'Auto' option for "columns",
+  we also let the user pick between:
+  - 2 columns (grid in 1)
+  - 3 columns (grid in 1)
+  - 3 columns (grid in 2)
+- With this user-control now available, we've now deprecated the `exolve-option`
+  settings that had a similar intent: `print-incomplete-2cols` and
+  `print-completed-3cols`.
+- Bug fix: we had been adjusting available printed height by -72. This was
+  because printed line-height setting is often a bit bigger than the value
+  used for display. Now we explicitly set `line-height` to 1.2, which fixes
+  the issue.
+- When splitting clues into columns for printing, allow the entire first set
+  (Across, typically) to go the the second column (previously we were forcing
+  at least one clue to remain, but when there's a long explanations section,
+  that creates unnecessary imbalance).
+
 ### Minor Version: Exolve v1.70.6: June 6, 2026
 
 - Move the "setter" line slightly up my getting rid of its top margin and

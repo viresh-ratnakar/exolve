@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.70, March 31, 2026
+### Version: Exolve v1.71, June 17, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1698,11 +1698,9 @@ The list of currently supported options is as follows:
   and removals trigger the same action on the symmetric counterpart of the cell.
   Setting this option avoids triggering this symmetric action.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
-  override the default layout choices used for printing puzzles (and creating
-  PDFs). By default, a completed puzzle is printed in 2 columns
-  (`print-completed-3cols` makes that 3 columns) while an incomplete puzzle is
-  printed in 3 columns (`print-incomplete-2cols` makes that 2 columns). See
-  [`Printing`](#printing) for more details.
+  are deprecated now as we allow the user the pick columnization while printing
+  (apart from the default "Auto" option). See [`Printing`](#printing) for more
+  details.
 - **`show-cell-level-buttons`** If this option is specified, then "Check cell"
   and "Reveal cell" buttons are also shown, in an extra row of buttons, for
   crosswords with solutions provided.
@@ -2051,6 +2049,14 @@ Here are all the names of pieces of text that you can relabel:
 | `print-font-xlarge` | Extra Large                                |
 | `print-font-small` | Small                                       |
 | `print-font-other` | Other                                       |
+| `print-portrait` | Portrait        |
+| `print-landscape` | Landscape      |
+| `print-cols` | Columns:               |
+| `print-cols-hover` | Number of columns. [Auto] picks reasonable values based upon the state of the puzzle and the page orientation. For three columns, you can decide whether the grid should span 1 or 2 of them.|
+| `print-cols-auto` | Auto           |
+| `print-cols-2`    | 2 (grid in 1)  |
+| `print-cols-3-1`  | 3 (grid in 1)  |
+| `print-cols-3-2`  | 3 (grid in 2)  |
 | `print-crossword` | Print crossword                              |
 | `print-crossword.hover` | Print just this crossword, hiding any content outside it (Ctrl/Cmd-b). |
 | `print-page` | Print page                                        |
@@ -2939,19 +2945,34 @@ print, and then print.
 You can create PDF files for your crosswords by "printing to file" in most
 browsers.
 
+You can pick the page size (such as 'Letter' or 'A4'), the margins, and the
+page orientation (portrait or landscape) in the printing settings section.
+As of May 2022, you still need to pick the same page size in the printer's
+settings that open up when you print, if you use a paper size that's not the
+current choice in the printer's settings.
+
 The printed puzzle is laid out in a newspaper-like multi-column layout.
 If not all the puzzle entries have been filled in, then the printing is done in
-three columns, with the grid occupying two columns. This makes the grid a bit
-larger and easier for writing into.
+three columns in portrait mode, with the grid occupying two columns. This makes
+the grid a bit larger and easier for writing into.
 
 If all the puzzle entries have been filled in, then the printing is done in
-two columns, with the grid occupying the first column (which makes it slightly
-smaller than in the three-column layout for incomplete puzzles). If the puzzle
-provides annotations and/or explanations that get revealed, then this two-column
-layout is especially useful to limit the printed size.
+two columns in portrait mode, with the grid occupying the first column (which
+makes it slightly smaller than in the three-column portrait layout for
+incomplete puzzles). If the puzzle provides annotations and/or explanations that
+get revealed, then this two-column layout is especially useful to limit the
+printed size.
+
+In landscape mode, not-fully-filled puzzles are printed in two columns, and
+filled puzzles are printed in three columns (with the grid occupuing two of
+the three columns).
+
+The columnization defaults described above can be overridden with `Columns`
+settings. You can choose 2 or 3 columns; and for 3 columns, you can choose
+whether the grid should span 1 or 2 columns.
 
 The font size can be specified from the print settings section. The default
-setting is `auto`, which makes the software use the largest font size that will
+setting is `Auto`, which makes the software use the largest font size that will
 make the puzzle fit in one page (this takes slightly longer, as we iterate
 to find the best font size before committing to it). Note that this calculation
 only uses the crossword element, not anything outside it, so if you're using
@@ -2959,14 +2980,15 @@ th "Print page" option (i.e., not "Print crossword"), you might need to
 manually choose a smaller font size if the automatically chosen one leads to
 a page split because of elements outside the crossword.
 
+Please note that a specific font size picked, such as "18px", may not be the
+actual printed size exactly (because of scaling). However, in general, you can
+increase/decrease the font size setting and the printed size will
+increase/decrease accordingly.
+
 *As of September 2023, at least in Chrome, printing has become buggy when the
 puzzle spills over to a second page, if you manually pick a large font size.
 Please reduce font-size (or revert to the `auto` setting) if that happens, to
 try to fit the puzzle into a single page.*
-
-You can override the column choices for completed (default: 2 columns) and
-incomplete (default: 3 columns) puzzles using the exolve-options
-`print-completed-3cols` and `print-incomplete-2cols` respectively.
 
 Before printing, any highlighting of the currently active clue is removed,
 and it is restored after printing.
@@ -2983,25 +3005,15 @@ you can add the class `xlv-only-print` to it.
 Clicking on the "Print" link (that's shown under the grid) toggles a panel
 with various settings for printing or creating PDFS. These include:
 
-- Page size (such as 'Letter' or 'A4'). As of May 2022, you still need to
-  pick the same page size in the printer's settings that open up when you
-  print, if you use a paper size that's not the current choice in the printer's
-  settings.
-- Page margins in inches. Caveat: very large margins may lead to some parts
-  getting clipped. You can now specify up to four numbers (all in inches),
-  for the top/right/bottom/left margins, respectively. Missing values will
-  be copied from their symmetric counterparts, and if that's missing too, then
-  from the last available value.
-- Font size (Auto, Normal, Large, Extra Large, Small, or specify an arbitrary
-  font size). Please note that the specific font size picked, such as "18px",
-  may not be the actual printed size exactly (because of scaling). However, in
-  general, you can increase/decrease the font size setting and the printed
-  size will increase/decrease accordingly.
+- Page margins, when specified, should be in inches. You can specify up to
+  four numbers, for the top/right/bottom/left margins, respectively. Missing
+  values will be copied from their symmetric counterparts, and if that's
+  missing too, then from the last available value.
 - You can choose to print just the grid or just the clues (instead of the
   default, grid as well as clues). Nuance: in the "only clues" mode, we
-  always just use two columns (not three, even if the crossword is unsolved),
-  we do not balance the heights of clue lists, and we split columns just before
-  the Down clues start.
+  just use two columns in the 'Auto' columns setting (not three, even if the
+  crossword is unsolved). Further, we do not balance the heights of clue lists,
+  splitting columns just before the Down clues start.
 - You can selectively exclude any of these from printing: title, setter,
   preamble, explanations, copyright, questions. These exclusion settings are
   ignored when printing in wysiwyg mode.
