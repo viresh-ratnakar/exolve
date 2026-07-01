@@ -1,6 +1,11 @@
 # Changelog
 
-### Minor Version: Exolve v1.71: June 17, 2026
+### Minor Version: Exolve v1.71.1: July 1, 2026
+
+- When typing an answer for a question, do not call deactivate..() so that
+  the solver does not lose their position in the grid.
+
+### Version: Exolve v1.71: June 17, 2026
 
 - Some printing improvements: add 'Landscape' printing option, allow
   user to pick columnization.

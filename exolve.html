@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.71, June 17, 2026';
+  this.VERSION = 'Exolve v1.71.1, July 1, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -2386,9 +2386,6 @@ Exolve.prototype.parseShapedCellSpec = function(s, start, cell) {
 }
 
 Exolve.prototype.answerListener = function(answer, forceUpper) {
-  this.deactivateCurrCell();
-  this.deactivateCurrClue();
-  this.usingGnav = false;
   let cursor = answer.selectionStart;
   if (forceUpper) {
     answer.value = answer.value.toUpperCase().trimLeft();
