@@ -14,16 +14,16 @@
   - It's a "temp" puzzle (which stops this behaviour in Exet too).
   - The user has passed a customizer function.
   - The user has specified offsetLeft/grid-bounds.
-  - There ae shaped cells.
+  - There are shaped cells.
   - It's a 3d grid.
 - Add exolve-options `scale-up-grid:always` and `scale-up-grid:never` to
   override the above resttrictions (with `always`) or to simply avoid
   scaling up (`never`).
-- Some other minor tweaks: numberSize is not limited to a max font size,
+- Some other minor tweaks: numberSize is now limited to a max font size,
   we assume all of the window width is available if the parentElement is
   root (or its parent is root), not worrying about a scrollbar (i.e.,
   we use window.innerWidth rather than document.documentElement.clientWidth).
-  This avoids the otherwise incosistent behaviour between the first load
+  This avoids the otherwise inconsistent behaviour between the first load
   and subsequent resizing arriving at the same size.
 
 ### Minor Version: Exolve v1.71.1: July 1, 2026
