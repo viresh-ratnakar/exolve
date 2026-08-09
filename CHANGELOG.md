@@ -1,5 +1,31 @@
 # Changelog
 
+### Version: Exolve v1.72: August 9, 2026
+
+- Scale up the grid to fill available width. The need for this became clearer
+  to me (sadly) only after I switched my laptop to one with a wider screen.
+- We try to use 2/5th of the available width for the grid and the remaining
+  for two clue columns.
+- We now always respond to window-resizing (previously we only acted if a big
+  enough change happened). But we throttle the response, waiting 300ms to
+  accumulate any ongoing resizing.
+- The scaling up is done upto a limit (max cell width 64).
+- The scaling up is not done in the following cases:
+  - It's a "temp" puzzle (which stops this behaviour in Exet too).
+  - The user has passed a customizer function.
+  - The user has specified offsetLeft/grid-bounds.
+  - There ae shaped cells.
+  - It's a 3d grid.
+- Add exolve-options `scale-up-grid:always` and `scale-up-grid:never` to
+  override the above resttrictions (with `always`) or to simply avoid
+  scaling up (`never`).
+- Some other minor tweaks: numberSize is not limited to a max font size,
+  we assume all of the window width is available if the parentElement is
+  root (or its parent is root), not worrying about a scrollbar (i.e.,
+  we use window.innerWidth rather than document.documentElement.clientWidth).
+  This avoids the otherwise incosistent behaviour between the first load
+  and subsequent resizing arriving at the same size.
+
 ### Minor Version: Exolve v1.71.1: July 1, 2026
 
 - When typing an answer for a question, do not call deactivate..() so that

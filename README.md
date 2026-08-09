@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.71, June 17, 2026
+### Version: Exolve v1.72, August 9, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1635,9 +1635,35 @@ The list of currently supported options is as follows:
   colour of the element named &lt;name&gt; to &lt;c&gt;, which should be a
   valid HTML colour name/code (do not include spaces within it though). See the
   "Colour schemes" subsection below for details.
+- **`colour-only-cell-bottom`** or **`color-only-cell-bottom`** If this option
+  is specified, then for cell colouring (for cells that have exolve-colour
+  specified or for cells that are parts of ninas), we do not colour the
+  whole cell; instead, we just colour a bar at the bottom of the cell. This
+  can be useful for printing too, as colouring the whole cell tends to blur
+  the text in it when printing). This option is ignored in 3-d (for now).
 - **`columnar-layout`** Deprecated. This option was used to create a
   newspaper-like layout, but it never worked reliably across platforms.
   You still get nice, "flowing" layouts when printing.
+- **`diagramless-bars`** Allow bars to be added to diagramless cells. See
+  [`Diagramless cells`](#diagramless-cells) for details.
+- **`diagramless-asymmetric`** By default, diagramless-block (and bar) additions
+  and removals trigger the same action on the symmetric counterpart of the cell.
+  Setting this option avoids triggering this symmetric action.
+- **`scale-up-grid:<always|never>`**: For most crosswords, Exolve will scale up
+  the grid to fill the available width (up to a max limit), except in these
+  cases:
+  - It's a "temp" puzzle (which stops this behaviour in Exet too).
+  - The user has passed a customizer function.
+  - The user has specified offsetLeft/grid-bounds.
+  - There are shaped cells.
+  - It's a 3d grid.
+  You can use the `scale-up-grid:always` option to try scaling even in the above
+  cases (but do verify that the behaviour looks OK). If you prefer not scaling up
+  at all, then use the `scale-up-grid:never` option.
+- **`extra-space-on-top:<N>`** Add N extra pixels space above the panel
+  containing the grid and the clues (and below the title/preamble part).
+  Defaults to 0. Note that the standard space there is 56 pixels; this is extra,
+  and can be negative (if you want to reduce it from 56 pixels).
 - **`font-family:<ff>`** Set the font-family CSS value (for clues, preamble,
   etc.). You can set this to **inherit** to override Exolve's default of
   **serif**.
@@ -1674,12 +1700,6 @@ The list of currently supported options is as follows:
   "Clear all", then the nina button is hidden again.
 - **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
   specified, then we do not try ["smart colouring"](#smart-colouring).
-- **`colour-only-cell-bottom`** or **`color-only-cell-bottom`** If this option
-  is specified, then for cell colouring (for cells that have exolve-colour
-  specified or for cells that are parts of ninas), we do not colour the
-  whole cell; instead, we just colour a bar at the bottom of the cell. This
-  can be useful for printing too, as colouring the whole cell tends to blur
-  the text in it when printing). This option is ignored in 3-d (for now).
 - **`offset-left:<N>`** Draw the grid with this much space to the left and
   to the right (N pixels). Useful for drawing additional art around the grid
   using `customizeExolve()`, for example.
@@ -1690,17 +1710,12 @@ The list of currently supported options is as follows:
   set the property named `<name>` in the puzzle to the numeric value `<N>`.
   This can be used to override properties for which there is no explicit
   dedicated option, such as `GRIDLINE`.
-- **`rebus-cells`** Allow multiple letters to be entered in cells. See
-  [`Rebus cells`](#rebus-cells) for details.
-- **`diagramless-bars`** Allow bars to be added to diagramless cells. See
-  [`Diagramless cells`](#diagramless-cells) for details.
-- **`diagramless-asymmetric`** By default, diagramless-block (and bar) additions
-  and removals trigger the same action on the symmetric counterpart of the cell.
-  Setting this option avoids triggering this symmetric action.
 - **`print-completed-3cols` and `print-incomplete-2cols`** These option
   are deprecated now as we allow the user the pick columnization while printing
   (apart from the default "Auto" option). See [`Printing`](#printing) for more
   details.
+- **`rebus-cells`** Allow multiple letters to be entered in cells. See
+  [`Rebus cells`](#rebus-cells) for details.
 - **`show-cell-level-buttons`** If this option is specified, then "Check cell"
   and "Reveal cell" buttons are also shown, in an extra row of buttons, for
   crosswords with solutions provided.
@@ -1708,10 +1723,6 @@ The list of currently supported options is as follows:
   and the bottom of the clue shown on top. Defaults to 0. You can set this
   to something like `20`, but note that if the clue text is very long then
   this setting will get overridden.
-- **`extra-space-on-top:<N>`** Add N extra pixels space above the panel
-  containing the grid and the clues (and below the title/preamble part).
-  Defaults to 0. Note that the standard space there is 56 pixels; this is extra,
-  and can be negative (if you want to reduce it from 56 pixels).
 - **`top-clue-wysiwyg`**: Show the top clue inside a DIV block and make it look
   just like it does in the clues lists: tabular, with the the clue number being
   in a slim column by itself, and the rest of the clue (including any embedded

@@ -6,6 +6,11 @@ Copyright (c) 2019 Viresh Ratnakar
 See the full license notice in exolve-m.js.
 */
 
+:root {
+  --default-grid-width: 481px;
+  --min-grid-width: 325px;
+}
+
 @media (max-width: 500px) {
   body {
     margin: 4px;
@@ -55,7 +60,7 @@ See the full license notice in exolve-m.js.
 @media (max-width: 325px) {
   .xlv-wide-box {
     width: 100%;
-    max-width: 325px;
+    max-width: var(--min-grid-width);
   }
   .xlv-button {
     font-size: 9px;
@@ -89,7 +94,7 @@ See the full license notice in exolve-m.js.
 @media (min-width: 326px) and (max-width: 500px) {
   .xlv-wide-box {
     width: 100%;
-    max-width: 480px;
+    max-width: var(--default-grid-width);
   }
   .xlv-button {
     font-size: 10px;
@@ -106,7 +111,7 @@ See the full license notice in exolve-m.js.
 
 @media (min-width: 501px) {
   .xlv-wide-box {
-    width: 480px;
+    width: var(--default-grid-width);
   }
   .xlv-button {
     font-size: 14px;
@@ -347,6 +352,7 @@ See the full license notice in exolve-m.js.
 }
 .xlv-controls {
   text-align: center;
+  width: 100%;
 }
 .xlv-controls-etc {
   padding: 0 0 2px 0;

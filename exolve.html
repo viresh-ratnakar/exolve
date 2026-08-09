@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.71.1, July 1, 2026';
+  this.VERSION = 'Exolve v1.72, August 9, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -157,7 +157,7 @@ function Exolve(puzzleSpec,
   this.offsetTop = 0;
 
   this.viewportDim = 0;
-  this.viewportDimUsable = 0;
+  this.viewportWidthUsable = 0;
   /**
    * For the following, if the corresponding {cell,tiling,box}WHGiven is false,
    * then will be set in computeGridSize().
@@ -191,9 +191,16 @@ function Exolve(puzzleSpec,
   this.NUMBER_START_X = 2;
   this.MAX_REBUS_SIZE = 20;
   this.DGMLESS_BLOCK_SCALE = 0.5;
+  this.MIN_LETTER_SIZE = 8;
+  this.MAX_NUMBER_SIZE = 16;
+  this.DEFAULT_CELL_DIM = 31;
+  this.MIN_CELL_DIM = 18;
+  this.MAX_CELL_DIM = 64;
+  this.DEFAULT_GRID_WIDTH = 481;
+  this.MIN_GRID_WIDTH = 325;
+  this.COLUMN_MARGIN = 12;
 
   this.PRINT_WIDTH_PIXELS = 992;
-  this.MIN_DIM_PIXELS = 325;
 
   this.credits = [];
   this.questionTexts = [];
@@ -278,7 +285,7 @@ function Exolve(puzzleSpec,
 
   this.visTop = visTop;
   this.maxDim = maxDim;
-  this.cluesBoxWidth = 0;
+  this.cluesBoxWidth = this.DEFAULT_GRID_WIDTH;
 
   this.answersList = [];
   this.revelationList = [];
@@ -721,6 +728,10 @@ function Exolve(puzzleSpec,
   this.useWebifi = false;
   this.hltOverwrittenMillis = 5000;
   this.colourOnlyCellBottom = false;
+  this.scaleUpGrid = '';
+
+  this.handleResizeTimer = null;
+  this.handleResizeLagMS = 300;
 
   this.createPuzzle();
 }
@@ -826,7 +837,7 @@ Exolve.prototype.init = function() {
             </div> <!-- xlv-grid-parent -->
           </div> <!-- xlv-grid-parent-centerer -->
           <div id="${this.prefix}-controls-etc" class="xlv-controls-etc">
-            <div id="${this.prefix}-controls" class="xlv-controls xlv-wide-box">
+            <div id="${this.prefix}-controls" class="xlv-controls">
               <div id="${this.prefix}-button-row-1" class="xlv-controls-row">
                 <button id="${this.prefix}-prev"
                   class="xlv-button xlv-nav-button xlv-prev"
@@ -1696,7 +1707,7 @@ class ExolveKB {
     <style>
     .xlv-phone-kb {
       background-color: ${puz.colorScheme['phone-kb-bg']};
-      max-width: ${puz.viewportDimUsable}px;
+      max-width: ${puz.viewportWidthUsable}px;
     }
     .xlv-phone-kb-btn {
       border: 2px solid ${puz.colorScheme['phone-kb-btn-border']};
@@ -2628,6 +2639,16 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (kv[0] == 'font-size') {
       this.fontSize = kv[1];
+      continue;
+    }
+    if (kv[0] == 'scale-up-grid') {
+      const val = kv[1].toLowerCase();
+      if (val == 'never' || val == 'always') {
+        this.scaleUpGrid = val;
+      } else {
+        this.throwErr(
+            'Unexpected val in exolve-option: scale-up-grid: ' + kv[1]);
+      }
       continue;
     }
     if (kv[0] == 'top-clue-clearance') {
@@ -6111,6 +6132,7 @@ Exolve.prototype.getViewportDim = function() {
 
 /**
  * Sets the following:
+ *   viewportWidthUsable
  *   viewportDim
  *   squareDim, squareDimBy2
  *   cellW and cellH, unless cellWHGiven==true
@@ -6123,36 +6145,66 @@ Exolve.prototype.getViewportDim = function() {
  *   circleR
  *   h3dLayer, offset3d if layers3d > 1
  *   letterSize, numberSize, arrowSize
- *   maxCurrClueWidth
+ *   cluesBoxWidth
+ *   gridPanelWidth
+ * Also sets these CSS variables (in case their default values have been
+ * changed with exolve-options):
+ *   --default-grid-width
+ *   --min-grid-width
  */
 Exolve.prototype.computeGridSize = function() {
   this.viewportDim = this.getViewportDim();
-  this.viewportDimUsable = this.viewportDim;
+  const viewportWidth = this.getViewportWidth();
+  this.viewportWidthUsable = viewportWidth;
   const bodyStyles = window.getComputedStyle(document.body);
   const marginRight = parseFloat(bodyStyles.marginRight);
   const marginLeft = parseFloat(bodyStyles.marginLeft);
   if (!isNaN(marginRight)) {
-    this.viewportDimUsable -= marginRight;
+    this.viewportWidthUsable -= marginRight;
   }
   if (!isNaN(marginLeft)) {
-    this.viewportDimUsable -= marginLeft;
+    this.viewportWidthUsable -= marginLeft;
   }
 
   if (this.parentElement != document.body) {
     const parentW = this.parentElement.clientWidth;
-    if (parentW > 0 && parentW < this.viewportDimUsable) {
-      this.viewportDimUsable = parentW;
+    if (parentW > 0 && parentW < this.viewportWidthUsable) {
+      this.viewportWidthUsable = parentW;
     }
   }
-  this.viewportDimUsable = Math.max(
-      this.viewportDimUsable, this.MIN_DIM_PIXELS);
+  this.viewportWidthUsable = Math.max(
+      this.viewportWidthUsable, this.MIN_GRID_WIDTH);
 
-  this.squareDim = 31;
+  this.squareDim = this.DEFAULT_CELL_DIM;
+  /**
+   * We automatically scale up the grid to fit the available width (up to a max
+   * cell dim of MAX_CELL_DIM), except for these cases:
+   * - It's a "temp" puzzle (which stops this behaviour in Exet too).
+   * - The user has passed a customizer function.
+   * - The user has specified offsetLeft/grid-bounds.
+   * - There are shaped cells.
+   * - It's a 3d grid.
+   */
+  if ((this.scaleUpGrid == 'always') ||
+      (this.scaleUpGrid != 'never' && this.notTemp && !this.customizer &&
+       this.layers3d == 1 && (this.offsetLeft == 0) && (this.shapedCells.length == 0) &&
+       !this.boxWHGiven)) {
+    const maybeWideGridPx = Math.floor(this.viewportWidthUsable * 2 / 5);
+    if (maybeWideGridPx > 0) {
+      const altDim = Math.min(this.MAX_CELL_DIM,
+          Math.floor((maybeWideGridPx - this.GRIDLINE) / this.gridWidth) -
+          this.GRIDLINE);
+      this.squareDim = Math.max(this.squareDim, altDim);
+    }
+  }
+  /**
+   * Reduce squareDim if not enough width available.
+   */
   if (this.gridWidth <= 30 &&  // For jumbo grids, give up.
       (this.squareDim + this.GRIDLINE) * this.gridWidth + this.GRIDLINE >
-      this.viewportDimUsable - 8) {
-    this.squareDim = Math.max(12,
-      Math.floor((this.viewportDimUsable - 8 - this.GRIDLINE) /
+      this.viewportWidthUsable - 8) {
+    this.squareDim = Math.max(this.MIN_CELL_DIM,
+      Math.floor((this.viewportWidthUsable - 8 - this.GRIDLINE) /
                  this.gridWidth) - this.GRIDLINE);
   }
   if (!this.cellWHGiven) {
@@ -6175,7 +6227,6 @@ Exolve.prototype.computeGridSize = function() {
   console.assert(this.tilingW > 0 && this.tilingH > 0,
                  this.tilingW, this.tilingH);
 
-  this.numberStartY = Math.min(10, Math.floor(this.cellH / 3));
   this.lightStartX = 1.0 + this.cellW / 2.0;
   this.lightStartY = 1.925 + Math.floor((2 * this.cellH) / 3);
 
@@ -6200,18 +6251,40 @@ Exolve.prototype.computeGridSize = function() {
   }
   console.assert(this.boxW > 0 && this.boxH > 0, this.boxW, this.boxH);
 
-  this.letterSize = Math.max(8, this.squareDimBy2);
-  this.numberSize = 1 + Math.max(5, Math.floor(this.squareDim / 3) - 1);
-  this.arrowSize = Math.max(6, Math.floor(13 * this.squareDim / 31));
-  this.maxCurrClueWidth = Math.max(this.boxW + (2 * this.offsetLeft),
-                                   Math.min(this.viewportDimUsable - 30, 450));
+  this.letterSize = Math.max(this.MIN_LETTER_SIZE, this.squareDimBy2);
+  this.numberSize = Math.min(this.MAX_NUMBER_SIZE, 1 + Math.max(5, Math.floor(this.squareDim / 3) - 1));
+  this.numberStartY = Math.max(this.numberSize, Math.min(10, Math.floor(this.cellH / 3)));
+  this.arrowSize = Math.max(6, Math.floor(13 * this.squareDim / this.DEFAULT_CELL_DIM));
+
+  this.gridPanelWidth = this.boxW + (2 * this.offsetLeft);
+  const minCurrClueWidth = Math.max(
+      this.MIN_GRID_WIDTH,
+      Math.min(this.viewportWidthUsable, this.DEFAULT_GRID_WIDTH));
+  this.gridPanelWidth = Math.max(this.gridPanelWidth, minCurrClueWidth);
+  const availWidthForClues = this.viewportWidthUsable - this.gridPanelWidth - (3 * this.COLUMN_MARGIN);
+  if (availWidthForClues < 400) {
+    /* Clues in a single column, under grid */
+    this.cluesBoxWidth = this.gridPanelWidth;
+  } else if (availWidthForClues < (2*(this.DEFAULT_GRID_WIDTH + this.COLUMN_MARGIN))) {
+    /* Clues in two columns to the right of the grid */
+    this.cluesBoxWidth = Math.floor(availWidthForClues / 2) - this.COLUMN_MARGIN;
+  } else {
+    /* Clues in two columns to the right of the grid */
+    this.cluesBoxWidth = this.DEFAULT_GRID_WIDTH;
+  }
+  console.assert(this.cluesBoxWidth > 0, this.cluesBoxWidth);
+
+  /**
+   * Set CSS variables.
+   */
+  const root = document.documentElement;
+  root.style.setProperty('--default-grid-width',
+      '' + this.DEFAULT_GRID_WIDTH + 'px');
+  root.style.setProperty('--min-grid-width',
+      '' + this.MIN_GRID_WIDTH + 'px');
 }
 
 Exolve.prototype.maybeResizeGrid = function() {
-  const delta = Math.abs(this.getViewportDim() - this.viewportDim);
-  if (delta <= 25) {
-    return;
-  }
   /** Let's resize the grid */
   this.computeGridSize();
   const activeElement = document.activeElement;
@@ -6235,42 +6308,28 @@ Exolve.prototype.maybeResizeGrid = function() {
   }
 }
 
-Exolve.prototype.setColumnLayout = function(cluesBoxWidth=0) {
-  const vpWidth = this.getViewportWidth();
-  const gpBox = this.gridPanel.getBoundingClientRect();
-  const gpWidth = gpBox.width || 481;
-  if (cluesBoxWidth > 0) {
-    this.cluesBoxWidth = cluesBoxWidth;
-  } else {
-    const frameBox = this.frame.getBoundingClientRect();
-    const xStart = Math.max(frameBox.left, 0);
-    const xEnd = frameBox.right > 0 ? Math.min(frameBox.right, vpWidth) : vpWidth;
-    const portWidth = xEnd - xStart;
-    /**
-     * 12 = rt margin of grid panel, 8 = rt margin of clues panel; subtract 20.
-     */
-    const availWidth = portWidth - gpWidth - 20;
-    if (availWidth < 400) {
-      /* Clues in a single column, under grid */
-      this.cluesBoxWidth = gpWidth;
-    } else if (availWidth < 984) {
-      /* Clues in two columns to the right of the grid */
-      this.cluesBoxWidth = Math.floor(availWidth / 2) - 12;
-    } else {
-      this.cluesBoxWidth = 480;
-    }
-  }
-  console.assert(this.cluesBoxWidth > 0, this.cluesBoxWidth);
+Exolve.prototype.setColumnLayout = function() {
   this.equalizeClueWidths(this.cluesBoxWidth);
-  this.cluesContainer.style.maxWidth = (2 * (this.cluesBoxWidth + 12)) + 'px';
+  this.cluesContainer.style.maxWidth =
+      (2 * (this.cluesBoxWidth + this.COLUMN_MARGIN)) + 'px';
   this.cluesContainer.className = 'xlv-clues xlv-clues-flex';
   this.gridcluesContainer.className = 'xlv-grid-and-clues-flex';
 }
 
-Exolve.prototype.handleResize = function() {
+Exolve.prototype.handleResizeInner = function() {
   this.maybeResizeGrid();
   this.resizeCurrClueAndControls();
   this.setColumnLayout();
+}
+
+Exolve.prototype.handleResize = function() {
+  if (this.handleResizeTimer) {
+    clearTimeout(this.handleResizeTimer);
+  }
+  this.handleResizeTimer = setTimeout(() => {
+    this.handleResizeInner();
+    this.handleResizeTimer = null;
+  }, this.handleResizeLagMS);
 }
 
 Exolve.prototype.makeRect = function(x, y, w, h, colour) {
@@ -6779,7 +6838,7 @@ Exolve.prototype.deactivateCurrClue = function() {
 Exolve.prototype.resizeCurrClueAndControls = function() {
   const bPos = this.frame.getBoundingClientRect();
   const gpPos = this.gridPanel.getBoundingClientRect();
-  const width = Math.max(this.maxCurrClueWidth, gpPos.width);
+  const width = this.gridPanelWidth;
   const widthPx = width + 'px';
   this.controlsEtc.style.width = widthPx;
   this.currClue.style.width = widthPx;
@@ -7012,11 +7071,20 @@ Exolve.prototype.getViewportHeight = function() {
 }
 
 Exolve.prototype.getViewportWidth = function() {
-  const cw = (window.location != window.parent.location) ? 0 :
-    document.documentElement.clientWidth;
-  return window.innerWidth && cw ? Math.min(window.innerWidth, cw) :
-    window.innerWidth || cw ||
-    document.getElementsByTagName('body')[0].clientWidth;
+  const wiw = window.innerWidth;
+  let cw = (window.location != window.parent.location) ? 0 :
+      document.documentElement.clientWidth;
+  if (this.parentElement === document.body ||
+      this.parentElement?.parentElement === document.body) {
+    /**
+     * Let's assume we have the full width, ignoring any existing scrollbars.
+     * This avoids the otherwise incosistent behaviour between the first load
+     * and subsequent resizing arriving at the same size.
+     */
+    cw = Math.max(cw, wiw);
+  }
+  return wiw && cw ? Math.min(wiw, cw) :
+      wiw || cw || document.getElementsByTagName('body')[0].clientWidth;
 }
 
 // Scroll if a clueTR is not visible, but its clues list is, vertically.
@@ -11337,6 +11405,11 @@ function createPuzzle() {
 </script>
 
 <style>
+:root {
+  --default-grid-width: 481px;
+  --min-grid-width: 325px;
+}
+
 @media (max-width: 500px) {
   body {
     margin: 4px;
@@ -11386,7 +11459,7 @@ function createPuzzle() {
 @media (max-width: 325px) {
   .xlv-wide-box {
     width: 100%;
-    max-width: 325px;
+    max-width: var(--min-grid-width);
   }
   .xlv-button {
     font-size: 9px;
@@ -11420,7 +11493,7 @@ function createPuzzle() {
 @media (min-width: 326px) and (max-width: 500px) {
   .xlv-wide-box {
     width: 100%;
-    max-width: 480px;
+    max-width: var(--default-grid-width);
   }
   .xlv-button {
     font-size: 10px;
@@ -11437,7 +11510,7 @@ function createPuzzle() {
 
 @media (min-width: 501px) {
   .xlv-wide-box {
-    width: 480px;
+    width: var(--default-grid-width);
   }
   .xlv-button {
     font-size: 14px;
@@ -11678,6 +11751,7 @@ function createPuzzle() {
 }
 .xlv-controls {
   text-align: center;
+  width: 100%;
 }
 .xlv-controls-etc {
   padding: 0 0 2px 0;
