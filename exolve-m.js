@@ -442,6 +442,10 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light cell in that direction.</li>
+         <li><b>Home/End:</b>
+             Jump to the start/end of the current row (Across) or column
+             (Down), stopping at the grid edge, the first black cell, or a
+             bar. Only active while the cursor is in the grid.</li>
          <li><b>Ctrl/Cmd-q:</b> Clear this, <b>Ctrl/Cmd-Q:</b> Clear All!,
              <b>Ctrl/Cmd-b:</b> Print crossword, <b>Ctrl-/ or Cmd-/:</b> Jump to/back-from
              notes, <b>Ctrl/Cmd-*:</b> Mark clue as fave in notes, adding a *
@@ -7501,6 +7505,11 @@ Exolve.prototype.arrowNav = function(rincr, cincr, shouldLoop) {
 /**
  * Home (36) / End (35): jump to the start/end of the current row (Across)
  * or column (Down). The boundary is the grid edge, a black cell, or a bar.
+ *
+ * Key-down on Home/End is muzzled (default action suppressed) only when the
+ * event target is inside the grid (not notes/jotter/etc., which also live
+ * under grid-panel) and the current cell is valid. Navigation itself runs on
+ * key-up from the grid input via handleKeyUpInner().
  */
 Exolve.prototype.homeEndNav = function(key) {
   if (!this.currCellIsValid()) {
@@ -7724,9 +7733,13 @@ Exolve.prototype.handleKeyDown = function(e) {
       this.muzzleEvent(e);
     }
   } else if (key == 35 || key == 36) {
-    // Prevent the browser from scrolling on Home/End; navigation is handled
-    // on keyup via homeEndNav().
-    this.muzzleEvent(e);
+    // Prevent the browser from scrolling on Home/End only while working in
+    // the grid; navigation is handled on keyup via homeEndNav().
+    // gridParent, not gridPanel: notes/jotter also sit inside grid-panel.
+    if (this.gridParent.contains(e.target) &&
+        this.currCellIsValid()) {
+      this.muzzleEvent(e);
+    }
   }
 }
 
