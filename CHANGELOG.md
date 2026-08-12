@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor Version: Exolve v1.73.1: August 12, 2026
+
+- Simplify Home/End implementation to use the `activeCells[]` array, which
+  is more intuitive for linked clues, and also for shaped-cells, orphan clues,
+  etc.
+
 ### Version: Exolve v1.73: August 11, 2026
 
 - Home and End keys jump to the start/end of the current row (Across) or

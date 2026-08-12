@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.72, August 9, 2026
+### Version: Exolve v1.73.1, August 12, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -151,9 +151,8 @@ direction of the arrow, but there is a light cell immediately diagonally in
 that direction to one side, then the cursor moves there (this is intuitively
 helpful in tiled grids created using `exolve-shaped-cell`).
 
-Within the current light's row (Across) or column (Down), the Home and End keys
-jump to the start or end of that run of cells — bounded by the grid edge, the
-first black cell, or a bar in that direction.
+Within the current light, the Home and End keys jump to the start or end of
+that run of cells.
 
 The software tries to keep the current clue visible when scrolling, as long
 as the cell with the cursor is visible.
