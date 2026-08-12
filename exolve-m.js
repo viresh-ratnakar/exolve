@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.72, August 9, 2026';
+  this.VERSION = 'Exolve v1.73, August 11, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -442,6 +442,10 @@ function Exolve(puzzleSpec,
          <li><b>Enter, Click/Tap:</b> Toggle current direction.</li>
          <li><b>Arrow keys:</b>
              Move to the nearest light cell in that direction.</li>
+         <li><b>Home/End:</b>
+             Jump to the start/end of the current row (Across) or column
+             (Down), stopping at the grid edge, the first black cell, or a
+             bar. Only active while the cursor is in the grid.</li>
          <li><b>Ctrl/Cmd-q:</b> Clear this, <b>Ctrl/Cmd-Q:</b> Clear All!,
              <b>Ctrl/Cmd-b:</b> Print crossword, <b>Ctrl-/ or Cmd-/:</b> Jump to/back-from
              notes, <b>Ctrl/Cmd-*:</b> Mark clue as fave in notes, adding a *
@@ -7499,6 +7503,69 @@ Exolve.prototype.arrowNav = function(rincr, cincr, shouldLoop) {
 }
 
 /**
+ * Home (36) / End (35): jump to the start/end of the current row (Across)
+ * or column (Down). The boundary is the grid edge, a black cell, or a bar.
+ *
+ * Key-down on Home/End is muzzled (default action suppressed) only when the
+ * event target is inside the grid (not notes/jotter/etc., which also live
+ * under grid-panel) and the current cell is valid. Navigation itself runs on
+ * key-up from the grid input via handleKeyUpInner().
+ */
+Exolve.prototype.homeEndNav = function(key) {
+  if (!this.currCellIsValid()) {
+    return false;
+  }
+  this.usingGnav = true;
+  let row = this.currRow;
+  let col = this.currCol;
+  const toStart = (key == 36);
+  let dr = 0;
+  let dc = 0;
+  if (this.currDir == 'D') {
+    dr = toStart ? -1 : 1;
+  } else if (this.currDir == 'Z' && this.layers3d > 1) {
+    dr = (toStart ? -1 : 1) * this.h3dLayer;
+  } else {
+    // Across and other directions: move within the row.
+    dc = toStart ? -1 : 1;
+  }
+  const canPass = (r, c) => {
+    const cell = this.grid[r][c];
+    return cell.isLight || cell.isDgmless;
+  };
+  const barBlocksStep = (r, c, nr, nc) => {
+    if (r == nr) {
+      // Horizontal step.
+      if (nc < c) {
+        return this.grid[nr][nc].hasBarAfter;
+      }
+      return this.grid[r][c].hasBarAfter;
+    }
+    if (c == nc) {
+      // Vertical step.
+      if (nr < r) {
+        return this.grid[nr][nc].hasBarUnder;
+      }
+      return this.grid[r][c].hasBarUnder;
+    }
+    return false;
+  };
+  let nextRow = row + dr;
+  let nextCol = col + dc;
+  while (this.rcValid(nextRow, nextCol) && canPass(nextRow, nextCol) &&
+         !barBlocksStep(row, col, nextRow, nextCol)) {
+    row = nextRow;
+    col = nextCol;
+    nextRow += dr;
+    nextCol += dc;
+  }
+  if (row != this.currRow || col != this.currCol) {
+    this.activateCell(row, col);
+  }
+  return true;
+}
+
+/**
  * Handle navigation keys. Used by a listener, and also used to auto-advance
  * after a cell is filled. Returns false only if a tab input was actually used.
  */
@@ -7603,6 +7670,9 @@ Exolve.prototype.handleKeyUpInner = function(key, shift=false) {
         this.arrowNav(-1, 1, false);
       }
     }
+  } else if (key == 35 || key == 36) {
+    // End / Home
+    this.homeEndNav(key);
   }
   return true;
 }
@@ -7660,6 +7730,14 @@ Exolve.prototype.handleKeyDown = function(e) {
     }
   } else if (isCtrl && e.key == '*') {
     if (this.markAsFave()) {
+      this.muzzleEvent(e);
+    }
+  } else if (key == 35 || key == 36) {
+    // Prevent the browser from scrolling on Home/End only while working in
+    // the grid; navigation is handled on keyup via homeEndNav().
+    // gridParent, not gridPanel: notes/jotter also sit inside grid-panel.
+    if (this.gridParent.contains(e.target) &&
+        this.currCellIsValid()) {
       this.muzzleEvent(e);
     }
   }

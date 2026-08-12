@@ -1,5 +1,10 @@
 # Changelog
 
+### Version: Exolve v1.73: August 11, 2026
+
+- Home and End keys jump to the start/end of the current row (Across) or
+  column (Down), stopping at the grid edge, the first black cell, or a bar.
+
 ### Version: Exolve v1.72: August 9, 2026
 
 - Scale up the grid to fill available width. The need for this became clearer

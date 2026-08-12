@@ -151,6 +151,10 @@ direction of the arrow, but there is a light cell immediately diagonally in
 that direction to one side, then the cursor moves there (this is intuitively
 helpful in tiled grids created using `exolve-shaped-cell`).
 
+Within the current light's row (Across) or column (Down), the Home and End keys
+jump to the start or end of that run of cells — bounded by the grid edge, the
+first black cell, or a bar in that direction.
+
 The software tries to keep the current clue visible when scrolling, as long
 as the cell with the cursor is visible.
 
