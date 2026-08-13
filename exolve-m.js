@@ -8077,17 +8077,17 @@ Exolve.prototype.setCellLetter = function(gridCell, letter) {
   }
   gridCell.currLetter = letter;
   const dc = this.stateToDisplayChar(letter);
-  gridCell.textNode.nodeValue = dc;
   const atCurr = this.atCurr(gridCell.row, gridCell.col);
   if (atCurr) {
     this.gridInput.value = dc;
   }
   if (this.hasRebusCells) {
-    const fontSize = this.cellLetterSize(dc);
-    gridCell.cellText.style.fontSize = fontSize;
+    this.setCellDisplayText(gridCell, dc);
     if (atCurr) {
-      this.gridInput.style.fontSize = fontSize;
+      this.gridInput.style.fontSize = this.cellLetterSize(dc);
     }
+  } else {
+    gridCell.textNode.nodeValue = dc;
   }
   if (gridCell.isDgmless) {
     gridCell.dgmlessBlock.style.display = (letter == '1') ? '' : 'none';
@@ -8303,31 +8303,121 @@ Exolve.prototype.recolourCells = function(scale=1) {
 }
 
 Exolve.prototype.cellLetterSize = function(entry) {
-  if (!this.hasRebusCells || entry.length <= 1) {
-    return this.letterSize + 'px';
-  }
-  const AVAILABLE_WIDTH = this.cellW - (2.5 * this.BAR_WIDTH);
-  const width = this.measureTextWidth(entry);
-
-  if (width <= AVAILABLE_WIDTH) {
-    return this.letterSize + 'px';
-  }
-  const scaledSize = Math.max(6, this.letterSize * AVAILABLE_WIDTH / width);
-  return scaledSize + 'px';
+  return this.layoutRebusText(entry).fontSize + 'px';
 }
 
 /**
  * Code and font size scaling idea contributed by DKMiller71.
  */
 Exolve.prototype.measureTextWidth = function(entry) {
+  return this.measureTextWidthAtSize(entry, this.letterSize);
+}
+
+Exolve.prototype.measureTextWidthAtSize = function(entry, fontSizePx) {
   /**
    * Re-use canvas object for better performance.
    */
   const canvas = this.canvas ?? (this.canvas = document.createElement("canvas"));
   const context = canvas.getContext("2d");
-  context.font = getComputedStyle(this.gridParent).getPropertyValue("font");
-  const metrics = context.measureText(entry);
-  return metrics.width;
+  const family = getComputedStyle(this.gridParent).fontFamily || 'sans-serif';
+  context.font = fontSizePx + 'px ' + family;
+  return context.measureText(entry).width;
+}
+
+Exolve.prototype.wrapRebusLines = function(entry, fontSizePx, maxWidth) {
+  const lines = [];
+  let line = '';
+  for (const ch of entry) {
+    const test = line + ch;
+    if (!line || this.measureTextWidthAtSize(test, fontSizePx) <= maxWidth) {
+      line = test;
+    } else {
+      lines.push(line);
+      line = ch;
+    }
+  }
+  if (line) {
+    lines.push(line);
+  }
+  return lines.length > 0 ? lines : [''];
+}
+
+Exolve.prototype.rebusTextBaselineY = function(numLines, fontSizePx, lineHeight) {
+  if (numLines <= 1) {
+    return this.lightStartY;
+  }
+  const usableTop = this.numberStartY + 1;
+  const usableBottom = this.cellH - 2;
+  const centerY = (usableTop + usableBottom) / 2;
+  const blockHeight = ((numLines - 1) * lineHeight) + fontSizePx;
+  return centerY - (blockHeight / 2) + (fontSizePx * 0.85);
+}
+
+Exolve.prototype.layoutRebusText = function(entry) {
+  const defaultLayout = {
+    fontSize: this.letterSize,
+    lines: [entry],
+    lineHeight: this.letterSize * 1.15,
+  };
+  if (!this.hasRebusCells || entry.length <= 1) {
+    return defaultLayout;
+  }
+  const AVAILABLE_WIDTH = this.cellW - (2.5 * this.BAR_WIDTH);
+  const AVAILABLE_HEIGHT = this.cellH - this.numberStartY - 2;
+  const MIN_FONT = 6;
+  for (let fontSize = this.letterSize; fontSize >= MIN_FONT; fontSize--) {
+    let lines;
+    if (this.measureTextWidthAtSize(entry, fontSize) <= AVAILABLE_WIDTH) {
+      lines = [entry];
+    } else {
+      lines = this.wrapRebusLines(entry, fontSize, AVAILABLE_WIDTH);
+    }
+    const lineHeight = fontSize * 1.15;
+    const totalHeight = ((lines.length - 1) * lineHeight) + fontSize;
+    const maxLineWidth = Math.max(...lines.map(
+        line => this.measureTextWidthAtSize(line, fontSize)));
+    if (maxLineWidth <= AVAILABLE_WIDTH && totalHeight <= AVAILABLE_HEIGHT) {
+      return {fontSize, lines, lineHeight};
+    }
+  }
+  const fontSize = MIN_FONT;
+  const lines = this.wrapRebusLines(entry, fontSize, AVAILABLE_WIDTH);
+  return {fontSize, lines, lineHeight: fontSize * 1.15};
+}
+
+Exolve.prototype.setCellDisplayText = function(gridCell, displayChar) {
+  const layout = this.layoutRebusText(displayChar);
+  const fontSize = layout.fontSize + 'px';
+  gridCell.cellText.style.fontSize = fontSize;
+  while (gridCell.cellText.firstChild) {
+    gridCell.cellText.removeChild(gridCell.cellText.firstChild);
+  }
+  const x = gridCell.cellLeft - this.GRIDLINE + this.lightStartX;
+  gridCell.cellText.setAttributeNS(null, 'x', x);
+  const baselineY = this.rebusTextBaselineY(
+      layout.lines.length, layout.fontSize, layout.lineHeight);
+  gridCell.cellText.setAttributeNS(
+      null, 'y', gridCell.cellTop - this.GRIDLINE + baselineY);
+  if (layout.lines.length <= 1) {
+    const text = document.createTextNode(displayChar);
+    gridCell.cellText.appendChild(text);
+    gridCell.textNode = text;
+    return;
+  }
+  for (let i = 0; i < layout.lines.length; i++) {
+    const tspan = document.createElementNS(
+        'http://www.w3.org/2000/svg', 'tspan');
+    tspan.setAttributeNS(null, 'x', x);
+    if (i > 0) {
+      tspan.setAttributeNS(null, 'dy', layout.lineHeight + 'px');
+    }
+    const text = document.createTextNode(layout.lines[i]);
+    tspan.appendChild(text);
+    gridCell.cellText.appendChild(tspan);
+    if (i == 0) {
+      gridCell.textNode = text;
+    }
+  }
 }
 
 Exolve.prototype.adjustRebusFonts = function() {
@@ -8341,10 +8431,9 @@ Exolve.prototype.adjustRebusFonts = function() {
         continue;
       }
       const displayChar = this.stateToDisplayChar(gridCell.currLetter);
-      const fontSize = this.cellLetterSize(displayChar);
-      gridCell.cellText.style.fontSize = fontSize;
+      this.setCellDisplayText(gridCell, displayChar);
       if (this.atCurr(i, j)) {
-        this.gridInput.style.fontSize = fontSize;
+        this.gridInput.style.fontSize = this.cellLetterSize(displayChar);
       }
     }
   }
@@ -8494,16 +8583,19 @@ Exolve.prototype.displayGrid = function() {
       } else {
         cellText.style.fill = this.colorScheme['light-text'];
       }
-      cellText.style.fontSize = fontSize;
       cellText.setAttributeNS(null, 'class', cellClass);
-
-      const shownLetter = this.stateToDisplayChar(gridCell.currLetter);
-      const text = document.createTextNode(shownLetter);
-      cellText.appendChild(text);
       cellGroup.appendChild(cellText);
 
-      gridCell.textNode = text;
       gridCell.cellText = cellText;
+      const shownLetter = this.stateToDisplayChar(gridCell.currLetter);
+      if (this.hasRebusCells) {
+        this.setCellDisplayText(gridCell, shownLetter);
+      } else {
+        cellText.style.fontSize = fontSize;
+        const text = document.createTextNode(shownLetter);
+        cellText.appendChild(text);
+        gridCell.textNode = text;
+      }
       gridCell.cellRect = cellRect;
 
       cellText.addEventListener('click', activator);
