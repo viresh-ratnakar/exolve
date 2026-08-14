@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.73.1, August 12, 2026';
+  this.VERSION = 'Exolve v1.73.2, August 14, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -109,6 +109,7 @@ function Exolve(puzzleSpec,
   this.offsetTop = 0;
 
   this.viewportDim = 0;
+  this.viewportWidth = 0;
   this.viewportWidthUsable = 0;
   /**
    * For the following, if the corresponding {cell,tiling,box}WHGiven is false,
@@ -6086,6 +6087,7 @@ Exolve.prototype.getViewportDim = function() {
 
 /**
  * Sets the following:
+ *   viewportWidth
  *   viewportWidthUsable
  *   viewportDim
  *   squareDim, squareDimBy2
@@ -6108,8 +6110,8 @@ Exolve.prototype.getViewportDim = function() {
  */
 Exolve.prototype.computeGridSize = function() {
   this.viewportDim = this.getViewportDim();
-  const viewportWidth = this.getViewportWidth();
-  this.viewportWidthUsable = viewportWidth;
+  this.viewportWidth = this.getViewportWidth();
+  this.viewportWidthUsable = this.viewportWidth;
   const bodyStyles = window.getComputedStyle(document.body);
   const marginRight = parseFloat(bodyStyles.marginRight);
   const marginLeft = parseFloat(bodyStyles.marginLeft);

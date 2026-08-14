@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.73.2: August 14, 2026
+
+- Add viewportWidth as an Exolve field to remember (for use by Exet)
+
 ### Minor Version: Exolve v1.73.1: August 12, 2026
 
 - Simplify Home/End implementation to use the `activeCells[]` array, which
