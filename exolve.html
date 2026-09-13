@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.73.2, August 14, 2026';
+  this.VERSION = 'Exolve v1.73.3, September 13, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -6488,9 +6488,9 @@ Exolve.prototype.myStatePart = function(s) {
  * Call updateDisplayAndGetState() and save state in local storage.
  */
 Exolve.prototype.updateAndSaveState = function(notifyIfComplete=true) {
-  let state = this.updateDisplayAndGetState(notifyIfComplete)
+  let state = this.updateDisplayAndGetState(notifyIfComplete);
   for (let a of this.answersList) {
-    state = state + this.STATE_SEP + a.input.value
+    state = state + this.STATE_SEP + a.input.value;
   }
 
   if (this.notTemp) {
@@ -11412,6 +11412,10 @@ Exolve.prototype.createPuzzle = function() {
 
   if (this.customizer) {
     this.customizer(this);
+    /**
+     * The customizer may have set some solutions/answers, so re-save.
+     */
+    this.updateAndSaveState();
   }
   /**
    * Register into the global exolvePuzzles[] registry only at the very end.

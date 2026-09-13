@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.73.3: September 13, 2026
+
+- Add an updateAndSaveState() call after calling customizer(), to save
+  any state potentially set in the customizer.
+
 ### Minor Version: Exolve v1.73.2: August 14, 2026
 
 - Add viewportWidth as an Exolve field to remember (for use by Exet)
