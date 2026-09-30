@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.73.3, September 13, 2026';
+  this.VERSION = 'Exolve v1.73.4, September 30, 2026';
   this.id = '';
 
   this.puzzleText = puzzleSpec;
@@ -304,11 +304,25 @@ function Exolve(puzzleSpec,
   this.scriptLowerCaseRE = null;
 
   /**
-   * Font details for clues text.
    * If fontFamily/fontSize are not set, the CSS rule sets them to serif/16px.
    */
   this.fontFamily = '';
   this.fontSize = '';
+  /**
+   * fontSize overrides (em numbers) for some specific elements.
+   */
+  this.zoomDefaults = {
+    'curr-clue': 1.0,
+    'clue': 1.0,
+    'explanations': 1.0,
+    'preamble': 1.0,
+    'setter': 1.0,
+    'title': 1.5,
+    'phone-title': 1.5
+  };
+  this.zooms = {
+    ...this.zoomDefaults
+  };
 
   this.smartColoring = true;
   this.lightColorScheme = {
@@ -436,7 +450,8 @@ function Exolve(puzzleSpec,
         this.VERSION + ': Show/hide panel with info/help and links to report ' +
         'a bug, manage storage, etc.',
     'tools-msg': `
-       <p>Control keys:</p>
+       <details>
+       <summary>Control keys:</summary>
        <ul>
          <li><b>Tab/Shift-Tab:</b>
              Jump to the next/previous clue.</li>
@@ -460,14 +475,16 @@ function Exolve(puzzleSpec,
              If the puzzle has rebus cells, this is the way to enter
              multiple letters into a single cell.</li>
        </ul>
-       <p>
-         Overwritten letters will briefly be coloured like
-         <b style="background:white;color:${this.colorScheme['overwritten-start']}">this</b>
-         (before fading back to 
-         <b style="background:white;color:${this.colorScheme['light-text']}">this</b>)
-         just to draw your attention so that you can fix any accidental
-         typing errors.
-       </p>`,
+       </details>`,
+    'appearance': 'Appearance',
+    'zoom-msg': 'Apply zoom',
+    'overwritten-msg': `
+       Overwritten letters will briefly be coloured like
+       <b style="background:white;color:${this.colorScheme['overwritten-start']}">this</b>
+       (before fading back to 
+       <b style="background:white;color:${this.colorScheme['light-text']}">this</b>)
+       just to draw your attention so that you can fix any accidental
+       typing errors.`,
     'alts.hover': 'This is an alternative solution to the clue. Clicking on it ' +
         'will set any currently visible letters in it to this variant. If ' +
         'the setter has created an alternative solution group with more than one ' +
@@ -754,6 +771,7 @@ Exolve.prototype.init = function() {
     this.parentElement = document.body;
   }
 
+  this.setCSSVars();
   this.computeGridSize();
 
   const basicHTML = `
@@ -887,6 +905,23 @@ Exolve.prototype.init = function() {
                 <div id="${this.prefix}-tools-msg">
                   ${this.textLabels['tools-msg']}
                 </div>
+                <details>
+                  <summary>${this.textLabels['appearance']}:</summary>
+                  <ul>
+                    <li>${this.textLabels['overwritten-msg']}</li>
+                    <li>
+                      <button class="xlv-small-button" id="${this.prefix}-apply-zoom">
+                        ${this.textLabels['zoom-msg']}
+                      </button>
+                      <select id="${this.prefix}-zoom-what"></select>
+                      <select id="${this.prefix}-zoom-how">
+                        <option value="in">+0.1</option>
+                        <option value="reset">1.0x</option>
+                        <option value="out">-0.1</option>
+                      </select>
+                    </li>
+                  </ul>
+                </details>
                 <p id="${this.prefix}-saving" class="xlv-saving">
                   <span id="${this.prefix}-saving-msg">
                     ${this.notTemp ? this.textLabels['saving-msg'] : ''}
@@ -1209,13 +1244,6 @@ Exolve.prototype.init = function() {
   this.parentElement.insertAdjacentHTML('beforeend', basicHTML);
   this.frame = document.getElementById(this.prefix + '-frame');
 
-  if (this.fontFamily) {
-    this.frame.style.fontFamily = this.fontFamily;
-  }
-  if (this.fontSize) {
-    this.frame.style.fontSize = this.fontSize;
-  }
-
   this.pickColorScheme();
 
   this.titleElt = document.getElementById(this.prefix + '-title');
@@ -1423,6 +1451,8 @@ Exolve.prototype.init = function() {
   document.getElementById(this.prefix + '-manage-storage').addEventListener(
     'click', this.manageStorage.bind(this));
 
+  this.setUpZooming();
+
   this.scratchPad = document.getElementById(this.prefix + '-scratchpad');
   this.scratchPad.style.color = this.colorScheme['imp-text'];
   document.getElementById(this.prefix + '-shuffle').addEventListener(
@@ -1448,6 +1478,38 @@ Exolve.prototype.init = function() {
   const maxlen = this.hasRebusCells ?
                  this.MAX_REBUS_SIZE : (2 * this.langMaxCharCodes);
   this.gridInput.maxLength = '' + maxlen;
+}
+
+Exolve.prototype.setUpZooming = function() {
+  this.zoomWhat = document.getElementById(this.prefix + '-zoom-what');
+  this.zoomHow = document.getElementById(this.prefix + '-zoom-how');
+  this.applyZoom = document.getElementById(this.prefix + '-apply-zoom');
+  let zoomWhatOptions = '';
+  for (const elt in this.zooms) {
+    zoomWhatOptions += `
+      <option value="${elt}">${elt}</option>
+    `;
+  }
+  this.zoomWhat.innerHTML = zoomWhatOptions;
+  this.applyZoom.addEventListener('click', this.handleApplyZoom.bind(this));
+}
+
+Exolve.prototype.handleApplyZoom = function() {
+  const what = this.zoomWhat.value;
+  const cssVar = '--font-size-' + what;
+  const how = this.zoomHow.value;
+  let ems = this.zooms[what];
+  if (how == 'in') {
+    ems += 0.1;
+  } else if (how == 'out') {
+    ems = Math.max(0, ems - 0.1);
+  } else {
+    ems = this.zoomDefaults[what];
+  }
+  this.zooms[what] = ems;
+  const fontSize = '' + ems + 'em';
+  const root = document.documentElement;
+  root.style.setProperty(cssVar, fontSize);
 }
 
 Exolve.prototype.checkPhoniness = function() {
@@ -6086,6 +6148,28 @@ Exolve.prototype.getViewportDim = function() {
 }
 
 /**
+ * Also sets CSS variables (their default values may have been
+ * changed with exolve-options):
+ *   --default-grid-width
+ *   --min-grid-width
+ *   --font-family
+ *   --font-size
+ */
+Exolve.prototype.setCSSVars = function() {
+  const root = document.documentElement;
+  root.style.setProperty('--default-grid-width',
+      '' + this.DEFAULT_GRID_WIDTH + 'px');
+  root.style.setProperty('--min-grid-width',
+      '' + this.MIN_GRID_WIDTH + 'px');
+  if (this.fontFamily) {
+    root.style.setProperty('--font-family', this.fontFamily);
+  }
+  if (this.fontSize) {
+    root.style.setProperty('--font-size', this.fontSize);
+  }
+}
+
+/**
  * Sets the following:
  *   viewportWidth
  *   viewportWidthUsable
@@ -6103,10 +6187,6 @@ Exolve.prototype.getViewportDim = function() {
  *   letterSize, numberSize, arrowSize
  *   cluesBoxWidth
  *   gridPanelWidth
- * Also sets these CSS variables (in case their default values have been
- * changed with exolve-options):
- *   --default-grid-width
- *   --min-grid-width
  */
 Exolve.prototype.computeGridSize = function() {
   this.viewportDim = this.getViewportDim();
@@ -6229,15 +6309,6 @@ Exolve.prototype.computeGridSize = function() {
     this.cluesBoxWidth = this.DEFAULT_GRID_WIDTH;
   }
   console.assert(this.cluesBoxWidth > 0, this.cluesBoxWidth);
-
-  /**
-   * Set CSS variables.
-   */
-  const root = document.documentElement;
-  root.style.setProperty('--default-grid-width',
-      '' + this.DEFAULT_GRID_WIDTH + 'px');
-  root.style.setProperty('--min-grid-width',
-      '' + this.MIN_GRID_WIDTH + 'px');
 }
 
 Exolve.prototype.maybeResizeGrid = function() {

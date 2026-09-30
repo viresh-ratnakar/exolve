@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.73.3, September 13, 2026
+### Version: Exolve v1.73.4, September 30, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1671,7 +1671,8 @@ The list of currently supported options is as follows:
   etc.). You can set this to **inherit** to override Exolve's default of
   **serif**.
 - **`font-size:<fs>`** Set the font-size CSS value (for clues, preamble,
-  etc.). Exolve's default is **16px**.
+  etc.). Exolve's default is **16px**. Some elements can be independently
+  zoomed using [controls in the Exolve section](#zooming-individual-sections).
 - **`grid-background:<c>`** 
   This option is deprecated and ignored now. Please use color-background
   (see above).
@@ -1987,6 +1988,9 @@ Here are all the names of pieces of text that you can relabel:
 | `tools-link`     | Exolve                               |
 | `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, etc.|
 | `tools-msg`      | [Longish list of all control keys, and more...]|
+| `appearance`     | Appearance |
+| `zoom-msg`       | Apply zoom |
+| `overwritten-msg`| [Longish explanation of how an overwritten entry is briefly shown in a different colour...]|
 | `alts.hover`     | This is an alternative solution to the clue. Clicking on it will set any currently visible letters in it to this variant. If the setter has created an alternative solution group with more than one cell (group numbers are shown in superscripts of solution variants) then clicking will set all revealed visible letters in the group to reflect this variant.|
 | `crossword-id`   | Crossword ID                         |
 | `notes`          | Notes                                |
@@ -2431,6 +2435,26 @@ will get replaced by
 ai - eh
 ```
 
+## Zooming individual sections
+
+When presenting a crossword on a screen (e.g., for streaming), it might be
+useful to make certain sections bigger (such as the current clue shown above
+the grid) or smaller. This can be done via a zooms control in the `Exolve`
+section (`Appearance:` subsection) under the grid. For the following elements,
+the `font-size` values (in ems) can be increased or decreased in steps of
+0.1 (or reset back to its default shown below). This setting
+is not saved across reloads.
+
+  |**Element**|**EMs**|
+  |--------------|------------|
+  | clue         | 1.0        |
+  | curr-clue    | 1.0        |
+  | explanations | 1.0        |
+  | preamble     | 1.0        |
+  | setter       | 1.0        |
+  | title        | 1.5        |
+  | phone-title  | 1.1        |
+
 ## Completion event
 
 The software fires a custom JavaScript event (with type `exolve`) under the
@@ -2480,7 +2504,7 @@ the state is restored in the following preferential order, if possible:
 URL as well as in the local storage, then the user is prompted to ask whether
 they want to override the local storage set with the state in the URL.
 
-Clicking on the "Exolve" menu under the crossword grid makes a "Manage local
+Clicking on the `Exolve` menu under the crossword grid makes a "Manage local
 storage" button visible. If you have saved a *lot* of puzzle states, then
 it's possible that you may fill up the local storage in the browser (you'll get
 a warning thereafter when state-saving fails for the first time after opening a

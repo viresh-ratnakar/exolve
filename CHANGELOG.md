@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.73.4: September 30, 2026
+
+- Allow the user to zoom in/out in these specific elements: curr-clue,
+  clue, preamble, setter, title, explanations. These controls can be
+  useful when presenting on screen.
+- Refactor a bit to use some CSS vars.
+- Remove some annoying css outlines.
+
 ### Minor Version: Exolve v1.73.3: September 13, 2026
 
 - Add an updateAndSaveState() call after calling customizer(), to save

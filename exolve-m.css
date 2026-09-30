@@ -9,6 +9,15 @@ See the full license notice in exolve-m.js.
 :root {
   --default-grid-width: 481px;
   --min-grid-width: 325px;
+  --font-family: serif;
+  --font-size: 16px;
+  --font-size-clue: 1.0em;
+  --font-size-curr-clue: 1.0em;
+  --font-size-explanations: 1.0em;
+  --font-size-phone-title: 1.1em;
+  --font-size-preamble: 1.0em;
+  --font-size-setter: 1.0em;
+  --font-size-title: 1.5em;
 }
 
 @media (max-width: 500px) {
@@ -18,8 +27,8 @@ See the full license notice in exolve-m.js.
 }
 .xlv-frame {
   box-sizing: border-box;
-  font-family: serif;
-  font-size: 16px;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
   font-weight: 400;
   letter-spacing: normal !important;
   line-height: normal !important;
@@ -54,6 +63,7 @@ See the full license notice in exolve-m.js.
   margin: 0;
 }
 .xlv-clues-panel {
+  font-size: var(--font-size-clue);
   margin: 0 0 8px 0;
 }
 
@@ -204,20 +214,21 @@ See the full license notice in exolve-m.js.
 .xlv-title {
   text-align: center;
   font-weight: bold;
-  font-size: 1.5em;
+  font-size: var(--font-size-title);
   padding: 2px 6px 4px;
 }
 .xlv-setter {
+  font-size: var(--font-size-setter);
   text-align: center;
   padding: 0 0 12px 0;
 }
 .xlv-preamble-link {
   display: none;
-  font-size: 90%;
+  font-size: 0.9em;
   font-weight: normal;
 }
 .xlv-phone-display .xlv-title {
-  font-size: 110%;
+  font-size: var(--font-size-phone-title);
   display: inline-block;
   padding: 2px 0;
 }
@@ -227,6 +238,7 @@ See the full license notice in exolve-m.js.
   padding: 2px 0 2px 4px;
 }
 .xlv-preamble {
+  font-size: var(--font-size-preamble);
   padding: 0;
 }
 .xlv-phone-display .xlv-preamble {
@@ -250,6 +262,7 @@ See the full license notice in exolve-m.js.
   margin: 4px 0 2px 0;
 }
 .xlv-explanations {
+  font-size: var(--font-size-explanations);
   padding: 10px 0 2px 0;
 }
 .xlv-metadata {
@@ -275,6 +288,7 @@ See the full license notice in exolve-m.js.
   margin: 0;
 }
 .xlv-curr-clue {
+  font-size: var(--font-size-curr-clue);
   font-weight: bold;
   margin: 0;
   overflow-y: auto;
@@ -640,6 +654,10 @@ a.xlv-link:hover {
 .xlv-notes-help {
   padding: 0 0 0 16px !important;
   text-align: left;
+}
+.xlv-frame select:focus-visible,
+.xlv-frame summary {
+  outline: none;
 }
 
 /**
