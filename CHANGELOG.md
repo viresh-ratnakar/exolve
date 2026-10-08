@@ -1,5 +1,34 @@
 # Changelog
 
+### Version: Exolve v1.74: October 8, 2026
+
+- Save a "settings" object in local storage. This will capture some settings
+  that we want to keep sticky across reloads, across crosswords from the same
+  site. This uses the key 'xlvstate:42xlvindex42' (the puzzle id '42xlvindex42'
+  was already a special id that puzzles are not allowed to have as it is
+  used in `exolvePuzzles[]` to save the highest index of a puzzle on the same
+  page).
+- For each sticky setting, we have a default value. Only when the setting
+  value is different from that is it saved in local storage.
+- Make the following printer settings sticky: page size, orientation, margins,
+  inksaver mode. Printer settings are only persisted in local storage upon an
+  attempt to print/create-PDF (just fiddling with the settings in the UI is not
+  enough).
+- Make all the zoom settings added in v1.73.4 sticky.
+- In the saved state, also include puzzle title and setter, and display
+  these (when available) in the 'Manage storage' table.
+- Sticky settings are not used/saved for temp puzzles.
+- For printer page size, make the deault be dependent region (inferred
+  heuristically from time-zone): for North America, 'letter', elsewhere, 'A4'.
+- Show the "nodir clues" heading (idefault: "Other") only when there are other
+  clues (across/down/3d). This if only nodir clues are there in a crossword,
+  the "Other" heading is suppressed (of course, you can still add a specific
+  heading, with `exolve-nodir: Custom Heading`)).
+- Minor expansion of ipuz support in exolve-from-ipuz.js
+  - nodir clues
+  - blocks only given in solution cells
+  - notes become preamble, not explanations!
+
 ### Minor Version: Exolve v1.73.4: September 30, 2026
 
 - Allow the user to zoom in/out in these specific elements: curr-clue,

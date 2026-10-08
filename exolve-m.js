@@ -84,8 +84,35 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.73.4, September 30, 2026';
+  this.VERSION = 'Exolve v1.74, October 8, 2026';
   this.id = '';
+
+  /**
+   * SPECIAL_ID is Used in local storage to store settings, and is used in
+   * exolvePuzzles[] to store the greatest puzzle index for all puzzles on the
+   * same page. We do not allow puzzles to have this id.
+   */
+  this.SPECIAL_ID = '42xlvIndex42';
+  this.STATE_KEY_PREFIX = 'xlvstate:';
+  this.SETTINGS_KEY = this.STATE_KEY_PREFIX + this.SPECIAL_ID;
+
+  /**
+   * We base some settings defaults on location.
+   */
+  this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  this.isAmerica = this.timeZone.startsWith('America/');
+  this.isNorthAmerica = this.isAmerica;
+  if (this.isAmerica) {
+    const overrides = [
+      'Argentina', 'Sao_Paulo', 'Santiago', 'Bogota', 'Lima', 'Caracas',
+      'Montevideo', 'La_Paz'];
+    for (const ovr of overrides) {
+      if (this.timeZone.startsWith('America/' + ovr)) {
+        this.isNorthAmerica = false;
+        break;
+      }
+    }
+  }
 
   this.puzzleText = puzzleSpec;
   this.containerId = containerId;
@@ -736,7 +763,7 @@ Exolve.prototype.destroy = function(deleteState=false) {
     this.windowListeners = {};
   }
   if (deleteState) {
-    window.localStorage.removeItem('xlvstate:' + this.id);
+    window.localStorage.removeItem(this.stateKey());
   }
 }
 
@@ -748,15 +775,14 @@ Exolve.prototype.init = function() {
   this.parseOverall();
   this.parseRelabel();
 
-  const SPECIAL_ID = '42xlvIndex42';
-  if (this.id && this.id == SPECIAL_ID) {
+  if (this.id && this.id == this.SPECIAL_ID) {
     this.throwErr('Puzzle id cannot be: ' + this.id);
   }
   if (!exolvePuzzles) {
     exolvePuzzles = {};
-    exolvePuzzles[SPECIAL_ID] = 1;
+    exolvePuzzles[this.SPECIAL_ID] = 1;
   }
-  this.index = exolvePuzzles[SPECIAL_ID]++;
+  this.index = exolvePuzzles[this.SPECIAL_ID]++;
   this.prefix = 'xlv' + this.index;
 
   if (!this.containerId) {
@@ -771,7 +797,6 @@ Exolve.prototype.init = function() {
     this.parentElement = document.body;
   }
 
-  this.setCSSVars();
   this.computeGridSize();
 
   const basicHTML = `
@@ -1451,8 +1476,6 @@ Exolve.prototype.init = function() {
   document.getElementById(this.prefix + '-manage-storage').addEventListener(
     'click', this.manageStorage.bind(this));
 
-  this.setUpZooming();
-
   this.scratchPad = document.getElementById(this.prefix + '-scratchpad');
   this.scratchPad.style.color = this.colorScheme['imp-text'];
   document.getElementById(this.prefix + '-shuffle').addEventListener(
@@ -1478,6 +1501,10 @@ Exolve.prototype.init = function() {
   const maxlen = this.hasRebusCells ?
                  this.MAX_REBUS_SIZE : (2 * this.langMaxCharCodes);
   this.gridInput.maxLength = '' + maxlen;
+  this.setUpZooming();
+
+  this.initAndRestoreSettings();
+  this.setCSSVars();
 }
 
 Exolve.prototype.setUpZooming = function() {
@@ -1506,10 +1533,12 @@ Exolve.prototype.handleApplyZoom = function() {
   } else {
     ems = this.zoomDefaults[what];
   }
+  ems = Math.round((ems + Number.EPSILON) * 10) / 10;
   this.zooms[what] = ems;
   const fontSize = '' + ems + 'em';
   const root = document.documentElement;
   root.style.setProperty(cssVar, fontSize);
+  this.saveSettingsList([[cssVar, fontSize]]);
 }
 
 Exolve.prototype.checkPhoniness = function() {
@@ -6121,11 +6150,14 @@ Exolve.prototype.displayClues = function() {
   }
   if (this.hasNodirClues) {
     this.nodirPanel.parentElement.style.display = '';
-    if (!this.nodirHeading) {
+    if (!this.nodirHeading &&
+        (this.hasAcrossClues || this.hasDownClues || this.hasZ3dClues)) {
       this.nodirHeading = this.textLabels['nodir-label'];
     }
-    document.getElementById(this.prefix + '-nodir-label').
-      insertAdjacentHTML('beforeend', this.nodirHeading);
+    if (this.nodirHeading) {
+      document.getElementById(this.prefix + '-nodir-label').
+        insertAdjacentHTML('beforeend', this.nodirHeading);
+    }
   }
 }
 
@@ -6166,6 +6198,14 @@ Exolve.prototype.setCSSVars = function() {
   }
   if (this.fontSize) {
     root.style.setProperty('--font-size', this.fontSize);
+  }
+  /** Set css-var values from savableSettings */
+  for (const key in this.savableSettings) {
+    const setting = this.savableSettings[key];
+    if (setting.type != 'css-var') {
+      continue;
+    }
+    root.style.setProperty(key, setting.value);
   }
 }
 
@@ -6522,9 +6562,15 @@ Exolve.prototype.updateAndSaveState = function(notifyIfComplete=true) {
         timestamp: Date.now(),
         state: state,
         notes: this.notes,
+        details: {
+          title: this.title,
+          setter: this.setter
+        }
       });
       window.localStorage.setItem(this.stateKey(), lsVal);
     } catch (err) {
+      console.log(err);
+      console.log('Failed to save state');
       if (!this.warnedAboutLocalStorage) {
         alert('Could not save state in local storage! Click on ' +
               'Tools > Manage local storage to delete state from ' +
@@ -6645,7 +6691,7 @@ Exolve.prototype.parseState = function(state) {
 }
 
 Exolve.prototype.stateKey = function() {
-  return 'xlvstate:' + this.id;
+  return this.STATE_KEY_PREFIX + this.id;
 }
 
 // Restore state from local storage or cookie (or location.hash).
@@ -10057,12 +10103,15 @@ Exolve.prototype.deleteStorage = function(id, timestamp) {
   }
   document.getElementById(this.prefix + '-storage-list').style.display = 'none';
   if (id) {
-    window.localStorage.removeItem('xlvstate:' + id);
+    window.localStorage.removeItem(this.STATE_KEY_PREFIX + id);
   } else {
     const keysToDelete = [];
     for (let idx = 0; idx < window.localStorage.length; idx++) {
       let key = window.localStorage.key(idx)
-      if (!key.startsWith('xlvstate:')) {
+      if (!key.startsWith(this.STATE_KEY_PREFIX)) {
+        continue;
+      }
+      if (key == this.SETTINGS_KEY) {
         continue;
       }
       let lsVal;
@@ -10091,7 +10140,10 @@ Exolve.prototype.manageStorage = function(e) {
     let bytes = 0;
     for (let idx = 0; idx < window.localStorage.length; idx++) {
       let key = window.localStorage.key(idx)
-      if (!key.startsWith('xlvstate:')) {
+      if (!key.startsWith(this.STATE_KEY_PREFIX)) {
+        continue;
+      }
+      if (key == this.SETTINGS_KEY) {
         continue;
       }
       bytes += key.length;
@@ -10105,7 +10157,8 @@ Exolve.prototype.manageStorage = function(e) {
       }
       saved.push({
         timestamp: lsVal.timestamp,
-        id: key.substr(9)
+        id: key.substr(9),
+        details: lsVal.details ?? {}
       });
     }
     b.innerText = this.textLabels['manage-storage-close'] +
@@ -10113,10 +10166,15 @@ Exolve.prototype.manageStorage = function(e) {
     saved.sort(function(a, b) {return b.timestamp - a.timestamp;});
     let html = '<table>'
     let x = 0
-    for (let s of saved) {
+    for (const s of saved) {
+      let id = s.details.title ?? '';
+      id += s.details.setter ? (' by ' + s.details.setter) : '';
+      id = id.trim();
+      if (id) id += '<br>';
+      id += s.id;
       html += `
       <tr>
-        <td>${s.id}</td>
+        <td>${id}</td>
         <td><button class="xlv-small-button"
                title="Delete this puzzle's saved state"
                id="${this.prefix}-delstor-${x}">
@@ -10148,6 +10206,108 @@ Exolve.prototype.manageStorage = function(e) {
   }
 }
 
+Exolve.prototype.saveSettingsList = function(kvArray) {
+  for (const kv of kvArray) {
+    const key = kv[0];
+    if (!this.savableSettings.hasOwnProperty(key)) {
+      continue;
+    }
+    this.savableSettings[key].value = kv[1];
+  }
+  this.saveSettings();
+}
+
+Exolve.prototype.saveSettings = function() {
+  if (!this.notTemp) {
+    return;
+  }
+  const settings = {};
+  for (const key in this.savableSettings) {
+    const setting = this.savableSettings[key];
+    if (setting.value != setting.default) {
+      settings[key] = setting.value;
+    }
+  }
+  try {
+    const lsVal = JSON.stringify(settings);
+    window.localStorage.setItem(this.SETTINGS_KEY, lsVal);
+  } catch (err) {
+    console.log(err);
+    console.log('Failed to save settings');
+  }
+}
+
+Exolve.prototype.savePrintSettings = function() {
+  const settingsList = [];
+  for (const key in this.savableSettings) {
+    const setting = this.savableSettings[key];
+    if (setting.type != 'input' ||
+        !this.savablePrintSettings.hasOwnProperty(key)) {
+      continue;
+    }
+    setting.value = setting.input[setting.attribute];
+    settingsList.push([key, setting.value]);
+  }
+  this.saveSettingsList(settingsList);
+}
+
+Exolve.prototype.initAndRestoreSettings = function() {
+  const defaultPageSize = this.isNorthAmerica ? 'letter' : 'A4';
+  this.savablePrintSettings = {
+    'page-size': { default: defaultPageSize, type: 'input', attribute: 'value' },
+    'page-margins': { default: '0.5 0.5 0.5 0.5', type: 'input', attribute: 'value' },
+    'print-orientation': { default: 'portrait', type: 'input', attribute: 'value' },
+    'print-inksaver': { default: false, type: 'input', attribute: 'checked' }
+  };
+  this.savableSettings = { ...this.savablePrintSettings };
+  for (const zoomType in this.zoomDefaults) {
+    const key = '--font-size-' + zoomType;
+    const val = '' + this.zoomDefaults[zoomType] + 'em';
+    this.savableSettings[key] = { default: val, type: 'css-var' };
+  }
+  for (const key in this.savableSettings) {
+    const setting = this.savableSettings[key];
+    setting.value = setting.default;
+  }
+  this.restoreSettings();
+  for (const key in this.savableSettings) {
+    const setting = this.savableSettings[key];
+    if (setting.type != 'input') {
+      continue;
+    }
+    const eltId = this.prefix + '-' + key;
+    setting.input = document.getElementById(eltId);
+    if (!setting.input) {
+      this.throwErr('Missing settings input element with id: ' + eltId);
+    }
+    setting.input[setting.attribute] = setting.value;
+  }
+  /** setting.type == 'css-var' will get applied in setCSSVars() */
+}
+
+Exolve.prototype.restoreSettings = function() {
+  if (!this.notTemp) {
+    return;
+  }
+  let savedSettings = null;
+  const savedSettingsJSON = window.localStorage.getItem(this.SETTINGS_KEY);
+  if (savedSettingsJSON) {
+    try {
+      savedSettings = JSON.parse(savedSettingsJSON);
+    } catch (err) {
+      savedSettings = null;
+    }
+  }
+  if (!savedSettings) {
+    return;
+  }
+  for (const key in this.savableSettings) {
+    if (savedSettings.hasOwnProperty(key)) {
+      this.savableSettings[key].value = savedSettings[key];
+    }
+  }
+}
+
 /**
  * mode can be one of: 'page' 'crossword' 'wysiwyg'
  */
@@ -10174,58 +10334,59 @@ Exolve.prototype.printNow = function(mode) {
 }
 
 Exolve.prototype.handleAfterPrint = function() {
-  if (this.printingChanges) {
-    this.printAsIs = false;
-    this.printOnlyCrossword = false;
-    if (this.printingChanges.inksaver) {
-      this.changeBG(this.colorScheme['background']);
-    }
-    if (this.printingChanges.hiddenDisplays) {
-      for (let display in this.printingChanges.hiddenDisplays) {
-        const elts = this.printingChanges.hiddenDisplays[display];
-        for (let elt of elts) {
-          elt.style.display = display;
-        }
+  if (!this.printingChanges) {
+    return;
+  }
+  this.printAsIs = false;
+  this.printOnlyCrossword = false;
+  if (this.printingChanges.inksaver) {
+    this.changeBG(this.colorScheme['background']);
+  }
+  if (this.printingChanges.hiddenDisplays) {
+    for (let display in this.printingChanges.hiddenDisplays) {
+      const elts = this.printingChanges.hiddenDisplays[display];
+      for (let elt of elts) {
+        elt.style.display = display;
       }
-    }
-    if (this.printingChanges.moves) {
-      // Undo the moves in reverse order.
-      for (let i = this.printingChanges.moves.length - 1; i >= 0; i--) {
-        const move = this.printingChanges.moves[i];
-        move.target.insertBefore(move.elem, move.sibling);
-      }
-    }
-    if (this.printingChanges.extras) {
-      for (let extra of this.printingChanges.extras) {
-        extra.remove();
-      }
-    }
-    if (this.printingChanges.explnHtml) {
-      this.explanations.innerHTML = this.printingChanges.explnHtml;
-    }
-    this.setColumnLayout();
-    this.recolourCells();
-    this.redisplayNinas();
-
-    // Restore active clue/cells.
-    if (this.printingChanges.usingGnav) {
-      this.currDir = this.printingChanges.currDir;
-      this.activateCell(this.printingChanges.currRow,
-                        this.printingChanges.currCol);
-    } else {
-      this.cnavTo(this.printingChanges.currClueIndex);
-    }
-    if (this.printingChanges.undidPhoneTweaks) {
-      this.redoPhoneTweaks();
-    }
-    if (this.printingChanges.hidPhoneKB) {
-      this.phoneKB.show();
-    }
-
-    if (this.printingChanges.pageYOffset) {
-      window.scrollTo({top: this.printingChanges.pageYOffset});
     }
   }
+  if (this.printingChanges.moves) {
+    // Undo the moves in reverse order.
+    for (let i = this.printingChanges.moves.length - 1; i >= 0; i--) {
+      const move = this.printingChanges.moves[i];
+      move.target.insertBefore(move.elem, move.sibling);
+    }
+  }
+  if (this.printingChanges.extras) {
+    for (let extra of this.printingChanges.extras) {
+      extra.remove();
+    }
+  }
+  if (this.printingChanges.explnHtml) {
+    this.explanations.innerHTML = this.printingChanges.explnHtml;
+  }
+  this.setColumnLayout();
+  this.recolourCells();
+  this.redisplayNinas();
+
+  // Restore active clue/cells.
+  if (this.printingChanges.usingGnav) {
+    this.currDir = this.printingChanges.currDir;
+    this.activateCell(this.printingChanges.currRow,
+                      this.printingChanges.currCol);
+  } else {
+    this.cnavTo(this.printingChanges.currClueIndex);
+  }
+  if (this.printingChanges.undidPhoneTweaks) {
+    this.redoPhoneTweaks();
+  }
+  if (this.printingChanges.hidPhoneKB) {
+    this.phoneKB.show();
+  }
+  if (this.printingChanges.pageYOffset) {
+    window.scrollTo({top: this.printingChanges.pageYOffset});
+  }
+  this.savePrintSettings();
   this.printingChanges = null;
 }
 

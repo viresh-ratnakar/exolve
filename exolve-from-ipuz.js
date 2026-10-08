@@ -30,8 +30,9 @@ https://github.com/viresh-ratnakar/exolve
  * crossword format (http://ipuz.org/crossword) to a string in the Exolve
  * format and returns it. Upon any error, this returns the empty string.
  *
+ * Clue directions other than Across and Down are treated as "nodir".
+ *
  * The following ipuz features are currently unsupported:
- * - Clue directions other than Across and Down.
  * - Omitted cells (they get rendered as black cells).
  */
 exolveFromIpuz = function(ipuz, fname='') {
@@ -54,6 +55,8 @@ exolveFromIpuz = function(ipuz, fname='') {
     return '';
   }
   const id = ipuz['uniqueid'] || '';
+
+  const specialChars = new Set;
 
   let exolve = `
     exolve-begin
@@ -82,20 +85,20 @@ exolveFromIpuz = function(ipuz, fname='') {
     exolve += `
       exolve-copyright: ${ipuz['copyright']}`
   }
-  if (ipuz['intro']) {
+  if (ipuz['intro'] || ipuz['notes']) {
+    let text = ipuz['intro'] || '';
+    if (ipuz['notes'] && text && (text != ipuz['notes'])) {
+      text += '<br>\n';
+    }
+    text += ipuz['notes'] || '';
     exolve += `
       exolve-preamble:
-        ${ipuz['intro']}`
+        ${text}`;
   }
-  if (ipuz['explanation'] || ipuz['notes']) {
-    let text = ipuz['explanation'] || ''
-    if (ipuz['notes'] && text) {
-      text += '<br>\n'
-    }
-    text += ipuz['notes'] || ''
+  if (ipuz['explanation']) {
     exolve += `
       exolve-explanations:
-        ${text}`
+        ${ipuz['explanation']}`
   }
   exolve += `
       exolve-grid:`
@@ -138,6 +141,9 @@ exolveFromIpuz = function(ipuz, fname='') {
       gridCell.hasCircle =
         (ipuzCell.style && ipuzCell.style.shapebg &&
          ipuzCell.style.shapebg == 'circle')
+      if (ipuzCell.fixed) {
+        gridCell.prefill = true;
+      }
       if (ipuzCell.style && ipuzCell.style.barred) {
         let bars = ipuzCell.style.barred
         for (let x = 0; x < bars.length; x++) {
@@ -176,7 +182,12 @@ exolveFromIpuz = function(ipuz, fname='') {
         }
         if (ipuzSolCell.value !== null && ipuzSolCell.value != empty &&
             typeof ipuzSolCell.value !== 'object') {
-          gridCell.solution = ipuzSolCell.value;
+          if (ipuzSolCell.value == block) {
+            // TODO: we assume non-diagramless for this.
+            gridCell.isLight = false
+          } else {
+            gridCell.solution = ipuzSolCell.value;
+          }
         }
       }
     }
@@ -209,8 +220,8 @@ exolveFromIpuz = function(ipuz, fname='') {
     } else if (ldir == 'down') {
       dir = 'D';
     } else {
-      console.log('ipuz: unsupported direction: ' + idir);
-      return '';
+      dir = 'X';
+      ldir = 'nodir';
     }
     exolve += `
       exolve-${ldir}:`;
@@ -224,7 +235,23 @@ exolveFromIpuz = function(ipuz, fname='') {
       }
       const clueText = [];
       if (objClue.number) {
-        clueText.push(objClue.number);
+        if (dir != 'X') {
+          clueText.push(objClue.number);
+        } else {
+          /**
+           * Special case this common convention.
+           */
+          if ((!objClue.clue || objClue.clue == ':') && !objClue.continued) {
+            if (exolve.endsWith('exolve-nodir:')) {
+              exolve += ` ${objClue.number}`;
+            } else {
+              exolve += `
+              --- ${objClue.number}`;
+            }
+            continue;
+          }
+          clueText.push('[' + objClue.number + ']');
+        }
       } else if (objClue.label) {
         clueText.push('[' + objClue.label + ']');
       }
@@ -265,6 +292,10 @@ exolveFromIpuz = function(ipuz, fname='') {
       exolve += `
           ${clueText.join(' ')}`;
     }
+  }
+  if (ipuz['fakeClues'] || ipuz['fakeclues']) {
+    exolve += `
+      exolve-option: hide-inferred-numbers`
   }
   exolve += '\n    exolve-end\n';
   return exolve;

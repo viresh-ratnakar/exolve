@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.73.4, September 30, 2026
+### Version: Exolve v1.74, October 8, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -1984,7 +1984,7 @@ Here are all the names of pieces of text that you can relabel:
 | `3d-ac-label`     | Across & Back                       |
 | `3d-aw-label`     | Away & Towards                      |
 | `3d-dn-label`     | Down & Up                           |
-| `nodir-label`    | Other                                |
+| `nodir-label`    | Other [omitted if only nodir clues are present]|
 | `tools-link`     | Exolve                               |
 | `tools-link.hover` | Crossword software: [VERSION]: Show/hide panel with info/help and links to report a bug, manage storage, etc.|
 | `tools-msg`      | [Longish list of all control keys, and more...]|
@@ -2442,8 +2442,8 @@ useful to make certain sections bigger (such as the current clue shown above
 the grid) or smaller. This can be done via a zooms control in the `Exolve`
 section (`Appearance:` subsection) under the grid. For the following elements,
 the `font-size` values (in ems) can be increased or decreased in steps of
-0.1 (or reset back to its default shown below). This setting
-is not saved across reloads.
+0.1 (or reset back to its default shown below). All of these zoom settings are
+"sticky" (see [`Sticky settings`](#sticky-settings)).
 
   |**Element**|**EMs**|
   |--------------|------------|
@@ -2510,6 +2510,31 @@ it's possible that you may fill up the local storage in the browser (you'll get
 a warning thereafter when state-saving fails for the first time after opening a
 puzzle). You can then choose to free up local storage by deleting the states of
 old puzzles, after clicking on this button.
+
+## Sticky settings
+Some of the settings are "sticky"—they persist across page reloads and across
+loading different crosswords from the same site. These are:
+
+- Printing settings:
+  - Page size
+  - Orientation
+  - Margins
+  - Inksaver mode
+- Element zooming CSS vars (all are in "ems", zooming relative to parent):
+  - `--font-size-clue`
+  - `--font-size-curr-clue`
+  - `--font-size-explanations`
+  - `--font-size-preamble`
+  - `--font-size-setter`
+  - `--font-size-title`
+  - `--font-size-phone-title`
+
+Printing settings are persisted only after the print button is clicked (i.e.,
+if you just change the page size from the print settings panel but don't
+actually print, then that choice will not stick).
+
+Sticky settings are not restored/saved for "temporary" puzzles (created with
+`notTemp = true` in the constructor).
 
 ## Serving and sharing
 
@@ -2983,11 +3008,12 @@ print, and then print.
 You can create PDF files for your crosswords by "printing to file" in most
 browsers.
 
-You can pick the page size (such as 'Letter' or 'A4'), the margins, and the
-page orientation (portrait or landscape) in the printing settings section.
-As of May 2022, you still need to pick the same page size in the printer's
-settings that open up when you print, if you use a paper size that's not the
-current choice in the printer's settings.
+You can pick the page size (such as 'Letter' or 'A4': defaults to one of these
+two, using a timezone-based heuristic), the margins, and the page orientation
+(portrait or landscape) in the printing settings section.  As of May 2022,
+you still need to pick the same page size in the printer's settings that open
+up when you print, if you use a paper size that's not the current choice in the
+printer's settings.
 
 The printed puzzle is laid out in a newspaper-like multi-column layout.
 If not all the puzzle entries have been filled in, then the printing is done in
@@ -3076,6 +3102,11 @@ Additionally, from this panel, you have three buttons for printing:
   (if Exolve's reformatting plays havoc, overlapping with the surrounding
   content, for example), then you can click on "Print wysiwyg". Note that this
   completely ignores any other Exolve print settings such as font-size.
+
+### Sticky printing settings
+A few of the printing settings (such as page size) are "sticky"—they persist
+across page reloads and across loading different crosswords from the same site.
+See [`Sticky settings`](#sticky-settings) for the full list.
 
 ### Printing layout algorithm details
 
