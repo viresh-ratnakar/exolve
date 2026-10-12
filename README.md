@@ -3124,7 +3124,7 @@ Additionally, from this panel, you have three buttons for printing:
 
 ### Printing concise annotations
 When printing clues that have been revealed, you can control the verbosity.
-This is useful because many publications except a solution submission with
+This is useful because many publications expect a solution submission with
 concise annotations only. Consider the following clue:
 
 ```
