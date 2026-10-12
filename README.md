@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.74, October 8, 2026
+### Version: Exolve v1.74.1, October 12, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -761,10 +761,22 @@ explaining how a clue works or for providing hints. Any text located after the
 enum in a clue is treated as annotation. The annotation is displayed when the
 solver clicks on the "Reveal all" button or on the "Reveal this" button when
 that clue is the current clue. Example:
+
 ```
   exolve-across:
-    28 Replace bottles containing questionable medicine (7) Def: questionable medicine. Hidden word: (-re)PLACE BO(-ttles).
+    28 Replace bottles containing questionable medicine (7) Hidden answer {... containing}: (-re)PLACE BO(-ttles).
 ```
+
+The annotation part typically includes all wordplay types used, along with
+the indicator words and an illustration of the actual wordplay. While there's
+no standard format for this, some conventions are often used, such as `*` for
+indicating an anagram. One convention that I use is to wrap the indicator words
+within curly braces. This convention is used in creating concise versions of
+annos for printing (see
+[`Printing concise annotations`](#printing-concise-annotations)), which
+exclude indicator words. Of course, you can wrap any other kinds of details
+of your choice within curly braces, and these will be omitted from concise
+versions for printing.
 
 If a clue does not provide its anno, the software still creates a minimal anno
 consisting of just the solution text (that it infers from the grid and the
@@ -820,7 +832,7 @@ You can also decorate sub-phrases in the clue with underlines, different styles,
 colours, backgrounds, etc., by enclosing specific substrings with the special
 markers, `~{` and `}~`, like this:
 ```
-    28 Replace bottles containing ~{questionable medicine}~ (7) Hidden word: (-re)PLACE BO(-ttles).
+    28 Replace bottles containing ~{questionable medicine}~ (7) Hidden answer {... containing}: (-re)PLACE BO(-ttles).
 ```
 The default styling for such "in-clue annotations" is to underline the
 text with a "darkgreen" underline. This styling will get revealed when the
@@ -831,13 +843,17 @@ You can apply different in-clue annotation styles (instead of underlining),
 by providing an HTML element class name, like this:
 <!-- {% raw %} -->
 ```
-    28 ~{{xlv-blue}Replace}~ bottles ~{{my-style}containing}~ ~{questionable medicine}~ (7) Hidden word: (-re)PLACE BO(-ttles).
+    28 ~{{xlv-blue}Replace}~ bottles ~{{my-style}containing}~ ~{questionable medicine}~ (7) Hidden answer {... containing}: (-re)PLACE BO(-ttles).
 ```
 <!-- {% endraw %} -->
 Here, "xlv-blue" is a class name that Exolve has set up in its CSS (some others
 are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
+
+#### Concise annotation in printing
+When printing a fully revealed clue, you can control how the verbosity of the
+printed annotation. See [`Printing concise annotations`](#printing-concise-annotations).
 
 #### Concise versions of long clues
 If a crossword has some really long clues, then you can choose to provide
@@ -3083,6 +3099,9 @@ with various settings for printing or creating PDFS. These include:
   ignored when printing in wysiwyg mode.
 - Inksaver. Set this option to print using a chequered pattern instead of a
   complete fill as the background colour for blocks.
+- Anno printing mode: this is a menu that controls the verbosity of
+  printed annotations. See
+  [`Printing concise annotations`](#printing-concise-annotations) below.
 - Include QR code. Use this option to include a QR code. The QR code will
   use the URL of the current web page, but you can override that, and you
   can also override the call to action, which defaults to "Solve online".
@@ -3102,6 +3121,28 @@ Additionally, from this panel, you have three buttons for printing:
   (if Exolve's reformatting plays havoc, overlapping with the surrounding
   content, for example), then you can click on "Print wysiwyg". Note that this
   completely ignores any other Exolve print settings such as font-size.
+
+### Printing concise annotations
+When printing clues that have been revealed, you can control the verbosity.
+This is useful because many publications except a solution submission with
+concise annotations only. Consider the following clue:
+
+```
+28 Replace bottles containing ~{questionable medicine}~ (7) Hidden answer {... containing}: (-re)PLACE BO(-ttles).
+```
+
+The following table shows the various levels of printing verbosity:
+
+| Anno printing mode               | Printed clue |
+|----------------------------------|--------------|
+| Clue + solution + anno (default) | 28 Replace bottles containing <b><u>questionable medicine</u></b> (7) PLACEBO. Hidden answer {... containing}: (-re)PLACE BO(-ttles). |
+| Solution + anno + def | 28 PLACEBO. Hidden answer {... containing}: (-re)PLACE BO(-ttles). <b><u>questionable medicine</u></b> |
+| Solution + anno | 28 PLACEBO. Hidden answer {... containing}: (-re)PLACE BO(-ttles). |
+| Solution + concise anno | 28 PLACEBO. Hidden answer: (-re)PLACE BO(-ttles). |
+| Concise anno | 28 Hidden answer: (-re)PLACE BO(-ttles). |
+
+Note that concise versions of annotations are created by removing any details
+wrapped within curly braces `{...}`.
 
 ### Sticky printing settings
 A few of the printing settings (such as page size) are "sticky"—they persist

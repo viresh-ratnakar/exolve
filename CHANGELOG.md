@@ -1,5 +1,19 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.1: October 12, 2026
+
+- Add some half-page page sizes for printing: half-{A4,Letter,Legal}.
+- Add a menu to choose to print concise annos for clues that have beens
+  revealed. The following progressively more concise options are
+  presented:
+  - Full clue + solution + anno
+  - Solution + anno + def(s)
+  - Solution + anno
+  - Solution + concise anno
+  - Concise anno
+  The "concise anno" is a version of the anno in which any part wrapped
+  in `{...}` is not shown.
+
 ### Version: Exolve v1.74: October 8, 2026
 
 - Save a "settings" object in local storage. This will capture some settings

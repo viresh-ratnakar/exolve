@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74, October 8, 2026';
+  this.VERSION = 'Exolve v1.74.1, October 12, 2026';
   this.id = '';
 
   /**
@@ -620,6 +620,9 @@ function Exolve(puzzleSpec,
     'print-page-wysiwyg': 'Print wysiwyg',
     'print-page-wysiwyg.hover': 'Print the whole page without reformatting the crossword (none of the settings above are used).',
 
+    'print-include-if-visible': 'Include if visible',
+    'print-anno-mode': 'Anno printing mode',
+    'print-anno-mode.hover': 'For clues with solution visible, you can print various concise versions instead of the full clue + solution + annotation',
     'print-title': 'Title',
     'print-setter': 'Setter',
     'print-preamble': 'Preamble',
@@ -993,6 +996,9 @@ Exolve.prototype.init = function() {
                       <option value="6in 9in">Book: 6in x 9in</option>
                       <option value="legal">Legal: 8.5in x 14in</option>
                       <option value="ledger">Ledger: 11in x 17in</option>
+                      <option value="half-letter">Half Letter: 8.5in x 5.5in</option>
+                      <option value="half-A4">Half A4: 210mm x 148.5mm</option>
+                      <option value="half-legal">Half Legal: 8.5in x 7in</option>
                     </select>
                     <select name="${this.prefix}-print-orientation" id="${this.prefix}-print-orientation">
                       <option value="portrait">${this.textLabels['print-portrait']}</option>
@@ -1015,7 +1021,7 @@ Exolve.prototype.init = function() {
                     </input>
                   </div>
                   <div>
-                    Include if visible:
+                    ${this.textLabels['print-include-if-visible']}:
                     <table>
                     <tr>
                     <td>
@@ -1058,6 +1064,16 @@ Exolve.prototype.init = function() {
                     </td>
                     </tr>
                     </table>
+                  </div>
+                  <div title="${this.textLabels['print-anno-mode.hover']}">
+                    ${this.textLabels['print-anno-mode']}:
+                    <select id="${this.prefix}-print-anno-mode">
+                      <option value="0">Clue + solution + anno</option>
+                      <option value="1">Solution + anno + def</option>
+                      <option value="2">Solution + anno</option>
+                      <option value="3">Solution + concise anno</option>
+                      <option value="4">Concise anno</option>
+                    </select>
                   </div>
                   <div>
                     <table>
@@ -5774,6 +5790,52 @@ Exolve.prototype.renderLongClue = function(concise, full) {
     '<span class="xlv-long-clue">' + full + '</span>';
 }
 
+/**
+ * Returns html, wrapping parts in {...} with
+ * <span class="xlv-anno-details">...</span>
+ * If what follows is non-space-needing-punctuation, then spaces
+ * before and after are also taken into the span.
+ */
+Exolve.prototype.renderAnnoSpan = function(anno) {
+  let html = '';
+  let idx = anno.indexOf('{');
+  let endIdx = 0;
+  /**
+   * Punctuations that do not need preceding space, plus "{", the start of the
+   * next anno-detail.
+   */
+  const punct = new Set([',', '.', ':', ';', '?', '!', ')', ']', '{']);
+  while (idx >= 0) {
+    const oldEndIdx = endIdx;
+    endIdx = anno.indexOf('}', idx + 1);
+    if (endIdx < 0) {
+      endIdx = idx;
+      break;
+    }
+    endIdx++;
+    let nextNonSpaceIndex = endIdx;
+    while (nextNonSpaceIndex < anno.length &&
+           anno.charAt(nextNonSpaceIndex) == ' ') {
+      nextNonSpaceIndex++;
+    }
+    if (nextNonSpaceIndex < anno.length &&
+        punct.has(anno.charAt(nextNonSpaceIndex))) {
+      while (idx > 1 && idx > oldEndIdx &&
+             anno.charAt(idx - 1) == ' ') {
+        idx--;
+      }
+      endIdx = nextNonSpaceIndex;
+    }
+    html += anno.substring(oldEndIdx, idx);
+    html += '<span class="xlv-anno-details">' +
+            anno.substring(idx, endIdx) +
+            '</span>';
+    idx = anno.indexOf('{', endIdx);
+  }
+  html += anno.substr(endIdx);
+  return html;
+}
+
 Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
   let clueText = clue.clue.trim();
   if (clueText.endsWith('*')) {
@@ -5789,7 +5851,8 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
   if (clue.concise) {
     clueText = this.renderLongClue(clue.concise, clueText);
   }
-  let html = '';
+  /** All non-in-clue-anno text is wrapped in xlv-clue-text-raw spans */
+  let html = '<span class="xlv-clue-text-raw">';
   let idx = clueText.indexOf('~{');
   let endIdx = 0;
   while (idx >= 0) {
@@ -5806,12 +5869,14 @@ Exolve.prototype.renderClueSpan = function(clue, elt, inCurrClue=false) {
         skip = close + 1 - idx;
       }
     }
-    html += '<span class="xlv-in-clue-anno">' +
-            clueText.substring(idx + skip, endIdx) + '</span>';
+    html += '</span><span class="xlv-in-clue-anno">' +
+            clueText.substring(idx + skip, endIdx) +
+            '</span><span class="xlv-clue-text-raw">';
     endIdx += 2;
     idx = clueText.indexOf('~{', endIdx);
   }
   html += clueText.substr(endIdx);
+  html += '</span">';
   elt.innerHTML = html;
   if (inCurrClue) {
     return;
@@ -6098,6 +6163,7 @@ Exolve.prototype.displayClues = function() {
       clueCol.classList.add('xlv-clue-indent');
     }
     const clueSpan = document.createElement('span');
+    clueSpan.className = 'xlv-clue-text';
     this.renderClueSpan(theClue, clueSpan);
     clueCol.appendChild(clueSpan);
     theClue.clueSpan = clueSpan;
@@ -6113,12 +6179,12 @@ Exolve.prototype.displayClues = function() {
       });
     }
     const annoSpan = document.createElement('span');
-    annoSpan.setAttributeNS(null, 'class', 'xlv-anno-text');
+    annoSpan.className = 'xlv-anno-text';
     annoSpan.style.color = this.colorScheme['anno'];
     annoSpan.style.display = 'none';
     if (theClue.anno || theClue.dispSol) {
       annoSpan.innerHTML = ' ' + theClue.dispSol +
-                           '<span>' + theClue.anno + '</span>';
+          '<span>' + this.renderAnnoSpan(theClue.anno) + '</span>';
       this.revelationList.push(annoSpan);
     }
     clueCol.appendChild(annoSpan);
@@ -10533,9 +10599,10 @@ Exolve.prototype.getPrintSettings = function() {
 
   const page = (pageSizeElt ? pageSizeElt.value : 'letter') || 'letter';
 
-  let widthIn = ((page == 'letter' || page == 'legal') ? 8.5 :
+  let widthIn = ((page == 'letter' || page == 'legal' ||
+                  page == 'half-letter' || page == 'half-legal') ? 8.5 :
                   ((page == '6in 9in') ? 6.0 :
-                  ((page == 'A4') ? 210.0/25.4 :
+                  ((page == 'A4' || page == 'half-A4') ? 210.0/25.4 :
                   ((page == 'A3') ? 297.0/25.4 :
                   ((page == 'A5') ? 148.0/25.4 :
                   ((page == 'B5') ? 176.0/25.4 :
@@ -10549,9 +10616,12 @@ Exolve.prototype.getPrintSettings = function() {
                    ((page == 'B5') ? 250.0/25.4 :
                    ((page == 'B4') ? 353.0/25.4 :
                    ((page == 'legal') ? 14.0 :
-                   ((page == 'ledger') ? 17.0 : 11.0)))))))));
+                   ((page == 'half-letter') ? 5.5 :
+                   ((page == 'half-legal') ? 7.0 :
+                   ((page == 'half-A4') ? 148.5/25.4 :
+                   ((page == 'ledger') ? 17.0 : 11.0))))))))))));
   let orientation = 'portrait';
-  if (orientationElt && orientationElt.value == 'landscape') {
+  if (orientationElt.value == 'landscape') {
     orientation = 'landscape';
     const temp = widthIn;
     widthIn = heightIn;
@@ -10573,6 +10643,7 @@ Exolve.prototype.getPrintSettings = function() {
   const pFooter = document.getElementById(this.prefix + '-print-footer');
   const pGridScale = document.getElementById(this.prefix + '-print-grid-scale');
   const onlyCrossword = this.printOnlyCrossword || false;
+  const annoModeStr = document.getElementById(this.prefix + '-print-anno-mode').value;
 
   /**
    * When onlyClues is true, we do not print the grid, and we print
@@ -10630,6 +10701,7 @@ Exolve.prototype.getPrintSettings = function() {
     copyright: pCopyright.checked,
     questions: pQuestions.checked,
     inksaver: inksaver,
+    annoMode: parseInt(annoModeStr),
     header: pHeader.value.trim(),
     footer: pFooter.value.trim(),
     qr: this.qrCheckbox.checked && this.qrImg.complete,
@@ -10842,6 +10914,63 @@ Exolve.prototype.preprint = function(settings) {
     this.printingChanges.extras.push(defs);
     this.changeBG('url(#shading)');
   }
+  if (settings.annoMode > 0) {
+    /** Swap anno and clue */
+    for (const ci in this.clues) {
+      const clue = this.clues[ci];
+      const clueTR = clue.clueTR;
+      const clueTexts = clueTR.getElementsByClassName('xlv-clue-text');
+      if (!clueTexts || clueTexts.length < 1) continue;
+      const clueText = clueTexts[0];
+      const annoTexts = clueTR.getElementsByClassName('xlv-anno-text');
+      if (!annoTexts || annoTexts.length < 1) continue;
+      const annoText = annoTexts[0];
+      clueText.insertAdjacentElement('beforebegin', annoText);
+      this.printingChanges.moves.push(
+        {'elem': clueText, 'target': clueText.parentElement, 'sibling': annoText});
+      if (clue.parentClueIndex && !clue.anno) {
+        /**
+         * Create a fake anno consisting of the clue text, which is likely
+         * something like "See 13"
+         */
+        const fakeAnno = document.createElement('span');
+        fakeAnno.innerHTML = clue.clue;
+        annoText.insertAdjacentElement('afterbegin', fakeAnno);
+        this.printingChanges.extras.push(fakeAnno);
+      }
+    }
+    const customStyles = document.createElement('style');
+    let css = `
+    #${this.prefix}-frame .xlv-clue-text-raw {
+      display: none;
+    }`
+    if (settings.annoMode > 1) {
+      css += `
+      #${this.prefix}-frame .xlv-definition {
+        display: none;
+      }`
+      if (settings.annoMode > 2) {
+        css += `
+        #${this.prefix}-frame .xlv-anno-details {
+          display: none;
+        }`
+        if (settings.annoMode > 3) {
+          css += `
+          #${this.prefix}-frame .xlv-solution {
+            display: none;
+          }`
+        }
+      }
+    } else {
+      css += `
+      #${this.prefix}-frame .xlv-definition {
+        margin-left: 0.5em;
+      }`
+    }
+    customStyles.insertAdjacentHTML('beforeend', css);
+    this.frame.appendChild(customStyles);
+    this.printingChanges.extras.push(customStyles);
+  }
 
   let zoomPerc = 100;
   const pageIn = settings.pageWidthIn -
@@ -10885,8 +11014,9 @@ Exolve.prototype.preprint = function(settings) {
     #${this.prefix}-frame .xlv-title {
       font-size: ${settings.font.number * 1.5}${settings.font.unit};
     }
-    #${this.prefix}-frame .xlv-anno-text {
-      font-size: ${settings.font.number * 0.75}${settings.font.unit} !important;
+    #${this.prefix}-frame .xlv-anno-text,
+    #${this.prefix}-frame .xlv-solution {
+      font-size: ${settings.font.number * 0.80}${settings.font.unit} !important;
     }
     #${this.prefix}-frame .xlv-copyright {
       font-size: ${settings.font.number * 0.625}${settings.font.unit} !important;
