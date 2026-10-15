@@ -147,7 +147,7 @@ function Exolve(puzzleSpec,
   /**
    * We base some settings defaults on location.
    */
-  this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  this.timeZone = Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? 'UTC';
   this.isAmerica = this.timeZone.startsWith('America/');
   this.isNorthAmerica = this.isAmerica;
   if (this.isAmerica) {

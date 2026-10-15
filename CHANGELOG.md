@@ -1,5 +1,11 @@
 # Changelog
 
+### Minor unnumbered tweak
+
+- `Intl.DateTimeFormat().resolvedOptions().timeZone` is returning undefined for
+  some users. It should not, but fixing by replacing it with:
+  `Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone ?? 'UTC'`
+
 ### Minor Version: Exolve v1.74.1: October 12, 2026
 
 - Add some half-page page sizes for printing: half-{A4,Letter,Legal}.
