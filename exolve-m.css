@@ -72,8 +72,14 @@ See the full license notice in exolve-m.js.
     width: 100%;
     max-width: var(--min-grid-width);
   }
+  .xlv-width-small-text {
+    display: inline;
+  }
+  .xlv-width-large-text {
+    display: none;
+  }
   .xlv-button {
-    font-size: 9px;
+    font-size: 11px;
     padding: 6px 2px;
     border-radius: 4px;
   }
@@ -106,8 +112,14 @@ See the full license notice in exolve-m.js.
     width: 100%;
     max-width: var(--default-grid-width);
   }
+  .xlv-width-small-text {
+    display: inline;
+  }
+  .xlv-width-large-text {
+    display: none;
+  }
   .xlv-button {
-    font-size: 10px;
+    font-size: 12px;
     padding: 6px 3px;
     border-radius: 8px;
   }
@@ -122,6 +134,12 @@ See the full license notice in exolve-m.js.
 @media (min-width: 501px) {
   .xlv-wide-box {
     width: var(--default-grid-width);
+  }
+  .xlv-width-small-text {
+    display: none;
+  }
+  .xlv-width-large-text {
+    display: inline;
   }
   .xlv-button {
     font-size: 14px;

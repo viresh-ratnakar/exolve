@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.1, October 12, 2026';
+  this.VERSION = 'Exolve v1.74.2, October 15, 2026';
   this.id = '';
 
   /**
@@ -422,12 +422,14 @@ function Exolve(puzzleSpec,
 
   this.textLabels = {
     'clear': 'Clear this',
+    'clear-sml': 'Clear',
     'clear.hover': 'Clear highlighted clues and squares. Clear crossers ' +
         'from full clues with a second click. Shortcut: Ctrl/Cmd-q.',
     'clear-all': 'Clear all!',
     'clear-all.hover': 'Clear everything! A second click clears any ' +
         'placeholder entries in clues. Shortcut: Ctrl/Cmd-Q.',
     'check': 'Check this',
+    'check-sml': 'Check',
     'check.hover': 'Erase mistakes in highlighted cells. Long-click to ' +
         'check just the current cell.',
     'checkcell': 'Check cell',
@@ -442,6 +444,7 @@ function Exolve(puzzleSpec,
         'You can edit the draft before sending.',
     'email-notes-recipients.hover': ' Draft recipient(s): ',
     'reveal': 'Reveal this',
+    'reveal-sml': 'Reveal',
     'reveal.hover': 'Reveal highlighted clue/cells. Long-click to reveal ' +
         'just the current cell.',
     'revealcell': 'Reveal cell',
@@ -845,11 +848,17 @@ Exolve.prototype.init = function() {
                   title="${this.textLabels['curr-clue-prev.hover']}"
                     >${this.textLabels['curr-clue-prev']}</button>
                 <button id="${this.prefix}-clear"
-                    class="xlv-button">${this.textLabels['clear']}</button>
+                    class="xlv-button">
+                  <span class="xlv-width-large-text">${this.textLabels['clear']}</span>
+                  <span class="xlv-width-small-text">${this.textLabels['clear-sml']}</span>
+                </button>
                 <button id="${this.prefix}-clear-all"
                     class="xlv-button">${this.textLabels['clear-all']}</button>
                 <button id="${this.prefix}-check" class="xlv-button"
-                    style="display:none">${this.textLabels['check']}</button>
+                    style="display:none">
+                  <span class="xlv-width-large-text">${this.textLabels['check']}</span>
+                  <span class="xlv-width-small-text">${this.textLabels['check-sml']}</span>
+                </button>
                 <button id="${this.prefix}-check-all" class="xlv-button"
                   style="display:none">${this.textLabels['check-all']}</button>
                 <button id="${this.prefix}-next"
@@ -866,7 +875,10 @@ Exolve.prototype.init = function() {
               </div>
               <div id="${this.prefix}-button-row-2" class="xlv-controls-row">
                 <button id="${this.prefix}-reveal" class="xlv-button"
-                    style="display:none">${this.textLabels['reveal']}</button>
+                    style="display:none">
+                  <span class="xlv-width-large-text">${this.textLabels['reveal']}</span>
+                  <span class="xlv-width-small-text">${this.textLabels['reveal-sml']}</span>
+                </button>
                 <button id="${this.prefix}-ninas" class="xlv-button"
                   style="display:none">${this.textLabels['show-ninas']}</button>
                 <button id="${this.prefix}-reveal-all" class="xlv-button"
@@ -1578,6 +1590,7 @@ Exolve.prototype.checkPhoniness = function() {
     return;
   }
   this.onPhone = true;
+  this.phoneHeight = window.outerHeight;
   /**
    * If we're sufficiently near the top of the viewport, then we
    * do some rearranging to reduce the space used above the grid.
@@ -6450,6 +6463,17 @@ Exolve.prototype.setColumnLayout = function() {
 }
 
 Exolve.prototype.handleResizeInner = function() {
+  if (this.onPhone) {
+    const h = window.outerHeight;
+    if (h == this.phoneHeight) {
+      /**
+       * Noisy resize event from browser nav-bar that we do not want to respond
+       * to.
+       */
+      return;
+    }
+    this.phoneHeight = h;
+  }
   this.maybeResizeGrid();
   this.resizeCurrClueAndControls();
   this.setColumnLayout();
@@ -9538,7 +9562,9 @@ Exolve.prototype.revealCurr = function() {
     clearTimeout(this.cellLightToggleTimer);
     this.cellLightToggleTimer = null;
   }
-  this.revealButton.innerHTML = this.textLabels['reveal'];
+  this.revealButton.innerHTML = `
+    <span class="xlv-width-large-text">${this.textLabels['reveal']}</span>
+    <span class="xlv-width-small-text">${this.textLabels['reveal-sml']}</span>`;
   // If active cells are present and usingGnav, we reveal only those (the
   // current clue might be pointing to a random orphan).
   let clueIndexForAnnoReveal = null;

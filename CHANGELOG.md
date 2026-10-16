@@ -1,5 +1,15 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.2: October 15, 2026
+
+- For smaller widths, the top row of buttons spills over (bug reported on
+  some iphones). Reducing the font-size makes the text hard to read.
+  Have instead made the "Clear/Check/Reveal this" buttons use abbreviated
+  labels (just "Clear/Check/Reveal", no " this") at smaller widths.
+- On a phone, do not detect to resize events that do not change
+  `window.outerHeight` to avoid jumpy behaviour when the browser's nav bar
+  appears/disappears because of scrolling.
+
 ### Minor unnumbered tweak
 
 - `Intl.DateTimeFormat().resolvedOptions().timeZone` is returning undefined for
