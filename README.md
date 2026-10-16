@@ -1959,10 +1959,12 @@ Here are all the names of pieces of text that you can relabel:
 | Name             | Default text                         |
 |------------------|--------------------------------------|
 | `clear`          | Clear this                           |
+| `clear-sml`      | Clear                                |
 | `clear.hover`    | Clear highlighted clues and cells. Clear crossers from full clues with a second click. Shortcut: Ctrl/Cmd-q.|
 | `clear-all`      | Clear all!                           |
 | `clear-all.hover` | Clear everything! A second click clears any placeholder entries in clues. Shortcut: Ctrl/Cmd-Q.|
 | `check`          | Check this                           |
+| `check-sml`      | Check                                |
 | `checkcell`      | Check cell                           |
 | `check.hover`    | Erase mistakes in highlighted cells. Long-click to check the just current cell.|
 | `checkcell.hover`| Erase the current cell if it's incorrect. |
@@ -1974,6 +1976,7 @@ Here are all the names of pieces of text that you can relabel:
 | `email-notes.hover`| Compose an email containing these notes as plain text. You can edit the draft before sending.|
 | `email-notes-recipients.hover`|Draft recipient(s): |
 | `reveal`         | Reveal this                          |
+| `reveal-sml`     | Reveal                               |
 | `revealcell`     | Reveal cell                          |
 | `reveal.hover`   | Reveal highlighted clue/cells. Long-click to reveal the just current cell.|
 | `revealcell.hover`| Reveal the solution letter in the current cell. |
