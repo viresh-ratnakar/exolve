@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.2, October 15, 2026';
+  this.VERSION = 'Exolve v1.74.3, October 21, 2026';
   this.id = '';
 
   /**
@@ -730,6 +730,7 @@ function Exolve(puzzleSpec,
   this.ignoreEnumMismatch = false;
   this.showCellLevelButtons = false;
   this.noNinaButton = false;
+  this.showNinasOnRevealAll = false;
   this.useWebifi = false;
   this.hltOverwrittenMillis = 5000;
   this.colourOnlyCellBottom = false;
@@ -2638,6 +2639,10 @@ Exolve.prototype.parseOption = function(s) {
     }
     if (spart == "no-nina-button" || spart == "no-ninas-button") {
       this.noNinaButton = true;
+      continue;
+    }
+    if (spart == "show-ninas-on-reveal-all") {
+      this.showNinasOnRevealAll = true;
       continue;
     }
     if (spart == "colour-only-cell-bottom" ||
@@ -8986,12 +8991,12 @@ Exolve.prototype.showNinas = function() {
     ec.element.style.backgroundColor = ec.colour;
   }
   this.ninaGroup.style.display = '';
-  this.ninasButton.innerHTML = this.textLabels['hide-ninas']
-  this.ninasButton.title = this.textLabels['hide-ninas.hover']
-  this.showingNinas = true
+  this.ninasButton.innerHTML = this.textLabels['hide-ninas'];
+  this.ninasButton.title = this.textLabels['hide-ninas.hover'];
+  this.showingNinas = true;
   if (this.ninas.length > 0 && this.noNinaButton) {
     // Show the "hide-ninas" button
-    this.ninasButton.style.display = ''
+    this.ninasButton.style.display = '';
   }
 }
 
@@ -9000,12 +9005,12 @@ Exolve.prototype.hideNinas = function() {
     ec.element.style.backgroundColor = 'transparent';
   }
   this.ninaGroup.style.display = 'none';
-  this.ninasButton.innerHTML = this.textLabels['show-ninas']
-  this.ninasButton.title = this.textLabels['show-ninas.hover']
-  this.showingNinas = false
+  this.ninasButton.innerHTML = this.textLabels['show-ninas'];
+  this.ninasButton.title = this.textLabels['show-ninas.hover'];
+  this.showingNinas = false;
   if (this.ninas.length > 0 && this.noNinaButton) {
     // Hide the "show-ninas" button
-    this.ninasButton.style.display = 'none'
+    this.ninasButton.style.display = 'none';
   }
 }
 
@@ -9712,7 +9717,9 @@ Exolve.prototype.revealAll = function(conf=true) {
       s.className = c;
     }
   }
-  this.showNinas();
+  if (this.showNinasOnRevealAll || this.noNinasButton) {
+    this.showNinas();
+  }
   for (const ci of this.allClueIndices) {
     this.revealClueAnno(ci);
     this.updateClueState(ci, false, 'solved', true);

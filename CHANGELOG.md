@@ -1,5 +1,13 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.3: October 21, 2026
+
+- Do not make ninas automatically get shown upon "Reveal all" (thus allowing
+  the solver to have fun looking for them even after clicking "Reveal all!").
+- Add a new option called `show-ninas-on-reveal-all`. If this option set, or
+  the `no-nina-button` option is set, then we do reveal the ninas upon
+  "Reveal all!".
+
 ### Minor Version: Exolve v1.74.2: October 15, 2026
 
 - For smaller widths, the top row of buttons spills over (bug reported on

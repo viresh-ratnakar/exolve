@@ -2,7 +2,7 @@
 
 ## An Easily Configurable Interactive Crossword Solver
 
-### Version: Exolve v1.74.2, October 15, 2026
+### Version: Exolve v1.74.3, October 21, 2026
 
 Exolve can help you create online interactively solvable crosswords (simple
 ones with blocks and/or bars as well as those that are jumbles or are
@@ -118,8 +118,11 @@ possibly).
 If the setter has provided the location of one or more ninas (through
 [`exolve-nina`](#exolve-nina) sections), then an additional button control,
 *Show ninas*, gets shown, for the solver to see where the ninas are. The button
-can be clicked again to hide the nina locations. Ninas also get shown on
-clicking "Reveal all".
+can be clicked again to hide the nina locations. Ninas do not get shown on
+clicking "Reveal all", unless one of these two options has been set as true:
+
+- `no-nina-button`
+- `show-ninas-on-reveal-all`
 
 If the setter has asked additional questions in the puzzle (through
 [`exolve-question`](#exolve-question) sections), then input fields for these get
@@ -1718,6 +1721,9 @@ The list of currently supported options is as follows:
   is used, the button does get shown (in case the user wants to hide the ninas,
   say for printing). If at that point, the user does "Hide ninas" or
   "Clear all", then the nina button is hidden again.
+- **`show-ninas-on-reveal-all`** In a grid with ninas, "Reveal all" does not
+  reveal ninas automatically (allowing the solver to look for them). Setting
+  this option makes the ninas get revealed upon clicking "Reveal all".
 - **`no-smart-coloring`** or **`no-smart-colouring`** If this option is
   specified, then we do not try ["smart colouring"](#smart-colouring).
 - **`offset-left:<N>`** Draw the grid with this much space to the left and
