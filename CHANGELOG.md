@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.4: October 21, 2026
+
+- Typo/bug-fix! noNinaButton, not noNinasButton
+
 ### Minor Version: Exolve v1.74.3: October 21, 2026
 
 - Do not make ninas automatically get shown upon "Reveal all" (thus allowing

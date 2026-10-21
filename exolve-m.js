@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.3, October 21, 2026';
+  this.VERSION = 'Exolve v1.74.4, October 21, 2026';
   this.id = '';
 
   /**
@@ -9717,7 +9717,7 @@ Exolve.prototype.revealAll = function(conf=true) {
       s.className = c;
     }
   }
-  if (this.showNinasOnRevealAll || this.noNinasButton) {
+  if (this.showNinasOnRevealAll || this.noNinaButton) {
     this.showNinas();
   }
   for (const ci of this.allClueIndices) {
