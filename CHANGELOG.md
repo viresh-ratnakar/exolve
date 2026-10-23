@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor unnumbered tweak
+
+- Fix random bug in exost (uploading puz files was broken)
+
 ### Minor Version: Exolve v1.74.4: October 21, 2026
 
 - Typo/bug-fix! noNinaButton, not noNinasButton

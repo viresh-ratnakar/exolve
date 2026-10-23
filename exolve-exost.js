@@ -436,7 +436,7 @@ class ExolveExost {
     if (!exolve) {
       return false;
     }
-    return this.setExolve(exolve, true);
+    return this.setExolve(exolve);
   }
 
   setFromBuffer(buffer) {
