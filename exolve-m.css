@@ -404,6 +404,7 @@ See the full license notice in exolve-m.js.
 }
 .xlv-frame hr {
   margin: 0 0 4px 0;
+  padding: 0;
 }
 .xlv-frame .xlv-button {
   border: none;

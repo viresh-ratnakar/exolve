@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.5: October 29, 2026
+
+- Protect `<hr>` within exolve from css overbearing padding coming from
+  the surrounding style rules, set it to 0.
+
 ### Minor unnumbered tweak
 
 - Fix random bug in exost (uploading puz files was broken)
