@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.6: November 7, 2026
+
+- Remove some space above the preamble, making the title, byline, preamble
+  look more evenly spaced.
+
 ### Minor Version: Exolve v1.74.5: October 29, 2026
 
 - Protect `<hr>` within exolve from css overbearing padding coming from
