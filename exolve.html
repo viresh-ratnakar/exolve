@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.7, November 9, 2026';
+  this.VERSION = 'Exolve v1.74.8, November 10, 2026';
   this.id = '';
 
   /**
@@ -10085,8 +10085,9 @@ Exolve.prototype.copyNotesSuccess = function() {
 }
 
 Exolve.prototype.copyNotes = function() {
-  if(typeof ClipboardItem === "undefined") {
-    alert('Sorry, this is not yet supported in your browser!');
+  if (typeof ClipboardItem === "undefined" ||
+      !navigator.clipboard?.write) {
+    alert('Sorry, this is not supported in your browser or requires a secure (HTTPS) connection!');
     return;
   }
   const type = "text/html";
@@ -11731,7 +11732,7 @@ Exolve.prototype.createIdIfNeeded = function() {
         rowstr += gridCell.isLight ? '0' : '.';
         if (gridCell.hasBarAfter) rowstr += '|';
         if (gridCell.hasBarUnder) rowstr += '_';
-        if (gridCell.isDiagramless) rowstr += '*';
+        if (gridCell.isDgmless) rowstr += '*';
       }
       idHashFodders.push(rowstr);
     }

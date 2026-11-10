@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.8: November 10, 2026
+
+- Minor cleanups and bug-fixes (check for navigator.clipboard, use isDgmless
+  not isDiagtamless).
+
 ### Minor Version: Exolve v1.74.7: November 9, 2026
 
 - Store barAfterRect and barUnderRect rects in the grid cell object (needed
