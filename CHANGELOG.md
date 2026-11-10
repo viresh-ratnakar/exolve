@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.7: November 9, 2026
+
+- Store barAfterRect and barUnderRect rects in the grid cell object (needed
+  for Exet).
+
 ### Minor Version: Exolve v1.74.6: November 7, 2026
 
 - Remove some space above the preamble, making the title, byline, preamble

@@ -84,7 +84,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.6, November 7, 2026';
+  this.VERSION = 'Exolve v1.74.7, November 9, 2026';
   this.id = '';
 
   /**
@@ -8780,32 +8780,32 @@ Exolve.prototype.displayGrid = function() {
       }
       if (gridCell.hasBarAfter ||
           (gridCell.isDgmless && this.dgmlessBars)) {
-        const barRect = this.makeRect(
+        gridCell.barAfterRect = this.makeRect(
             this.cellLeftPos(j + 1, this.GRIDLINE - this.BAR_WIDTH_BY2),
             this.cellTopPos(i, this.GRIDLINE),
             this.BAR_WIDTH, this.cellH,
             this.colorScheme[gridCell.hasBarAfter ?
               'background' : 'dgmless-divider']);
-        miscGroup.appendChild(barRect);
+        miscGroup.appendChild(gridCell.barAfterRect);
         emptyGroup = false;
         if (!gridCell.hasBarAfter) {
-          gridCell.dgmlessBarAfter = barRect;
-          barRect.style.display = 'none';
+          gridCell.dgmlessBarAfter = gridCell.barAfterRect;
+          gridCell.barAfterRect.style.display = 'none';
         }
       }
       if (gridCell.hasBarUnder ||
           (gridCell.isDgmless && this.dgmlessBars)) {
-        const barRect = this.makeRect(
+        gridCell.barUnderRect = this.makeRect(
             this.cellLeftPos(j, this.GRIDLINE),
             this.cellTopPos(i + 1, this.GRIDLINE - this.BAR_WIDTH_BY2),
             this.cellW, this.BAR_WIDTH,
             this.colorScheme[gridCell.hasBarUnder ?
               'background' : 'dgmless-divider']);
-        miscGroup.appendChild(barRect);
+        miscGroup.appendChild(gridCell.barUnderRect);
         emptyGroup = false;
         if (!gridCell.hasBarUnder) {
-          gridCell.dgmlessBarUnder = barRect;
-          barRect.style.display = 'none';
+          gridCell.dgmlessBarUnder = gridCell.barUnderRect;
+          gridCell.barUnderRect.style.display = 'none';
         }
       }
       if (!emptyGroup) {
