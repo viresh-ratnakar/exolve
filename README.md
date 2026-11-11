@@ -854,6 +854,8 @@ are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
 
+[hoverpic-slim](https://github.com/ballantynedewolf/hoverpic-slim) is a cross-platform hover style, for images with picture clues.
+
 #### Concise annotation in printing
 When printing a fully revealed clue, you can control how the verbosity of the
 printed annotation. See [`Printing concise annotations`](#printing-concise-annotations).
