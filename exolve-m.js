@@ -3610,7 +3610,7 @@ Exolve.prototype.startsZ3dCells = function(i, j, grid=null) {
 }
 
 Exolve.prototype.newClue = function(index) {
-  clue = {};
+  const clue = {};
   clue.index = index;
   clue.dir = index.substr(0, 1);
   clue.label = index.substr(1);

@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor unnumbered tweak
+
+- A missing "const" added.
+
 ### Minor Version: Exolve v1.74.8: November 10, 2026
 
 - Minor cleanups and bug-fixes (check for navigator.clipboard, use isDgmless
