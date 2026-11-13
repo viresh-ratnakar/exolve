@@ -2074,7 +2074,7 @@ Here are all the names of pieces of text that you can relabel:
 | `confirm-delete-id` | Delete puzzle state for puzzle id |
 | `confirm-delete-older` | Delete all puzzle states saved before |
 | `confirm-state-override` | Do you want to override the state saved in this device with the state found in the URL?|
-| `warnings-label` | Please fix, or use "ignore-unclued" / "ignore-enum-mismatch" [options](https://github.com/viresh-ratnakar/exolve/blob/master/README.md#exolve-option):|
+| `warnings-label` | Please fix, or use "ignore-unclued" / "ignore-enum-mismatch" [options](#exolve-option):|
 | `warnings.hover` | Issues detected: click &times; to dismiss.    |
 | `print` | Print                                                  |
 | `print.hover` | Show/hide panel for printing or creating a PDF or saving grid image to SVG file. |
@@ -3343,5 +3343,5 @@ License.
 **Is there a user community group where I can ask questions or propose and
 discuss ideas?**
 
-Yes. ["Exolve-Exet-Etc"](https://groups.google.com/g/exolve-exet-etc)
+Yes. ["Exolve-Exet-Etc"](https://groups.google.com/g/exolve-exet-etc).
 
