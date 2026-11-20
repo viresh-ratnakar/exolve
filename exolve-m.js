@@ -8012,13 +8012,6 @@ Exolve.prototype.updateClueState =
       numPrefilled++;
     }
   }
-  for (const ci of cis) {
-    const theClue = this.clues[ci];
-    if (!theClue.clueTR) {
-      numFilled = 0;
-      break;
-    }
-  }
   if (forceSolved) {
     if (forceSolved == 'solved') {
       solved = true;
