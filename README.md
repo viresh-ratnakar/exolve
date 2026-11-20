@@ -855,7 +855,7 @@ class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
 
 #### In-clue images
-If you'd like to include pictures in your clues, just including them withs
+If you'd like to include pictures in your clues, just including them with
 `<img ..>` HTML tags is an option, but the appearance can be jarring because
 of unevenly spaced clue lines. A nice approach for this is to use
 [hoverpic-slim](https://github.com/ballantynedewolf/hoverpic-slim), a
