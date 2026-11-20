@@ -27,6 +27,9 @@ https://github.com/viresh-ratnakar/exolve
 
 function exolveToIpuzAddClue(xlvp, ci, cluesArray) {
   const clue = xlvp.clues[ci];
+  if (clue.parentClueIndex) {
+    return;
+  }
   if (clue.reversed) {
     throw 'Reversed clues like ' + ci + ' are not supported';
   }
