@@ -861,8 +861,9 @@ of unevenly spaced clue lines. A nice approach for this is to use
 [hoverpic-slim](https://github.com/ballantynedewolf/hoverpic-slim), a
 cross-platform solution that shows pictures upon hovering over text
 wrapped in spans with class `hoverpic`. The necessary css and js files for
-this are also served from my serving sites (viresh-ratnakar.github.io as well as
-viresh-ratnakar.codeberg.page), and the example below shows how to use them.
+this are also served from my serving sites (`viresh-ratnakar.github.io` as well
+as `viresh-ratnakar.codeberg.page`), and the example below shows how to use
+them.
 
 ```
 <link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/hoverpic-slim.css"/>
