@@ -1,5 +1,9 @@
 # Changelog
 
+### Minor unnumbered doc/test update
+
+- Updated documentation for using `hoverpic` and added it to a test.
+
 ### Minor unnumbered tweak
 
 - A missing "const" added.

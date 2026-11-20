@@ -854,7 +854,24 @@ are "xlv-red", "xlv-yellow-bg", and "xlv-pink-bg"). But you can use your own
 class names too (such as "my-style" above) and specify their stylings with your
 own custom CSS rules.
 
-[hoverpic-slim](https://github.com/ballantynedewolf/hoverpic-slim) is a cross-platform hover style, for images with picture clues.
+#### In-clue images
+If you'd like to include pictures in your clues, just including them withs
+`<img ..>` HTML tags is an option, but the appearance can be jarring because
+of unevenly spaced clue lines. A nice approach for this is to use
+[hoverpic-slim](https://github.com/ballantynedewolf/hoverpic-slim), a
+cross-platform solution that shows pictures upon hovering over text
+wrapped in spans with class `hoverpic`. The necessary css and js files for
+this are also served from my serving sites (viresh-ratnakar.github.io as well as
+viresh-ratnakar.codeberg.page), and the example below shows how to use them.
+
+```
+<link rel="stylesheet" type="text/css" href="https://viresh-ratnakar.github.io/hoverpic-slim.css"/>
+<script src="https://viresh-ratnakar.github.io/hoverpic-slim.js"></script>
+...
+    2. This clue has
+       <span class="hoverpic" data-hoverpic="foo.png">a foo image</span> available
+       for your perusal through hovering! (7)
+```
 
 #### Concise annotation in printing
 When printing a fully revealed clue, you can control how the verbosity of the
