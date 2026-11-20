@@ -266,7 +266,8 @@ exolveFromIpuz = function(ipuz, fname='') {
       let haveEnum = false;
       if (objClue.clue) {
         clueText.push(objClue.clue);
-        if (objClue.clue.trim().endsWith(')')) {
+        if (/\((?:\s*[1-9][0-9\-,\.'’\s]*(?:w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?)?|\s*\?)\s*\)\s*$/i
+            .test(objClue.clue.trim())) {
           haveEnum = true;
         }
       }
