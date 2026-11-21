@@ -266,7 +266,12 @@ exolveFromIpuz = function(ipuz, fname='') {
       let haveEnum = false;
       if (objClue.clue) {
         clueText.push(objClue.clue);
-        if (objClue.clue.trim().endsWith(')')) {
+        // Only treat a trailing parenthesis as an enumeration if it starts
+        // with a number or is just "?", as in "(5)" or "(?)". Other trailing
+        // parentheticals such as "(abbr.)" must not suppress the explicit
+        // enumeration appended below.
+        if (/\((?:\s*[1-9][0-9\-,\.'’\s]*(?:w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?)?|\s*\?)\s*\)\s*$/i
+            .test(objClue.clue.trim())) {
           haveEnum = true;
         }
       }
