@@ -35,11 +35,14 @@ function exolveToIpuzAddClue(xlvp, ci, cluesArray) {
     label: clue.displayLabel,
     clue: xlvp.formatClue(clue.clue, false, /* deprecated */ true, false),
   };
-  if (clue.childrenClueIndices.length > 0) {
-    ipuzClue.number = [clue.label];
+  if (clue.childrenClueIndices && clue.childrenClueIndices.length > 0) {
+    ipuzClue.continued = [];
     for (const chi of clue.childrenClueIndices) {
       const chClue = xlvp.clues[chi];
-      ipuzClue.number.push(chClue.label);
+      ipuzClue.continued.push({
+          direction: (chClue.dir == 'A') ? 'Across' : 'Down',
+          number: chClue.label
+      });
     }
   }
   if (clue.solution) {

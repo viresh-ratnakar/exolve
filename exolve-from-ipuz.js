@@ -26,6 +26,19 @@ https://github.com/viresh-ratnakar/exolve
 */
 
 /**
+ * Matches a parenthesized crossword clue enumeration at the end of a string
+ * (case-insensitive).
+ *
+ * Supported formats:
+ * - Numeric counts with optional separators & unit abbreviations: e.g.,
+ *   "(5)", "(3, 4)", "(2-5)", "(2 wds)", "(10 ltrs)"
+ * - Spelled-out numbers (one–fifteen) with a required word/letter unit: e.g.,
+ *   "(two words)", "(twelve letters)"
+ * - Unknown length indicator: e.g., "(?)"
+ */
+const EXOLVE_FROM_IPUZ_CLUE_ENUM_REGEX = /\(\s*(?:[1-9][\d,.'’\s-]*(?:wo?r?d?s?|le?t?t?e?r?s?)?|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen)\s+(?:wo?r?d?s?|le?t?t?e?r?s?)|\?)\s*\)\s*$/i;
+
+/**
  * exolveFromIpuz() converts the ipuz object, which should be in the ipuz
  * crossword format (http://ipuz.org/crossword) to a string in the Exolve
  * format and returns it. Upon any error, this returns the empty string.
@@ -266,12 +279,7 @@ exolveFromIpuz = function(ipuz, fname='') {
       let haveEnum = false;
       if (objClue.clue) {
         clueText.push(objClue.clue);
-        // Only treat a trailing parenthesis as an enumeration if it starts
-        // with a number or is just "?", as in "(5)" or "(?)". Other trailing
-        // parentheticals such as "(abbr.)" must not suppress the explicit
-        // enumeration appended below.
-        if (/\((?:\s*[1-9][0-9\-,\.'’\s]*(?:w[o]?[r]?[d]?[s]?|l[e]?[t]?[t]?[e]?[r]?[s]?)?|\s*\?)\s*\)\s*$/i
-            .test(objClue.clue.trim())) {
+        if (EXOLVE_FROM_IPUZ_CLUE_ENUM_REGEX.test(objClue.clue.trim())) {
           haveEnum = true;
         }
       }

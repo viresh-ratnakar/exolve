@@ -132,7 +132,7 @@ function Exolve(puzzleSpec,
                 visTop=0,
                 maxDim=0,
                 notTemp=true) {
-  this.VERSION = 'Exolve v1.74.8, November 10, 2026';
+  this.VERSION = 'Exolve v1.74.9, November 22, 2026';
   this.id = '';
 
   /**
@@ -8060,12 +8060,6 @@ Exolve.prototype.updateClueState =
       numPrefilled++;
     }
   }
-  // getAllCells() returns the cells of the parent clue and all of its linked
-  // children, so the loop above counts every cell in the linked group. Child
-  // clues do not need their own clue rows: ipuz imports can link a clue to
-  // entries that have no separate clue, and such children have no clueTR.
-  // Requiring a clueTR here used to reset numFilled to 0, so these clues were
-  // never marked solved.
   if (forceSolved) {
     if (forceSolved == 'solved') {
       solved = true;

@@ -1,5 +1,10 @@
 # Changelog
 
+### Minor Version: Exolve v1.74.9: November 22, 2026
+
+- Some minor tweaks after applying PRs with ipuz bug-fixes.
+- exolve-to-ipuz now correctly uses "continued" for linked clues.
+
 ### Minor unnumbered doc/test update
 
 - Updated documentation for using `hoverpic` and added it to a test.
